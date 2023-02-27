@@ -1,0 +1,1148 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>C&#43;&#43; on SalmoneX Blog</title>
+        <link>https://salmooo.github.io/categories/c&#43;&#43;/</link>
+        <description>Recent content in C&#43;&#43; on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Thu, 26 Jul 2018 20:18:41 +0800</lastBuildDate><atom:link href="https://salmooo.github.io/categories/c++/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>3.字符串，向量和数组</title>
+        <link>https://salmooo.github.io/p/3.%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%90%91%E9%87%8F%E5%92%8C%E6%95%B0%E7%BB%84/</link>
+        <pubDate>Thu, 26 Jul 2018 20:18:41 +0800</pubDate>
+        
+        <guid>https://salmooo.github.io/p/3.%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%90%91%E9%87%8F%E5%92%8C%E6%95%B0%E7%BB%84/</guid>
+        <description>&lt;img src="https://salmooo.github.io/pawel-czerwinski-8uZPynIu-rQ-unsplash.jpg" alt="Featured image of post 3.字符串，向量和数组" /&gt;&lt;h1 id=&#34;第三章-字符串向量和数组&#34;&gt;第三章 字符串，向量和数组&lt;/h1&gt;
+&lt;h2 id=&#34;using声明&#34;&gt;using声明&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;使用某个命名空间：例如 &lt;code&gt;using std::cin&lt;/code&gt;表示使用命名空间&lt;code&gt;std&lt;/code&gt;中的名字&lt;code&gt;cin&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;头文件中不应该包含&lt;code&gt;using&lt;/code&gt;声明。这样使用了该头文件的源码也会使用这个声明，会带来风险。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988estringstring&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#string&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;string&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;标准库类型&lt;code&gt;string&lt;/code&gt;表示可变长的字符序列。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;#include &amp;lt;string&amp;gt;&lt;/code&gt;，然后 &lt;code&gt;using std::string;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;string对象&lt;/strong&gt;：注意，不同于字符串字面值。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988e定义和初始化string对象定义和初始化string对象&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#%e5%ae%9a%e4%b9%89%e5%92%8c%e5%88%9d%e5%a7%8b%e5%8c%96string%e5%af%b9%e8%b1%a1&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;定义和初始化string对象&lt;/h3&gt;
+&lt;p&gt;初始化&lt;code&gt;string&lt;/code&gt;对象的方式：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;方式&lt;/th&gt;
+&lt;th&gt;解释&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;string s1&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;默认初始化，&lt;code&gt;s1&lt;/code&gt;是个空字符串&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;string s2(s1)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;s2&lt;/code&gt;是&lt;code&gt;s1&lt;/code&gt;的副本&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;string s2 = s1&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;等价于&lt;code&gt;s2(s1)&lt;/code&gt;，&lt;code&gt;s2&lt;/code&gt;是&lt;code&gt;s1&lt;/code&gt;的副本&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;string s3(&amp;quot;value&amp;quot;)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;s3&lt;/code&gt;是字面值“value”的副本，除了字面值最后的那个空字符外&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;string s3 = &amp;quot;value&amp;quot;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;等价于&lt;code&gt;s3(&amp;quot;value&amp;quot;)&lt;/code&gt;，&lt;code&gt;s3&lt;/code&gt;是字面值&amp;quot;value&amp;quot;的副本&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;string s4(n, &#39;c&#39;)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;把&lt;code&gt;s4&lt;/code&gt;初始化为由连续&lt;code&gt;n&lt;/code&gt;个字符&lt;code&gt;c&lt;/code&gt;组成的串&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;ul&gt;
+&lt;li&gt;拷贝初始化（copy initialization）：使用等号&lt;code&gt;=&lt;/code&gt;将一个已有的对象拷贝到正在创建的对象。&lt;/li&gt;
+&lt;li&gt;直接初始化（direct initialization）：通过括号给对象赋值。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988estring对象上的操作string对象上的操作&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#string%e5%af%b9%e8%b1%a1%e4%b8%8a%e7%9a%84%e6%93%8d%e4%bd%9c&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;string对象上的操作&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;string&lt;/code&gt;的操作：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;操作&lt;/th&gt;
+&lt;th&gt;解释&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;os &amp;lt;&amp;lt; s&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;将&lt;code&gt;s&lt;/code&gt;写到输出流&lt;code&gt;os&lt;/code&gt;当中，返回&lt;code&gt;os&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;is &amp;gt;&amp;gt; s&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;从&lt;code&gt;is&lt;/code&gt;中读取字符串赋给&lt;code&gt;s&lt;/code&gt;，字符串以空白分割，返回&lt;code&gt;is&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;getline(is, s)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;从&lt;code&gt;is&lt;/code&gt;中读取一行赋给&lt;code&gt;s&lt;/code&gt;，返回&lt;code&gt;is&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;s.empty()&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;s&lt;/code&gt;为空返回&lt;code&gt;true&lt;/code&gt;，否则返回&lt;code&gt;false&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;s.size()&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;返回&lt;code&gt;s&lt;/code&gt;中字符的个数&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;s[n]&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;返回&lt;code&gt;s&lt;/code&gt;中第&lt;code&gt;n&lt;/code&gt;个字符的引用，位置&lt;code&gt;n&lt;/code&gt;从0计起&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;s1+s2&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;返回&lt;code&gt;s1&lt;/code&gt;和&lt;code&gt;s2&lt;/code&gt;连接后的结果&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;s1=s2&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;用&lt;code&gt;s2&lt;/code&gt;的副本代替&lt;code&gt;s1&lt;/code&gt;中原来的字符&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;s1==s2&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;如果&lt;code&gt;s1&lt;/code&gt;和&lt;code&gt;s2&lt;/code&gt;中所含的字符完全一样，则它们相等；&lt;code&gt;string&lt;/code&gt;对象的相等性判断对字母的大小写敏感&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;s1!=s2&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;同上&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;&amp;lt;&lt;/code&gt;, &lt;code&gt;&amp;lt;=&lt;/code&gt;, &lt;code&gt;&amp;gt;&lt;/code&gt;, &lt;code&gt;&amp;gt;=&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;利用字符在字典中的顺序进行比较，且对字母的大小写敏感（对第一个不相同的位置进行比较）&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;ul&gt;
+&lt;li&gt;string io：
+&lt;ul&gt;
+&lt;li&gt;执行读操作&lt;code&gt;&amp;gt;&amp;gt;&lt;/code&gt;：忽略掉开头的空白（包括空格、换行符和制表符），直到遇到下一处空白为止。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;getline&lt;/code&gt;：读取一整行，&lt;strong&gt;包括空白符&lt;/strong&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;s.size()&lt;/code&gt;返回的时&lt;code&gt;string::size_type&lt;/code&gt;类型，记住是一个&lt;strong&gt;无符号&lt;/strong&gt;类型的值，不要和&lt;code&gt;int&lt;/code&gt;混用&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;s1+s2&lt;/code&gt;使用时，保证至少一侧是string类型。&lt;code&gt;string s1 = &amp;quot;hello&amp;quot; + &amp;quot;world&amp;quot; // 错误，两侧均为字符串字面值&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;字符串字面值和string是不同的类型。&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988e处理string对象中的字符处理string对象中的字符&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#%e5%a4%84%e7%90%86string%e5%af%b9%e8%b1%a1%e4%b8%ad%e7%9a%84%e5%ad%97%e7%ac%a6&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;处理string对象中的字符&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;ctype.h vs. cctype&lt;/strong&gt;：C++修改了c的标准库，名称为去掉&lt;code&gt;.h&lt;/code&gt;，前面加&lt;code&gt;c&lt;/code&gt;。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;如c++版本为&lt;code&gt;cctype&lt;/code&gt;，c版本为&lt;code&gt;ctype.h&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;尽量使用c++版本的头文件&lt;/strong&gt;，即&lt;code&gt;cctype&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;cctype&lt;/code&gt;头文件中定义了一组标准函数：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;函数&lt;/th&gt;
+&lt;th&gt;解释&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;isalnum(c)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;当&lt;code&gt;c&lt;/code&gt;是字母或数字时为真&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;isalpha(c)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;当&lt;code&gt;c&lt;/code&gt;是字母时为真&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;iscntrl(c)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;当&lt;code&gt;c&lt;/code&gt;是控制字符时为真&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;isdigit(c)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;当&lt;code&gt;c&lt;/code&gt;是数字时为真&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;isgraph(c)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;当&lt;code&gt;c&lt;/code&gt;不是空格但可以打印时为真&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;islower(c)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;当&lt;code&gt;c&lt;/code&gt;是小写字母时为真&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;isprint(c)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;当&lt;code&gt;c&lt;/code&gt;是可打印字符时为真&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;ispunct(c)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;当&lt;code&gt;c&lt;/code&gt;是标点符号时为真&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;isspace(c)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;当&lt;code&gt;c&lt;/code&gt;是空白时为真（空格、横向制表符、纵向制表符、回车符、换行符、进纸符）&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;isupper(c)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;当&lt;code&gt;c&lt;/code&gt;是大写字母时为真&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;isxdigit(c)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;当&lt;code&gt;c&lt;/code&gt;是十六进制数字时为真&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;tolower(c)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;当&lt;code&gt;c&lt;/code&gt;是大写字母，输出对应的小写字母；否则原样输出&lt;code&gt;c&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;toupper(c)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;当&lt;code&gt;c&lt;/code&gt;是小写字母，输出对应的大写字母；否则原样输出&lt;code&gt;c&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;ul&gt;
+&lt;li&gt;遍历字符串：使用&lt;strong&gt;范围for&lt;/strong&gt;（range for）语句： &lt;code&gt;for (auto c: str)&lt;/code&gt;，或者 &lt;code&gt;for (auto &amp;amp;c: str)&lt;/code&gt;使用引用直接改变字符串中的字符。 （C++11）&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;str[x]&lt;/code&gt;,[]输入参数为&lt;code&gt;string::size_type&lt;/code&gt;类型，给出&lt;code&gt;int&lt;/code&gt;整型也会自动转化为该类型&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988evectorvector&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#vector&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;vector&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;vector是一个&lt;strong&gt;容器&lt;/strong&gt;，也是一个类模板；&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;#include &amp;lt;vector&amp;gt;&lt;/code&gt; 然后 &lt;code&gt;using std::vector;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;容器：包含其他对象。&lt;/li&gt;
+&lt;li&gt;类模板：本身不是类，但可以&lt;strong&gt;实例化instantiation&lt;/strong&gt;出一个类。 &lt;code&gt;vector&lt;/code&gt;是一个模板， &lt;code&gt;vector&amp;lt;int&amp;gt;&lt;/code&gt;是一个类型。&lt;/li&gt;
+&lt;li&gt;通过将类型放在类模板名称后面的&lt;strong&gt;尖括号&lt;/strong&gt;中来指定&lt;strong&gt;类型&lt;/strong&gt;，如&lt;code&gt;vector&amp;lt;int&amp;gt; ivec&lt;/code&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988e定义和初始化vector对象定义和初始化vector对象&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#%e5%ae%9a%e4%b9%89%e5%92%8c%e5%88%9d%e5%a7%8b%e5%8c%96vector%e5%af%b9%e8%b1%a1&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;定义和初始化vector对象&lt;/h3&gt;
+&lt;p&gt;初始化&lt;code&gt;vector&lt;/code&gt;对象的方法&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;方法&lt;/th&gt;
+&lt;th&gt;解释&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;vector&amp;lt;T&amp;gt; v1&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;v1&lt;/code&gt;是一个空&lt;code&gt;vector&lt;/code&gt;，它潜在的元素是&lt;code&gt;T&lt;/code&gt;类型的，执行默认初始化&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;vector&amp;lt;T&amp;gt; v2(v1)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;v2&lt;/code&gt;中包含有&lt;code&gt;v1&lt;/code&gt;所有元素的副本&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;vector&amp;lt;T&amp;gt; v2 = v1&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;等价于&lt;code&gt;v2(v1)&lt;/code&gt;，&lt;code&gt;v2&lt;/code&gt;中包含&lt;code&gt;v1&lt;/code&gt;所有元素的副本&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;vector&amp;lt;T&amp;gt; v3(n, val)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;v3&lt;/code&gt;包含了n个重复的元素，每个元素的值都是&lt;code&gt;val&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;vector&amp;lt;T&amp;gt; v4(n)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;v4&lt;/code&gt;包含了n个重复地执行了值初始化的对象&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;vector&amp;lt;T&amp;gt; v5{a, b, c...}&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;v5&lt;/code&gt;包含了初始值个数的元素，每个元素被赋予相应的初始值&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;vector&amp;lt;T&amp;gt; v5={a, b, c...}&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;等价于&lt;code&gt;v5{a, b, c...}&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;ul&gt;
+&lt;li&gt;列表初始化： &lt;code&gt;vector&amp;lt;string&amp;gt; v{&amp;quot;a&amp;quot;, &amp;quot;an&amp;quot;, &amp;quot;the&amp;quot;};&lt;/code&gt; （C++11）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988e向vector对象中添加元素向vector对象中添加元素&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#%e5%90%91vector%e5%af%b9%e8%b1%a1%e4%b8%ad%e6%b7%bb%e5%8a%a0%e5%85%83%e7%b4%a0&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;向vector对象中添加元素&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;v.push_back(e)&lt;/code&gt; 在尾部增加元素。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988e其他vector操作其他vector操作&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#%e5%85%b6%e4%bb%96vector%e6%93%8d%e4%bd%9c&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;其他vector操作&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;vector&lt;/code&gt;支持的操作：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;操作&lt;/th&gt;
+&lt;th&gt;解释&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;v.emtpy()&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;如果&lt;code&gt;v&lt;/code&gt;不含有任何元素，返回真；否则返回假&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;v.size()&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;返回&lt;code&gt;v&lt;/code&gt;中元素的个数&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;v.push_back(t)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;向&lt;code&gt;v&lt;/code&gt;的尾端添加一个值为&lt;code&gt;t&lt;/code&gt;的元素&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;v[n]&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;返回&lt;code&gt;v&lt;/code&gt;中第&lt;code&gt;n&lt;/code&gt;个位置上元素的&lt;strong&gt;引用&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;v1 = v2&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;用&lt;code&gt;v2&lt;/code&gt;中的元素拷贝替换&lt;code&gt;v1&lt;/code&gt;中的元素&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;v1 = {a,b,c...}&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;用列表中元素的拷贝替换&lt;code&gt;v1&lt;/code&gt;中的元素&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;v1 == v2&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;v1&lt;/code&gt;和&lt;code&gt;v2&lt;/code&gt;相等当且仅当它们的元素数量相同且对应位置的元素值都相同&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;v1 != v2&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;同上&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;&amp;lt;&lt;/code&gt;,&lt;code&gt;&amp;lt;=&lt;/code&gt;,&lt;code&gt;&amp;gt;&lt;/code&gt;, &lt;code&gt;&amp;gt;=&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;以字典顺序进行比较&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;ul&gt;
+&lt;li&gt;范围&lt;code&gt;for&lt;/code&gt;语句内不应该改变其遍历序列的大小。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;vector&lt;/code&gt;对象（以及&lt;code&gt;string&lt;/code&gt;对象）的下标运算符，只能对确知已存在的元素执行下标操作，不能用于添加元素。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988e迭代器iterator迭代器iterator&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#%e8%bf%ad%e4%bb%a3%e5%99%a8iterator&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;迭代器iterator&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;所有标准库容器都可以使用迭代器。&lt;/li&gt;
+&lt;li&gt;类似于指针类型，迭代器也提供了对对象的间接访问。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988e使用迭代器使用迭代器&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#%e4%bd%bf%e7%94%a8%e8%bf%ad%e4%bb%a3%e5%99%a8&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;使用迭代器&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;vector&amp;lt;int&amp;gt;::iterator iter&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;auto b = v.begin();&lt;/code&gt;返回指向第一个元素的迭代器。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;auto e = v.end();&lt;/code&gt;返回指向最后一个元素的下一个（哨兵，尾后,one past the end）的迭代器（off the end）。&lt;/li&gt;
+&lt;li&gt;如果容器为空， &lt;code&gt;begin()&lt;/code&gt;和 &lt;code&gt;end()&lt;/code&gt;返回的是同一个迭代器，都是尾后迭代器。&lt;/li&gt;
+&lt;li&gt;使用解引用符&lt;code&gt;*&lt;/code&gt;访问迭代器指向的元素。&lt;/li&gt;
+&lt;li&gt;养成使用迭代器和&lt;code&gt;!=&lt;/code&gt;的习惯（泛型编程）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;容器&lt;/strong&gt;：可以包含其他对象；但所有的对象必须类型相同。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;迭代器（iterator）&lt;/strong&gt;：每种标准容器都有自己的迭代器。&lt;code&gt;C++&lt;/code&gt;倾向于用迭代器而不是下标遍历元素。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;const_iterator&lt;/strong&gt;：只能读取容器内元素不能改变。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;箭头运算符&lt;/strong&gt;： 解引用 + 成员访问，&lt;code&gt;it-&amp;gt;mem&lt;/code&gt;等价于 &lt;code&gt;(*it).mem&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;谨记&lt;/strong&gt;：但凡是使用了&lt;strong&gt;迭代器&lt;/strong&gt;的循环体，都&lt;strong&gt;不要&lt;/strong&gt;向迭代器所属的容器&lt;strong&gt;添加元素&lt;/strong&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;标准容器迭代器的运算符:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;运算符&lt;/th&gt;
+&lt;th&gt;解释&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;*iter&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;返回迭代器&lt;code&gt;iter&lt;/code&gt;所指向的&lt;strong&gt;元素的引用&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;iter-&amp;gt;mem&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;等价于&lt;code&gt;(*iter).mem&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;++iter&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;令&lt;code&gt;iter&lt;/code&gt;指示容器中的下一个元素&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;--iter&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;令&lt;code&gt;iter&lt;/code&gt;指示容器中的上一个元素&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;iter1 == iter2&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;判断两个迭代器是否相等&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988e迭代器运算迭代器运算&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#%e8%bf%ad%e4%bb%a3%e5%99%a8%e8%bf%90%e7%ae%97&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;迭代器运算&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;vector&lt;/code&gt;和&lt;code&gt;string&lt;/code&gt;迭代器支持的运算：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;运算符&lt;/th&gt;
+&lt;th&gt;解释&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;iter + n&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;迭代器加上一个整数值仍得到一个迭代器，迭代器指示的新位置和原来相比向前移动了若干个元素。结果迭代器或者指示容器内的一个元素，或者指示容器尾元素的下一位置。&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;iter - n&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;迭代器减去一个整数仍得到一个迭代器，迭代器指示的新位置比原来向后移动了若干个元素。结果迭代器或者指向容器内的一个元素，或者指示容器尾元素的下一位置。&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;iter1 += n&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;迭代器加法的复合赋值语句，将&lt;code&gt;iter1&lt;/code&gt;加n的结果赋给&lt;code&gt;iter1&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;iter1 -= n&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;迭代器减法的复合赋值语句，将&lt;code&gt;iter2&lt;/code&gt;减n的加过赋给&lt;code&gt;iter1&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;iter1 - iter2&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;两个迭代器相减的结果是它们之间的距离，也就是说，将运算符右侧的迭代器向前移动差值个元素后得到左侧的迭代器。参与运算的两个迭代器必须指向的是同一个容器中的元素或者尾元素的下一位置。&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;&amp;gt;&lt;/code&gt;、&lt;code&gt;&amp;gt;=&lt;/code&gt;、&lt;code&gt;&amp;lt;&lt;/code&gt;、&lt;code&gt;&amp;lt;=&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;迭代器的关系运算符，如果某迭代器&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;difference_type&lt;/strong&gt;：保证足够大以存储任何两个迭代器对象间的距离，可正可负。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988e数组数组&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#%e6%95%b0%e7%bb%84&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;数组&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;相当于vector的低级版，&lt;strong&gt;长度固定&lt;/strong&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988e定义和初始化内置数组定义和初始化内置数组&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#%e5%ae%9a%e4%b9%89%e5%92%8c%e5%88%9d%e5%a7%8b%e5%8c%96%e5%86%85%e7%bd%ae%e6%95%b0%e7%bb%84&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;定义和初始化内置数组&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;初始化：&lt;code&gt;char input_buffer[buffer_size];&lt;/code&gt;，长度必须是const表达式，或者不写，让编译器自己推断。&lt;/li&gt;
+&lt;li&gt;数组不允许直接赋值给另一个数组。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988e访问数组元素访问数组元素&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#%e8%ae%bf%e9%97%ae%e6%95%b0%e7%bb%84%e5%85%83%e7%b4%a0&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;访问数组元素&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;数组下标的类型：&lt;code&gt;size_t&lt;/code&gt; 。&lt;/li&gt;
+&lt;li&gt;字符数组的特殊性：结尾处有一个空字符，如 &lt;code&gt;char a[] = &amp;quot;hello&amp;quot;;&lt;/code&gt; 。&lt;/li&gt;
+&lt;li&gt;用数组初始化 &lt;code&gt;vector&lt;/code&gt;： &lt;code&gt;int a[] = {1,2,3,4,5}; vector&amp;lt;int&amp;gt; v(begin(a), end(a));&lt;/code&gt; 。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988e数组和指针数组和指针&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#%e6%95%b0%e7%bb%84%e5%92%8c%e6%8c%87%e9%92%88&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;数组和指针&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;使用数组时，编译器一般会把它转换成指针。&lt;/li&gt;
+&lt;li&gt;标准库类型限定使用的下标必须是无符号类型，而内置的下标可以处理负值。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;指针访问数组&lt;/strong&gt;：在表达式中使用数组名时，名字会自动转换成指向数组的第一个元素的指针。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988ec风格字符串c风格字符串&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#c%e9%a3%8e%e6%a0%bc%e5%ad%97%e7%ac%a6%e4%b8%b2&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;C风格字符串&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;从C继承来的字符串。&lt;/li&gt;
+&lt;li&gt;用空字符结束（&lt;code&gt;\0&lt;/code&gt;）。&lt;/li&gt;
+&lt;li&gt;对大多数应用来说，使用标准库 &lt;code&gt;string&lt;/code&gt;比使用C风格字符串更安全、更高效。&lt;/li&gt;
+&lt;li&gt;获取 &lt;code&gt;string&lt;/code&gt; 中的 &lt;code&gt;cstring&lt;/code&gt; ： &lt;code&gt;const char *str = s.c_str();&lt;/code&gt; 。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;C标准库String函数，定义在&lt;code&gt;&amp;lt;cstring&amp;gt;&lt;/code&gt; 中：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;函数&lt;/th&gt;
+&lt;th&gt;介绍&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;strlen(p)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;返回&lt;code&gt;p&lt;/code&gt;的长度，空字符不计算在内&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;strcmp(p1, p2)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;比较&lt;code&gt;p1&lt;/code&gt;和&lt;code&gt;p2&lt;/code&gt;的相等性。如果&lt;code&gt;p1==p2&lt;/code&gt;，返回0；如果&lt;code&gt;p1&amp;gt;p2&lt;/code&gt;，返回一个正值；如果&lt;code&gt;p1&amp;lt;p2&lt;/code&gt;，返回一个负值。&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;strcat(p1, p2)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;将&lt;code&gt;p2&lt;/code&gt;附加到&lt;code&gt;p1&lt;/code&gt;之后，返回&lt;code&gt;p1&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;strcpy(p1, p2)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;将&lt;code&gt;p2&lt;/code&gt;拷贝给&lt;code&gt;p1&lt;/code&gt;，返回&lt;code&gt;p1&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;尽量使用vector和迭代器，少用数组&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988e多维数组多维数组&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#%e5%a4%9a%e7%bb%b4%e6%95%b0%e7%bb%84&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;多维数组&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;多维数组的初始化&lt;/strong&gt;： &lt;code&gt;int ia[3][4] = {{0,1,2,3}, ...}&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;使用范围for语句时，除了最内层的循环外，其他所有循环的控制变量都应该是&lt;strong&gt;引用&lt;/strong&gt;类型。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988e指针vs引用指针vs引用&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#%e6%8c%87%e9%92%88vs%e5%bc%95%e7%94%a8&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;指针vs引用&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;引用总是指向某个对象，定义引用时没有初始化是错的。&lt;/li&gt;
+&lt;li&gt;给引用赋值，修改的是该引用所关联的对象的值，而不是让引用和另一个对象相关联。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988e指向指针的指针指向指针的指针&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#%e6%8c%87%e5%90%91%e6%8c%87%e9%92%88%e7%9a%84%e6%8c%87%e9%92%88&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;指向指针的指针&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;定义： &lt;code&gt;int **ppi = &amp;amp;pi;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;解引用：&lt;code&gt;**ppi&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch03mdusinge5a3b0e6988e动态数组动态数组&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch03.md#using%E5%A3%B0%E6%98%8E#%e5%8a%a8%e6%80%81%e6%95%b0%e7%bb%84&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;动态数组&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;使用 &lt;code&gt;new&lt;/code&gt;和 &lt;code&gt;delete&lt;/code&gt;表达和c中&lt;code&gt;malloc&lt;/code&gt;和&lt;code&gt;free&lt;/code&gt;类似的功能，即在堆（自由存储区）中分配存储空间。&lt;/li&gt;
+&lt;li&gt;定义： &lt;code&gt;int *pia = new int[10];&lt;/code&gt; 10可以被一个变量替代。&lt;/li&gt;
+&lt;li&gt;释放： &lt;code&gt;delete [] pia;&lt;/code&gt;，注意不要忘记&lt;code&gt;[]&lt;/code&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        <item>
+        <title>2.变量类型</title>
+        <link>https://salmooo.github.io/p/2.%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B/</link>
+        <pubDate>Wed, 25 Jul 2018 19:12:19 +0800</pubDate>
+        
+        <guid>https://salmooo.github.io/p/2.%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B/</guid>
+        <description>&lt;img src="https://salmooo.github.io/pawel-czerwinski-8uZPynIu-rQ-unsplash.jpg" alt="Featured image of post 2.变量类型" /&gt;&lt;h1 id=&#34;第二章-变量和基本类型&#34;&gt;第二章 变量和基本类型&lt;/h1&gt;
+&lt;p&gt;任何常用的编程语言都具备一组公共的语法特征，最基本的特征包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;整型、字符型等内置类型&lt;/li&gt;
+&lt;li&gt;变量，用来为对象命名&lt;/li&gt;
+&lt;li&gt;表达式和语句，用于操作上述数据类型的具体值&lt;/li&gt;
+&lt;li&gt;if 或 while 等控制结构，有选择地执行一些语句或重复地执行一些语句&lt;/li&gt;
+&lt;li&gt;函数，用于定义可供随时调用的计算单元&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;大多数编程语言通过两种方式来进一步补充其基本特征：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;自定义数据类型，实现对语言的扩展&lt;/li&gt;
+&lt;li&gt;将一些有用的功能封装成库函数&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md基本内置类型基本内置类型&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%9f%ba%e6%9c%ac%e5%86%85%e7%bd%ae%e7%b1%bb%e5%9e%8b&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;基本内置类型&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;基本算数类型&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;类型&lt;/th&gt;
+&lt;th&gt;含义&lt;/th&gt;
+&lt;th&gt;最小尺寸&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;bool&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;布尔类型&lt;/td&gt;
+&lt;td&gt;8bits&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;char&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;字符&lt;/td&gt;
+&lt;td&gt;8bits&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;wchar_t&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;宽字符&lt;/td&gt;
+&lt;td&gt;16bits&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;char16_t&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Unicode字符&lt;/td&gt;
+&lt;td&gt;16bits&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;char32_t&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Unicode字符&lt;/td&gt;
+&lt;td&gt;32bits&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;short&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;短整型&lt;/td&gt;
+&lt;td&gt;16bits&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;int&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;整型&lt;/td&gt;
+&lt;td&gt;16bits (在32位机器中是32bits)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;long&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;长整型&lt;/td&gt;
+&lt;td&gt;32bits&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;long long&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;长整型&lt;/td&gt;
+&lt;td&gt;64bits （是在C++11中新定义的）&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;float&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;单精度浮点数&lt;/td&gt;
+&lt;td&gt;6位有效数字&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;double&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;双精度浮点数&lt;/td&gt;
+&lt;td&gt;10位有效数字&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;long double&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;扩展精度浮点数&lt;/td&gt;
+&lt;td&gt;10位有效数字&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md如何选择类型如何选择类型&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%a6%82%e4%bd%95%e9%80%89%e6%8b%a9%e7%b1%bb%e5%9e%8b&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;如何选择类型&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;1.当明确知晓数值不可能是负数时，选用无符号类型；&lt;/li&gt;
+&lt;li&gt;2.使用&lt;code&gt;int&lt;/code&gt;执行整数运算。一般&lt;code&gt;long&lt;/code&gt;的大小和&lt;code&gt;int&lt;/code&gt;一样，而&lt;code&gt;short&lt;/code&gt;常常显得太小。除非超过了&lt;code&gt;int&lt;/code&gt;的范围，选择&lt;code&gt;long long&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;3.算术表达式中不要使用&lt;code&gt;char&lt;/code&gt;或&lt;code&gt;bool&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;4.浮点运算选用&lt;code&gt;double&lt;/code&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md类型转换类型转换&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e7%b1%bb%e5%9e%8b%e8%bd%ac%e6%8d%a2&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;类型转换&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;非布尔型赋给布尔型，初始值为0则结果为false，否则为true。&lt;/li&gt;
+&lt;li&gt;布尔型赋给非布尔型，初始值为false结果为0，初始值为true结果为1。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md字面值常量字面值常量&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%ad%97%e9%9d%a2%e5%80%bc%e5%b8%b8%e9%87%8f&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;字面值常量&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;一个形如&lt;code&gt;42&lt;/code&gt;的值被称作&lt;strong&gt;字面值常量&lt;/strong&gt;（literal）。
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;整型和浮点型字面值。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;字符和字符串字面值。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;使用空格连接，继承自C。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;字符字面值：单引号， &lt;code&gt;&#39;a&#39;&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;字符串字面值：双引号， &lt;code&gt;&amp;quot;Hello World&amp;quot;&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;分多行书写字符串。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nl&#34;&gt;std&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;cout&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;wow, a really, really long string&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;          &lt;span class=&#34;s&#34;&gt;&amp;#34;literal that spans two lines&amp;#34;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;std&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;endl&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;转义序列。&lt;code&gt;\n&lt;/code&gt;、&lt;code&gt;\t&lt;/code&gt;等。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;布尔字面值。&lt;code&gt;true&lt;/code&gt;，&lt;code&gt;false&lt;/code&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;指针字面值。&lt;code&gt;nullptr&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;字符串型实际上时常量字符构成的数组，结尾处以&lt;code&gt;&#39;\0&#39;&lt;/code&gt;结束，所以字符串类型实际上长度比内容多1。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md变量变量&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%8f%98%e9%87%8f&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;变量&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;变量&lt;/strong&gt;提供一个&lt;strong&gt;具名&lt;/strong&gt;的、可供程序操作的存储空间。 &lt;code&gt;C++&lt;/code&gt;中&lt;strong&gt;变量&lt;/strong&gt;和&lt;strong&gt;对象&lt;/strong&gt;一般可以互换使用。&lt;/p&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md变量定义define变量定义define&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%8f%98%e9%87%8f%e5%ae%9a%e4%b9%89define&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;变量定义（define）&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;定义形式&lt;/strong&gt;：类型说明符（type specifier） + 一个或多个变量名组成的列表。如&lt;code&gt;int sum = 0, value, units_sold = 0;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;初始化&lt;/strong&gt;（initialize）：对象在创建时获得了一个特定的值。
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;初始化不是赋值！&lt;/strong&gt;：&lt;/li&gt;
+&lt;li&gt;初始化 = 创建变量 + 赋予初始值&lt;/li&gt;
+&lt;li&gt;赋值 = 擦除对象的当前值 + 用新值代替&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;列表初始化&lt;/strong&gt;：使用花括号&lt;code&gt;{}&lt;/code&gt;，如&lt;code&gt;int units_sold{0};&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;默认初始化：定义时没有指定初始值会被默认初始化；&lt;strong&gt;在函数体内部的内置类型变量将不会被初始化&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;建议初始化每一个内置类型的变量。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md变量的声明declaration-vs-定义define变量的声明declaration-vs-定义define&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%8f%98%e9%87%8f%e7%9a%84%e5%a3%b0%e6%98%8edeclaration-vs-%e5%ae%9a%e4%b9%89define&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;变量的&lt;strong&gt;声明&lt;/strong&gt;（declaration） vs &lt;strong&gt;定义&lt;/strong&gt;（define）&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;为了支持分离式编译，&lt;code&gt;C++&lt;/code&gt;将声明和定义区分开。&lt;strong&gt;声明&lt;/strong&gt;使得名字为程序所知。&lt;strong&gt;定义&lt;/strong&gt;负责创建与名字关联的实体。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;extern&lt;/strong&gt;：只是说明变量定义在其他地方。&lt;/li&gt;
+&lt;li&gt;只声明而不定义： 在变量名前添加关键字 &lt;code&gt;extern&lt;/code&gt;，如&lt;code&gt;extern int i;&lt;/code&gt;。但如果包含了初始值，就变成了定义：&lt;code&gt;extern double pi = 3.14;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;变量只能被定义一次，但是可以多次声明。定义只出现在一个文件中，其他文件使用该变量时需要对其声明。&lt;/li&gt;
+&lt;li&gt;名字的&lt;strong&gt;作用域&lt;/strong&gt;（namescope）&lt;code&gt;{}&lt;/code&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;第一次使用变量时再定义它&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;嵌套的作用域
+&lt;ul&gt;
+&lt;li&gt;同时存在全局和局部变量时，已定义局部变量的作用域中可用&lt;code&gt;::reused&lt;/code&gt;显式访问全局变量reused。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;但是用到全局变量时，尽量不适用重名的局部变量。&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md变量命名规范变量命名规范&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%8f%98%e9%87%8f%e5%91%bd%e5%90%8d%e8%a7%84%e8%8c%83&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;变量命名规范&lt;/h4&gt;
+&lt;ol&gt;
+&lt;li&gt;需体现实际意义&lt;/li&gt;
+&lt;li&gt;变量名用小写字母&lt;/li&gt;
+&lt;li&gt;自定义类名用大写字母开头：Sales_item&lt;/li&gt;
+&lt;li&gt;标识符由多个单词组成，中间须有明确区分：student_loan或studentLoan，不要用studentloan。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md左值和右值左值和右值&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%b7%a6%e5%80%bc%e5%92%8c%e5%8f%b3%e5%80%bc&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;左值和右值&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;左值&lt;/strong&gt;（l-value）&lt;strong&gt;可以&lt;/strong&gt;出现在赋值语句的左边或者右边，比如变量；&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;右值&lt;/strong&gt;（r-value）&lt;strong&gt;只能&lt;/strong&gt;出现在赋值语句的右边，比如常量。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md复合类型复合类型&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%a4%8d%e5%90%88%e7%b1%bb%e5%9e%8b&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;复合类型&lt;/h2&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md引用引用&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%bc%95%e7%94%a8&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;引用&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;一般说的引用是指的左值引用&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;引用&lt;/strong&gt;：引用是一个对象的别名，引用类型引用（refer to）另外一种类型。如&lt;code&gt;int &amp;amp;refVal = val;&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;引用必须初始化。&lt;/li&gt;
+&lt;li&gt;引用和它的初始值是&lt;strong&gt;绑定bind&lt;/strong&gt;在一起的，而&lt;strong&gt;不是拷贝&lt;/strong&gt;。一旦定义就不能更改绑定为其他的对象&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md指针指针&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e6%8c%87%e9%92%88&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;指针&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;int *p; //&lt;strong&gt;指向int型对象&lt;/strong&gt;的指针&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;是一种 &lt;code&gt;&amp;quot;指向（point to）&amp;quot;&lt;/code&gt;另外一种类型的复合类型。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;定义&lt;/strong&gt;指针类型： &lt;code&gt;int *ip1;&lt;/code&gt;，&lt;strong&gt;从右向左读有助于阅读&lt;/strong&gt;，&lt;code&gt;ip1&lt;/code&gt;是指向&lt;code&gt;int&lt;/code&gt;类型的指针。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;指针存放某个对象的&lt;strong&gt;地址&lt;/strong&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;获取对象的地址： &lt;code&gt;int i=42; int *p = &amp;amp;i;&lt;/code&gt;。 &lt;code&gt;&amp;amp;&lt;/code&gt;是&lt;strong&gt;取地址符&lt;/strong&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;指针的类型与所指向的对象类型必须一致（均为同一类型int、double等）&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;指针的值的四种状态：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;1.指向一个对象；&lt;/li&gt;
+&lt;li&gt;2.指向紧邻对象的下一个位置；&lt;/li&gt;
+&lt;li&gt;3.空指针；&lt;/li&gt;
+&lt;li&gt;4.无效指针。&lt;/li&gt;
+&lt;li&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;对无效指针的操作均会引发错误，第二种和第三种虽为有效的，但理论上是不被允许的&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;指针访问对象： &lt;code&gt;cout &amp;lt;&amp;lt; *p;&lt;/code&gt;输出p指针所指对象的数据， &lt;code&gt;*&lt;/code&gt;是&lt;strong&gt;解引用符&lt;/strong&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;空指针不指向任何对象。使用&lt;code&gt;int *p=nullptr;&lt;/code&gt;来使用空指针。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;blockquote&gt;
+&lt;p&gt;指针和引用的区别：引用本身并非一个对象，引用定义后就不能绑定到其他的对象了；指针并没有此限制，相当于变量一样使用。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;blockquote&gt;
+&lt;p&gt;赋值语句永远改变的是&lt;strong&gt;左侧&lt;/strong&gt;的对象。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;void*&lt;/code&gt;指针可以存放&lt;strong&gt;任意&lt;/strong&gt;对象的地址。因无类型，仅操作内存空间，对所存对象无法访问。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;其他指针类型必须要与所指对象&lt;strong&gt;严格匹配&lt;/strong&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;两个指针相减的类型是&lt;code&gt;ptrdiff_t&lt;/code&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;建议：初始化所有指针。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;int* p1, p2;//*是对p1的修饰，所以p2还是int型&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02mdconst限定符const限定符&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#const%e9%99%90%e5%ae%9a%e7%ac%a6&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;const限定符&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;动机：希望定义一些不能被改变值的变量。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md初始化和const初始化和const&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%88%9d%e5%a7%8b%e5%8c%96%e5%92%8cconst&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;初始化和const&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;const对象&lt;strong&gt;必须初始化&lt;/strong&gt;，且&lt;strong&gt;不能被改变&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;const变量默认不能被其他文件访问，非要访问，必须在指定const定义之前加extern。要想在多个文件中使用const变量共享，定义和声明都加const关键字即可。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02mdconst的引用const的引用&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#const%e7%9a%84%e5%bc%95%e7%94%a8&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;const的引用&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;reference to const&lt;/strong&gt;（对常量的引用）：指向const对象的引用，如 &lt;code&gt;const int ival=1; const int &amp;amp;refVal = ival;&lt;/code&gt;，可以读取但不能修改&lt;code&gt;refVal&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;临时量&lt;/strong&gt;（temporary）对象：当编译器需要一个空间来暂存表达式的求值结果时，临时创建的一个未命名的对象。&lt;/li&gt;
+&lt;li&gt;对临时量的引用是非法行为。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md指针和const指针和const&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e6%8c%87%e9%92%88%e5%92%8cconst&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;指针和const&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;pointer to const&lt;/strong&gt;（指向常量的指针）：不能用于改变其所指对象的值, 如 &lt;code&gt;const double pi = 3.14; const double *cptr = &amp;amp;pi;&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;const pointer&lt;/strong&gt;：指针本身是常量，也就是说指针固定指向该对象，（存放在指针中的地址不变，地址所对应的那个对象值可以修改）如 &lt;code&gt;int i = 0; int *const ptr = &amp;amp;i;&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md顶层const顶层const&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e9%a1%b6%e5%b1%82const&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;顶层const&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;顶层const&lt;/code&gt;：指针本身是个常量。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;底层const&lt;/code&gt;：指针指向的对象是个常量。拷贝时严格要求相同的底层const资格。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02mdconstexpr和常量表达式可选constexpr和常量表达式可选&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#constexpr%e5%92%8c%e5%b8%b8%e9%87%8f%e8%a1%a8%e8%be%be%e5%bc%8f%e5%8f%af%e9%80%89&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;&lt;code&gt;constexpr&lt;/code&gt;和常量表达式（▲可选）&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;常量表达式：指值不会改变，且在编译过程中就能得到计算结果的表达式。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;C++11&lt;/code&gt;新标准规定，允许将变量声明为&lt;code&gt;constexpr&lt;/code&gt;类型以便由编译器来验证变量的值是否是一个常量的表达式。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md处理类型处理类型&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%a4%84%e7%90%86%e7%b1%bb%e5%9e%8b&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;处理类型&lt;/h2&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md类型别名类型别名&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e7%b1%bb%e5%9e%8b%e5%88%ab%e5%90%8d&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;类型别名&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;传统别名：使用&lt;strong&gt;typedef&lt;/strong&gt;来定义类型的同义词。 &lt;code&gt;typedef double wages;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;新标准别名：别名声明（alias declaration）： &lt;code&gt;using SI = Sales_item;&lt;/code&gt;（C++11）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// 对于复合类型（指针等）不能代回原式来进行理解
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;typedef&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;char&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;pstring&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;  &lt;span class=&#34;c1&#34;&gt;// pstring是char*的别名
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;const&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;pstring&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;cstr&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;// 指向char的常量指针
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// 如改写为const char *cstr = 0;不正确，为指向const char的指针
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// 辅助理解（可代回后加括号）
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// const pstring cstr = 0;代回后const (char *) cstr = 0;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// const char *cstr = 0;即为(const char *) cstr = 0;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02mdauto类型说明符-c11auto类型说明符-c11&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#auto%e7%b1%bb%e5%9e%8b%e8%af%b4%e6%98%8e%e7%ac%a6-c11&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;auto类型说明符 c++11&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;auto&lt;/strong&gt;类型说明符：让编译器&lt;strong&gt;自动推断类型&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;一条声明语句只能有一个数据类型，所以一个auto声明多个变量时只能相同的变量类型(包括复杂类型&amp;amp;和*)。&lt;code&gt;auto sz = 0, pi =3.14//错误&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;int i = 0, &amp;amp;r = i; auto a = r;&lt;/code&gt; 推断&lt;code&gt;a&lt;/code&gt;的类型是&lt;code&gt;int&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;会忽略&lt;code&gt;顶层const&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;const int ci = 1; const auto f = ci;&lt;/code&gt;推断类型是&lt;code&gt;int&lt;/code&gt;，如果希望是顶层const需要自己加&lt;code&gt;const&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02mddecltype类型指示符decltype类型指示符&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#decltype%e7%b1%bb%e5%9e%8b%e6%8c%87%e7%a4%ba%e7%ac%a6&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;decltype类型指示符&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;从表达式的类型推断出要定义的变量的类型。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;decltype&lt;/strong&gt;：选择并返回操作数的&lt;strong&gt;数据类型&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;decltype(f()) sum = x;&lt;/code&gt; 推断&lt;code&gt;sum&lt;/code&gt;的类型是函数&lt;code&gt;f&lt;/code&gt;的返回类型。&lt;/li&gt;
+&lt;li&gt;不会忽略&lt;code&gt;顶层const&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;如果对变量加括号，编译器会将其认为是一个表达式，如int i&amp;ndash;&amp;gt;(i),则decltype((i))得到结果为int&amp;amp;引用。&lt;/li&gt;
+&lt;li&gt;赋值是会产生引用的一类典型表达式，引用的类型就是左值的类型。也就是说，如果 i 是 int，则表达式 i=x 的类型是 int&amp;amp;。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;C++11&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md自定义数据结构自定义数据结构&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e8%87%aa%e5%ae%9a%e4%b9%89%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;自定义数据结构&lt;/h2&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02mdstructstruct&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#struct&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;struct&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;尽量不要吧类定义和对象定义放在一起。如&lt;code&gt;struct Student{} xiaoming,xiaofang;&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;类可以以关键字&lt;code&gt;struct&lt;/code&gt;开始，紧跟类名和类体。&lt;/li&gt;
+&lt;li&gt;类数据成员：类体定义类的成员。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;C++11&lt;/code&gt;：可以为类数据成员提供一个&lt;strong&gt;类内初始值&lt;/strong&gt;（in-class initializer）。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md编写自己的头文件编写自己的头文件&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e7%bc%96%e5%86%99%e8%87%aa%e5%b7%b1%e7%9a%84%e5%a4%b4%e6%96%87%e4%bb%b6&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;编写自己的头文件&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;头文件通常包含哪些只能被定义一次的实体：类、&lt;code&gt;const&lt;/code&gt;和&lt;code&gt;constexpr&lt;/code&gt;变量。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;预处理器概述：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;预处理器&lt;/strong&gt;（preprocessor）：确保头文件多次包含仍能安全工作。&lt;/li&gt;
+&lt;li&gt;当预处理器看到&lt;code&gt;#include&lt;/code&gt;标记时，会用指定的头文件内容代替&lt;code&gt;#include&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;头文件保护符&lt;/strong&gt;（header guard）：头文件保护符依赖于预处理变量的状态：已定义和未定义。
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;#indef&lt;/code&gt;已定义时为真&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;#inndef&lt;/code&gt;未定义时为真&lt;/li&gt;
+&lt;li&gt;头文件保护符的名称需要唯一，且保持全部大写。养成良好习惯，不论是否该头文件被包含，要加保护符。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#ifndef SALES_DATA_H  &lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;//SALES_DATA_H未定义时为真
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;#define SALES_DATA_H
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;strct&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Sale_data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#endif
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;</description>
+        </item>
+        <item>
+        <title>1.开始</title>
+        <link>https://salmooo.github.io/p/1.%E5%BC%80%E5%A7%8B/</link>
+        <pubDate>Tue, 24 Jul 2018 15:25:20 +0800</pubDate>
+        
+        <guid>https://salmooo.github.io/p/1.%E5%BC%80%E5%A7%8B/</guid>
+        <description>&lt;img src="https://salmooo.github.io/img/hp.jpg" alt="Featured image of post 1.开始" /&gt;&lt;h1 id=&#34;第一章-开始&#34;&gt;第一章 开始&lt;/h1&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch01md熟悉编译器熟悉编译器&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch01.md#%e7%86%9f%e6%82%89%e7%bc%96%e8%af%91%e5%99%a8&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;熟悉编译器&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;g++&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;编译：&lt;code&gt;g++ --std=c++11 ch01.cpp -o main&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;运行：&lt;code&gt;./prog1&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;查看运行状态：&lt;code&gt;echo $?&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;编译多个文件:&lt;code&gt;g++ ch2.cpp Sales_item.cc -o main&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;输入 &lt;code&gt;g++ --help&lt;/code&gt;，查看编译器选项：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;23
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;24
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;25
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;26
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;27
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;28
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;29
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;30
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;31
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;32
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;33
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;34
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;35
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;36
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;37
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;38
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;39
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;40
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;41
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;42
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;43
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;44
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;45
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;46
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;47
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;48
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;49
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;50
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;51
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;52
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;53
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Usage: g++ [options] file...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Options:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -pass-exit-codes         Exit with highest error code from a phase
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  --help                   Display this information
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  --target-help            Display target specific command line options
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  --help={common|optimizers|params|target|warnings|[^]{joined|separate|undocumented}}[,...]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                           Display specific types of command line options
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  (Use &amp;#39;-v --help&amp;#39; to display command line options of sub-processes)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  --version                Display compiler version information
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -dumpspecs               Display all of the built in spec strings
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -dumpversion             Display the version of the compiler
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -dumpmachine             Display the compiler&amp;#39;s target processor
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -print-search-dirs       Display the directories in the compiler&amp;#39;s search path
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -print-libgcc-file-name  Display the name of the compiler&amp;#39;s companion library
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -print-file-name=&amp;lt;lib&amp;gt;   Display the full path to library &amp;lt;lib&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -print-prog-name=&amp;lt;prog&amp;gt;  Display the full path to compiler component &amp;lt;prog&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -print-multiarch         Display the target&amp;#39;s normalized GNU triplet, used as
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                           a component in the library path
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -print-multi-directory   Display the root directory for versions of libgcc
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -print-multi-lib         Display the mapping between command line options and
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                           multiple library search directories
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -print-multi-os-directory Display the relative path to OS libraries
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -print-sysroot           Display the target libraries directory
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -print-sysroot-headers-suffix Display the sysroot suffix used to find headers
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -Wa,&amp;lt;options&amp;gt;            Pass comma-separated &amp;lt;options&amp;gt; on to the assembler
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -Wp,&amp;lt;options&amp;gt;            Pass comma-separated &amp;lt;options&amp;gt; on to the preprocessor
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -Wl,&amp;lt;options&amp;gt;            Pass comma-separated &amp;lt;options&amp;gt; on to the linker
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -Xassembler &amp;lt;arg&amp;gt;        Pass &amp;lt;arg&amp;gt; on to the assembler
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -Xpreprocessor &amp;lt;arg&amp;gt;     Pass &amp;lt;arg&amp;gt; on to the preprocessor
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -Xlinker &amp;lt;arg&amp;gt;           Pass &amp;lt;arg&amp;gt; on to the linker
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -save-temps              Do not delete intermediate files
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -save-temps=&amp;lt;arg&amp;gt;        Do not delete intermediate files
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -no-canonical-prefixes   Do not canonicalize paths when building relative
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                           prefixes to other gcc components
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -pipe                    Use pipes rather than intermediate files
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -time                    Time the execution of each subprocess
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -specs=&amp;lt;file&amp;gt;            Override built-in specs with the contents of &amp;lt;file&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -std=&amp;lt;standard&amp;gt;          Assume that the input sources are for &amp;lt;standard&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  --sysroot=&amp;lt;directory&amp;gt;    Use &amp;lt;directory&amp;gt; as the root directory for headers
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                           and libraries
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -B &amp;lt;directory&amp;gt;           Add &amp;lt;directory&amp;gt; to the compiler&amp;#39;s search paths
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -v                       Display the programs invoked by the compiler
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -###                     Like -v but options quoted and commands not executed
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -E                       Preprocess only; do not compile, assemble or link
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -S                       Compile only; do not assemble or link
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -c                       Compile and assemble, but do not link
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -o &amp;lt;file&amp;gt;                Place the output into &amp;lt;file&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -pie                     Create a position independent executable
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -shared                  Create a shared library
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  -x &amp;lt;language&amp;gt;            Specify the language of the following input files
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                           Permissible languages include: c c++ assembler none
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                           &amp;#39;none&amp;#39; means revert to the default behavior of
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                           guessing the language based on the file&amp;#39;s extension
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;输入 &lt;code&gt;g++ -v --help&lt;/code&gt;可以看到更完整的指令。 例如还有些常用的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-h FILENAME, -soname FILENAME: Set internal name of shared library
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-I PROGRAM, --dynamic-linker PROGRAM: Set PROGRAM as the dynamic linker to use
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-l LIBNAME, --library LIBNAME: Search for library LIBNAME
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-L DIRECTORY, --library-path DIRECTORY: Add DIRECTORY to library search path
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;获得程序状态&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;windows: &lt;code&gt;echo %ERRORLEVEL%&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;UNIX: &lt;code&gt;echo $?&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch01mdioio&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch01.md#io&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;IO&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;#include &amp;lt;iostream&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;std::cout &amp;lt;&amp;lt; &amp;quot;hello&amp;quot;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;std::cin &amp;gt;&amp;gt; v1&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;记住&lt;code&gt;&amp;gt;&amp;gt;&lt;/code&gt;和&lt;code&gt;&amp;lt;&amp;lt;&lt;/code&gt;返回的结果都是左操作数，也就是输入流和输出流本身。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;endl&lt;/strong&gt;：这是一个被称为&lt;strong&gt;操纵符&lt;/strong&gt;（manipulator）的特殊值，效果是结束当前行，并将设备关联的缓冲区（buffer）中的内容刷到设备中。&lt;/p&gt;
+&lt;p&gt;UNIX和Mac下键盘输入文件结束符：&lt;code&gt;ctrl+d&lt;/code&gt;，Windows下：&lt;code&gt;ctrl+z&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;头文件&lt;/strong&gt;：类的类型一般存储在头文件中，标准库的头文件使用&lt;code&gt;&amp;lt;&amp;gt;&lt;/code&gt;，非标准库的头文件使用&lt;code&gt;&amp;quot;&amp;quot;&lt;/code&gt;。申明写在&lt;code&gt;.h&lt;/code&gt;文件，定义实现写在&lt;code&gt;.cpp&lt;/code&gt;文件。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;避免多次包含同一头文件&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#ifndef SALESITEM_H
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define SALESITEM_H
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;// Definition of Sales_itemclass and related functions goes here
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;#endif
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;成员函数（类方法）&lt;/strong&gt;：使用&lt;code&gt;.&lt;/code&gt;调用。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;命名空间（namespace）&lt;/strong&gt;：使用作用域运算符&lt;code&gt;::&lt;/code&gt;调用。&lt;/p&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch01md注释注释&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch01.md#%e6%b3%a8%e9%87%8a&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;注释&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;单行注释： &lt;code&gt;//&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;多行注释： &lt;code&gt;/**/&lt;/code&gt;。编译器将&lt;code&gt;/*&lt;/code&gt;和&lt;code&gt;*/&lt;/code&gt;之间的内容都作为注释内容忽略。注意不能嵌套。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define SALESITEM_H
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;&lt;span class=&#34;cm&#34;&gt;/*
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt; * 多行注释格式
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt; * 每一行加一个*
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt; */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch01mdwhile语句while语句&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch01.md#while%e8%af%ad%e5%8f%a5&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;while语句&lt;/h2&gt;
+&lt;p&gt;循环执行，（直到条件（condition）为假。&lt;/p&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch01mdfor语句for语句&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch01.md#for%e8%af%ad%e5%8f%a5&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;for语句&lt;/h2&gt;
+&lt;p&gt;循环头由三部分组成：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;一个初始化语句（init-statement）&lt;/li&gt;
+&lt;li&gt;一个循环条件（condition）&lt;/li&gt;
+&lt;li&gt;一个表达式（expression）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch01md使用文件重定向使用文件重定向&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch01.md#%e4%bd%bf%e7%94%a8%e6%96%87%e4%bb%b6%e9%87%8d%e5%ae%9a%e5%90%91&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;使用文件重定向&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;./main &amp;lt;infile &amp;gt;outfile&lt;/code&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

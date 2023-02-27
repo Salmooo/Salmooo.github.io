@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Categories on SalmoneX Blog</title>
+        <link>https://salmooo.github.io/categories/</link>
+        <description>Recent content in Categories on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Thu, 26 Jul 2018 20:18:41 +0800</lastBuildDate><atom:link href="https://salmooo.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>C&#43;&#43;</title>
+        <link>https://salmooo.github.io/categories/c&#43;&#43;/</link>
+        <pubDate>Thu, 26 Jul 2018 20:18:41 +0800</pubDate>
+        
+        <guid>https://salmooo.github.io/categories/c&#43;&#43;/</guid>
+        <description></description>
+        </item>
+        
+    </channel>
+</rss>
