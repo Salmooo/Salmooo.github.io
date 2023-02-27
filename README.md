@@ -1,0 +1,2 @@
+# Salmooo.github.io
+blog
