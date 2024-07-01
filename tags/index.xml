@@ -2,24 +2,48 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Tags on SalmoneX Blog</title>
-        <link>https://salmooo.github.io/tags/</link>
+        <link>http://salmooo.github.io/tags/</link>
         <description>Recent content in Tags on SalmoneX Blog</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Thu, 26 Jul 2018 20:18:41 +0800</lastBuildDate><atom:link href="https://salmooo.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sun, 07 Oct 2018 18:51:29 +0800</lastBuildDate><atom:link href="http://salmooo.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>C&#43;&#43;</title>
-        <link>https://salmooo.github.io/tags/c&#43;&#43;/</link>
-        <pubDate>Thu, 26 Jul 2018 20:18:41 +0800</pubDate>
+        <link>http://salmooo.github.io/tags/c&#43;&#43;/</link>
+        <pubDate>Sun, 07 Oct 2018 18:51:29 +0800</pubDate>
         
-        <guid>https://salmooo.github.io/tags/c&#43;&#43;/</guid>
+        <guid>http://salmooo.github.io/tags/c&#43;&#43;/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>C&#43;&#43; Experience</title>
+        <link>http://salmooo.github.io/tags/c&#43;&#43;-experience/</link>
+        <pubDate>Sun, 07 Oct 2018 18:51:29 +0800</pubDate>
+        
+        <guid>http://salmooo.github.io/tags/c&#43;&#43;-experience/</guid>
         <description></description>
         </item>
         <item>
         <title>C&#43;&#43;Primer</title>
-        <link>https://salmooo.github.io/tags/c&#43;&#43;primer/</link>
-        <pubDate>Thu, 26 Jul 2018 20:18:41 +0800</pubDate>
+        <link>http://salmooo.github.io/tags/c&#43;&#43;primer/</link>
+        <pubDate>Sun, 30 Sep 2018 19:20:22 +0800</pubDate>
         
-        <guid>https://salmooo.github.io/tags/c&#43;&#43;primer/</guid>
+        <guid>http://salmooo.github.io/tags/c&#43;&#43;primer/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Git</title>
+        <link>http://salmooo.github.io/tags/git/</link>
+        <pubDate>Sun, 30 Sep 2018 19:20:22 +0800</pubDate>
+        
+        <guid>http://salmooo.github.io/tags/git/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>C&#43;&#43; Primer</title>
+        <link>http://salmooo.github.io/tags/c&#43;&#43;-primer/</link>
+        <pubDate>Mon, 17 Sep 2018 13:41:11 +0800</pubDate>
+        
+        <guid>http://salmooo.github.io/tags/c&#43;&#43;-primer/</guid>
         <description></description>
         </item>
         

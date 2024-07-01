@@ -2,19 +2,19 @@
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <sitemap>
-    <loc>https://salmooo.github.io/en/sitemap.xml</loc>
+    <loc>http://salmooo.github.io/en/sitemap.xml</loc>
     
-      <lastmod>2023-02-24T14:05:19+08:00</lastmod>
-    
-  </sitemap>
-  
-  <sitemap>
-    <loc>https://salmooo.github.io/zh-cn/sitemap.xml</loc>
+      <lastmod>2018-10-07T18:51:29+08:00</lastmod>
     
   </sitemap>
   
   <sitemap>
-    <loc>https://salmooo.github.io/ar/sitemap.xml</loc>
+    <loc>http://salmooo.github.io/zh-cn/sitemap.xml</loc>
+    
+  </sitemap>
+  
+  <sitemap>
+    <loc>http://salmooo.github.io/ar/sitemap.xml</loc>
     
   </sitemap>
   

@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Git learning'>
+<title>Git Magic</title>
+
+<link rel='canonical' href='http://salmooo.github.io/p/git-magic/'>
+
+<link rel="stylesheet" href="/scss/style.min.5be32ca3f6e1a997c75795c4359147cc6d4fbd34948c0acd51e31d237033978a.css"><meta property='og:title' content='Git Magic'>
+<meta property='og:description' content='Git learning'>
+<meta property='og:url' content='http://salmooo.github.io/p/git-magic/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Git' /><meta property='article:tag' content='C&#43;&#43;Primer' /><meta property='article:published_time' content='2018-09-30T19:20:22&#43;08:00'/><meta property='article:modified_time' content='2018-09-30T19:20:22&#43;08:00'/><meta property='og:image' content='http://salmooo.github.io/images/1.png' />
+<meta name="twitter:title" content="Git Magic">
+<meta name="twitter:description" content="Git learning"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://salmooo.github.io/images/1.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/hp_huddfc85967d338f7c431198027b4852a6_7905_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description"></h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://github.com/salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="http://salmooo.github.io/" selected>English</option>
+                        
+                            <option value="http://salmooo.github.io/zh-cn/" >中文</option>
+                        
+                            <option value="http://salmooo.github.io/ar/" >عربي</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#开卷必读">开卷必读</a></li>
+    <li><a href="#展示帮助信息">展示帮助信息</a></li>
+    <li><a href="#回到远程仓库的状态">回到远程仓库的状态</a></li>
+    <li><a href="#重设第一个-commit">重设第一个 commit</a></li>
+    <li><a href="#查看冲突文件列表">查看冲突文件列表</a></li>
+    <li><a href="#展示工作区和暂存区的不同">展示工作区和暂存区的不同</a></li>
+    <li><a href="#展示暂存区和最近版本的不同">展示暂存区和最近版本的不同</a></li>
+    <li><a href="#展示暂存区工作区和最近版本的不同">展示暂存区、工作区和最近版本的不同</a></li>
+    <li><a href="#快速切换到上一个分支">快速切换到上一个分支</a></li>
+    <li><a href="#删除已经合并到-master-的分支">删除已经合并到 master 的分支</a></li>
+    <li><a href="#展示本地分支关联远程仓库的情况">展示本地分支关联远程仓库的情况</a></li>
+    <li><a href="#关联远程分支">关联远程分支</a></li>
+    <li><a href="#列出所有远程分支">列出所有远程分支</a></li>
+    <li><a href="#列出本地和远程分支">列出本地和远程分支</a></li>
+    <li><a href="#查看远程分支和本地分支的对应关系">查看远程分支和本地分支的对应关系</a></li>
+    <li><a href="#远程删除了分支本地也想删除">远程删除了分支本地也想删除</a></li>
+    <li><a href="#创建并切换到本地分支">创建并切换到本地分支</a></li>
+    <li><a href="#从远程分支中创建并切换到本地分支">从远程分支中创建并切换到本地分支</a></li>
+    <li><a href="#删除本地分支">删除本地分支</a></li>
+    <li><a href="#删除远程分支">删除远程分支</a></li>
+    <li><a href="#重命名本地分支">重命名本地分支</a></li>
+    <li><a href="#查看标签">查看标签</a></li>
+    <li><a href="#查看标签详细信息">查看标签详细信息</a></li>
+    <li><a href="#本地创建标签">本地创建标签</a></li>
+    <li><a href="#推送标签到远程仓库">推送标签到远程仓库</a></li>
+    <li><a href="#删除本地标签">删除本地标签</a></li>
+    <li><a href="#删除远程标签">删除远程标签</a></li>
+    <li><a href="#切回到某个标签">切回到某个标签</a></li>
+    <li><a href="#放弃工作区的修改">放弃工作区的修改</a></li>
+    <li><a href="#恢复删除的文件">恢复删除的文件</a></li>
+    <li><a href="#以新增一个-commit-的方式还原某一个-commit-的修改">以新增一个 commit 的方式还原某一个 commit 的修改</a></li>
+    <li><a href="#回到某个-commit-的状态并删除后面的-commit">回到某个 commit 的状态，并删除后面的 commit</a></li>
+    <li><a href="#修改上一个-commit-的描述">修改上一个 commit 的描述</a></li>
+    <li><a href="#查看-commit-历史">查看 commit 历史</a></li>
+    <li><a href="#查看某段代码是谁写的">查看某段代码是谁写的</a></li>
+    <li><a href="#显示本地更新过-head-的-git-命令记录">显示本地更新过 HEAD 的 git 命令记录</a></li>
+    <li><a href="#修改作者名">修改作者名</a></li>
+    <li><a href="#修改远程仓库的-url">修改远程仓库的 url</a></li>
+    <li><a href="#增加远程仓库">增加远程仓库</a></li>
+    <li><a href="#列出所有远程仓库">列出所有远程仓库</a></li>
+    <li><a href="#查看两个星期内的改动">查看两个星期内的改动</a></li>
+    <li><a href="#把-a-分支的某一个-commit放到-b-分支上">把 A 分支的某一个 commit，放到 B 分支上</a></li>
+    <li><a href="#存储当前的修改但不用提交-commit">存储当前的修改，但不用提交 commit</a></li>
+    <li><a href="#保存当前状态包括-untracked-的文件">保存当前状态，包括 untracked 的文件</a></li>
+    <li><a href="#展示所有-stashes">展示所有 stashes</a></li>
+    <li><a href="#回到某个-stash-的状态">回到某个 stash 的状态</a></li>
+    <li><a href="#回到最后一个-stash-的状态并删除这个-stash">回到最后一个 stash 的状态，并删除这个 stash</a></li>
+    <li><a href="#删除所有的-stash">删除所有的 stash</a></li>
+    <li><a href="#从-stash-中拿出某个文件的修改">从 stash 中拿出某个文件的修改</a></li>
+    <li><a href="#展示所有-tracked-的文件">展示所有 tracked 的文件</a></li>
+    <li><a href="#展示所有-untracked-的文件">展示所有 untracked 的文件</a></li>
+    <li><a href="#展示所有忽略的文件">展示所有忽略的文件</a></li>
+    <li><a href="#强制删除-untracked-的文件">强制删除 untracked 的文件</a></li>
+    <li><a href="#强制删除-untracked-的目录">强制删除 untracked 的目录</a></li>
+    <li><a href="#展示简化的-commit-历史">展示简化的 commit 历史</a></li>
+    <li><a href="#把某一个分支导出成一个文件">把某一个分支导出成一个文件</a></li>
+    <li><a href="#从包中导入分支">从包中导入分支</a></li>
+    <li><a href="#执行-rebase-之前自动-stash">执行 rebase 之前自动 stash</a></li>
+    <li><a href="#从远程仓库根据-id拉下某一状态到本地分支">从远程仓库根据 ID，拉下某一状态，到本地分支</a></li>
+    <li><a href="#详细展示一行中的修改">详细展示一行中的修改</a></li>
+    <li><a href="#清除-gitignore-文件中记录的文件">清除 gitignore 文件中记录的文件</a></li>
+    <li><a href="#展示所有-alias-和-configs">展示所有 alias 和 configs</a></li>
+    <li><a href="#展示忽略的文件">展示忽略的文件</a></li>
+    <li><a href="#commit-历史中显示-branch1-有的但是-branch2-没有-commit">commit 历史中显示 Branch1 有的，但是 Branch2 没有 commit</a></li>
+    <li><a href="#在-commit-log-中显示-gpg-签名">在 commit log 中显示 GPG 签名</a></li>
+    <li><a href="#删除全局设置">删除全局设置</a></li>
+    <li><a href="#新建并切换到新分支上同时这个分支没有任何-commit">新建并切换到新分支上，同时这个分支没有任何 commit</a></li>
+    <li><a href="#展示任意分支某一文件的内容">展示任意分支某一文件的内容</a></li>
+    <li><a href="#clone-下来指定的单一分支">clone 下来指定的单一分支</a></li>
+    <li><a href="#clone-最新一次提交">clone 最新一次提交</a></li>
+    <li><a href="#忽略某个文件的改动">忽略某个文件的改动</a></li>
+    <li><a href="#忽略文件的权限变化">忽略文件的权限变化</a></li>
+    <li><a href="#以最后提交的顺序列出所有-git-分支">以最后提交的顺序列出所有 Git 分支</a></li>
+    <li><a href="#在-commit-log-中查找相关内容">在 commit log 中查找相关内容</a></li>
+    <li><a href="#把暂存区的指定-file-放到工作区中">把暂存区的指定 file 放到工作区中</a></li>
+    <li><a href="#强制推送">强制推送</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/git-magic/">
+                
+                    <img src="/images/1.png" loading="lazy" alt="Featured image of post Git Magic" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/git/" >
+                Git
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/git-magic/">Git Magic</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Git learning
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Sep 30, 2018</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    5 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="git魔法">git魔法</h1>
+<p>Git 是一个分布式版本管理工具，版本管理工具就是大家在写东西的时候都用过 <strong>回撤</strong>这个功能，但是回撤只能回撤几步，假如想要找回我三天之前的修改，光用回撤是找不回来的。而<strong>版本管理工具能记录每次的修改</strong>，只要提交到版本仓库，就可以找到之前任何时刻的状态（文本状态）。</p>
+<p>下面的内容就是列举了常用的 Git 命令和一些小技巧，可以通过页面内查找的方式 Ctrl/Command+f 进行快速查找。</p>
+<h2 id="开卷必读">开卷必读</h2>
+<p><em>如果之前未使用过 Git，可以学习 <a class="link" href="https://rogerdudler.github.io/git-guide/index.zh.html"  target="_blank" rel="noopener"
+    >Git 小白教程</a>入门</em></p>
+<ol>
+<li><strong>一定要先测试命令的效果后</strong>，再用于工作环境中，以防造成不能弥补的后果！<strong>到时候别拿着砍刀来找我</strong></li>
+<li>所有的命令都在 git version 2.7.4 (Apple Git-66) 下测试通过</li>
+<li>统一概念：
+<ul>
+<li>工作区：改动（增删文件和内容）</li>
+<li>暂存区：输入命令：git add 改动的文件名，此次改动就放到了 ‘暂存区’</li>
+<li>本地仓库(简称：本地)：输入命令：git commit 此次修改的描述，此次改动就放到了本地仓库，每个 commit，我叫它为一个版本。</li>
+<li>远程仓库(简称：远程)：输入命令：git push 远程仓库，此次改动就放到了远程仓库（GitHub 等)</li>
+<li>commit-id：输出命令：git log，最上面那行 commit xxxxxx，后面的字符串就是 commit-id</li>
+</ul>
+</li>
+</ol>
+<p>下面，就是你在找的 Git 命令速查表。</p>
+<h2 id="展示帮助信息">展示帮助信息</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git help -g
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The command output as below:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-v" data-lang="v"><span class="line"><span class="cl"><span class="nc">The</span> <span class="nv">common</span> <span class="nc">Git</span> <span class="nv">guides</span> <span class="nl">are</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">   <span class="nv">attributes</span>          <span class="nc">Defining</span> <span class="nv">attributes</span> <span class="nv">per</span> <span class="nv">path</span>
+</span></span><span class="line"><span class="cl">   <span class="nv">cli</span>                 <span class="nc">Git</span> <span class="nv">command</span><span class="o">-</span><span class="nv">line</span> <span class="kd">interface</span> <span class="nv">and</span> <span class="nv">conventions</span>
+</span></span><span class="line"><span class="cl">   <span class="nv">core</span><span class="o">-</span><span class="nv">tutorial</span>       <span class="nc">A</span> <span class="nc">Git</span> <span class="nv">core</span> <span class="nv">tutorial</span> <span class="k">for</span> <span class="nv">developers</span>
+</span></span><span class="line"><span class="cl">   <span class="nv">cvs</span><span class="o">-</span><span class="nv">migration</span>       <span class="nc">Git</span> <span class="k">for</span> <span class="nc">CVS</span> <span class="nv">users</span>
+</span></span><span class="line"><span class="cl">   <span class="nv">diffcore</span>            <span class="nc">Tweaking</span> <span class="nv">diff</span> <span class="nv">output</span>
+</span></span><span class="line"><span class="cl">   <span class="nv">everyday</span>            <span class="nc">A</span> <span class="nv">useful</span> <span class="nv">minimum</span> <span class="nv">set</span> <span class="nv">of</span> <span class="nv">commands</span> <span class="k">for</span> <span class="nc">Everyday</span> <span class="nc">Git</span>
+</span></span><span class="line"><span class="cl">   <span class="nv">glossary</span>            <span class="nc">A</span> <span class="nc">Git</span> <span class="nc">Glossary</span>
+</span></span><span class="line"><span class="cl">   <span class="nv">hooks</span>               <span class="nc">Hooks</span> <span class="nv">used</span> <span class="nv">by</span> <span class="nc">Git</span>
+</span></span><span class="line"><span class="cl">   <span class="nv">ignore</span>              <span class="nc">Specifies</span> <span class="nv">intentionally</span> <span class="nv">untracked</span> <span class="nv">files</span> <span class="nv">to</span> <span class="nv">ignore</span>
+</span></span><span class="line"><span class="cl">   <span class="nv">modules</span>             <span class="nc">Defining</span> <span class="nv">submodule</span> <span class="nv">properties</span>
+</span></span><span class="line"><span class="cl">   <span class="nv">namespaces</span>          <span class="nc">Git</span> <span class="nv">namespaces</span>
+</span></span><span class="line"><span class="cl">   <span class="nv">repository</span><span class="o">-</span><span class="nv">layout</span>    <span class="nc">Git</span> <span class="nc">Repository</span> <span class="nc">Layout</span>
+</span></span><span class="line"><span class="cl">   <span class="nv">revisions</span>           <span class="nc">Specifying</span> <span class="nv">revisions</span> <span class="nv">and</span> <span class="nv">ranges</span> <span class="k">for</span> <span class="nc">Git</span>
+</span></span><span class="line"><span class="cl">   <span class="nv">tutorial</span>            <span class="nc">A</span> <span class="nv">tutorial</span> <span class="nv">introduction</span> <span class="nv">to</span> <span class="nc">Git</span>
+</span></span><span class="line"><span class="cl">   <span class="nv">tutorial</span><span class="o">-</span><span class="mi">2</span>          <span class="nc">A</span> <span class="nv">tutorial</span> <span class="nv">introduction</span> <span class="nv">to</span> <span class="nc">Git</span><span class="p">:</span> <span class="nv">part</span> <span class="nv">two</span>
+</span></span><span class="line"><span class="cl">   <span class="nv">workflows</span>           <span class="nc">An</span> <span class="nv">overview</span> <span class="nv">of</span> <span class="nv">recommended</span> <span class="nv">workflows</span> <span class="nv">with</span> <span class="nc">Git</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="s1">&#39;git help -a&#39;</span> <span class="nv">and</span> <span class="s1">&#39;git help -g&#39;</span> <span class="nv">list</span> <span class="nv">available</span> <span class="nv">subcommands</span> <span class="nv">and</span> <span class="nv">some</span> <span class="nv">concept</span> <span class="nv">guides</span><span class="p">.</span> <span class="nc">See</span> <span class="s1">&#39;git help &lt;command&gt;&#39;</span> <span class="k">or</span> <span class="s1">&#39;git help &lt;concept&gt;&#39;</span> <span class="nv">to</span> <span class="nv">read</span> <span class="nv">about</span> <span class="nv">a</span> <span class="nv">specific</span> <span class="nv">subcommand</span> <span class="k">or</span> <span class="nv">concept</span><span class="p">.</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="回到远程仓库的状态">回到远程仓库的状态</h2>
+<p>抛弃本地所有的修改，回到远程仓库的状态。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git fetch --all &amp;&amp; git reset --hard origin/master
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="重设第一个-commit">重设第一个 commit</h2>
+<p>也就是把所有的改动都重新放回工作区，并<strong>清空所有的 commit</strong>，这样就可以重新提交第一个 commit 了</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git update-ref -d HEAD
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="查看冲突文件列表">查看冲突文件列表</h2>
+<p>展示工作区的冲突文件列表</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git diff --name-only --diff-filter=U
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="展示工作区和暂存区的不同">展示工作区和暂存区的不同</h2>
+<p>输出<strong>工作区</strong>和<strong>暂存区</strong>的 different (不同)。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git diff
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>还可以展示本地仓库中任意两个 commit 之间的文件变动：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git diff &lt;commit-id&gt; &lt;commit-id&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="展示暂存区和最近版本的不同">展示暂存区和最近版本的不同</h2>
+<p>输出<strong>暂存区</strong>和本地最近的版本 (commit) 的 different (不同)。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git diff --cached
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="展示暂存区工作区和最近版本的不同">展示暂存区、工作区和最近版本的不同</h2>
+<p>输出<strong>工作区</strong>、<strong>暂存区</strong> 和本地最近的版本 (commit) 的 different (不同)。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git diff HEAD
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="快速切换到上一个分支">快速切换到上一个分支</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git checkout -
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="删除已经合并到-master-的分支">删除已经合并到 master 的分支</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git branch --merged master | grep -v &#39;^\\*\\|  master&#39; | xargs -n 1 git branch -d
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="展示本地分支关联远程仓库的情况">展示本地分支关联远程仓库的情况</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git branch -vv
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="关联远程分支">关联远程分支</h2>
+<p>关联之后，git branch -vv 就可以展示关联的远程分支名了，同时推送到远程仓库直接：git push，不需要指定远程仓库了。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git branch -u origin/mybranch
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>或者在 push 时加上 -u 参数</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git push origin/mybranch -u
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="列出所有远程分支">列出所有远程分支</h2>
+<p>-r 参数相当于：remote</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git branch -r
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="列出本地和远程分支">列出本地和远程分支</h2>
+<p>-a 参数相当于：all</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git branch -a
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="查看远程分支和本地分支的对应关系">查看远程分支和本地分支的对应关系</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git remote show origin
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="远程删除了分支本地也想删除">远程删除了分支本地也想删除</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git remote prune origin
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="创建并切换到本地分支">创建并切换到本地分支</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git checkout -b &lt;branch-name&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="从远程分支中创建并切换到本地分支">从远程分支中创建并切换到本地分支</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git checkout -b &lt;branch-name&gt; origin/&lt;branch-name&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="删除本地分支">删除本地分支</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git branch -d &lt;local-branchname&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="删除远程分支">删除远程分支</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git push origin --delete &lt;remote-branchname&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>或者</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git push origin :&lt;remote-branchname&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="重命名本地分支">重命名本地分支</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git branch -m &lt;new-branch-name&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="查看标签">查看标签</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git tag
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>展示当前分支的最近的 tag</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git describe --tags --abbrev=0
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="查看标签详细信息">查看标签详细信息</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git tag -ln
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="本地创建标签">本地创建标签</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git tag &lt;version-number&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>默认 tag 是打在最近的一次 commit 上，如果需要指定 commit 打 tag：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ git tag -a &lt;version-number&gt; -m &#34;v1.0 发布(描述)&#34; &lt;commit-id&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="推送标签到远程仓库">推送标签到远程仓库</h2>
+<p>首先要保证本地创建好了标签才可以推送标签到远程仓库：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git push origin &lt;local-version-number&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>一次性推送所有标签，同步到远程仓库：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git push origin --tags
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="删除本地标签">删除本地标签</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git tag -d &lt;tag-name&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="删除远程标签">删除远程标签</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git push origin --delete tag &lt;tagname&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="切回到某个标签">切回到某个标签</h2>
+<p>一般上线之前都会打 tag，就是为了防止上线后出现问题，方便快速回退到上一版本。下面的命令是回到某一标签下的状态：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git checkout -b branch_name tag_name
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="放弃工作区的修改">放弃工作区的修改</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git checkout &lt;file-name&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>放弃所有修改：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git checkout .
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="恢复删除的文件">恢复删除的文件</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git rev-list -n 1 HEAD -- &lt;file_path&gt; #得到 deleting_commit
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git checkout &lt;deleting_commit&gt;^ -- &lt;file_path&gt; #回到删除文件 deleting_commit 之前的状态
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="以新增一个-commit-的方式还原某一个-commit-的修改">以新增一个 commit 的方式还原某一个 commit 的修改</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git revert &lt;commit-id&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="回到某个-commit-的状态并删除后面的-commit">回到某个 commit 的状态，并删除后面的 commit</h2>
+<p>和 revert 的区别：reset 命令会抹去某个 commit id 之后的所有 commit</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git reset &lt;commit-id&gt;  #默认就是-mixed参数。
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git reset --mixed HEAD^  #回退至上个版本，它将重置HEAD到另外一个commit,并且重置暂存区以便和HEAD相匹配，但是也到此为止。工作区不会被更改。
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git reset --soft HEAD~3  #回退至三个版本之前，只回退了commit的信息，暂存区和工作区与回退之前保持一致。如果还要提交，直接commit即可
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git reset --hard &lt;commit-id&gt;  #彻底回退到指定commit-id的状态，暂存区和工作区也会变为指定commit-id版本的内容
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="修改上一个-commit-的描述">修改上一个 commit 的描述</h2>
+<p>如果暂存区有改动，同时也会将暂存区的改动提交到上一个 commit</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git commit --amend
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="查看-commit-历史">查看 commit 历史</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git log
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="查看某段代码是谁写的">查看某段代码是谁写的</h2>
+<p>blame 的意思为‘责怪’，你懂的。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git blame &lt;file-name&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="显示本地更新过-head-的-git-命令记录">显示本地更新过 HEAD 的 git 命令记录</h2>
+<p>每次更新了 HEAD 的 git 命令比如 commit、amend、cherry-pick、reset、revert 等都会被记录下来（不限分支），就像 shell 的 history 一样。 这样你可以 reset 到任何一次更新了 HEAD 的操作之后，而不仅仅是回到当前分支下的某个 commit 之后的状态。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git reflog
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="修改作者名">修改作者名</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git commit --amend --author=&#39;Author Name &lt;email@address.com&gt;&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="修改远程仓库的-url">修改远程仓库的 url</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git remote set-url origin &lt;URL&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="增加远程仓库">增加远程仓库</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git remote add origin &lt;remote-url&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="列出所有远程仓库">列出所有远程仓库</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git remote
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="查看两个星期内的改动">查看两个星期内的改动</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git whatchanged --since=&#39;2 weeks ago&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="把-a-分支的某一个-commit放到-b-分支上">把 A 分支的某一个 commit，放到 B 分支上</h2>
+<p>这个过程需要 cherry-pick 命令，<a class="link" href="http://sg552.iteye.com/blog/1300713#bc2367928"  target="_blank" rel="noopener"
+    >参考</a></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git checkout &lt;branch-name&gt; &amp;&amp; git cherry-pick &lt;commit-id&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>简化命令</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git config --global alias.&lt;handle&gt; &lt;command&gt;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">比如：git status 改成 git st，这样可以简化命令
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git config --global alias.st status
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="存储当前的修改但不用提交-commit">存储当前的修改，但不用提交 commit</h2>
+<p>详解可以参考<a class="link" href="http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/00137602359178794d966923e5c4134bc8bf98dfb03aea3000"  target="_blank" rel="noopener"
+    >廖雪峰老师的 git 教程</a></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git stash
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="保存当前状态包括-untracked-的文件">保存当前状态，包括 untracked 的文件</h2>
+<p>untracked 文件：新建的文件</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git stash -u
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="展示所有-stashes">展示所有 stashes</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git stash list
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="回到某个-stash-的状态">回到某个 stash 的状态</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git stash apply &lt;stash@{n}&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="回到最后一个-stash-的状态并删除这个-stash">回到最后一个 stash 的状态，并删除这个 stash</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git stash pop
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="删除所有的-stash">删除所有的 stash</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git stash clear
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="从-stash-中拿出某个文件的修改">从 stash 中拿出某个文件的修改</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git checkout &lt;stash@{n}&gt; -- &lt;file-path&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="展示所有-tracked-的文件">展示所有 tracked 的文件</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git ls-files -t
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="展示所有-untracked-的文件">展示所有 untracked 的文件</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git ls-files --others
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="展示所有忽略的文件">展示所有忽略的文件</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git ls-files --others -i --exclude-standard
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="强制删除-untracked-的文件">强制删除 untracked 的文件</h2>
+<p>可以用来删除新建的文件。如果不指定文件文件名，则清空所有工作的 untracked 文件。clean 命令，<strong>注意两点</strong>：</p>
+<ol>
+<li>clean 后，删除的文件无法找回</li>
+<li>不会影响 tracked 的文件的改动，只会删除 untracked 的文件</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git clean &lt;file-name&gt; -f
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="强制删除-untracked-的目录">强制删除 untracked 的目录</h2>
+<p>可以用来删除新建的目录，<strong>注意</strong>:这个命令也可以用来删除 untracked 的文件。详情见上一条</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git clean &lt;directory-name&gt; -df
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="展示简化的-commit-历史">展示简化的 commit 历史</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git log --pretty=oneline --graph --decorate --all
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="把某一个分支导出成一个文件">把某一个分支导出成一个文件</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git bundle create &lt;file&gt; &lt;branch-name&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="从包中导入分支">从包中导入分支</h2>
+<p>新建一个分支，分支内容就是上面 git bundle create 命令导出的内容</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git clone repo.bundle &lt;repo-dir&gt; -b &lt;branch-name&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="执行-rebase-之前自动-stash">执行 rebase 之前自动 stash</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git rebase --autostash
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="从远程仓库根据-id拉下某一状态到本地分支">从远程仓库根据 ID，拉下某一状态，到本地分支</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git fetch origin pull/&lt;id&gt;/head:&lt;branch-name&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="详细展示一行中的修改">详细展示一行中的修改</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git diff --word-diff
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="清除-gitignore-文件中记录的文件">清除 gitignore 文件中记录的文件</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git clean -X -f
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="展示所有-alias-和-configs">展示所有 alias 和 configs</h2>
+<p><strong>注意：</strong> config 分为：当前目录（local）和全局（golbal）的 config，默认为当前目录的 config</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git config --local --list (当前目录)
+</span></span><span class="line"><span class="cl">git config --global --list (全局)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="展示忽略的文件">展示忽略的文件</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git status --ignored
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="commit-历史中显示-branch1-有的但是-branch2-没有-commit">commit 历史中显示 Branch1 有的，但是 Branch2 没有 commit</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git log Branch1 ^Branch2
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="在-commit-log-中显示-gpg-签名">在 commit log 中显示 GPG 签名</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git log --show-signature
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="删除全局设置">删除全局设置</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git config --global --unset &lt;entry-name&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="新建并切换到新分支上同时这个分支没有任何-commit">新建并切换到新分支上，同时这个分支没有任何 commit</h2>
+<p>相当于保存修改，但是重写 commit 历史</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git checkout --orphan &lt;branch-name&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="展示任意分支某一文件的内容">展示任意分支某一文件的内容</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git show &lt;branch-name&gt;:&lt;file-name&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="clone-下来指定的单一分支">clone 下来指定的单一分支</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git clone -b &lt;branch-name&gt; --single-branch &lt;https://github.com/user/repo.git&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="clone-最新一次提交">clone 最新一次提交</h2>
+<p>只会 clone 最近一次提交，将减少 clone 时间</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git clone --depth=1 &lt;https://github.com/user/repo.git&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="忽略某个文件的改动">忽略某个文件的改动</h2>
+<p>关闭 track 指定文件的改动，也就是 Git 将不会在记录这个文件的改动</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git update-index --assume-unchanged path/to/file
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>恢复 track 指定文件的改动</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git update-index --no-assume-unchanged path/to/file
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="忽略文件的权限变化">忽略文件的权限变化</h2>
+<p>不再将文件的权限变化视作改动</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git config core.fileMode false
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="以最后提交的顺序列出所有-git-分支">以最后提交的顺序列出所有 Git 分支</h2>
+<p>最新的放在最上面</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git for-each-ref --sort=-committerdate --format=&#39;%(refname:short)&#39; refs/heads/
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="在-commit-log-中查找相关内容">在 commit log 中查找相关内容</h2>
+<p>通过 grep 查找，given-text：所需要查找的字段</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git log --all --grep=&#39;&lt;given-text&gt;&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="把暂存区的指定-file-放到工作区中">把暂存区的指定 file 放到工作区中</h2>
+<p>不添加参数，默认是 -mixed</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git reset &lt;file-name&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="强制推送">强制推送</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git push -f &lt;remote-name&gt; &lt;branch-name&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/git/">Git</a>
+        
+            <a href="/tags/c&#43;&#43;primer/">C&#43;&#43;Primer</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 SalmoneX Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
