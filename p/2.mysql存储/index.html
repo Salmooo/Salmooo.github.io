@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='mysql Learning Notes'>
+<title>2.Mysql存储</title>
+
+<link rel='canonical' href='http://salmooo.github.io/p/2.mysql%E5%AD%98%E5%82%A8/'>
+
+<link rel="stylesheet" href="/scss/style.min.5be32ca3f6e1a997c75795c4359147cc6d4fbd34948c0acd51e31d237033978a.css"><meta property='og:title' content='2.Mysql存储'>
+<meta property='og:description' content='mysql Learning Notes'>
+<meta property='og:url' content='http://salmooo.github.io/p/2.mysql%E5%AD%98%E5%82%A8/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='database' /><meta property='article:tag' content='Mysql' /><meta property='article:published_time' content='2018-12-07T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2018-12-07T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="2.Mysql存储">
+<meta name="twitter:description" content="mysql Learning Notes">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/hp_huddfc85967d338f7c431198027b4852a6_7905_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description"></h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://github.com/salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="http://salmooo.github.io/" selected>English</option>
+                        
+                            <option value="http://salmooo.github.io/zh-cn/" >中文</option>
+                        
+                            <option value="http://salmooo.github.io/ar/" >عربي</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#mysql-的数据存放在哪个文件">MySQL 的数据存放在哪个文件？</a>
+      <ol>
+        <li><a href="#httpsxiaolincodingcommysqlbaserow_formathtml25e825a125a825e725a925ba25e9259725b425e62596258725e425bb25b625e7259a258425e725bb259325e6259e258425e6259825af25e62580258e25e425b9258825e625a025b725e7259a2584表空间文件的结构是怎么样的"><a href="https://xiaolincoding.com/mysql/base/row_format.html#%25E8%25A1%25A8%25E7%25A9%25BA%25E9%2597%25B4%25E6%2596%2587%25E4%25BB%25B6%25E7%259A%2584%25E7%25BB%2593%25E6%259E%2584%25E6%2598%25AF%25E6%2580%258E%25E4%25B9%2588%25E6%25A0%25B7%25E7%259A%2584">#</a>表空间文件的结构是怎么样的？</a>
+          <ol>
+            <li><a href="#httpsxiaolincodingcommysqlbaserow_formathtml_125e32580258125e825a1258c-row1行row"><a href="https://xiaolincoding.com/mysql/base/row_format.html#_1%25E3%2580%2581%25E8%25A1%258C-row">#</a>1、行（row）</a></li>
+            <li><a href="#httpsxiaolincodingcommysqlbaserow_formathtml_225e32580258125e925a125b5-page2页page"><a href="https://xiaolincoding.com/mysql/base/row_format.html#_2%25E3%2580%2581%25E9%25A1%25B5-page">#</a>2、页（page）</a></li>
+            <li><a href="#httpsxiaolincodingcommysqlbaserow_formathtml_325e32580258125e5258c25ba-extent3区extent"><a href="https://xiaolincoding.com/mysql/base/row_format.html#_3%25E3%2580%2581%25E5%258C%25BA-extent">#</a>3、区（extent）</a></li>
+            <li><a href="#httpsxiaolincodingcommysqlbaserow_formathtml_425e32580258125e625ae25b5-segment4段segment"><a href="https://xiaolincoding.com/mysql/base/row_format.html#_4%25E3%2580%2581%25E6%25AE%25B5-segment">#</a>4、段（segment）</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#httpsxiaolincodingcommysqlbaserow_formathtmlinnodb-25e825a1258c25e625a025bc25e525bc258f25e6259c258925e5259325aa25e425ba259binnodb-行格式有哪些"><a href="https://xiaolincoding.com/mysql/base/row_format.html#innodb-%25E8%25A1%258C%25E6%25A0%25BC%25E5%25BC%258F%25E6%259C%2589%25E5%2593%25AA%25E4%25BA%259B">#</a>InnoDB 行格式有哪些？</a></li>
+    <li><a href="#httpsxiaolincodingcommysqlbaserow_formathtmlcompact-25e825a1258c25e625a025bc25e525bc258f25e9259525bf25e425bb258025e425b9258825e625a025b7compact-行格式长什么样"><a href="https://xiaolincoding.com/mysql/base/row_format.html#compact-%25E8%25A1%258C%25E6%25A0%25BC%25E5%25BC%258F%25E9%2595%25BF%25E4%25BB%2580%25E4%25B9%2588%25E6%25A0%25B7">#</a>COMPACT 行格式长什么样？</a>
+      <ol>
+        <li><a href="#httpsxiaolincodingcommysqlbaserow_formathtml25e825ae25b025e525bd259525e7259a258425e925a2259d25e525a4259625e425bf25a125e6258125af记录的额外信息"><a href="https://xiaolincoding.com/mysql/base/row_format.html#%25E8%25AE%25B0%25E5%25BD%2595%25E7%259A%2584%25E9%25A2%259D%25E5%25A4%2596%25E4%25BF%25A1%25E6%2581%25AF">#</a>记录的额外信息</a>
+          <ol>
+            <li><a href="#httpsxiaolincodingcommysqlbaserow_formathtml_1-25e5258f259825e9259525bf25e525ad259725e625ae25b525e9259525bf25e525ba25a625e52588259725e825a125a81-变长字段长度列表"><a href="https://xiaolincoding.com/mysql/base/row_format.html#_1-%25E5%258F%2598%25E9%2595%25BF%25E5%25AD%2597%25E6%25AE%25B5%25E9%2595%25BF%25E5%25BA%25A6%25E5%2588%2597%25E8%25A1%25A8">#</a>1. 变长字段长度列表</a></li>
+            <li><a href="#httpsxiaolincodingcommysqlbaserow_formathtml_2-null-25e5258025bc25e52588259725e825a125a82-null-值列表"><a href="https://xiaolincoding.com/mysql/base/row_format.html#_2-null-%25E5%2580%25BC%25E5%2588%2597%25E8%25A1%25A8">#</a>2. NULL 值列表</a></li>
+            <li><a href="#httpsxiaolincodingcommysqlbaserow_formathtml_3-25e825ae25b025e525bd259525e525a425b425e425bf25a125e6258125af3-记录头信息"><a href="https://xiaolincoding.com/mysql/base/row_format.html#_3-%25E8%25AE%25B0%25E5%25BD%2595%25E5%25A4%25B4%25E4%25BF%25A1%25E6%2581%25AF">#</a>3. 记录头信息</a></li>
+          </ol>
+        </li>
+        <li><a href="#httpsxiaolincodingcommysqlbaserow_formathtml25e825ae25b025e525bd259525e7259a258425e7259c259f25e525ae259e25e6259525b025e6258d25ae记录的真实数据"><a href="https://xiaolincoding.com/mysql/base/row_format.html#%25E8%25AE%25B0%25E5%25BD%2595%25E7%259A%2584%25E7%259C%259F%25E5%25AE%259E%25E6%2595%25B0%25E6%258D%25AE">#</a>记录的真实数据</a></li>
+      </ol>
+    </li>
+    <li><a href="#httpsxiaolincodingcommysqlbaserow_formathtmlvarchar-n-25e425b825ad-n-25e6259c258025e525a425a725e5258f259625e5258025bc25e425b825ba25e525a4259a25e525b02591varcharn-中-n-最大取值为多少"><a href="https://xiaolincoding.com/mysql/base/row_format.html#varchar-n-%25E4%25B8%25AD-n-%25E6%259C%2580%25E5%25A4%25A7%25E5%258F%2596%25E5%2580%25BC%25E4%25B8%25BA%25E5%25A4%259A%25E5%25B0%2591">#</a>varchar(n) 中 n 最大取值为多少？</a>
+      <ol>
+        <li><a href="#httpsxiaolincodingcommysqlbaserow_formathtml25e5258d259525e525ad259725e625ae25b525e7259a258425e62583258525e5258625b5单字段的情况"><a href="https://xiaolincoding.com/mysql/base/row_format.html#%25E5%258D%2595%25E5%25AD%2597%25E6%25AE%25B5%25E7%259A%2584%25E6%2583%2585%25E5%2586%25B5">#</a>单字段的情况</a></li>
+        <li><a href="#httpsxiaolincodingcommysqlbaserow_formathtml25e525a4259a25e525ad259725e625ae25b525e7259a258425e62583258525e5258625b5多字段的情况"><a href="https://xiaolincoding.com/mysql/base/row_format.html#%25E5%25A4%259A%25E5%25AD%2597%25E6%25AE%25B5%25E7%259A%2584%25E6%2583%2585%25E5%2586%25B5">#</a>多字段的情况</a></li>
+      </ol>
+    </li>
+    <li><a href="#httpsxiaolincodingcommysqlbaserow_formathtml25e825a1258c25e625ba25a225e5258725ba25e52590258e-mysql-25e6259825af25e62580258e25e425b9258825e525a4258425e72590258625e7259a2584行溢出后mysql-是怎么处理的"><a href="https://xiaolincoding.com/mysql/base/row_format.html#%25E8%25A1%258C%25E6%25BA%25A2%25E5%2587%25BA%25E5%2590%258E-mysql-%25E6%2598%25AF%25E6%2580%258E%25E4%25B9%2588%25E5%25A4%2584%25E7%2590%2586%25E7%259A%2584">#</a>行溢出后，MySQL 是怎么处理的？</a></li>
+    <li><a href="#httpsxiaolincodingcommysqlbaserow_formathtml25e6258025bb25e725bb2593总结"><a href="https://xiaolincoding.com/mysql/base/row_format.html#%25E6%2580%25BB%25E7%25BB%2593">#</a>总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/mysql/" >
+                Mysql
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/2.mysql%E5%AD%98%E5%82%A8/">2.Mysql存储</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            mysql Learning Notes
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Dec 07, 2018</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    4 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="mysql-的数据存放在哪个文件">MySQL 的数据存放在哪个文件？</h2>
+<p>大家都知道 MySQL 的数据都是保存在磁盘的，那具体是保存在哪个文件呢？</p>
+<p>MySQL 存储的行为是由存储引擎实现的，MySQL 支持多种存储引擎，不同的存储引擎保存的文件自然也不同。</p>
+<p>InnoDB 是我们常用的存储引擎，也是 MySQL 默认的存储引擎。所以，本文主要以 InnoDB 存储引擎展开讨论。</p>
+<p>先来看看 MySQL 数据库的文件存放在哪个目录？</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">mysql&gt; SHOW VARIABLES LIKE &#39;datadir&#39;;
+</span></span><span class="line"><span class="cl">+---------------+-----------------+
+</span></span><span class="line"><span class="cl">| Variable_name | Value           |
+</span></span><span class="line"><span class="cl">+---------------+-----------------+
+</span></span><span class="line"><span class="cl">| datadir       | /var/lib/mysql/ |
+</span></span><span class="line"><span class="cl">+---------------+-----------------+
+</span></span><span class="line"><span class="cl">1 row in set (0.00 sec)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>我们每创建一个 database（数据库） 都会在 /var/lib/mysql/ 目录里面创建一个以 database 为名的目录，然后保存表结构和表数据的文件都会存放在这个目录里。</p>
+<p>比如，我这里有一个名为 my_test 的 database，该 database 里有一张名为 t_order 数据库表。</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/database.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>然后，我们进入 /var/lib/mysql/my_test 目录，看看里面有什么文件？</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">[root@xiaolin ~]#ls /var/lib/mysql/my_test
+</span></span><span class="line"><span class="cl">db.opt  
+</span></span><span class="line"><span class="cl">t_order.frm  
+</span></span><span class="line"><span class="cl">t_order.ibd
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看到，共有三个文件，这三个文件分别代表着：</p>
+<ul>
+<li>db.opt，用来存储当前数据库的默认字符集和字符校验规则。</li>
+<li>t_order.frm ，t_order 的<strong>表结构</strong>会保存在这个文件。在 MySQL 中建立一张表都会生成一个.frm 文件，该文件是用来保存每个表的元数据信息的，主要包含表结构定义。</li>
+<li>t_order.ibd，t_order 的<strong>表数据</strong>会保存在这个文件。表数据既可以存在共享表空间文件（文件名：ibdata1）里，也可以存放在独占表空间文件（文件名：表名字.ibd）。这个行为是由参数 innodb_file_per_table 控制的，若设置了参数 innodb_file_per_table 为 1，则会将存储的数据、索引等信息单独存储在一个独占表空间，从 MySQL 5.6.6 版本开始，它的默认值就是 1 了，因此从这个版本之后， MySQL 中每一张表的数据都存放在一个独立的 .ibd 文件。</li>
+</ul>
+<p>好了，现在我们知道了一张数据库表的数据是保存在「 表名字.ibd 」的文件里的，这个文件也称为独占表空间文件。</p>
+<h3 id="httpsxiaolincodingcommysqlbaserow_formathtml25e825a125a825e725a925ba25e9259725b425e62596258725e425bb25b625e7259a258425e725bb259325e6259e258425e6259825af25e62580258e25e425b9258825e625a025b725e7259a2584表空间文件的结构是怎么样的"><a class="link" href="https://xiaolincoding.com/mysql/base/row_format.html#%25E8%25A1%25A8%25E7%25A9%25BA%25E9%2597%25B4%25E6%2596%2587%25E4%25BB%25B6%25E7%259A%2584%25E7%25BB%2593%25E6%259E%2584%25E6%2598%25AF%25E6%2580%258E%25E4%25B9%2588%25E6%25A0%25B7%25E7%259A%2584"  target="_blank" rel="noopener"
+    >#</a>表空间文件的结构是怎么样的？</h3>
+<p><strong>表空间由段（segment）、区（extent）、页（page）、行（row）组成</strong>，InnoDB存储引擎的逻辑存储结构大致如下图：</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/%25E8%25A1%25A8%25E7%25A9%25BA%25E9%2597%25B4%25E7%25BB%2593%25E6%259E%2584.drawio.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>下面我们从下往上一个个看看。</p>
+<h4 id="httpsxiaolincodingcommysqlbaserow_formathtml_125e32580258125e825a1258c-row1行row"><a class="link" href="https://xiaolincoding.com/mysql/base/row_format.html#_1%25E3%2580%2581%25E8%25A1%258C-row"  target="_blank" rel="noopener"
+    >#</a>1、行（row）</h4>
+<p>数据库表中的记录都是按行（row）进行存放的，每行记录根据不同的行格式，有不同的存储结构。</p>
+<p>后面我们详细介绍 InnoDB 存储引擎的行格式，也是本文重点介绍的内容。</p>
+<h4 id="httpsxiaolincodingcommysqlbaserow_formathtml_225e32580258125e925a125b5-page2页page"><a class="link" href="https://xiaolincoding.com/mysql/base/row_format.html#_2%25E3%2580%2581%25E9%25A1%25B5-page"  target="_blank" rel="noopener"
+    >#</a>2、页（page）</h4>
+<p>记录是按照行来存储的，但是数据库的读取并不以「行」为单位，否则一次读取（也就是一次 I/O 操作）只能处理一行数据，效率会非常低。</p>
+<p>因此，<strong>InnoDB 的数据是按「页」为单位来读写的</strong>，也就是说，当需要读一条记录的时候，并不是将这个行记录从磁盘读出来，而是以页为单位，将其整体读入内存。</p>
+<p><strong>默认每个页的大小为 16KB</strong>，也就是最多能保证 16KB 的连续存储空间。</p>
+<p>页是 InnoDB 存储引擎磁盘管理的最小单元，意味着数据库每次读写都是以 16KB 为单位的，一次最少从磁盘中读取 16K 的内容到内存中，一次最少把内存中的 16K 内容刷新到磁盘中。</p>
+<p>页的类型有很多，常见的有数据页、undo 日志页、溢出页等等。数据表中的行记录是用「数据页」来管理的，数据页的结构这里我就不讲细说了，之前文章有说过，感兴趣的可以去看这篇文章：<a class="link" href="https://xiaolincoding.com/mysql/index/page.html"  target="_blank" rel="noopener"
+    >换一个角度看 B+ 树(opens new window)</a></p>
+<p>总之知道表中的记录存储在「数据页」里面就行。</p>
+<h4 id="httpsxiaolincodingcommysqlbaserow_formathtml_325e32580258125e5258c25ba-extent3区extent"><a class="link" href="https://xiaolincoding.com/mysql/base/row_format.html#_3%25E3%2580%2581%25E5%258C%25BA-extent"  target="_blank" rel="noopener"
+    >#</a>3、区（extent）</h4>
+<p>我们知道 InnoDB 存储引擎是用 B+ 树来组织数据的。</p>
+<p>B+ 树中每一层都是通过双向链表连接起来的，如果是以页为单位来分配存储空间，那么链表中相邻的两个页之间的物理位置并不是连续的，可能离得非常远，那么磁盘查询时就会有大量的随机I/O，随机 I/O 是非常慢的。</p>
+<p>解决这个问题也很简单，就是让链表中相邻的页的物理位置也相邻，这样就可以使用顺序 I/O 了，那么在范围查询（扫描叶子节点）的时候性能就会很高。</p>
+<p>那具体怎么解决呢？</p>
+<p><strong>在表中数据量大的时候，为某个索引分配空间的时候就不再按照页为单位分配了，而是按照区（extent）为单位分配。每个区的大小为 1MB，对于 16KB 的页来说，连续的 64 个页会被划为一个区，这样就使得链表中相邻的页的物理位置也相邻，就能使用顺序 I/O 了</strong>。</p>
+<h4 id="httpsxiaolincodingcommysqlbaserow_formathtml_425e32580258125e625ae25b5-segment4段segment"><a class="link" href="https://xiaolincoding.com/mysql/base/row_format.html#_4%25E3%2580%2581%25E6%25AE%25B5-segment"  target="_blank" rel="noopener"
+    >#</a>4、段（segment）</h4>
+<p>表空间是由各个段（segment）组成的，段是由多个区（extent）组成的。段一般分为数据段、索引段和回滚段等。</p>
+<ul>
+<li>索引段：存放 B + 树的非叶子节点的区的集合；</li>
+<li>数据段：存放 B + 树的叶子节点的区的集合；</li>
+<li>回滚段：存放的是回滚数据的区的集合，之前讲<a class="link" href="https://xiaolincoding.com/mysql/transaction/mvcc.html"  target="_blank" rel="noopener"
+    >事务隔离 (opens new window)</a>的时候就介绍到了 MVCC 利用了回滚段实现了多版本查询数据。</li>
+</ul>
+<p>好了，终于说完表空间的结构了。接下来，就具体讲一下 InnoDB 的行格式了。</p>
+<p>之所以要绕一大圈才讲行记录的格式，主要是想让大家知道行记录是存储在哪个文件，以及行记录在这个表空间文件中的哪个区域，有一个从上往下切入的视角，这样理解起来不会觉得很抽象。</p>
+<h2 id="httpsxiaolincodingcommysqlbaserow_formathtmlinnodb-25e825a1258c25e625a025bc25e525bc258f25e6259c258925e5259325aa25e425ba259binnodb-行格式有哪些"><a class="link" href="https://xiaolincoding.com/mysql/base/row_format.html#innodb-%25E8%25A1%258C%25E6%25A0%25BC%25E5%25BC%258F%25E6%259C%2589%25E5%2593%25AA%25E4%25BA%259B"  target="_blank" rel="noopener"
+    >#</a>InnoDB 行格式有哪些？</h2>
+<p>行格式（row_format），就是一条记录的存储结构。</p>
+<p>InnoDB 提供了 4 种行格式，分别是 Redundant、Compact、Dynamic和 Compressed 行格式。</p>
+<ul>
+<li>Redundant 是很古老的行格式了， MySQL 5.0 版本之前用的行格式，现在基本没人用了。</li>
+<li>由于 Redundant 不是一种紧凑的行格式，所以 MySQL 5.0 之后引入了 Compact 行记录存储方式，Compact 是一种紧凑的行格式，设计的初衷就是为了让一个数据页中可以存放更多的行记录，从 MySQL 5.1 版本之后，行格式默认设置成 Compact。</li>
+<li>Dynamic 和 Compressed 两个都是紧凑的行格式，它们的行格式都和 Compact 差不多，因为都是基于 Compact 改进一点东西。从 MySQL5.7 版本之后，默认使用 Dynamic 行格式。</li>
+</ul>
+<p>Redundant 行格式我这里就不讲了，因为现在基本没人用了，这次重点介绍 Compact 行格式，因为 Dynamic 和 Compressed 这两个行格式跟 Compact 非常像。</p>
+<p>所以，弄懂了 Compact 行格式，之后你们在去了解其他行格式，很快也能看懂。</p>
+<h2 id="httpsxiaolincodingcommysqlbaserow_formathtmlcompact-25e825a1258c25e625a025bc25e525bc258f25e9259525bf25e425bb258025e425b9258825e625a025b7compact-行格式长什么样"><a class="link" href="https://xiaolincoding.com/mysql/base/row_format.html#compact-%25E8%25A1%258C%25E6%25A0%25BC%25E5%25BC%258F%25E9%2595%25BF%25E4%25BB%2580%25E4%25B9%2588%25E6%25A0%25B7"  target="_blank" rel="noopener"
+    >#</a>COMPACT 行格式长什么样？</h2>
+<p>先跟 Compact 行格式混个脸熟，它长这样：</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/COMPACT.drawio.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>可以看到，一条完整的记录分为「记录的额外信息」和「记录的真实数据」两个部分。</p>
+<p>接下里，分别详细说下。</p>
+<h3 id="httpsxiaolincodingcommysqlbaserow_formathtml25e825ae25b025e525bd259525e7259a258425e925a2259d25e525a4259625e425bf25a125e6258125af记录的额外信息"><a class="link" href="https://xiaolincoding.com/mysql/base/row_format.html#%25E8%25AE%25B0%25E5%25BD%2595%25E7%259A%2584%25E9%25A2%259D%25E5%25A4%2596%25E4%25BF%25A1%25E6%2581%25AF"  target="_blank" rel="noopener"
+    >#</a>记录的额外信息</h3>
+<p>记录的额外信息包含 3 个部分：变长字段长度列表、NULL 值列表、记录头信息。</p>
+<h4 id="httpsxiaolincodingcommysqlbaserow_formathtml_1-25e5258f259825e9259525bf25e525ad259725e625ae25b525e9259525bf25e525ba25a625e52588259725e825a125a81-变长字段长度列表"><a class="link" href="https://xiaolincoding.com/mysql/base/row_format.html#_1-%25E5%258F%2598%25E9%2595%25BF%25E5%25AD%2597%25E6%25AE%25B5%25E9%2595%25BF%25E5%25BA%25A6%25E5%2588%2597%25E8%25A1%25A8"  target="_blank" rel="noopener"
+    >#</a>1. 变长字段长度列表</h4>
+<p>varchar(n) 和 char(n) 的区别是什么，相信大家都非常清楚，char 是定长的，varchar 是变长的，变长字段实际存储的数据的长度（大小）不固定的。</p>
+<p>所以，在存储数据的时候，也要把数据占用的大小存起来，存到「变长字段长度列表」里面，读取数据的时候才能根据这个「变长字段长度列表」去读取对应长度的数据。其他 TEXT、BLOB 等变长字段也是这么实现的。</p>
+<p>为了展示「变长字段长度列表」具体是怎么保存「变长字段的真实数据占用的字节数」，我们先创建这样一张表，字符集是 ascii（所以每一个字符占用的 1 字节），行格式是 Compact，t_user 表中 name 和 phone 字段都是变长字段：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-mysql" data-lang="mysql"><span class="line"><span class="cl"><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="o">`</span><span class="n">t_user</span><span class="o">`</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="o">`</span><span class="n">id</span><span class="o">`</span><span class="w"> </span><span class="kt">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="no">NULL</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="o">`</span><span class="n">name</span><span class="o">`</span><span class="w"> </span><span class="kt">VARCHAR</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="no">NULL</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="o">`</span><span class="n">phone</span><span class="o">`</span><span class="w"> </span><span class="kt">VARCHAR</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="no">NULL</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="o">`</span><span class="n">age</span><span class="o">`</span><span class="w"> </span><span class="kt">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="no">NULL</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="o">`</span><span class="n">id</span><span class="o">`</span><span class="p">)</span><span class="w"> </span><span class="k">USING</span><span class="w"> </span><span class="n">BTREE</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="w"> </span><span class="kp">ENGINE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">InnoDB</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">CHARACTER</span><span class="w"> </span><span class="kt">SET</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ascii</span><span class="w"> </span><span class="n">ROW_FORMAT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">COMPACT</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>现在 t_user 表里有这三条记录：</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/t_test.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>接下来，我们看看看看这三条记录的行格式中的 「变长字段长度列表」是怎样存储的。</p>
+<p>先来看第一条记录：</p>
+<ul>
+<li>name 列的值为 a，真实数据占用的字节数是 1 字节，十六进制 0x01；</li>
+<li>phone 列的值为 123，真实数据占用的字节数是 3 字节，十六进制 0x03；</li>
+<li>age 列和 id 列不是变长字段，所以这里不用管。</li>
+</ul>
+<p>这些变长字段的真实数据占用的字节数会按照列的顺序<strong>逆序存放</strong>（等下会说为什么要这么设计），所以「变长字段长度列表」里的内容是「 03 01」，而不是 「01 03」。</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/%25E5%258F%2598%25E9%2595%25BF%25E5%25AD%2597%25E6%25AE%25B5%25E9%2595%25BF%25E5%25BA%25A6%25E5%2588%2597%25E8%25A1%25A81.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>同样的道理，我们也可以得出<strong>第二条记录</strong>的行格式中，「变长字段长度列表」里的内容是「 04 02」，如下图：</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/%25E5%258F%2598%25E9%2595%25BF%25E5%25AD%2597%25E6%25AE%25B5%25E9%2595%25BF%25E5%25BA%25A6%25E5%2588%2597%25E8%25A1%25A82.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p><strong>第三条记录</strong>中 phone 列的值是 NULL，<strong>NULL 是不会存放在行格式中记录的真实数据部分里的</strong>，所以「变长字段长度列表」里不需要保存值为 NULL 的变长字段的长度。</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/%25E5%258F%2598%25E9%2595%25BF%25E5%25AD%2597%25E6%25AE%25B5%25E9%2595%25BF%25E5%25BA%25A6%25E5%2588%2597%25E8%25A1%25A83.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<blockquote>
+<p>为什么「变长字段长度列表」的信息要按照逆序存放？</p>
+</blockquote>
+<p>这个设计是有想法的，主要是因为「记录头信息」中指向下一个记录的指针，指向的是下一条记录的「记录头信息」和「真实数据」之间的位置，这样的好处是向左读就是记录头信息，向右读就是真实数据，比较方便。</p>
+<p>「变长字段长度列表」中的信息之所以要逆序存放，是因为这样可以<strong>使得位置靠前的记录的真实数据和数据对应的字段长度信息可以同时在一个 CPU Cache Line 中，这样就可以提高 CPU Cache 的命中率</strong>。</p>
+<p>同样的道理， NULL 值列表的信息也需要逆序存放。</p>
+<p>如果你不知道什么是 CPU Cache，可以看<a class="link" href="https://xiaolincoding.com/os/1_hardware/how_to_make_cpu_run_faster.html"  target="_blank" rel="noopener"
+    >这篇文章 (opens new window)</a>，这属于计算机组成的知识。</p>
+<blockquote>
+<p>每个数据库表的行格式都有「变长字段字节数列表」吗？</p>
+</blockquote>
+<p>其实变长字段字节数列表不是必须的。</p>
+<p><strong>当数据表没有变长字段的时候，比如全部都是 int 类型的字段，这时候表里的行格式就不会有「变长字段长度列表」了</strong>，因为没必要，不如去掉以节省空间。</p>
+<p>所以「变长字段长度列表」只出现在数据表有变长字段的时候。</p>
+<h4 id="httpsxiaolincodingcommysqlbaserow_formathtml_2-null-25e5258025bc25e52588259725e825a125a82-null-值列表"><a class="link" href="https://xiaolincoding.com/mysql/base/row_format.html#_2-null-%25E5%2580%25BC%25E5%2588%2597%25E8%25A1%25A8"  target="_blank" rel="noopener"
+    >#</a>2. NULL 值列表</h4>
+<p>表中的某些列可能会存储 NULL 值，如果把这些 NULL 值都放到记录的真实数据中会比较浪费空间，所以 Compact 行格式把这些值为 NULL 的列存储到 NULL值列表中。</p>
+<p>如果存在允许 NULL 值的列，则每个列对应一个二进制位（bit），二进制位按照列的顺序逆序排列。</p>
+<ul>
+<li>二进制位的值为<code>1</code>时，代表该列的值为NULL。</li>
+<li>二进制位的值为<code>0</code>时，代表该列的值不为NULL。</li>
+</ul>
+<p>另外，NULL 值列表必须用整数个字节的位表示（1字节8位），如果使用的二进制位个数不足整数个字节，则在字节的高位补 <code>0</code>。</p>
+<p>还是以 t_user 表的这三条记录作为例子：</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/t_test.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>接下来，我们看看看看这三条记录的行格式中的 NULL 值列表是怎样存储的。</p>
+<p>先来看<strong>第一条记录</strong>，第一条记录所有列都有值，不存在 NULL 值，所以用二进制来表示是酱紫的：</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/null%25E5%2580%25BC%25E5%2588%2597%25E8%25A1%25A81.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>但是 InnoDB 是用整数字节的二进制位来表示 NULL 值列表的，现在不足 8 位，所以要在高位补 0，最终用二进制来表示是酱紫的：</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/null%25E5%2580%25BC%25E5%2588%2597%25E8%25A1%25A82.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>所以，对于第一条数据，NULL 值列表用十六进制表示是 0x00。</p>
+<p>接下来看<strong>第二条记录</strong>，第二条记录 age 列是 NULL 值，所以，对于第二条数据，NULL值列表用十六进制表示是 0x04。</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/null%25E5%2580%25BC%25E5%2588%2597%25E8%25A1%25A83.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>最后<strong>第三条记录</strong>，第三条记录 phone 列 和 age 列是 NULL 值，所以，对于第三条数据，NULL 值列表用十六进制表示是 0x06。</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/null%25E5%2580%25BC%25E5%2588%2597%25E8%25A1%25A84.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>我们把三条记录的 NULL 值列表都填充完毕后，它们的行格式是这样的：</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/null%25E5%2580%25BC%25E5%2588%2597%25E8%25A1%25A85.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<blockquote>
+<p>每个数据库表的行格式都有「NULL 值列表」吗？</p>
+</blockquote>
+<p>NULL 值列表也不是必须的。</p>
+<p><strong>当数据表的字段都定义成 NOT NULL 的时候，这时候表里的行格式就不会有 NULL 值列表了</strong>。</p>
+<p>所以在设计数据库表的时候，通常都是建议将字段设置为 NOT NULL，这样可以至少节省 1 字节的空间（NULL 值列表至少占用 1 字节空间）。</p>
+<blockquote>
+<p>「NULL 值列表」是固定 1 字节空间吗？如果这样的话，一条记录有 9 个字段值都是 NULL，这时候怎么表示？</p>
+</blockquote>
+<p>「NULL 值列表」的空间不是固定 1 字节的。</p>
+<p>当一条记录有 9 个字段值都是 NULL，那么就会创建 2 字节空间的「NULL 值列表」，以此类推。</p>
+<h4 id="httpsxiaolincodingcommysqlbaserow_formathtml_3-25e825ae25b025e525bd259525e525a425b425e425bf25a125e6258125af3-记录头信息"><a class="link" href="https://xiaolincoding.com/mysql/base/row_format.html#_3-%25E8%25AE%25B0%25E5%25BD%2595%25E5%25A4%25B4%25E4%25BF%25A1%25E6%2581%25AF"  target="_blank" rel="noopener"
+    >#</a>3. 记录头信息</h4>
+<p>记录头信息中包含的内容很多，我就不一一列举了，这里说几个比较重要的：</p>
+<ul>
+<li>delete_mask ：标识此条数据是否被删除。从这里可以知道，我们执行 detele 删除记录的时候，并不会真正的删除记录，只是将这个记录的 delete_mask 标记为 1。</li>
+<li>next_record：下一条记录的位置。从这里可以知道，记录与记录之间是通过链表组织的。在前面我也提到了，指向的是下一条记录的「记录头信息」和「真实数据」之间的位置，这样的好处是向左读就是记录头信息，向右读就是真实数据，比较方便。</li>
+<li>record_type：表示当前记录的类型，0表示普通记录，1表示B+树非叶子节点记录，2表示最小记录，3表示最大记录</li>
+</ul>
+<h3 id="httpsxiaolincodingcommysqlbaserow_formathtml25e825ae25b025e525bd259525e7259a258425e7259c259f25e525ae259e25e6259525b025e6258d25ae记录的真实数据"><a class="link" href="https://xiaolincoding.com/mysql/base/row_format.html#%25E8%25AE%25B0%25E5%25BD%2595%25E7%259A%2584%25E7%259C%259F%25E5%25AE%259E%25E6%2595%25B0%25E6%258D%25AE"  target="_blank" rel="noopener"
+    >#</a>记录的真实数据</h3>
+<p>记录真实数据部分除了我们定义的字段，还有三个隐藏字段，分别为：row_id、trx_id、roll_pointer，我们来看下这三个字段是什么。</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/%25E8%25AE%25B0%25E5%25BD%2595%25E7%259A%2584%25E7%259C%259F%25E5%25AE%259E%25E6%2595%25B0%25E6%258D%25AE.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<ul>
+<li>row_id</li>
+</ul>
+<p>如果我们建表的时候指定了主键或者唯一约束列，那么就没有 row_id 隐藏字段了。如果既没有指定主键，又没有唯一约束，那么 InnoDB 就会为记录添加 row_id 隐藏字段。row_id不是必需的，占用 6 个字节。</p>
+<ul>
+<li>trx_id</li>
+</ul>
+<p>事务id，表示这个数据是由哪个事务生成的。 trx_id是必需的，占用 6 个字节。</p>
+<ul>
+<li>roll_pointer</li>
+</ul>
+<p>这条记录上一个版本的指针。roll_pointer 是必需的，占用 7 个字节。</p>
+<p>如果你熟悉 MVCC 机制，你应该就清楚 trx_id 和 roll_pointer 的作用了，如果你还不知道 MVCC 机制，可以看完<a class="link" href="https://xiaolincoding.com/mysql/transaction/mvcc.html"  target="_blank" rel="noopener"
+    >这篇文章 (opens new window)</a>，一定要掌握，面试也很经常问 MVCC 是怎么实现的。</p>
+<h2 id="httpsxiaolincodingcommysqlbaserow_formathtmlvarchar-n-25e425b825ad-n-25e6259c258025e525a425a725e5258f259625e5258025bc25e425b825ba25e525a4259a25e525b02591varcharn-中-n-最大取值为多少"><a class="link" href="https://xiaolincoding.com/mysql/base/row_format.html#varchar-n-%25E4%25B8%25AD-n-%25E6%259C%2580%25E5%25A4%25A7%25E5%258F%2596%25E5%2580%25BC%25E4%25B8%25BA%25E5%25A4%259A%25E5%25B0%2591"  target="_blank" rel="noopener"
+    >#</a>varchar(n) 中 n 最大取值为多少？</h2>
+<p>我们要清楚一点，<strong>MySQL 规定除了 TEXT、BLOBs 这种大对象类型之外，其他所有的列（不包括隐藏列和记录头信息）占用的字节长度加起来不能超过 65535 个字节</strong>。</p>
+<p>也就是说，一行记录除了 TEXT、BLOBs 类型的列，限制最大为 65535 字节，注意是一行的总长度，不是一列。</p>
+<p>知道了这个前提之后，我们再来看看这个问题：「varchar(n) 中 n 最大取值为多少？」</p>
+<p>varchar(n) 字段类型的 n 代表的是最多存储的字符数量，并不是字节大小哦。</p>
+<p>要算 varchar(n) 最大能允许存储的字节数，还要看数据库表的字符集，因为字符集代表着，1个字符要占用多少字节，比如 ascii 字符集， 1 个字符占用 1 字节，那么 varchar(100) 意味着最大能允许存储 100 字节的数据。</p>
+<h3 id="httpsxiaolincodingcommysqlbaserow_formathtml25e5258d259525e525ad259725e625ae25b525e7259a258425e62583258525e5258625b5单字段的情况"><a class="link" href="https://xiaolincoding.com/mysql/base/row_format.html#%25E5%258D%2595%25E5%25AD%2597%25E6%25AE%25B5%25E7%259A%2584%25E6%2583%2585%25E5%2586%25B5"  target="_blank" rel="noopener"
+    >#</a>单字段的情况</h3>
+<p>前面我们知道了，一行记录最大只能存储 65535 字节的数据。</p>
+<p>那假设数据库表只有一个 varchar(n) 类型的列且字符集是 ascii，在这种情况下， varchar(n) 中 n 最大取值是 65535 吗？</p>
+<p>不着急说结论，我们先来做个实验验证一下。</p>
+<p>我们定义一个 varchar(65535) 类型的字段，字符集为 ascii 的数据库表。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-mysql" data-lang="mysql"><span class="line"><span class="cl"><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="nf">test</span><span class="w"> </span><span class="p">(</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">`</span><span class="n">name</span><span class="o">`</span><span class="w"> </span><span class="kt">VARCHAR</span><span class="p">(</span><span class="mi">65535</span><span class="p">)</span><span class="w">  </span><span class="no">NULL</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="w"> </span><span class="kp">ENGINE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">InnoDB</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">CHARACTER</span><span class="w"> </span><span class="kt">SET</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ascii</span><span class="w"> </span><span class="n">ROW_FORMAT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">COMPACT</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>看能不能成功创建一张表：</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/error.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>可以看到，创建失败了。</p>
+<p>从报错信息就可以知道<strong>一行数据的最大字节数是 65535（不包含 TEXT、BLOBs 这种大对象类型），其中包含了 storage overhead</strong>。</p>
+<p>问题来了，这个 storage overhead 是什么呢？其实就是「变长字段长度列表」和 「NULL 值列表」，也就是说<strong>一行数据的最大字节数 65535，其实是包含「变长字段长度列表」和 「NULL 值列表」所占用的字节数的</strong>。所以， 我们在算 varchar(n) 中 n 最大值时，需要减去 storage overhead 占用的字节数。</p>
+<p>这是因为我们存储字段类型为 varchar(n) 的数据时，其实分成了三个部分来存储：</p>
+<ul>
+<li>真实数据</li>
+<li>真实数据占用的字节数</li>
+<li>NULL 标识，如果不允许为NULL，这部分不需要</li>
+</ul>
+<blockquote>
+<p>本次案例中，「NULL 值列表」所占用的字节数是多少？</p>
+</blockquote>
+<p>前面我创建表的时候，字段是允许为 NULL 的，所以<strong>会用 1 字节来表示「NULL 值列表」</strong>。</p>
+<blockquote>
+<p>本次案例中，「变长字段长度列表」所占用的字节数是多少？</p>
+</blockquote>
+<p>「变长字段长度列表」所占用的字节数 = 所有「变长字段长度」占用的字节数之和。</p>
+<p>所以，我们要先知道每个变长字段的「变长字段长度」需要用多少字节表示？具体情况分为：</p>
+<ul>
+<li>条件一：如果变长字段允许存储的最大字节数小于等于 255 字节，就会用 1 字节表示「变长字段长度」；</li>
+<li>条件二：如果变长字段允许存储的最大字节数大于 255 字节，就会用 2 字节表示「变长字段长度」；</li>
+</ul>
+<p>我们这里字段类型是 varchar(65535) ，字符集是 ascii，所以代表着变长字段允许存储的最大字节数是 65535，符合条件二，所以会用 2 字节来表示「变长字段长度」。</p>
+<p><strong>因为我们这个案例是只有 1 个变长字段，所以「变长字段长度列表」= 1 个「变长字段长度」占用的字节数，也就是 2 字节</strong>。</p>
+<p>因为我们在算 varchar(n) 中 n 最大值时，需要减去 「变长字段长度列表」和 「NULL 值列表」所占用的字节数的。所以，<strong>在数据库表只有一个 varchar(n) 字段且字符集是 ascii 的情况下，varchar(n) 中 n 最大值 = 65535 - 2 - 1 = 65532</strong>。</p>
+<p>我们先来测试看看 varchar(65533) 是否可行？</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/65533.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>可以看到，还是不行，接下来看看 varchar(65532) 是否可行？</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/65532.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>可以看到，创建成功了。说明我们的推论是正确的，在算 varchar(n) 中 n 最大值时，需要减去 「变长字段长度列表」和 「NULL 值列表」所占用的字节数的。</p>
+<p>当然，我上面这个例子是针对字符集为 ascii 情况，如果采用的是 UTF-8，varchar(n) 最多能存储的数据计算方式就不一样了：</p>
+<ul>
+<li>在 UTF-8 字符集下，一个字符最多需要三个字节，varchar(n) 的 n 最大取值就是 65532/3 = 21844。</li>
+</ul>
+<p>上面所说的只是针对于一个字段的计算方式。</p>
+<h3 id="httpsxiaolincodingcommysqlbaserow_formathtml25e525a4259a25e525ad259725e625ae25b525e7259a258425e62583258525e5258625b5多字段的情况"><a class="link" href="https://xiaolincoding.com/mysql/base/row_format.html#%25E5%25A4%259A%25E5%25AD%2597%25E6%25AE%25B5%25E7%259A%2584%25E6%2583%2585%25E5%2586%25B5"  target="_blank" rel="noopener"
+    >#</a>多字段的情况</h3>
+<p><strong>如果有多个字段的话，要保证所有字段的长度 + 变长字段字节数列表所占用的字节数 + NULL值列表所占用的字节数 &lt;= 65535</strong>。</p>
+<p>这里举个多字段的情况的例子（感谢@Emoji同学提供的例子）</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/%25E5%25A4%259A%25E5%25AD%2597%25E6%25AE%25B5%25E7%259A%2584%25E6%2583%2585%25E5%2586%25B5.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<h2 id="httpsxiaolincodingcommysqlbaserow_formathtml25e825a1258c25e625ba25a225e5258725ba25e52590258e-mysql-25e6259825af25e62580258e25e425b9258825e525a4258425e72590258625e7259a2584行溢出后mysql-是怎么处理的"><a class="link" href="https://xiaolincoding.com/mysql/base/row_format.html#%25E8%25A1%258C%25E6%25BA%25A2%25E5%2587%25BA%25E5%2590%258E-mysql-%25E6%2598%25AF%25E6%2580%258E%25E4%25B9%2588%25E5%25A4%2584%25E7%2590%2586%25E7%259A%2584"  target="_blank" rel="noopener"
+    >#</a>行溢出后，MySQL 是怎么处理的？</h2>
+<p>MySQL 中磁盘和内存交互的基本单位是页，一个页的大小一般是 <code>16KB</code>，也就是 <code>16384字节</code>，而一个 varchar(n) 类型的列最多可以存储 <code>65532字节</code>，一些大对象如 TEXT、BLOB 可能存储更多的数据，这时一个页可能就存不了一条记录。这个时候就会<strong>发生行溢出，多的数据就会存到另外的「溢出页」中</strong>。</p>
+<p>如果一个数据页存不了一条记录，InnoDB 存储引擎会自动将溢出的数据存放到「溢出页」中。在一般情况下，InnoDB 的数据都是存放在 「数据页」中。但是当发生行溢出时，溢出的数据会存放到「溢出页」中。</p>
+<p>当发生行溢出时，在记录的真实数据处只会保存该列的一部分数据，而把剩余的数据放在「溢出页」中，然后真实数据处用 20 字节存储指向溢出页的地址，从而可以找到剩余数据所在的页。大致如下图所示。</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/%25E8%25A1%258C%25E6%25BA%25A2%25E5%2587%25BA.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>上面这个是 Compact 行格式在发生行溢出后的处理。</p>
+<p>Compressed 和 Dynamic 这两个行格式和 Compact 非常类似，主要的区别在于处理行溢出数据时有些区别。</p>
+<p>这两种格式采用完全的行溢出方式，记录的真实数据处不会存储该列的一部分数据，只存储 20 个字节的指针来指向溢出页。而实际的数据都存储在溢出页中，看起来就像下面这样：</p>
+<p><img src="https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/row_format/%25E8%25A1%258C%25E6%25BA%25A2%25E5%2587%25BA2.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<h2 id="httpsxiaolincodingcommysqlbaserow_formathtml25e6258025bb25e725bb2593总结"><a class="link" href="https://xiaolincoding.com/mysql/base/row_format.html#%25E6%2580%25BB%25E7%25BB%2593"  target="_blank" rel="noopener"
+    >#</a>总结</h2>
+<blockquote>
+<p>MySQL 的 NULL 值是怎么存放的？</p>
+</blockquote>
+<p>MySQL 的 Compact 行格式中会用「NULL值列表」来标记值为 NULL 的列，NULL 值并不会存储在行格式中的真实数据部分。</p>
+<p>NULL值列表会占用 1 字节空间，当表中所有字段都定义成 NOT NULL，行格式中就不会有 NULL值列表，这样可节省 1 字节的空间。</p>
+<blockquote>
+<p>MySQL 怎么知道 varchar(n) 实际占用数据的大小？</p>
+</blockquote>
+<p>MySQL 的 Compact 行格式中会用「变长字段长度列表」存储变长字段实际占用的数据大小。</p>
+<blockquote>
+<p>varchar(n) 中 n 最大取值为多少？</p>
+</blockquote>
+<p>一行记录最大能存储 65535 字节的数据，但是这个是包含「变长字段字节数列表所占用的字节数」和「NULL值列表所占用的字节数」。所以， 我们在算 varchar(n) 中 n 最大值时，需要减去这两个列表所占用的字节数。</p>
+<p>如果一张表只有一个 varchar(n) 字段，且允许为 NULL，字符集为 ascii。varchar(n) 中 n 最大取值为 65532。</p>
+<p>计算公式：65535 - 变长字段字节数列表所占用的字节数 - NULL值列表所占用的字节数 = 65535 - 2 - 1 = 65532。</p>
+<p>如果有多个字段的话，要保证所有字段的长度 + 变长字段字节数列表所占用的字节数 + NULL值列表所占用的字节数 &lt;= 65535。</p>
+<blockquote>
+<p>行溢出后，MySQL 是怎么处理的？</p>
+</blockquote>
+<p>如果一个数据页存不了一条记录，InnoDB 存储引擎会自动将溢出的数据存放到「溢出页」中。</p>
+<p>Compact 行格式针对行溢出的处理是这样的：当发生行溢出时，在记录的真实数据处只会保存该列的一部分数据，而把剩余的数据放在「溢出页」中，然后真实数据处用 20 字节存储指向溢出页的地址，从而可以找到剩余数据所在的页。</p>
+<p>Compressed 和 Dynamic 这两种格式采用完全的行溢出方式，记录的真实数据处不会存储该列的一部分数据，只存储 20 个字节的指针来指向溢出页。而实际的数据都存储在溢出页中。</p>
+<p>参考资料：</p>
+<ul>
+<li>《MySQL 是怎样运行的》</li>
+<li>《MySQL技术内幕 InnoDB存储引擎》</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/database/">database</a>
+        
+            <a href="/tags/mysql/">Mysql</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/3.mysql%E7%B4%A2%E5%BC%95/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">3.Mysql索引</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/1.mysql%E5%85%A5%E9%97%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">1.Mysql入门</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 SalmoneX Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
