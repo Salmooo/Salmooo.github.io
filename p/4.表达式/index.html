@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="C++ learning">
+<title>4.表达式</title>
+
+<link rel='canonical' href='https://salmooo.github.io/p/4.%E8%A1%A8%E8%BE%BE%E5%BC%8F/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="4.表达式">
+<meta property='og:description' content="C++ learning">
+<meta property='og:url' content='https://salmooo.github.io/p/4.%E8%A1%A8%E8%BE%BE%E5%BC%8F/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='C&#43;&#43;' /><meta property='article:tag' content='C&#43;&#43;Primer' /><meta property='article:published_time' content='2018-07-27T20:38:41&#43;08:00'/><meta property='article:modified_time' content='2018-07-27T20:38:41&#43;08:00'/>
+<meta name="twitter:title" content="4.表达式">
+<meta name="twitter:description" content="C++ learning">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu13739649187745961479.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">test</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md表达式基础表达式基础"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E7%A1%80"></a>表达式基础</a></li>
+    <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md算术运算符算术运算符"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%E7%AE%97%E6%9C%AF%E8%BF%90%E7%AE%97%E7%AC%A6"></a>算术运算符</a></li>
+    <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md逻辑运算符逻辑运算符"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97%E7%AC%A6"></a>逻辑运算符</a></li>
+    <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md赋值运算符赋值运算符"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%E8%B5%8B%E5%80%BC%E8%BF%90%E7%AE%97%E7%AC%A6"></a>赋值运算符</a></li>
+    <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md递增递减运算符递增递减运算符"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%E9%80%92%E5%A2%9E%E9%80%92%E5%87%8F%E8%BF%90%E7%AE%97%E7%AC%A6"></a>递增递减运算符</a>
+      <ol>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md混用解引用和递增运算符混用解引用和递增运算符"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%E6%B7%B7%E7%94%A8%E8%A7%A3%E5%BC%95%E7%94%A8%E5%92%8C%E9%80%92%E5%A2%9E%E8%BF%90%E7%AE%97%E7%AC%A6"></a>混用解引用和递增运算符</a></li>
+      </ol>
+    </li>
+    <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md成员访问运算符成员访问运算符"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%E6%88%90%E5%91%98%E8%AE%BF%E9%97%AE%E8%BF%90%E7%AE%97%E7%AC%A6"></a>成员访问运算符</a></li>
+    <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md条件运算符条件运算符"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%E6%9D%A1%E4%BB%B6%E8%BF%90%E7%AE%97%E7%AC%A6"></a>条件运算符</a></li>
+    <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md位运算符位运算符"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%E4%BD%8D%E8%BF%90%E7%AE%97%E7%AC%A6"></a>位运算符</a></li>
+    <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04mdsizeof运算符sizeof运算符"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#sizeof%E8%BF%90%E7%AE%97%E7%AC%A6"></a>sizeof运算符</a></li>
+    <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md逗号运算符逗号运算符"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%E9%80%97%E5%8F%B7%E8%BF%90%E7%AE%97%E7%AC%A6"></a>逗号运算符</a></li>
+    <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md类型转换类型转换"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2"></a>类型转换</a>
+      <ol>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md隐式类型转换隐式类型转换"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%E9%9A%90%E5%BC%8F%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2"></a>隐式类型转换</a>
+          <ol>
+            <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md算术转换算术转换"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%E7%AE%97%E6%9C%AF%E8%BD%AC%E6%8D%A2"></a>算术转换</a></li>
+            <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md其他转换其他转换"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%E5%85%B6%E4%BB%96%E8%BD%AC%E6%8D%A2"></a>其他转换</a></li>
+          </ol>
+        </li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md显式类型转换尽量避免显式类型转换尽量避免"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%E6%98%BE%E5%BC%8F%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E5%B0%BD%E9%87%8F%E9%81%BF%E5%85%8D"></a>显式类型转换（尽量避免）</a>
+          <ol>
+            <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md旧式强制类型转换旧式强制类型转换"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%E6%97%A7%E5%BC%8F%E5%BC%BA%E5%88%B6%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2"></a>旧式强制类型转换</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md运算符优先级表运算符优先级表"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%E8%BF%90%E7%AE%97%E7%AC%A6%E4%BC%98%E5%85%88%E7%BA%A7%E8%A1%A8"></a>运算符优先级表</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/c&#43;&#43;/" >
+                C&#43;&#43;
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/4.%E8%A1%A8%E8%BE%BE%E5%BC%8F/">4.表达式</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            C&#43;&#43; learning
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jul 27, 2018</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    2 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="第四章-表达式">第四章 表达式
+</h1><h2 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md表达式基础表达式基础"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e8%a1%a8%e8%be%be%e5%bc%8f%e5%9f%ba%e7%a1%80"  target="_blank" rel="noopener"
+    ></a>表达式基础
+</h2><ul>
+<li><strong>运算对象转换</strong>：小整数类型会被提升为较大的整数类型</li>
+<li><strong>重载运算符</strong>：当运算符作用在类类型的运算对象时，用户可以自行定义其含义。</li>
+<li><strong>左值和右值</strong>：
+<ul>
+<li>C中原意：左值<strong>可以</strong>在表达式左边，右值不能。</li>
+<li><code>C++</code>：当一个对象被用作<strong>右值</strong>的时候，用的是对象的<strong>值</strong>（内容）；</li>
+<li>被用做<strong>左值</strong>时，用的是对象的<strong>身份</strong>（在内存中的位置）。</li>
+</ul>
+</li>
+<li><strong>求值顺序</strong>：<code>int i = f1() + f2()</code>
+<ul>
+<li>先计算<code>f1() + f2()</code>,再计算<code>int i = f1() + f2()</code>。但是f1和f2的计算<strong>先后不确定</strong></li>
+<li>但是，如果f1、f2都对同一对象进行了修改，因为顺序不确定，所以会编译出错，显示未定义</li>
+</ul>
+</li>
+</ul>
+<h2 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md算术运算符算术运算符"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e7%ae%97%e6%9c%af%e8%bf%90%e7%ae%97%e7%ac%a6"  target="_blank" rel="noopener"
+    ></a>算术运算符
+</h2><ul>
+<li>
+<p><strong>溢出</strong>：当计算的结果超出该类型所能表示的范围时就会产生溢出。</p>
+</li>
+<li>
+<p><strong>bool类型不应该参与计算</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">bool</span> <span class="n">b</span><span class="o">=</span><span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">bool</span> <span class="n">b2</span><span class="o">=-</span><span class="n">b</span><span class="p">;</span>   <span class="c1">//仍然为true
+</span></span></span><span class="line"><span class="cl"><span class="c1">//b为true，提升为对应int=1，-b=-1
+</span></span></span><span class="line"><span class="cl"><span class="c1">//b2=-1≠0，所以b2仍未true
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>取余运算m%n，结果符号与m相同</p>
+</li>
+</ul>
+<h2 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md逻辑运算符逻辑运算符"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e9%80%bb%e8%be%91%e8%bf%90%e7%ae%97%e7%ac%a6"  target="_blank" rel="noopener"
+    ></a>逻辑运算符
+</h2><ul>
+<li><strong>短路求值</strong>：逻辑与运算符和逻辑或运算符都是先求左侧运算对象的值再求右侧运算对象的值，当且仅当左侧运算对象无法确定表达式的结果时才会计算右侧运算对象的值。<strong>先左再右</strong></li>
+<li>小技巧，声明为引用类型可以避免对元素的拷贝，如下，如string特别大时可以节省大量时间。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">text</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span><span class="p">(</span><span class="k">const</span> <span class="k">auto</span> <span class="o">&amp;</span><span class="nl">s</span><span class="p">:</span> <span class="n">text</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">  <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">s</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md赋值运算符赋值运算符"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e8%b5%8b%e5%80%bc%e8%bf%90%e7%ae%97%e7%ac%a6"  target="_blank" rel="noopener"
+    ></a>赋值运算符
+</h2><ul>
+<li>赋值运算的<strong>返回结果时它的左侧运算对象</strong>，且是一个左值。类型也就是左侧对象的类型。</li>
+<li>如果赋值运算的左右侧运算对象类型不同，则右侧运算对象将转换成左侧运算对象的类型。</li>
+<li>赋值运算符满足<strong>右结合律</strong>，这点和其他二元运算符不一样。 <code>ival = jval = 0;</code>等价于<code>ival = (jval = 0);</code></li>
+<li>赋值运算优先级比较低，使用其当条件时应该加括号。</li>
+<li>复合赋值运算符，<strong>复合运算符只求值一次</strong>，普通运算符求值两次。（对性能有一点点点点影响） 任意复合运算符op等价于<code>a = a op b;</code></li>
+</ul>
+<h2 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md递增递减运算符递增递减运算符"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e9%80%92%e5%a2%9e%e9%80%92%e5%87%8f%e8%bf%90%e7%ae%97%e7%ac%a6"  target="_blank" rel="noopener"
+    ></a>递增递减运算符
+</h2><ul>
+<li>前置版本<code>j = ++i</code>，先加一后赋值</li>
+<li>后置版本<code>j = i++</code>，先赋值后加一</li>
+</ul>
+<p><strong>优先使用前置</strong>版本，后置多一步储存原始值。（除非需要变化前的值）</p>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md混用解引用和递增运算符混用解引用和递增运算符"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e6%b7%b7%e7%94%a8%e8%a7%a3%e5%bc%95%e7%94%a8%e5%92%8c%e9%80%92%e5%a2%9e%e8%bf%90%e7%ae%97%e7%ac%a6"  target="_blank" rel="noopener"
+    ></a>混用解引用和递增运算符
+</h3><p><code>*iter++</code>等价于<code>*(iter++)</code>，递增优先级较高</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">iter</span> <span class="o">=</span> <span class="n">vi</span><span class="p">.</span><span class="nf">begin</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="p">(</span><span class="n">iter</span><span class="o">!=</span><span class="n">vi</span><span class="p">.</span><span class="nf">end</span><span class="p">()</span><span class="o">&amp;&amp;*</span><span class="n">iter</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">cout</span><span class="o">&lt;&lt;*</span><span class="n">iter</span><span class="o">++&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="c1">// 输出当前值，指针向前移1
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p><strong>简介是一种美德</strong>，追求简洁能降低程序出错可能性</p>
+</blockquote>
+<h2 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md成员访问运算符成员访问运算符"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e6%88%90%e5%91%98%e8%ae%bf%e9%97%ae%e8%bf%90%e7%ae%97%e7%ac%a6"  target="_blank" rel="noopener"
+    ></a>成员访问运算符
+</h2><p><code>ptr-&gt;mem</code>等价于<code>(*ptr).mem</code></p>
+<p>注意<code>.</code>运算符优先级大于<code>*</code>，所以记得加括号</p>
+<h2 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md条件运算符条件运算符"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e6%9d%a1%e4%bb%b6%e8%bf%90%e7%ae%97%e7%ac%a6"  target="_blank" rel="noopener"
+    ></a>条件运算符
+</h2><ul>
+<li>
+<p>条件运算符（<code>?:</code>）允许我们把简单的<code>if-else</code>逻辑嵌入到单个表达式中去，按照如下形式：<code>cond? expr1: expr2</code></p>
+</li>
+<li>
+<p>可以嵌套使用，<strong>右结合律</strong>，从右向左顺序组合</p>
+<ul>
+<li>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">finalgrade</span> <span class="o">=</span> <span class="p">(</span><span class="n">grade</span> <span class="o">&gt;</span> <span class="mi">90</span><span class="p">)</span> <span class="o">?</span> <span class="s">&#34;high pass&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">:</span> <span class="p">(</span><span class="n">grade</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="p">)</span> <span class="o">?</span> <span class="s">&#34;fail&#34;</span> <span class="o">:</span> <span class="s">&#34;pass&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="c1">//等价于
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">finalgrade</span> <span class="o">=</span> <span class="p">(</span><span class="n">grade</span> <span class="o">&gt;</span> <span class="mi">90</span><span class="p">)</span> <span class="o">?</span> <span class="s">&#34;high pass&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">:</span> <span class="err">（</span><span class="p">(</span><span class="n">grade</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="p">)</span> <span class="o">?</span> <span class="s">&#34;fail&#34;</span> <span class="o">:</span> <span class="s">&#34;pass&#34;</span><span class="err">）</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+</li>
+<li>
+<p>输出表达式使用条件运算符记得加括号，条件运算符优先级太低。</p>
+</li>
+</ul>
+<h2 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md位运算符位运算符"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e4%bd%8d%e8%bf%90%e7%ae%97%e7%ac%a6"  target="_blank" rel="noopener"
+    ></a>位运算符
+</h2><p>用于检查和设置二进制位的功能。</p>
+<ul>
+<li>位运算符是作用于<strong>整数类型</strong>的运算对象。</li>
+<li>二进制位向左移（<code>&lt;&lt;</code>）或者向右移（<code>&gt;&gt;</code>），移出边界外的位就被舍弃掉了。</li>
+<li>位取反（<code>~</code>）（逐位求反）、与（<code>&amp;</code>）、或（<code>|</code>）、异或（<code>^</code>）</li>
+</ul>
+<p>有符号数负值可能移位后变号，所以强烈建议<strong>位运算符仅用于无符号数</strong>。</p>
+<p>应用：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">quiz1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>    <span class="c1">// 每一位代表一个学生是否通过考试
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="mi">1UL</span> <span class="o">&lt;&lt;</span> <span class="mi">12</span><span class="p">;</span>  <span class="c1">// 代表第12个学生通过
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">quiz1</span> <span class="o">|=</span> <span class="p">(</span><span class="mi">1UL</span> <span class="o">&lt;&lt;</span> <span class="mi">12</span><span class="p">);</span>   <span class="c1">// 将第12个学生置为已通过
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">quiz1</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="p">(</span><span class="mi">1UL</span> <span class="o">&lt;&lt;</span> <span class="mi">12</span><span class="p">);</span>  <span class="c1">// 将第12个学生修改为未通过
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">bool</span> <span class="n">stu12</span> <span class="o">=</span> <span class="n">quiz1</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1UL</span> <span class="o">&lt;&lt;</span> <span class="mi">12</span><span class="p">);</span>   <span class="c1">// 判断第12个学生是否通过
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>位运算符使用较少，但是重载cout、cin大家都用过</p>
+</blockquote>
+<p>位运算符满足左结合律，优先级介于中间，使用时尽量加括号。</p>
+<h2 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04mdsizeof运算符sizeof运算符"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#sizeof%e8%bf%90%e7%ae%97%e7%ac%a6"  target="_blank" rel="noopener"
+    ></a>sizeof运算符
+</h2><ul>
+<li>返回一条表达式或一个类型名字所占的<strong>字节数</strong>。</li>
+<li>返回的类型是 <code>size_t</code>的常量表达式。</li>
+<li><code>sizeof</code>并不实际计算其运算对象的值。</li>
+<li>两种形式：
+<ol>
+<li><code>sizeof (type)</code>，给出类型名</li>
+<li><code>sizeof expr</code>，给出表达式</li>
+</ol>
+</li>
+<li>可用sizeof返回数组的大小</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">ia</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// sizeof(ia)返回整个数组所占空间的大小
+</span></span></span><span class="line"><span class="cl"><span class="c1">// sizeof(ia)/sizeof(*ia)返回数组的大小
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">constexpr</span> <span class="kt">size_t</span> <span class="n">sz</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ia</span><span class="p">)</span><span class="o">/</span><span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">ia</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">arr</span><span class="p">[</span><span class="n">sz</span><span class="p">];</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md逗号运算符逗号运算符"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e9%80%97%e5%8f%b7%e8%bf%90%e7%ae%97%e7%ac%a6"  target="_blank" rel="noopener"
+    ></a>逗号运算符
+</h2><p>从左向右依次求值。</p>
+<p>左侧求值结果丢弃，逗号运算符<strong>结果是右侧表达式</strong>的值。</p>
+<h2 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md类型转换类型转换"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e7%b1%bb%e5%9e%8b%e8%bd%ac%e6%8d%a2"  target="_blank" rel="noopener"
+    ></a>类型转换
+</h2><h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md隐式类型转换隐式类型转换"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e9%9a%90%e5%bc%8f%e7%b1%bb%e5%9e%8b%e8%bd%ac%e6%8d%a2"  target="_blank" rel="noopener"
+    ></a>隐式类型转换
+</h3><blockquote>
+<p>设计为尽可能避免损失精度，即转换为更精细类型。</p>
+</blockquote>
+<ul>
+<li>比 <code>int</code>类型小的整数值先提升为较大的整数类型。</li>
+<li>条件中，非布尔转换成布尔。</li>
+<li>初始化中，初始值转换成变量的类型。</li>
+<li>算术运算或者关系运算的运算对象有多种类型，要转换成同一种类型。</li>
+<li>函数调用时也会有转换。</li>
+</ul>
+<h4 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md算术转换算术转换"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e7%ae%97%e6%9c%af%e8%bd%ac%e6%8d%a2"  target="_blank" rel="noopener"
+    ></a>算术转换
+</h4><h5 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md整型提升整型提升"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e6%95%b4%e5%9e%8b%e6%8f%90%e5%8d%87"  target="_blank" rel="noopener"
+    ></a>整型提升
+</h5><ul>
+<li>常见的char、bool、short能存在int就会转换成int，否则提升为<code>unsigned int</code></li>
+<li><code>wchar_t,char16_t,char32_t</code>提升为整型中<code>int,long,long long ……</code>最小的，且能容纳原类型所有可能值的类型。</li>
+</ul>
+<h4 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md其他转换其他转换"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e5%85%b6%e4%bb%96%e8%bd%ac%e6%8d%a2"  target="_blank" rel="noopener"
+    ></a>其他转换
+</h4><blockquote>
+<p>p143</p>
+</blockquote>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md显式类型转换尽量避免显式类型转换尽量避免"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e6%98%be%e5%bc%8f%e7%b1%bb%e5%9e%8b%e8%bd%ac%e6%8d%a2%e5%b0%bd%e9%87%8f%e9%81%bf%e5%85%8d"  target="_blank" rel="noopener"
+    ></a>显式类型转换（尽量避免）
+</h3><ul>
+<li>
+<p><strong>static_cast</strong>：任何明确定义的类型转换，只要不包含底层const，都可以使用。 <code>double slope = static_cast&lt;double&gt;(j);</code></p>
+</li>
+<li>
+<p><strong>dynamic_cast</strong>：支持运行时类型识别。</p>
+</li>
+<li>
+<p><strong>const_cast</strong>：只能改变运算对象的底层const，一般可用于去除const性质。 <code>const char *pc; char *p = const_cast&lt;char*&gt;(pc)</code></p>
+<blockquote>
+<p>只有其可以改变常量属性</p>
+</blockquote>
+</li>
+<li>
+<p><strong>reinterpret_cast</strong>：通常为运算对象的位模式提供低层次上的重新解释。</p>
+</li>
+</ul>
+<h4 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md旧式强制类型转换旧式强制类型转换"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e6%97%a7%e5%bc%8f%e5%bc%ba%e5%88%b6%e7%b1%bb%e5%9e%8b%e8%bd%ac%e6%8d%a2"  target="_blank" rel="noopener"
+    ></a>旧式强制类型转换
+</h4><p><code>type expr</code></p>
+<h2 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md运算符优先级表运算符优先级表"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e8%bf%90%e7%ae%97%e7%ac%a6%e4%bc%98%e5%85%88%e7%ba%a7%e8%a1%a8"  target="_blank" rel="noopener"
+    ></a>运算符优先级表
+</h2><blockquote>
+<p>p147</p>
+</blockquote>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/c&#43;&#43;/">C&#43;&#43;</a>
+        
+            <a href="/tags/c&#43;&#43;primer/">C&#43;&#43;Primer</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/99.%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/%E8%AF%BE%E5%90%8E%E4%B9%A0%E9%A2%98%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/1.png" loading="lazy" data-key="" data-hash="/images/1.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">99.重点记录/课后习题重点记录</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/12.-%E5%8A%A8%E6%80%81%E5%86%85%E5%AD%98/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">12. 动态内存</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/11.%E5%85%B3%E8%81%94%E5%AE%B9%E5%99%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">11.关联容器</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/8.-io%E5%BA%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">8. IO库</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/9.-%E9%A1%BA%E5%BA%8F%E5%AE%B9%E5%99%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">9. 顺序容器</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2025 SalmoneX Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="C++ learning">
+<title>99.重点记录/课后习题重点记录</title>
+
+<link rel='canonical' href='https://salmooo.github.io/p/99.%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/%E8%AF%BE%E5%90%8E%E4%B9%A0%E9%A2%98%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="99.重点记录/课后习题重点记录">
+<meta property='og:description' content="C++ learning">
+<meta property='og:url' content='https://salmooo.github.io/p/99.%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/%E8%AF%BE%E5%90%8E%E4%B9%A0%E9%A2%98%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='C&#43;&#43;' /><meta property='article:tag' content='C&#43;&#43;Primer' /><meta property='article:published_time' content='2018-08-30T23:19:45&#43;08:00'/><meta property='article:modified_time' content='2018-08-30T23:19:45&#43;08:00'/><meta property='og:image' content='https://salmooo.github.io/images/1.png' />
+<meta name="twitter:title" content="99.重点记录/课后习题重点记录">
+<meta name="twitter:description" content="C++ learning"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://salmooo.github.io/images/1.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu13739649187745961479.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">test</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#1第一章的重点及练习">1.第一章的重点及练习</a></li>
+    <li><a href="#2第二章的重点及练习">2.第二章的重点及练习</a></li>
+    <li><a href="#3第三章的重点及练习">3.第三章的重点及练习</a></li>
+    <li><a href="#4">4</a></li>
+    <li><a href="#5">5.</a></li>
+    <li><a href="#6">6.</a></li>
+  </ol>
+
+  <ol>
+    <li><a href="#9">9</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/99.%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/%E8%AF%BE%E5%90%8E%E4%B9%A0%E9%A2%98%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/">
+                
+                    <img src="/images/1.png" loading="lazy" alt="Featured image of post 99.重点记录/课后习题重点记录" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/c&#43;&#43;/" >
+                C&#43;&#43;
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/99.%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/%E8%AF%BE%E5%90%8E%E4%B9%A0%E9%A2%98%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/">99.重点记录/课后习题重点记录</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            C&#43;&#43; learning
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Aug 30, 2018</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    4 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="第九十九章-重点记录课后习题重点记录">第九十九章 重点记录/课后习题重点记录
+</h1><h2 id="1第一章的重点及练习">1.第一章的重点及练习
+</h2><h2 id="2第二章的重点及练习">2.第二章的重点及练习
+</h2><h2 id="3第三章的重点及练习">3.第三章的重点及练习
+</h2><ul>
+<li>
+<p>头文件中不应该包含using声明。这样使用了该头文件的源码也会使用这个声明，会带来风险。</p>
+</li>
+<li>
+<p>字符串字面值和string是不同的类型。</p>
+</li>
+<li>
+<p>str[x],[]输入参数为string::size_type类型，给出int整型也会自动转化为该类型 ，数组下标的类型：size_t</p>
+</li>
+<li>
+<p>但凡是使用了迭代器的循环体，都不要向迭代器所属的容器添加元素。</p>
+</li>
+<li>
+<p>初始化：char input_buffer[buffer_size];，长度必须是const表达式，或者不写，让编译器自己推断。</p>
+</li>
+<li>
+<p>使用数组时，编译器一般会把它转换成指针。</p>
+</li>
+<li>
+<p>标准库类型限定使用的下标必须是无符号类型，而内置的下标可以处理负值。</p>
+</li>
+<li>
+<p>在表达式中使用数组名时，名字会自动转换成指向数组的第一个元素的指针。</p>
+</li>
+<li>
+<p>下面的程序有何作用？它合法吗？如果不合法？为什么？不合法。使用下标访问空字符串是非法的行为。</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">string</span> <span class="n">s</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>将标点符号去除后输出字符串剩余的部分。关键代码if (!ispunct(x))</p>
+</li>
+<li>
+<p>下面的范围for语句合法吗？如果合法，c的类型是什么？
+要根据for循环中的代码来看是否合法，c是string 对象中字符的引用，s是常量。因此如果for循环中的代码重新给c赋值就会非法，如果不改变c的值，那么合法。</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">const</span> <span class="n">string</span> <span class="n">s</span> <span class="o">=</span> <span class="s">&#34;Keep out!&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span><span class="p">(</span><span class="k">auto</span> <span class="o">&amp;</span><span class="nl">c</span> <span class="p">:</span> <span class="n">s</span><span class="p">){</span> <span class="cm">/* ... */</span> <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>下列的vector对象各包含多少个元素？这些元素的值分别是多少？</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v1</span><span class="p">;</span>         <span class="c1">// size:0,  no values.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="nf">v2</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>     <span class="c1">// size:10, value:0
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="nf">v3</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">42</span><span class="p">);</span> <span class="c1">// size:10, value:42
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v4</span><span class="p">{</span> <span class="mi">10</span> <span class="p">};</span>     <span class="c1">// size:1,  value:10
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v5</span><span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">42</span> <span class="p">};</span> <span class="c1">// size:2,  value:10, 42
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">v6</span><span class="p">{</span> <span class="mi">10</span> <span class="p">};</span>  <span class="c1">// size:10, value:&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">v7</span><span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&#34;hi&#34;</span> <span class="p">};</span>  <span class="c1">// size:10, value:&#34;hi&#34;
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>在100页的二分搜索程序中，为什么用的是 <code>mid = beg + (end - beg) / 2</code>, 而非 <code>mid = (beg + end) / 2 ;</code> ? 因为两个迭代器相互之间支持的运算只有 <code>-</code> ，而没有 <code>+</code> 。 但是迭代器和迭代器差值（整数值）之间支持 <code>+</code>。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="err">假设`</span><span class="n">txt_size</span><span class="err">`是一个无参函数，它的返回值是`</span><span class="kt">int</span><span class="err">`。请回答下列哪个定义是非法的，为什么？</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">unsigned</span> <span class="n">buf_size</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="kt">int</span> <span class="n">ia</span><span class="p">[</span><span class="n">buf_size</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="kt">int</span> <span class="n">ia</span><span class="p">[</span><span class="mi">4</span> <span class="o">*</span> <span class="mi">7</span> <span class="o">-</span> <span class="mi">14</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="kt">int</span> <span class="n">ia</span><span class="p">[</span><span class="nf">txt_size</span><span class="p">()];</span>
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="kt">char</span> <span class="n">st</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#34;fundamental&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">解：</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">-</span>   <span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="err">非法。维度必须是一个常量表达式。</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span>   <span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="err">合法。</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span>   <span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="err">非法。</span><span class="n">txt</span><span class="err">\</span><span class="nf">_size</span><span class="p">()</span> <span class="err">的值必须要到运行时才能得到。</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span>   <span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="err">非法。数组的大小应该是</span><span class="mi">12</span><span class="err">。</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>假定<code>p1</code> 和 <code>p2</code> 都指向同一个数组中的元素，则下面程序的功能是什么？什么情况下该程序是非法的？</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">p1</span> <span class="o">+=</span> <span class="n">p2</span> <span class="o">-</span> <span class="n">p1</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>解：</p>
+<p>将 <code>p1</code> 移动到 <code>p2</code> 的位置。任何情况下都合法。</p>
+<h2 id="4">4
+</h2><p>求值顺序：int i = f1() + f2()
+先计算f1() + f2(),再计算int i = f1() + f2()。但是f1和f2的计算先后不确定
+但是，如果f1、f2都对同一对象进行了修改，因为顺序不确定，所以会编译出错，显示未定义</p>
+<p>取余运算m%n，结果符号与m相同</p>
+<p>短路求值：逻辑与运算符和逻辑或运算符都是先求左侧运算对象的值再求右侧运算对象的值，当且仅当左侧运算对象无法确定表达式的结果时才会计算右侧运算对象的值。先左再右
+小技巧，声明为引用类型可以避免对元素的拷贝，如下，如string特别大时可以节省大量时间。
+vector<!-- raw HTML omitted --> text;
+for(const auto &amp;s: text){
+cout&laquo;s;
+}</p>
+<p>赋值运算符满足<strong>右结合律</strong>，这点和其他二元运算符不一样。 <code>ival = jval = 0;</code>等价于<code>ival = (jval = 0);</code></p>
+<p>复合赋值运算符，复合运算符只求值一次，普通运算符求值两次。（对性能有一点点点点影响） 任意复合运算符op等价于a = a op b;</p>
+<p><em>iter++等价于</em>(iter++)，递增优先级较高</p>
+<p>ptr-&gt;mem等价于(<em>ptr).mem</em>   ，注意.运算符优先级大于，所以记得加括号</p>
+<p>可以嵌套使用，右结合律，从右向左顺序组合</p>
+<p>finalgrade = (grade &gt; 90) ? &ldquo;high pass&rdquo;
+: (grade &lt; 60) ? &ldquo;fail&rdquo; : &ldquo;pass&rdquo;;
+//等价于
+finalgrade = (grade &gt; 90) ? &ldquo;high pass&rdquo;
+: （(grade &lt; 60) ? &ldquo;fail&rdquo; : &ldquo;pass&rdquo;）;
+输出表达式使用条件运算符记得加括号，条件运算符优先级太低。</p>
+<p>有符号数负值可能移位后变号，所以强烈建议位运算符仅用于无符号数。</p>
+<p>逗号运算符从左向右依次求值，左侧求值结果丢弃，逗号运算符结果是右侧表达式的值。</p>
+<h2 id="5">5.
+</h2><p>C++语言没有明确规定大多数二元运算符的求值顺序，给编译器优化留下了余地。这种策略实际上是在代码生成效率和程序潜在缺陷之间进行了权衡，你认为这可以接受吗？请说出你的理由。
+<strong>可以接受</strong>。C++的设计思想是尽可能地“相信”程序员，将效率最大化。然而这种思想却有着潜在的危害，就是无法控制程序员自身引发的错误。因此 Java 的诞生也是必然，Java的思想就是尽可能地“不相信”程序员。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">for： for语句可以省略掉 init-statement， condition和 expression的任何一个；甚至全部。
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">什么是“悬垂else”？C++语言是如何处理else子句的？ 解： 用来描述在嵌套的if else语句中，如果if比else多时如何处理的问题。C++使用的方法是else匹配最近没有配对的if 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">12 / 3 * 4 + 5 * 15 + 24 % 4 / 2
+</span></span><span class="line"><span class="cl">解：
+</span></span><span class="line"><span class="cl">((12 / 3) * 4) + (5 * 15) + ((24 % 4) / 2) = 16 + 75 + 0 = 91
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">逻辑与运算符和逻辑或运算符都是先求左侧运算对象的值再求右侧运算对象的值，当且仅当左侧运算对象无法确定表达式的结果时才会计算右侧运算对象的值。这种策略称为 短路求值。
+</span></span><span class="line"><span class="cl">相等性运算符未定义求值顺序。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">解释在下面的</span><span class="n">if语句中条件部分的判断过程</span><span class="err">。</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">cp</span> <span class="o">=</span> <span class="s2">&#34;Hello World&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">cp</span> <span class="o">&amp;&amp;</span> <span class="o">*</span><span class="n">cp</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="err">解：</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">首先判断</span><span class="n">cp</span><span class="err">，</span><span class="n">cp</span> <span class="err">不是一个空指针，因此</span><span class="n">cp为真</span><span class="err">。然后判断</span><span class="o">*</span><span class="n">cp</span><span class="err">，</span><span class="o">*</span><span class="n">cp</span> <span class="err">的值是字符</span><span class="s1">&#39;H&#39;</span><span class="err">，非</span><span class="mi">0</span><span class="err">。因此最后的结果为真。</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">执行下述</span> <span class="k">if</span> <span class="err">语句后将发生什么情况？</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="mi">42</span> <span class="o">=</span> <span class="n">i</span><span class="p">)</span>   <span class="o">//</span> <span class="err">编译错误。赋值运算符左侧必须是一个可修改的左值。而字面值是右值。</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">42</span><span class="p">)</span>   <span class="o">//</span> <span class="bp">true</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">尽管下面的语句合法，但它们实际执行的行为可能和预期并不一样，为什么？应该如何修改？</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">p</span> <span class="o">=</span> <span class="n">getPtr</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="err">解：</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">((</span><span class="n">p</span><span class="o">=</span><span class="n">getPtr</span><span class="p">())</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">1024</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="err">说明前置递增运算符和后置递增运算符的区别。</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">解：</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">前置递增运算符将对象本身作为左值返回，而后置递增运算符将对象原始值的副本作为右值返回。</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="n">vec</span><span class="p">[</span><span class="n">ival</span><span class="o">++</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">vec</span><span class="p">[</span><span class="n">ival</span><span class="p">]</span>  <span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="err">表达式有误。</span><span class="n">C</span><span class="o">++</span><span class="err">并没有规定`</span><span class="o">&lt;=</span><span class="err">`运算符两边的求值顺序，应该改为`</span><span class="n">vec</span><span class="p">[</span><span class="n">ival</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">vec</span><span class="p">[</span><span class="n">ival</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="err">`</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">因为运算符的优先级问题，下面这条表达式无法通过编译。根据</span><span class="mf">4.12</span><span class="err">节中的表指出它的问题在哪里？应该如何修改？</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">string</span> <span class="n">s</span> <span class="o">=</span> <span class="s">&#34;word&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">string</span> <span class="n">pl</span> <span class="o">=</span> <span class="n">s</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="n">s</span><span class="p">.</span><span class="nf">size</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;s&#39;</span> <span class="o">?</span> <span class="s">&#34;&#34;</span> <span class="o">:</span> <span class="s">&#34;s&#34;</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">解：</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">加法运算符的优先级高于条件运算符。因此要改为：</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">string</span> <span class="n">pl</span> <span class="o">=</span> <span class="n">s</span> <span class="o">+</span> <span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">s</span><span class="p">.</span><span class="nf">size</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;s&#39;</span> <span class="o">?</span> <span class="s">&#34;&#34;</span> <span class="o">:</span> <span class="s">&#34;s&#34;</span><span class="p">)</span> <span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">推断下面代码的输出结果并说明理由。实际运行这段程序，结果和你想象的一样吗？如不一样，为什么？
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">int x[10];   int *p = x;
+</span></span><span class="line"><span class="cl">cout &lt;&lt; sizeof(x)/sizeof(*x) &lt;&lt; endl;
+</span></span><span class="line"><span class="cl">cout &lt;&lt; sizeof(p)/sizeof(*p) &lt;&lt; endl;
+</span></span><span class="line"><span class="cl">解：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">第一个输出结果是 10。 第二个结果取决于机器。sizeof(p)即int*的内存空间大小, 32位机4B, 64位机8B; sizeof(*p)即sizeof(int), 通常为4B, C++标准规定其不得小于2B。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="6">6.
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">说明形参、局部变量以及局部静态变量的区别。编写一个函数，同时达到这三种形式。
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">解：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">形参定义在函数形参列表里面；局部变量定义在代码块里面； 局部静态变量在程序的执行路径第一次经过对象定义语句时初始化，并且直到程序终止时才被销毁。
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">// 例子
+</span></span><span class="line"><span class="cl">int count_add(int n)       // n是形参
+</span></span><span class="line"><span class="cl">{
+</span></span><span class="line"><span class="cl">    static int ctr = 0;    // ctr 是局部静态变量
+</span></span><span class="line"><span class="cl">    ctr += n;
+</span></span><span class="line"><span class="cl">    return ctr;
+</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">int main()
+</span></span><span class="line"><span class="cl">{
+</span></span><span class="line"><span class="cl">    for (int i = 0; i != 10; ++i)  // i 是局部变量
+</span></span><span class="line"><span class="cl">      cout &lt;&lt; count_add(i) &lt;&lt; endl;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    return 0;
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h1 id="7">7
+</h1><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">使用class和struct时有区别吗？如果有，是什么？
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">解：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">class和struct的唯一区别是默认的访问级别不同。&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">封装是何含义？它有什么用处？
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">解：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">将类内部分成员设置为外部不可见，而提供部分接口给外面，这样的行为叫做封装。
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">用处：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">1.确保用户的代码不会无意间破坏封装对象的状态。
+</span></span><span class="line"><span class="cl">2.被封装的类的具体实现细节可以随时改变，而无需调整用户级别的代码。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h1 id="8io库">8.IO库
+</h1><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">s.eof()	若流s的eofbit置位，则返回true
+</span></span><span class="line"><span class="cl">s.fail()	若流s的failbit置位，则返回true
+</span></span><span class="line"><span class="cl">s.bad()	若流s的badbit置位，则返回true
+</span></span><span class="line"><span class="cl">s.good()	若流s处于有效状态，则返回true
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">什么情况下，下面的while循环会终止？
+</span></span><span class="line"><span class="cl">while (cin &gt;&gt; i) /*  ...    */
+</span></span><span class="line"><span class="cl">解：如badbit、failbit、eofbit 的任一个被置位，那么检测流状态的条件会失败。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">istream&amp; func(istream &amp;is)
+</span></span><span class="line"><span class="cl">{
+</span></span><span class="line"><span class="cl">    std::string buf;
+</span></span><span class="line"><span class="cl">    while (is &gt;&gt; buf)
+</span></span><span class="line"><span class="cl">        std::cout &lt;&lt; buf &lt;&lt; std::endl;
+</span></span><span class="line"><span class="cl">    is.clear();
+</span></span><span class="line"><span class="cl">    return is;
+</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">有些情况下我们希望提供cin作为接受istream&amp;参数的构造函数的默认实参，请声明这样的构造函数。
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">解：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Sales_data(std::istream &amp;is = std::cin) { read(is, *this); }
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">如果接受string的构造函数和接受istream&amp;的构造函数都使用默认实参，这种行为合法吗？如果不，为什么？
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">解：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">不合法。当你调用Sales_data()构造函数时，无法区分是哪个重载。    
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">下面这条声明合法吗？如果不，为什么？
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">vector&lt;NoDefault&gt; vec(10);//vec初始化有10个元素
+</span></span><span class="line"><span class="cl">解：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">不合法。因为NoDefault没有默认构造函数。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="9">9
+</h2><p>const_iterator	可以读取元素但不能修改元素的迭代器类型</p>
+<p>C c1(c2);或C c1 = c2;	构造c2的拷贝c1</p>
+<p>使用非成员版本的swap是一个好习惯。</p>
+<p>当我们用一个对象去初始化容器或者将对象插入到容器时，实际上放入的是对象的拷贝。</p>
+<p>emplace开头的函数是新标准引入的，这些操作是构造而不是拷贝元素。</p>
+<p>会改变容器大小，不适用于array。
+forward_list有特殊版本的erase
+forward_list不支持pop_back
+vector和string不支持pop_front</p>
+<p>reverse_iterator	按逆序寻址元素的迭代器
+const_reverse_iterator	不能修改元素的逆序迭代器
+c.rbegin(), c.rend()	返回指向c的尾元素和首元素之前位置的迭代器
+c.crbegin(), c.crend()	返回const_reverse_iterator</p>
+<p>迭代器
+迭代器范围：begin到end，即第一个元素到最后一个元素的后面一个位置。
+左闭合区间：[begin, end)</p>
+<p>容器操作可能使迭代器失效
+在向容器添加元素后：
+如果容器是vector或string，且存储空间被重新分配，则指向容器的迭代器、指针、引用都会失效。
+对于deque，插入到除首尾位置之外的任何位置都会导致指向容器的迭代器、指针、引用失效。如果在首尾位置添加元素，迭代器会失效，但指向存在元素的引用和指针不会失效。
+对于list和forward_list，指向容器的迭代器、指针和引用依然有效。
+在从一个容器中删除元素后：
+对于list和forward_list，指向容器其他位置的迭代器、引用和指针仍然有效。
+对于deque，如果在首尾之外的任何位置删除元素，那么指向被删除元素外其他元素的迭代器、指针、引用都会失效；如果是删除deque的尾元素，则尾后迭代器会失效，但其他不受影响；如果删除的是deque的头元素，这些也不会受影响。
+对于vector和string，指向被删元素之前的迭代器、引用、指针仍然有效。
+注意：当我们删除元素时，尾后迭代器总是会失效。
+注意：使用失效的迭代器、指针、引用是严重的运行时错误！
+建议：将要求迭代器必须保持有效的程序片段最小化。
+建议：不要保存end返回的迭代器。</p>
+<p>定义在stack头文件中。
+stack默认基于deque实现，也可以在list或vector之上实现。</p>
+<p>定义在stack头文件中。
+stack默认基于deque实现，也可以在list或vector之上实现。</p>
+<ol start="10">
+<li></li>
+</ol>
+<p>有时可能希望操作可以接受更多的参数。</p>
+<p>lambda表达式表示一个可调用的代码单元，可以理解成是一个未命名的内联函数。</p>
+<p>形式：[capture list](parameter list) -&gt; return type {function body}。</p>
+<p>其中capture list捕获列表是一个lambda所在函数定义的局部变量的列表（通常为空）。不可忽略。
+return type是返回类型。可忽略。
+parameter是参数列表。可忽略。
+function body是函数体。不可忽略。
+auto f = [] {return 42;}</p>
+<p>只读算法
+只读取范围中的元素，不改变元素。
+如 find和 accumulate（在numeric中定义，求和）。
+find_first_of，输入：两对迭代器标记两段范围，在第一段中找第二段中任意元素，返回第一个匹配的元素，找不到返回第一段的end迭代器。
+通常最好使用cbegin和cend。
+equal：确定两个序列是否保存相同的值。</p>
+<p>隐式捕获：让编译器推断捕获列表，在捕获列表中写一个&amp;（引用方式）或=（值方式）。auto f3 = [=] {return v1;}</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/c&#43;&#43;/">C&#43;&#43;</a>
+        
+            <a href="/tags/c&#43;&#43;primer/">C&#43;&#43;Primer</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/12.-%E5%8A%A8%E6%80%81%E5%86%85%E5%AD%98/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">12. 动态内存</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/11.%E5%85%B3%E8%81%94%E5%AE%B9%E5%99%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">11.关联容器</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/8.-io%E5%BA%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">8. IO库</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/9.-%E9%A1%BA%E5%BA%8F%E5%AE%B9%E5%99%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">9. 顺序容器</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/7.%E7%B1%BB-class/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">7.类 （Class）</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2025 SalmoneX Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

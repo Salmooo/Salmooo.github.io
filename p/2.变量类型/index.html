@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="C++ learning">
+<title>2.变量类型</title>
+
+<link rel='canonical' href='https://salmooo.github.io/p/2.%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="2.变量类型">
+<meta property='og:description' content="C++ learning">
+<meta property='og:url' content='https://salmooo.github.io/p/2.%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='C&#43;&#43;' /><meta property='article:tag' content='C&#43;&#43;Primer' /><meta property='article:published_time' content='2018-07-25T19:12:19&#43;08:00'/><meta property='article:modified_time' content='2018-07-25T19:12:19&#43;08:00'/>
+<meta name="twitter:title" content="2.变量类型">
+<meta name="twitter:description" content="C++ learning">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu13739649187745961479.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">test</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li>
+      <ol>
+        <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md基本内置类型基本内置类型"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E5%9F%BA%E6%9C%AC%E5%86%85%E7%BD%AE%E7%B1%BB%E5%9E%8B"></a>基本内置类型</a></li>
+        <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md如何选择类型如何选择类型"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E7%B1%BB%E5%9E%8B"></a>如何选择类型</a></li>
+        <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md类型转换类型转换"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2"></a>类型转换</a></li>
+        <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md字面值常量字面值常量"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E5%AD%97%E9%9D%A2%E5%80%BC%E5%B8%B8%E9%87%8F"></a>字面值常量</a></li>
+      </ol>
+    </li>
+    <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md变量变量"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E5%8F%98%E9%87%8F"></a>变量</a>
+      <ol>
+        <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md变量定义define变量定义define"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E5%8F%98%E9%87%8F%E5%AE%9A%E4%B9%89define"></a>变量定义（define）</a></li>
+        <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md变量的声明declaration-vs-定义define变量的声明declaration-vs-定义define"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E5%8F%98%E9%87%8F%E7%9A%84%E5%A3%B0%E6%98%8Edeclaration-vs-%E5%AE%9A%E4%B9%89define"></a>变量的<strong>声明</strong>（declaration） vs <strong>定义</strong>（define）</a>
+          <ol>
+            <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md变量命名规范变量命名规范"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E5%8F%98%E9%87%8F%E5%91%BD%E5%90%8D%E8%A7%84%E8%8C%83"></a>变量命名规范</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md左值和右值左值和右值"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E5%B7%A6%E5%80%BC%E5%92%8C%E5%8F%B3%E5%80%BC"></a>左值和右值</a></li>
+    <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md复合类型复合类型"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E5%A4%8D%E5%90%88%E7%B1%BB%E5%9E%8B"></a>复合类型</a>
+      <ol>
+        <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md引用引用"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E5%BC%95%E7%94%A8"></a>引用</a></li>
+        <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md指针指针"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E6%8C%87%E9%92%88"></a>指针</a></li>
+      </ol>
+    </li>
+    <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02mdconst限定符const限定符"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#const%E9%99%90%E5%AE%9A%E7%AC%A6"></a>const限定符</a>
+      <ol>
+        <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md初始化和const初始化和const"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%92%8Cconst"></a>初始化和const</a></li>
+        <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02mdconst的引用const的引用"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#const%E7%9A%84%E5%BC%95%E7%94%A8"></a>const的引用</a></li>
+        <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md指针和const指针和const"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E6%8C%87%E9%92%88%E5%92%8Cconst"></a>指针和const</a></li>
+        <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md顶层const顶层const"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E9%A1%B6%E5%B1%82const"></a>顶层const</a></li>
+        <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02mdconstexpr和常量表达式可选constexpr和常量表达式可选"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#constexpr%E5%92%8C%E5%B8%B8%E9%87%8F%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%8F%AF%E9%80%89"></a><code>constexpr</code>和常量表达式（▲可选）</a></li>
+      </ol>
+    </li>
+    <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md处理类型处理类型"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E5%A4%84%E7%90%86%E7%B1%BB%E5%9E%8B"></a>处理类型</a>
+      <ol>
+        <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md类型别名类型别名"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E7%B1%BB%E5%9E%8B%E5%88%AB%E5%90%8D"></a>类型别名</a></li>
+        <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02mdauto类型说明符-c11auto类型说明符-c11"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#auto%E7%B1%BB%E5%9E%8B%E8%AF%B4%E6%98%8E%E7%AC%A6-c11"></a>auto类型说明符 c++11</a></li>
+        <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02mddecltype类型指示符decltype类型指示符"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#decltype%E7%B1%BB%E5%9E%8B%E6%8C%87%E7%A4%BA%E7%AC%A6"></a>decltype类型指示符</a></li>
+      </ol>
+    </li>
+    <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md自定义数据结构自定义数据结构"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"></a>自定义数据结构</a>
+      <ol>
+        <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02mdstructstruct"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#struct"></a>struct</a></li>
+        <li><a href="#httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md编写自己的头文件编写自己的头文件"><a href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%E7%BC%96%E5%86%99%E8%87%AA%E5%B7%B1%E7%9A%84%E5%A4%B4%E6%96%87%E4%BB%B6"></a>编写自己的头文件</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/c&#43;&#43;/" >
+                C&#43;&#43;
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/2.%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B/">2.变量类型</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            C&#43;&#43; learning
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jul 25, 2018</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    2 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="第二章-变量和基本类型">第二章 变量和基本类型
+</h1><p>任何常用的编程语言都具备一组公共的语法特征，最基本的特征包括：</p>
+<ul>
+<li>整型、字符型等内置类型</li>
+<li>变量，用来为对象命名</li>
+<li>表达式和语句，用于操作上述数据类型的具体值</li>
+<li>if 或 while 等控制结构，有选择地执行一些语句或重复地执行一些语句</li>
+<li>函数，用于定义可供随时调用的计算单元</li>
+</ul>
+<p>大多数编程语言通过两种方式来进一步补充其基本特征：</p>
+<ul>
+<li>自定义数据类型，实现对语言的扩展</li>
+<li>将一些有用的功能封装成库函数</li>
+</ul>
+<h3 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md基本内置类型基本内置类型"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%9f%ba%e6%9c%ac%e5%86%85%e7%bd%ae%e7%b1%bb%e5%9e%8b"  target="_blank" rel="noopener"
+    ></a>基本内置类型
+</h3><p><strong>基本算数类型</strong>：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>类型</th>
+          <th>含义</th>
+          <th>最小尺寸</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>bool</code></td>
+          <td>布尔类型</td>
+          <td>8bits</td>
+      </tr>
+      <tr>
+          <td><code>char</code></td>
+          <td>字符</td>
+          <td>8bits</td>
+      </tr>
+      <tr>
+          <td><code>wchar_t</code></td>
+          <td>宽字符</td>
+          <td>16bits</td>
+      </tr>
+      <tr>
+          <td><code>char16_t</code></td>
+          <td>Unicode字符</td>
+          <td>16bits</td>
+      </tr>
+      <tr>
+          <td><code>char32_t</code></td>
+          <td>Unicode字符</td>
+          <td>32bits</td>
+      </tr>
+      <tr>
+          <td><code>short</code></td>
+          <td>短整型</td>
+          <td>16bits</td>
+      </tr>
+      <tr>
+          <td><code>int</code></td>
+          <td>整型</td>
+          <td>16bits (在32位机器中是32bits)</td>
+      </tr>
+      <tr>
+          <td><code>long</code></td>
+          <td>长整型</td>
+          <td>32bits</td>
+      </tr>
+      <tr>
+          <td><code>long long</code></td>
+          <td>长整型</td>
+          <td>64bits （是在C++11中新定义的）</td>
+      </tr>
+      <tr>
+          <td><code>float</code></td>
+          <td>单精度浮点数</td>
+          <td>6位有效数字</td>
+      </tr>
+      <tr>
+          <td><code>double</code></td>
+          <td>双精度浮点数</td>
+          <td>10位有效数字</td>
+      </tr>
+      <tr>
+          <td><code>long double</code></td>
+          <td>扩展精度浮点数</td>
+          <td>10位有效数字</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md如何选择类型如何选择类型"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%a6%82%e4%bd%95%e9%80%89%e6%8b%a9%e7%b1%bb%e5%9e%8b"  target="_blank" rel="noopener"
+    ></a>如何选择类型
+</h3><ul>
+<li>1.当明确知晓数值不可能是负数时，选用无符号类型；</li>
+<li>2.使用<code>int</code>执行整数运算。一般<code>long</code>的大小和<code>int</code>一样，而<code>short</code>常常显得太小。除非超过了<code>int</code>的范围，选择<code>long long</code>。</li>
+<li>3.算术表达式中不要使用<code>char</code>或<code>bool</code>。</li>
+<li>4.浮点运算选用<code>double</code>。</li>
+</ul>
+<h3 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md类型转换类型转换"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e7%b1%bb%e5%9e%8b%e8%bd%ac%e6%8d%a2"  target="_blank" rel="noopener"
+    ></a>类型转换
+</h3><ul>
+<li>非布尔型赋给布尔型，初始值为0则结果为false，否则为true。</li>
+<li>布尔型赋给非布尔型，初始值为false结果为0，初始值为true结果为1。</li>
+</ul>
+<h3 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md字面值常量字面值常量"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%ad%97%e9%9d%a2%e5%80%bc%e5%b8%b8%e9%87%8f"  target="_blank" rel="noopener"
+    ></a>字面值常量
+</h3><ul>
+<li>一个形如<code>42</code>的值被称作<strong>字面值常量</strong>（literal）。
+<ul>
+<li>
+<p>整型和浮点型字面值。</p>
+</li>
+<li>
+<p>字符和字符串字面值。</p>
+<ul>
+<li>
+<p>使用空格连接，继承自C。</p>
+</li>
+<li>
+<p>字符字面值：单引号， <code>'a'</code></p>
+</li>
+<li>
+<p>字符串字面值：双引号， <code>&quot;Hello World&quot;</code></p>
+</li>
+<li>
+<p>分多行书写字符串。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nl">std</span><span class="p">:</span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&#34;wow, a really, really long string&#34;</span>
+</span></span><span class="line"><span class="cl">          <span class="s">&#34;literal that spans two lines&#34;</span> <span class="o">&lt;&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+</li>
+<li>
+<p>转义序列。<code>\n</code>、<code>\t</code>等。</p>
+</li>
+<li>
+<p>布尔字面值。<code>true</code>，<code>false</code>。</p>
+</li>
+<li>
+<p>指针字面值。<code>nullptr</code></p>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>字符串型实际上时常量字符构成的数组，结尾处以<code>'\0'</code>结束，所以字符串类型实际上长度比内容多1。</p>
+</blockquote>
+<h2 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md变量变量"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%8f%98%e9%87%8f"  target="_blank" rel="noopener"
+    ></a>变量
+</h2><p><strong>变量</strong>提供一个<strong>具名</strong>的、可供程序操作的存储空间。 <code>C++</code>中<strong>变量</strong>和<strong>对象</strong>一般可以互换使用。</p>
+<h3 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md变量定义define变量定义define"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%8f%98%e9%87%8f%e5%ae%9a%e4%b9%89define"  target="_blank" rel="noopener"
+    ></a>变量定义（define）
+</h3><ul>
+<li><strong>定义形式</strong>：类型说明符（type specifier） + 一个或多个变量名组成的列表。如<code>int sum = 0, value, units_sold = 0;</code></li>
+<li><strong>初始化</strong>（initialize）：对象在创建时获得了一个特定的值。
+<ul>
+<li><strong>初始化不是赋值！</strong>：</li>
+<li>初始化 = 创建变量 + 赋予初始值</li>
+<li>赋值 = 擦除对象的当前值 + 用新值代替</li>
+<li><strong>列表初始化</strong>：使用花括号<code>{}</code>，如<code>int units_sold{0};</code></li>
+<li>默认初始化：定义时没有指定初始值会被默认初始化；<strong>在函数体内部的内置类型变量将不会被初始化</strong>。</li>
+<li>建议初始化每一个内置类型的变量。</li>
+</ul>
+</li>
+</ul>
+<h3 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md变量的声明declaration-vs-定义define变量的声明declaration-vs-定义define"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%8f%98%e9%87%8f%e7%9a%84%e5%a3%b0%e6%98%8edeclaration-vs-%e5%ae%9a%e4%b9%89define"  target="_blank" rel="noopener"
+    ></a>变量的<strong>声明</strong>（declaration） vs <strong>定义</strong>（define）
+</h3><ul>
+<li>为了支持分离式编译，<code>C++</code>将声明和定义区分开。<strong>声明</strong>使得名字为程序所知。<strong>定义</strong>负责创建与名字关联的实体。</li>
+<li><strong>extern</strong>：只是说明变量定义在其他地方。</li>
+<li>只声明而不定义： 在变量名前添加关键字 <code>extern</code>，如<code>extern int i;</code>。但如果包含了初始值，就变成了定义：<code>extern double pi = 3.14;</code></li>
+<li>变量只能被定义一次，但是可以多次声明。定义只出现在一个文件中，其他文件使用该变量时需要对其声明。</li>
+<li>名字的<strong>作用域</strong>（namescope）<code>{}</code>
+<ul>
+<li><strong>第一次使用变量时再定义它</strong>。</li>
+<li>嵌套的作用域
+<ul>
+<li>同时存在全局和局部变量时，已定义局部变量的作用域中可用<code>::reused</code>显式访问全局变量reused。</li>
+<li><strong>但是用到全局变量时，尽量不适用重名的局部变量。</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md变量命名规范变量命名规范"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%8f%98%e9%87%8f%e5%91%bd%e5%90%8d%e8%a7%84%e8%8c%83"  target="_blank" rel="noopener"
+    ></a>变量命名规范
+</h4><ol>
+<li>需体现实际意义</li>
+<li>变量名用小写字母</li>
+<li>自定义类名用大写字母开头：Sales_item</li>
+<li>标识符由多个单词组成，中间须有明确区分：student_loan或studentLoan，不要用studentloan。</li>
+</ol>
+<h2 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md左值和右值左值和右值"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%b7%a6%e5%80%bc%e5%92%8c%e5%8f%b3%e5%80%bc"  target="_blank" rel="noopener"
+    ></a>左值和右值
+</h2><ul>
+<li><strong>左值</strong>（l-value）<strong>可以</strong>出现在赋值语句的左边或者右边，比如变量；</li>
+<li><strong>右值</strong>（r-value）<strong>只能</strong>出现在赋值语句的右边，比如常量。</li>
+</ul>
+<h2 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md复合类型复合类型"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%a4%8d%e5%90%88%e7%b1%bb%e5%9e%8b"  target="_blank" rel="noopener"
+    ></a>复合类型
+</h2><h3 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md引用引用"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%bc%95%e7%94%a8"  target="_blank" rel="noopener"
+    ></a>引用
+</h3><blockquote>
+<p>一般说的引用是指的左值引用</p>
+</blockquote>
+<ul>
+<li><strong>引用</strong>：引用是一个对象的别名，引用类型引用（refer to）另外一种类型。如<code>int &amp;refVal = val;</code>。</li>
+<li>引用必须初始化。</li>
+<li>引用和它的初始值是<strong>绑定bind</strong>在一起的，而<strong>不是拷贝</strong>。一旦定义就不能更改绑定为其他的对象</li>
+</ul>
+<h3 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md指针指针"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e6%8c%87%e9%92%88"  target="_blank" rel="noopener"
+    ></a>指针
+</h3><blockquote>
+<p>int *p; //<strong>指向int型对象</strong>的指针</p>
+</blockquote>
+<ul>
+<li>
+<p>是一种 <code>&quot;指向（point to）&quot;</code>另外一种类型的复合类型。</p>
+</li>
+<li>
+<p><strong>定义</strong>指针类型： <code>int *ip1;</code>，<strong>从右向左读有助于阅读</strong>，<code>ip1</code>是指向<code>int</code>类型的指针。</p>
+</li>
+<li>
+<p>指针存放某个对象的<strong>地址</strong>。</p>
+</li>
+<li>
+<p>获取对象的地址： <code>int i=42; int *p = &amp;i;</code>。 <code>&amp;</code>是<strong>取地址符</strong>。</p>
+</li>
+<li>
+<p>指针的类型与所指向的对象类型必须一致（均为同一类型int、double等）</p>
+</li>
+<li>
+<p>指针的值的四种状态：</p>
+<ul>
+<li>1.指向一个对象；</li>
+<li>2.指向紧邻对象的下一个位置；</li>
+<li>3.空指针；</li>
+<li>4.无效指针。</li>
+<li>
+<blockquote>
+<p><strong>对无效指针的操作均会引发错误，第二种和第三种虽为有效的，但理论上是不被允许的</strong></p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li>
+<p>指针访问对象： <code>cout &lt;&lt; *p;</code>输出p指针所指对象的数据， <code>*</code>是<strong>解引用符</strong>。</p>
+</li>
+<li>
+<p>空指针不指向任何对象。使用<code>int *p=nullptr;</code>来使用空指针。</p>
+</li>
+<li>
+<blockquote>
+<p>指针和引用的区别：引用本身并非一个对象，引用定义后就不能绑定到其他的对象了；指针并没有此限制，相当于变量一样使用。</p>
+</blockquote>
+</li>
+<li>
+<blockquote>
+<p>赋值语句永远改变的是<strong>左侧</strong>的对象。</p>
+</blockquote>
+</li>
+<li>
+<p><code>void*</code>指针可以存放<strong>任意</strong>对象的地址。因无类型，仅操作内存空间，对所存对象无法访问。</p>
+</li>
+<li>
+<p>其他指针类型必须要与所指对象<strong>严格匹配</strong>。</p>
+</li>
+<li>
+<p>两个指针相减的类型是<code>ptrdiff_t</code>。</p>
+</li>
+<li>
+<p>建议：初始化所有指针。</p>
+</li>
+<li>
+<p><code>int* p1, p2;//*是对p1的修饰，所以p2还是int型</code></p>
+</li>
+</ul>
+<h2 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02mdconst限定符const限定符"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#const%e9%99%90%e5%ae%9a%e7%ac%a6"  target="_blank" rel="noopener"
+    ></a>const限定符
+</h2><ul>
+<li>动机：希望定义一些不能被改变值的变量。</li>
+</ul>
+<h3 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md初始化和const初始化和const"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%88%9d%e5%a7%8b%e5%8c%96%e5%92%8cconst"  target="_blank" rel="noopener"
+    ></a>初始化和const
+</h3><ul>
+<li>const对象<strong>必须初始化</strong>，且<strong>不能被改变</strong>。</li>
+<li>const变量默认不能被其他文件访问，非要访问，必须在指定const定义之前加extern。要想在多个文件中使用const变量共享，定义和声明都加const关键字即可。</li>
+</ul>
+<h3 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02mdconst的引用const的引用"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#const%e7%9a%84%e5%bc%95%e7%94%a8"  target="_blank" rel="noopener"
+    ></a>const的引用
+</h3><ul>
+<li><strong>reference to const</strong>（对常量的引用）：指向const对象的引用，如 <code>const int ival=1; const int &amp;refVal = ival;</code>，可以读取但不能修改<code>refVal</code>。</li>
+<li><strong>临时量</strong>（temporary）对象：当编译器需要一个空间来暂存表达式的求值结果时，临时创建的一个未命名的对象。</li>
+<li>对临时量的引用是非法行为。</li>
+</ul>
+<h3 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md指针和const指针和const"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e6%8c%87%e9%92%88%e5%92%8cconst"  target="_blank" rel="noopener"
+    ></a>指针和const
+</h3><ul>
+<li><strong>pointer to const</strong>（指向常量的指针）：不能用于改变其所指对象的值, 如 <code>const double pi = 3.14; const double *cptr = &amp;pi;</code>。</li>
+<li><strong>const pointer</strong>：指针本身是常量，也就是说指针固定指向该对象，（存放在指针中的地址不变，地址所对应的那个对象值可以修改）如 <code>int i = 0; int *const ptr = &amp;i;</code></li>
+</ul>
+<h3 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md顶层const顶层const"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e9%a1%b6%e5%b1%82const"  target="_blank" rel="noopener"
+    ></a>顶层const
+</h3><ul>
+<li><code>顶层const</code>：指针本身是个常量。</li>
+<li><code>底层const</code>：指针指向的对象是个常量。拷贝时严格要求相同的底层const资格。</li>
+</ul>
+<h3 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02mdconstexpr和常量表达式可选constexpr和常量表达式可选"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#constexpr%e5%92%8c%e5%b8%b8%e9%87%8f%e8%a1%a8%e8%be%be%e5%bc%8f%e5%8f%af%e9%80%89"  target="_blank" rel="noopener"
+    ></a><code>constexpr</code>和常量表达式（▲可选）
+</h3><ul>
+<li>常量表达式：指值不会改变，且在编译过程中就能得到计算结果的表达式。</li>
+<li><code>C++11</code>新标准规定，允许将变量声明为<code>constexpr</code>类型以便由编译器来验证变量的值是否是一个常量的表达式。</li>
+</ul>
+<h2 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md处理类型处理类型"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e5%a4%84%e7%90%86%e7%b1%bb%e5%9e%8b"  target="_blank" rel="noopener"
+    ></a>处理类型
+</h2><h3 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md类型别名类型别名"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e7%b1%bb%e5%9e%8b%e5%88%ab%e5%90%8d"  target="_blank" rel="noopener"
+    ></a>类型别名
+</h3><ul>
+<li>传统别名：使用<strong>typedef</strong>来定义类型的同义词。 <code>typedef double wages;</code></li>
+<li>新标准别名：别名声明（alias declaration）： <code>using SI = Sales_item;</code>（C++11）</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// 对于复合类型（指针等）不能代回原式来进行理解
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">typedef</span> <span class="kt">char</span> <span class="o">*</span><span class="n">pstring</span><span class="p">;</span>  <span class="c1">// pstring是char*的别名
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">const</span> <span class="n">pstring</span> <span class="n">cstr</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// 指向char的常量指针
+</span></span></span><span class="line"><span class="cl"><span class="c1">// 如改写为const char *cstr = 0;不正确，为指向const char的指针
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 辅助理解（可代回后加括号）
+</span></span></span><span class="line"><span class="cl"><span class="c1">// const pstring cstr = 0;代回后const (char *) cstr = 0;
+</span></span></span><span class="line"><span class="cl"><span class="c1">// const char *cstr = 0;即为(const char *) cstr = 0;
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02mdauto类型说明符-c11auto类型说明符-c11"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#auto%e7%b1%bb%e5%9e%8b%e8%af%b4%e6%98%8e%e7%ac%a6-c11"  target="_blank" rel="noopener"
+    ></a>auto类型说明符 c++11
+</h3><ul>
+<li><strong>auto</strong>类型说明符：让编译器<strong>自动推断类型</strong>。</li>
+<li>一条声明语句只能有一个数据类型，所以一个auto声明多个变量时只能相同的变量类型(包括复杂类型&amp;和*)。<code>auto sz = 0, pi =3.14//错误</code></li>
+<li><code>int i = 0, &amp;r = i; auto a = r;</code> 推断<code>a</code>的类型是<code>int</code>。</li>
+<li>会忽略<code>顶层const</code>。</li>
+<li><code>const int ci = 1; const auto f = ci;</code>推断类型是<code>int</code>，如果希望是顶层const需要自己加<code>const</code></li>
+</ul>
+<h3 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02mddecltype类型指示符decltype类型指示符"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#decltype%e7%b1%bb%e5%9e%8b%e6%8c%87%e7%a4%ba%e7%ac%a6"  target="_blank" rel="noopener"
+    ></a>decltype类型指示符
+</h3><ul>
+<li>从表达式的类型推断出要定义的变量的类型。</li>
+<li><strong>decltype</strong>：选择并返回操作数的<strong>数据类型</strong>。</li>
+<li><code>decltype(f()) sum = x;</code> 推断<code>sum</code>的类型是函数<code>f</code>的返回类型。</li>
+<li>不会忽略<code>顶层const</code>。</li>
+<li>如果对变量加括号，编译器会将其认为是一个表达式，如int i&ndash;&gt;(i),则decltype((i))得到结果为int&amp;引用。</li>
+<li>赋值是会产生引用的一类典型表达式，引用的类型就是左值的类型。也就是说，如果 i 是 int，则表达式 i=x 的类型是 int&amp;。</li>
+<li><code>C++11</code></li>
+</ul>
+<h2 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md自定义数据结构自定义数据结构"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e8%87%aa%e5%ae%9a%e4%b9%89%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84"  target="_blank" rel="noopener"
+    ></a>自定义数据结构
+</h2><h3 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02mdstructstruct"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#struct"  target="_blank" rel="noopener"
+    ></a>struct
+</h3><blockquote>
+<p>尽量不要吧类定义和对象定义放在一起。如<code>struct Student{} xiaoming,xiaofang;</code></p>
+</blockquote>
+<ul>
+<li>类可以以关键字<code>struct</code>开始，紧跟类名和类体。</li>
+<li>类数据成员：类体定义类的成员。</li>
+<li><code>C++11</code>：可以为类数据成员提供一个<strong>类内初始值</strong>（in-class initializer）。</li>
+</ul>
+<h3 id="httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch02md编写自己的头文件编写自己的头文件"><a class="link" href="https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch02.md#%e7%bc%96%e5%86%99%e8%87%aa%e5%b7%b1%e7%9a%84%e5%a4%b4%e6%96%87%e4%bb%b6"  target="_blank" rel="noopener"
+    ></a>编写自己的头文件
+</h3><ul>
+<li>头文件通常包含哪些只能被定义一次的实体：类、<code>const</code>和<code>constexpr</code>变量。</li>
+</ul>
+<p>预处理器概述：</p>
+<ul>
+<li><strong>预处理器</strong>（preprocessor）：确保头文件多次包含仍能安全工作。</li>
+<li>当预处理器看到<code>#include</code>标记时，会用指定的头文件内容代替<code>#include</code></li>
+<li><strong>头文件保护符</strong>（header guard）：头文件保护符依赖于预处理变量的状态：已定义和未定义。
+<ul>
+<li><code>#indef</code>已定义时为真</li>
+<li><code>#inndef</code>未定义时为真</li>
+<li>头文件保护符的名称需要唯一，且保持全部大写。养成良好习惯，不论是否该头文件被包含，要加保护符。</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#ifndef SALES_DATA_H  </span><span class="c1">//SALES_DATA_H未定义时为真
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define SALES_DATA_H
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="n">strct</span> <span class="n">Sale_data</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#endif
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/c&#43;&#43;/">C&#43;&#43;</a>
+        
+            <a href="/tags/c&#43;&#43;primer/">C&#43;&#43;Primer</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/99.%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/%E8%AF%BE%E5%90%8E%E4%B9%A0%E9%A2%98%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/1.png" loading="lazy" data-key="" data-hash="/images/1.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">99.重点记录/课后习题重点记录</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/12.-%E5%8A%A8%E6%80%81%E5%86%85%E5%AD%98/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">12. 动态内存</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/11.%E5%85%B3%E8%81%94%E5%AE%B9%E5%99%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">11.关联容器</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/8.-io%E5%BA%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">8. IO库</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/9.-%E9%A1%BA%E5%BA%8F%E5%AE%B9%E5%99%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">9. 顺序容器</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2025 SalmoneX Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

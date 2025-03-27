@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="C++ learning">
+<title>9. 顺序容器</title>
+
+<link rel='canonical' href='https://salmooo.github.io/p/9.-%E9%A1%BA%E5%BA%8F%E5%AE%B9%E5%99%A8/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="9. 顺序容器">
+<meta property='og:description' content="C++ learning">
+<meta property='og:url' content='https://salmooo.github.io/p/9.-%E9%A1%BA%E5%BA%8F%E5%AE%B9%E5%99%A8/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='C&#43;&#43;' /><meta property='article:tag' content='C&#43;&#43;Primer' /><meta property='article:published_time' content='2018-07-30T21:37:20&#43;08:00'/><meta property='article:modified_time' content='2018-07-30T21:37:20&#43;08:00'/>
+<meta name="twitter:title" content="9. 顺序容器">
+<meta name="twitter:description" content="C++ learning">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu13739649187745961479.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">test</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md顺序容器概述顺序容器概述"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E9%A1%BA%E5%BA%8F%E5%AE%B9%E5%99%A8%E6%A6%82%E8%BF%B0"></a>顺序容器概述</a>
+      <ol>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md顺序容器类型顺序容器类型"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E9%A1%BA%E5%BA%8F%E5%AE%B9%E5%99%A8%E7%B1%BB%E5%9E%8B"></a>顺序容器类型</a></li>
+      </ol>
+    </li>
+    <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md容器操作容器操作"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E5%AE%B9%E5%99%A8%E6%93%8D%E4%BD%9C"></a>容器操作</a>
+      <ol>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md类型类型"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E7%B1%BB%E5%9E%8B"></a>类型</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md构造函数构造函数"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0"></a>构造函数</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md赋值和swap赋值和swap"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E8%B5%8B%E5%80%BC%E5%92%8Cswap"></a>赋值和<code>swap</code></a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md大小大小"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E5%A4%A7%E5%B0%8F"></a>大小</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md添加元素添加元素"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E6%B7%BB%E5%8A%A0%E5%85%83%E7%B4%A0"></a>添加元素</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md访问元素访问元素"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E8%AE%BF%E9%97%AE%E5%85%83%E7%B4%A0"></a>访问元素</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md删除元素删除元素"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E5%88%A0%E9%99%A4%E5%85%83%E7%B4%A0"></a>删除元素</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md特殊的forwad_list操作特殊的forwad_list操作"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E7%89%B9%E6%AE%8A%E7%9A%84forwad_list%E6%93%8D%E4%BD%9C"></a>特殊的forwad_list操作</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md改变容器大小改变容器大小"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E6%94%B9%E5%8F%98%E5%AE%B9%E5%99%A8%E5%A4%A7%E5%B0%8F"></a>改变容器大小</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md获取迭代器获取迭代器"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E8%8E%B7%E5%8F%96%E8%BF%AD%E4%BB%A3%E5%99%A8"></a>获取迭代器</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md反向容器的额外成员反向容器的额外成员"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E5%8F%8D%E5%90%91%E5%AE%B9%E5%99%A8%E7%9A%84%E9%A2%9D%E5%A4%96%E6%88%90%E5%91%98"></a>反向容器的额外成员</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md迭代器迭代器"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E8%BF%AD%E4%BB%A3%E5%99%A8"></a>迭代器</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md容器操作可能使迭代器失效容器操作可能使迭代器失效"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E5%AE%B9%E5%99%A8%E6%93%8D%E4%BD%9C%E5%8F%AF%E8%83%BD%E4%BD%BF%E8%BF%AD%E4%BB%A3%E5%99%A8%E5%A4%B1%E6%95%88"></a>容器操作可能使迭代器失效</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md容器内元素的类型约束容器内元素的类型约束"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E5%AE%B9%E5%99%A8%E5%86%85%E5%85%83%E7%B4%A0%E7%9A%84%E7%B1%BB%E5%9E%8B%E7%BA%A6%E6%9D%9F"></a>容器内元素的类型约束</a></li>
+      </ol>
+    </li>
+    <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09mdvector对象是如何增长的vector对象是如何增长的"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#vector%E5%AF%B9%E8%B1%A1%E6%98%AF%E5%A6%82%E4%BD%95%E5%A2%9E%E9%95%BF%E7%9A%84"></a>vector对象是如何增长的</a>
+      <ol>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md管理容量的成员函数管理容量的成员函数"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E7%AE%A1%E7%90%86%E5%AE%B9%E9%87%8F%E7%9A%84%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0"></a>管理容量的成员函数</a></li>
+      </ol>
+    </li>
+    <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md额外的string操作额外的string操作"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E9%A2%9D%E5%A4%96%E7%9A%84string%E6%93%8D%E4%BD%9C"></a>额外的string操作</a>
+      <ol>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md构造string的其他方法构造string的其他方法"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E6%9E%84%E9%80%A0string%E7%9A%84%E5%85%B6%E4%BB%96%E6%96%B9%E6%B3%95"></a>构造string的其他方法</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09mdsubstr操作substr操作"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#substr%E6%93%8D%E4%BD%9C"></a>substr操作</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md改变string的其他方法改变string的其他方法"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E6%94%B9%E5%8F%98string%E7%9A%84%E5%85%B6%E4%BB%96%E6%96%B9%E6%B3%95"></a>改变string的其他方法</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09mdstring搜索操作string搜索操作"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#string%E6%90%9C%E7%B4%A2%E6%93%8D%E4%BD%9C"></a>string搜索操作</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09mdscompare的几种参数形式scompare的几种参数形式"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#scompare%E7%9A%84%E5%87%A0%E7%A7%8D%E5%8F%82%E6%95%B0%E5%BD%A2%E5%BC%8F"></a>s.compare的几种参数形式</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09mdstring和数值转换string和数值转换"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#string%E5%92%8C%E6%95%B0%E5%80%BC%E8%BD%AC%E6%8D%A2"></a>string和数值转换</a></li>
+      </ol>
+    </li>
+    <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md容器适配器adapter容器适配器adapter"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E5%AE%B9%E5%99%A8%E9%80%82%E9%85%8D%E5%99%A8adapter"></a>容器适配器（adapter）</a>
+      <ol>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md适配器的通用操作和类型适配器的通用操作和类型"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%E9%80%82%E9%85%8D%E5%99%A8%E7%9A%84%E9%80%9A%E7%94%A8%E6%93%8D%E4%BD%9C%E5%92%8C%E7%B1%BB%E5%9E%8B"></a>适配器的通用操作和类型</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09mdstackstack"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#stack"></a>stack</a></li>
+        <li><a href="#httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09mdqueue和priority_queuequeue和priority_queue"><a href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#queue%E5%92%8Cpriority_queue"></a>queue和priority_queue</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/c&#43;&#43;/" >
+                C&#43;&#43;
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/9.-%E9%A1%BA%E5%BA%8F%E5%AE%B9%E5%99%A8/">9. 顺序容器</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            C&#43;&#43; learning
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jul 30, 2018</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    3 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="第八章-io库">第八章 IO库
+</h1><h1 id="第九章-顺序容器">第九章 顺序容器
+</h1><h2 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md顺序容器概述顺序容器概述"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e9%a1%ba%e5%ba%8f%e5%ae%b9%e5%99%a8%e6%a6%82%e8%bf%b0"  target="_blank" rel="noopener"
+    ></a>顺序容器概述
+</h2><ul>
+<li><strong>顺序容器</strong>（sequential container）：为程序员提供了控制元素存储和访问顺序的能力。这种顺序不依赖于元素的值，而是与元素加入容器时的位置相对应。</li>
+</ul>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md顺序容器类型顺序容器类型"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e9%a1%ba%e5%ba%8f%e5%ae%b9%e5%99%a8%e7%b1%bb%e5%9e%8b"  target="_blank" rel="noopener"
+    ></a>顺序容器类型
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>容器类型</th>
+          <th>介绍</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>vector</code></td>
+          <td>可变大小数组。支持快速随机访问。在尾部之外的位置插入或删除元素可能很慢。</td>
+      </tr>
+      <tr>
+          <td><code>deque</code></td>
+          <td>双端队列。支持快速随机访问。在头尾位置插入/删除速度很快。</td>
+      </tr>
+      <tr>
+          <td><code>list</code></td>
+          <td>双向链表。只支持双向顺序访问。在<code>list</code>中任何位置进行插入/删除操作速度都很快。</td>
+      </tr>
+      <tr>
+          <td><code>forward_list</code></td>
+          <td>单向链表。只支持单向顺序访问。在链表任何位置进行插入/删除操作速度都很快。</td>
+      </tr>
+      <tr>
+          <td><code>array</code></td>
+          <td>固定大小数组。支持快速随机访问。不能添加或者删除元素。</td>
+      </tr>
+      <tr>
+          <td><code>string</code></td>
+          <td>与<code>vector</code>相似的容器，但专门用于保存字符。随机访问块。在尾部插入/删除速度快。</td>
+      </tr>
+  </tbody>
+</table></div>
+<ul>
+<li>除了固定大小的<code>array</code>外，其他容器都提供高效、灵活的内存管理。</li>
+<li><code>forward_list</code>和<code>array</code>是新C++标准增加的类型。</li>
+<li>通常使用<code>vector</code>是最好的选择，除非你有很好的理由选择其他容器。</li>
+<li>新标准库的容器比旧版的快得多。</li>
+</ul>
+<h2 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md容器操作容器操作"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e5%ae%b9%e5%99%a8%e6%93%8d%e4%bd%9c"  target="_blank" rel="noopener"
+    ></a>容器操作
+</h2><h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md类型类型"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e7%b1%bb%e5%9e%8b"  target="_blank" rel="noopener"
+    ></a>类型
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>iterator</code></td>
+          <td>此容器类型的迭代器类型</td>
+      </tr>
+      <tr>
+          <td><code>const_iterator</code></td>
+          <td>可以读取元素但不能修改元素的迭代器类型</td>
+      </tr>
+      <tr>
+          <td><code>size_type</code></td>
+          <td>无符号整数类型，足够保存此种容器类型最大可能的大小</td>
+      </tr>
+      <tr>
+          <td><code>difference_type</code></td>
+          <td>带符号整数类型，足够保存两个迭代器之间的距离</td>
+      </tr>
+      <tr>
+          <td><code>value_type</code></td>
+          <td>元素类型</td>
+      </tr>
+      <tr>
+          <td><code>reference</code></td>
+          <td>元素的左值类型；和<code>value_type &amp;</code>含义相同</td>
+      </tr>
+      <tr>
+          <td><code>const_reference</code></td>
+          <td>元素的<code>const</code>左值类型，即<code>const value_type &amp;</code></td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md构造函数构造函数"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e6%9e%84%e9%80%a0%e5%87%bd%e6%95%b0"  target="_blank" rel="noopener"
+    ></a>构造函数
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>C c;</code></td>
+          <td>默认构造函数，构造空容器</td>
+      </tr>
+      <tr>
+          <td><code>C c1(c2);</code>或<code>C c1 = c2;</code></td>
+          <td>构造<code>c2</code>的拷贝<code>c1</code></td>
+      </tr>
+      <tr>
+          <td><code>C c(b, e)</code></td>
+          <td>构造<code>c</code>，将迭代器<code>b</code>和<code>e</code>指定范围内的所有元素拷贝到<code>c</code></td>
+      </tr>
+      <tr>
+          <td><code>C c(a, b, c...)</code></td>
+          <td>列表初始化<code>c</code></td>
+      </tr>
+      <tr>
+          <td><code>C c(n)</code></td>
+          <td>只支持顺序容器，且不包括<code>array</code>，包含<code>n</code>个元素，这些元素进行了值初始化</td>
+      </tr>
+      <tr>
+          <td><code>C c(n, t)</code></td>
+          <td>包含<code>n</code>个初始值为<code>t</code>的元素</td>
+      </tr>
+  </tbody>
+</table></div>
+<ul>
+<li>只有顺序容器的构造函数才接受大小参数，关联容器并不支持。</li>
+<li><code>array</code>具有固定大小。</li>
+<li>和其他容器不同，默认构造的<code>array</code>是非空的。</li>
+<li>直接复制：将一个容器复制给另一个容器时，类型必须匹配：容器类型和元素类型都必须相同。</li>
+<li>使用迭代器复制：不要求容器类型相同，容器内的元素类型也可以不同。</li>
+</ul>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md赋值和swap赋值和swap"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e8%b5%8b%e5%80%bc%e5%92%8cswap"  target="_blank" rel="noopener"
+    ></a>赋值和<code>swap</code>
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>c1 = c2;</code></td>
+          <td>将<code>c1</code>中的元素替换成<code>c2</code>中的元素</td>
+      </tr>
+      <tr>
+          <td><code>c1 = {a, b, c...}</code></td>
+          <td>将<code>c1</code>中的元素替换成列表中的元素（不适用于<code>array</code>）</td>
+      </tr>
+      <tr>
+          <td><code>c1.swap(c2)</code></td>
+          <td>交换<code>c1</code>和<code>c2</code>的元素</td>
+      </tr>
+      <tr>
+          <td><code>swap(c1, c2)</code></td>
+          <td>等价于<code>c1.swap(c2)</code></td>
+      </tr>
+      <tr>
+          <td><code>c.assign(b, e)</code></td>
+          <td>将<code>c</code>中的元素替换成迭代器<code>b</code>和<code>e</code>表示范围中的元素，<code>b</code>和<code>e</code>不能指向<code>c</code>中的元素</td>
+      </tr>
+      <tr>
+          <td><code>c.assign(il)</code></td>
+          <td>将<code>c</code>中的元素替换成初始化列表<code>il</code>中的元素</td>
+      </tr>
+      <tr>
+          <td><code>c.assign(n, r)</code></td>
+          <td>将<code>c</code>中的元素替换为<code>n</code>个值是<code>t</code>的元素</td>
+      </tr>
+  </tbody>
+</table></div>
+<ul>
+<li>使用非成员版本的<code>swap</code>是一个好习惯。</li>
+<li><code>assign</code>操作不适用于关联容器和<code>array</code></li>
+</ul>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md大小大小"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e5%a4%a7%e5%b0%8f"  target="_blank" rel="noopener"
+    ></a>大小
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>c.size()</code></td>
+          <td><code>c</code>中元素的数目（不支持<code>forward_list</code>）</td>
+      </tr>
+      <tr>
+          <td><code>c.max_size()</code></td>
+          <td><code>c</code>中可保存的最大元素数目</td>
+      </tr>
+      <tr>
+          <td><code>c.empty()</code></td>
+          <td>若<code>c</code>中存储了元素，返回<code>false</code>，否则返回<code>true</code></td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md添加元素添加元素"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e6%b7%bb%e5%8a%a0%e5%85%83%e7%b4%a0"  target="_blank" rel="noopener"
+    ></a>添加元素
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>c.push_back(t)</code></td>
+          <td>在<code>c</code>尾部创建一个值为<code>t</code>的元素，返回<code>void</code></td>
+      </tr>
+      <tr>
+          <td><code>c.emplace_back(args)</code></td>
+          <td>同上</td>
+      </tr>
+      <tr>
+          <td><code>c.push_front(t)</code></td>
+          <td>在<code>c</code>头部创建一个值为<code>t</code>的元素，返回<code>void</code></td>
+      </tr>
+      <tr>
+          <td><code>c.emplace_front(args)</code></td>
+          <td>同上</td>
+      </tr>
+      <tr>
+          <td><code>c.insert(p, t)</code></td>
+          <td>在迭代器<code>p</code>指向的元素之前创建一个值是<code>t</code>的元素，返回指向新元素的迭代器</td>
+      </tr>
+      <tr>
+          <td><code>c.emplace(p, args)</code></td>
+          <td>同上</td>
+      </tr>
+      <tr>
+          <td><code>c.insert(p, n, t)</code></td>
+          <td>在迭代器<code>p</code>指向的元素之前插入<code>n</code>个值为<code>t</code>的元素，返回指向第一个新元素的迭代器；如果<code>n</code>是0，则返回<code>p</code></td>
+      </tr>
+      <tr>
+          <td><code>c.insert(p, b, e)</code></td>
+          <td>将迭代器<code>b</code>和<code>e</code>范围内的元素，插入到<code>p</code>指向的元素之前；如果范围为空，则返回<code>p</code></td>
+      </tr>
+      <tr>
+          <td><code>c.insert(p, il)</code></td>
+          <td><code>il</code>是一个花括号包围中的元素值列表，将其插入到<code>p</code>指向的元素之前；如果<code>il</code>是空，则返回<code>p</code></td>
+      </tr>
+  </tbody>
+</table></div>
+<ul>
+<li>因为这些操作会改变大小，因此不适用于<code>array</code>。</li>
+<li><code>forward_list</code>有自己专有版本的<code>insert</code>和<code>emplace</code>。</li>
+<li><code>forward_list</code>不支持<code>push_back</code>和<code>emplace_back</code>。</li>
+<li>当我们用一个对象去初始化容器或者将对象插入到容器时，实际上放入的是对象的拷贝。</li>
+<li><code>emplace</code>开头的函数是新标准引入的，这些操作是构造而不是拷贝元素。</li>
+<li>传递给<code>emplace</code>的参数必须和元素类型的构造函数相匹配。</li>
+</ul>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md访问元素访问元素"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e8%ae%bf%e9%97%ae%e5%85%83%e7%b4%a0"  target="_blank" rel="noopener"
+    ></a>访问元素
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>c.back()</code></td>
+          <td>返回<code>c</code>中尾元素的引用。若<code>c</code>为空，函数行为未定义</td>
+      </tr>
+      <tr>
+          <td><code>c.front()</code></td>
+          <td>返回<code>c</code>中头元素的引用。若<code>c</code>为空，函数行为未定义</td>
+      </tr>
+      <tr>
+          <td><code>c[n]</code></td>
+          <td>返回<code>c</code>中下标是<code>n</code>的元素的引用，<code>n</code>时候一个无符号证书。若<code>n&gt;=c.size()</code>，则函数行为未定义</td>
+      </tr>
+      <tr>
+          <td><code>c.at(n)</code></td>
+          <td>返回下标为<code>n</code>的元素引用。如果下标越界，则抛出<code>out_of_range</code>异常</td>
+      </tr>
+  </tbody>
+</table></div>
+<ul>
+<li>访问成员函数返回的是引用。</li>
+<li><code>at</code>和下标操作只适用于<code>string</code>、<code>vector</code>、<code>deque</code>、<code>array</code>。</li>
+<li><code>back</code>不适用于<code>forward_list</code>。</li>
+<li>如果希望下标是合法的，可以使用<code>at</code>函数。</li>
+</ul>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md删除元素删除元素"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e5%88%a0%e9%99%a4%e5%85%83%e7%b4%a0"  target="_blank" rel="noopener"
+    ></a>删除元素
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>c.pop_back()</code></td>
+          <td>删除<code>c</code>中尾元素，若<code>c</code>为空，则函数行为未定义。函数返回<code>void</code></td>
+      </tr>
+      <tr>
+          <td><code>c.pop_front()</code></td>
+          <td>删除<code>c</code>中首元素，若<code>c</code>为空，则函数行为未定义。函数返回<code>void</code></td>
+      </tr>
+      <tr>
+          <td><code>c.erase(p)</code></td>
+          <td>删除迭代器<code>p</code>指向的元素，返回一个指向被删除元素之后的元素的迭代器，若<code>p</code>本身是尾后迭代器，则函数行为未定义</td>
+      </tr>
+      <tr>
+          <td><code>c.erase(b, e)</code></td>
+          <td>删除迭代器<code>b</code>和<code>e</code>范围内的元素，返回指向最后一个被删元素之后元素的迭代器，若<code>e</code>本身就是尾后迭代器，则返回尾后迭代器</td>
+      </tr>
+      <tr>
+          <td><code>c.clear()</code></td>
+          <td>删除<code>c</code>中所有元素，返回<code>void</code></td>
+      </tr>
+  </tbody>
+</table></div>
+<ul>
+<li>会改变容器大小，不适用于<code>array</code>。</li>
+<li><code>forward_list</code>有特殊版本的<code>erase</code></li>
+<li><code>forward_list</code>不支持<code>pop_back</code></li>
+<li><code>vector</code>和<code>string</code>不支持<code>pop_front</code></li>
+</ul>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md特殊的forwad_list操作特殊的forwad_list操作"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e7%89%b9%e6%ae%8a%e7%9a%84forwad_list%e6%93%8d%e4%bd%9c"  target="_blank" rel="noopener"
+    ></a>特殊的forwad_list操作
+</h3><ul>
+<li>链表在删除元素时需要修改前置节点的内容，双向链表会前驱的指针，但是单向链表没有保存，因此需要增加获取前置节点的方法。</li>
+<li><code>forward_list</code>定义了<code>before_begin</code>，即首前（off-the-begining）迭代器，允许我们再在首元素之前添加或删除元素。</li>
+</ul>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>lst.before_begin()</code></td>
+          <td>返回指向链表首元素之前不存在的元素的迭代器，此迭代器不能解引用。</td>
+      </tr>
+      <tr>
+          <td><code>lst.cbefore_begin()</code></td>
+          <td>同上，但是返回的是常量迭代器。</td>
+      </tr>
+      <tr>
+          <td><code>lst.insert_after(p, t)</code></td>
+          <td>在迭代器<code>p</code>之后插入元素。<code>t</code>是一个对象</td>
+      </tr>
+      <tr>
+          <td><code>lst.insert_after(p, n, t)</code></td>
+          <td>在迭代器<code>p</code>之后插入元素。<code>t</code>是一个对象，<code>n</code>是数量。若<code>n</code>是0则函数行为未定义</td>
+      </tr>
+      <tr>
+          <td><code>lst.insert_after(p, b, e)</code></td>
+          <td>在迭代器<code>p</code>之后插入元素。由迭代器<code>b</code>和<code>e</code>指定范围。</td>
+      </tr>
+      <tr>
+          <td><code>lst.insert_after(p, il)</code></td>
+          <td>在迭代器<code>p</code>之后插入元素。由<code>il</code>指定初始化列表。</td>
+      </tr>
+      <tr>
+          <td><code>emplace_after(p, args)</code></td>
+          <td>使用<code>args</code>在<code>p</code>之后的位置，创建一个元素，返回一个指向这个新元素的迭代器。若<code>p</code>为尾后迭代器，则函数行为未定义。</td>
+      </tr>
+      <tr>
+          <td><code>lst.erase_after(p)</code></td>
+          <td>删除<code>p</code>指向位置之后的元素，返回一个指向被删元素之后的元素的迭代器，若<code>p</code>指向<code>lst</code>的尾元素或者是一个尾后迭代器，则函数行为未定义。</td>
+      </tr>
+      <tr>
+          <td><code>lst.erase_after(b, e)</code></td>
+          <td>类似上面，删除对象换成从<code>b</code>到<code>e</code>指定的范围。</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md改变容器大小改变容器大小"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e6%94%b9%e5%8f%98%e5%ae%b9%e5%99%a8%e5%a4%a7%e5%b0%8f"  target="_blank" rel="noopener"
+    ></a>改变容器大小
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>c.resize(n)</code></td>
+          <td>调整<code>c</code>的大小为<code>n</code>个元素，若<code>n&lt;c.size()</code>，则多出的元素被丢弃。若必须添加新元素，对新元素进行值初始化</td>
+      </tr>
+      <tr>
+          <td><code>c.resize(n, t)</code></td>
+          <td>调整<code>c</code>的大小为<code>n</code>个元素，任何新添加的元素都初始化为值<code>t</code></td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md获取迭代器获取迭代器"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e8%8e%b7%e5%8f%96%e8%bf%ad%e4%bb%a3%e5%99%a8"  target="_blank" rel="noopener"
+    ></a>获取迭代器
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>c.begin()</code>, <code>c.end()</code></td>
+          <td>返回指向<code>c</code>的首元素和尾元素之后位置的迭代器</td>
+      </tr>
+      <tr>
+          <td><code>c.cbegin()</code>, <code>c.cend()</code></td>
+          <td>返回<code>const_iterator</code></td>
+      </tr>
+  </tbody>
+</table></div>
+<ul>
+<li>以<code>c</code>开头的版本是C++11新标准引入的</li>
+<li>当不需要写访问时，应该使用<code>cbegin</code>和<code>cend</code>。</li>
+</ul>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md反向容器的额外成员反向容器的额外成员"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e5%8f%8d%e5%90%91%e5%ae%b9%e5%99%a8%e7%9a%84%e9%a2%9d%e5%a4%96%e6%88%90%e5%91%98"  target="_blank" rel="noopener"
+    ></a>反向容器的额外成员
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>reverse_iterator</code></td>
+          <td>按逆序寻址元素的迭代器</td>
+      </tr>
+      <tr>
+          <td><code>const_reverse_iterator</code></td>
+          <td>不能修改元素的逆序迭代器</td>
+      </tr>
+      <tr>
+          <td><code>c.rbegin()</code>, <code>c.rend()</code></td>
+          <td>返回指向<code>c</code>的尾元素和首元素之前位置的迭代器</td>
+      </tr>
+      <tr>
+          <td><code>c.crbegin()</code>, <code>c.crend()</code></td>
+          <td>返回<code>const_reverse_iterator</code></td>
+      </tr>
+  </tbody>
+</table></div>
+<ul>
+<li>不支持<code>forward_list</code></li>
+</ul>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md迭代器迭代器"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e8%bf%ad%e4%bb%a3%e5%99%a8"  target="_blank" rel="noopener"
+    ></a>迭代器
+</h3><ul>
+<li>迭代器范围：<code>begin</code>到<code>end</code>，即第一个元素到最后一个元素的后面一个位置。</li>
+<li>左闭合区间：<code>[begin, end)</code></li>
+<li>左闭合范围蕴含的编程设定：
+<ul>
+<li>如果<code>begin</code>和<code>end</code>相等，则范围为空。</li>
+<li>如果二者不等，则范围至少包含一个元素，且<code>begin</code>指向该范围中的第一个元素。</li>
+<li>可以对<code>begin</code>递增若干次，使得<code>begin == end</code>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md容器操作可能使迭代器失效容器操作可能使迭代器失效"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e5%ae%b9%e5%99%a8%e6%93%8d%e4%bd%9c%e5%8f%af%e8%83%bd%e4%bd%bf%e8%bf%ad%e4%bb%a3%e5%99%a8%e5%a4%b1%e6%95%88"  target="_blank" rel="noopener"
+    ></a>容器操作可能使迭代器失效
+</h3><ul>
+<li>在向容器添加元素后：
+<ul>
+<li>如果容器是<code>vector</code>或<code>string</code>，且存储空间被重新分配，则指向容器的迭代器、指针、引用都会失效。</li>
+<li>对于<code>deque</code>，插入到除首尾位置之外的任何位置都会导致指向容器的迭代器、指针、引用失效。如果在首尾位置添加元素，迭代器会失效，但指向存在元素的引用和指针不会失效。</li>
+<li>对于<code>list</code>和<code>forward_list</code>，指向容器的迭代器、指针和引用依然有效。</li>
+</ul>
+</li>
+<li>在从一个容器中删除元素后：
+<ul>
+<li>对于<code>list</code>和<code>forward_list</code>，指向容器其他位置的迭代器、引用和指针仍然有效。</li>
+<li>对于<code>deque</code>，如果在首尾之外的任何位置删除元素，那么指向被删除元素外其他元素的迭代器、指针、引用都会失效；如果是删除<code>deque</code>的尾元素，则尾后迭代器会失效，但其他不受影响；如果删除的是<code>deque</code>的头元素，这些也不会受影响。</li>
+<li>对于<code>vector</code>和<code>string</code>，指向被删元素之前的迭代器、引用、指针仍然有效。</li>
+<li>注意：当我们删除元素时，尾后迭代器总是会失效。</li>
+<li>注意：使用失效的迭代器、指针、引用是严重的运行时错误！</li>
+<li>建议：将要求迭代器必须保持有效的程序片段最小化。</li>
+<li>建议：不要保存<code>end</code>返回的迭代器。</li>
+</ul>
+</li>
+</ul>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md容器内元素的类型约束容器内元素的类型约束"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e5%ae%b9%e5%99%a8%e5%86%85%e5%85%83%e7%b4%a0%e7%9a%84%e7%b1%bb%e5%9e%8b%e7%ba%a6%e6%9d%9f"  target="_blank" rel="noopener"
+    ></a>容器内元素的类型约束
+</h3><ul>
+<li>元素类型必须支持赋值运算；</li>
+<li>元素类型的对象必须可以复制。</li>
+<li>除了输入输出标准库类型外，其他所有标准库类型都是有效的容器元素类型。</li>
+</ul>
+<h2 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09mdvector对象是如何增长的vector对象是如何增长的"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#vector%e5%af%b9%e8%b1%a1%e6%98%af%e5%a6%82%e4%bd%95%e5%a2%9e%e9%95%bf%e7%9a%84"  target="_blank" rel="noopener"
+    ></a>vector对象是如何增长的
+</h2><p><code>vector</code>和<code>string</code>在内存中是连续保存的，如果原先分配的内存位置已经使用完，则需要重新分配新空间，将已有元素从就位置移动到新空间中，然后添加新元素。</p>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md管理容量的成员函数管理容量的成员函数"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e7%ae%a1%e7%90%86%e5%ae%b9%e9%87%8f%e7%9a%84%e6%88%90%e5%91%98%e5%87%bd%e6%95%b0"  target="_blank" rel="noopener"
+    ></a>管理容量的成员函数
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>c.shrink_to_fit()</code></td>
+          <td>将<code>capacity()</code>减少到和<code>size()</code>相同大小</td>
+      </tr>
+      <tr>
+          <td><code>c.capacity()</code></td>
+          <td>不重新分配内存空间的话，<code>c</code>可以保存多少个元素</td>
+      </tr>
+      <tr>
+          <td><code>c.reverse(n)</code></td>
+          <td>分配至少能容纳<code>n</code>个元素的内存空间</td>
+      </tr>
+  </tbody>
+</table></div>
+<ul>
+<li><code>shrink_to_fit</code>只适用于<code>vector</code>、<code>string</code>和<code>deque</code></li>
+<li><code>capacity</code>和<code>reverse</code>只适用于<code>vector</code>和<code>string</code>。</li>
+</ul>
+<h2 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md额外的string操作额外的string操作"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e9%a2%9d%e5%a4%96%e7%9a%84string%e6%93%8d%e4%bd%9c"  target="_blank" rel="noopener"
+    ></a>额外的string操作
+</h2><h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md构造string的其他方法构造string的其他方法"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e6%9e%84%e9%80%a0string%e7%9a%84%e5%85%b6%e4%bb%96%e6%96%b9%e6%b3%95"  target="_blank" rel="noopener"
+    ></a>构造string的其他方法
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>string s(cp, n)</code></td>
+          <td><code>s</code>是<code>cp</code>指向的数组中前<code>n</code>个字符的拷贝，此数组</td>
+      </tr>
+      <tr>
+          <td><code>string s(s2, pos2)</code></td>
+          <td><code>s</code>是<code>string s2</code>从下标<code>pos2</code>开始的字符的拷贝。若<code>pos2 &gt; s2.size()</code>，则构造函数的行为未定义。</td>
+      </tr>
+      <tr>
+          <td><code>string s(s2, pos2, len2)</code></td>
+          <td><code>s</code>是<code>string s2</code>从下标<code>pos2</code>开始的<code>len2</code>个字符的拷贝。</td>
+      </tr>
+  </tbody>
+</table></div>
+<ul>
+<li><code>n</code>,<code>len2</code>,<code>pos2</code>都是无符号值。</li>
+</ul>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09mdsubstr操作substr操作"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#substr%e6%93%8d%e4%bd%9c"  target="_blank" rel="noopener"
+    ></a>substr操作
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>s.substr(pos, n)</code></td>
+          <td>返回一个<code>string</code>，包含<code>s</code>中从<code>pos</code>开始的<code>n</code>个字符的拷贝。<code>pos</code>的默认值是0，<code>n</code>的默认值是<code>s.size() - pos</code>，即拷贝从<code>pos</code>开始的所有字符。</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md改变string的其他方法改变string的其他方法"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e6%94%b9%e5%8f%98string%e7%9a%84%e5%85%b6%e4%bb%96%e6%96%b9%e6%b3%95"  target="_blank" rel="noopener"
+    ></a>改变string的其他方法
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>s.insert(pos, args)</code></td>
+          <td>在<code>pos</code>之前插入<code>args</code>指定的字符。<code>pos</code>可以使是下标或者迭代器。接受下标的版本返回指向<code>s</code>的引用；接受迭代器的版本返回指向第一个插入字符的迭代器。</td>
+      </tr>
+      <tr>
+          <td><code>s.erase(pos, len)</code></td>
+          <td>删除从<code>pos</code>开始的<code>len</code>个字符，如果<code>len</code>被省略，则删除后面所有字符，返回指向<code>s</code>的引用。</td>
+      </tr>
+      <tr>
+          <td><code>s.assign(args)</code></td>
+          <td>将<code>s</code>中的字符替换成<code>args</code>指定的字符。返回一个指向<code>s</code>的引用。</td>
+      </tr>
+      <tr>
+          <td><code>s.append(args)</code></td>
+          <td>将<code>args</code>指定的字符追加到<code>s</code>，返回一个指向<code>s</code>的引用。</td>
+      </tr>
+      <tr>
+          <td><code>s.replace(range, args)</code></td>
+          <td>删除<code>s</code>中范围<code>range</code>中的字符，替换成<code>args</code>指定的字符。返回一个指向<code>s</code>的引用。</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09mdstring搜索操作string搜索操作"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#string%e6%90%9c%e7%b4%a2%e6%93%8d%e4%bd%9c"  target="_blank" rel="noopener"
+    ></a>string搜索操作
+</h3><ul>
+<li><code>string</code>类提供了6个不同的搜索函数，每个函数都有4个重载版本。</li>
+<li>每个搜索操作都返回一个<code>string::size_type</code>值，表示匹配发生位置的下标。如果搜索失败则返回一个名为<code>string::npos</code>的<code>static</code>成员（类型是<code>string::size_type</code>，初始化值是-1，也就是<code>string</code>最大的可能大小）。</li>
+</ul>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>搜索操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>s.find(args)</code></td>
+          <td>查找<code>s</code>中<code>args</code>第一次出现的位置</td>
+      </tr>
+      <tr>
+          <td><code>s.rfind(args)</code></td>
+          <td>查找<code>s</code>中<code>args</code>最后一次出现的位置</td>
+      </tr>
+      <tr>
+          <td><code>s.find_first_of(args)</code></td>
+          <td>在<code>s</code>中查找<code>args</code>中任何一个字符第一次出现的位置</td>
+      </tr>
+      <tr>
+          <td><code>s.find_last_of(args)</code></td>
+          <td>在<code>s</code>中查找<code>args</code>中任何一个字符最后一次出现的位置</td>
+      </tr>
+      <tr>
+          <td><code>s.find_first_not_of(args)</code></td>
+          <td>在<code>s</code>中查找第一个不在<code>args</code>中的字符</td>
+      </tr>
+      <tr>
+          <td><code>s.find_first_not_of(args)</code></td>
+          <td>在<code>s</code>中查找最后一个不在<code>args</code>中的字符</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>args必须是一下的形式之一：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th><code>args</code>形式</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>c, pos</code></td>
+          <td>从<code>s</code>中位置<code>pos</code>开始查找字符<code>c</code>。<code>pos</code>默认是0</td>
+      </tr>
+      <tr>
+          <td><code>s2, pos</code></td>
+          <td>从<code>s</code>中位置<code>pos</code>开始查找字符串<code>s</code>。<code>pos</code>默认是0</td>
+      </tr>
+      <tr>
+          <td><code>cp, pos</code></td>
+          <td>从<code>s</code>中位置<code>pos</code>开始查找指针<code>cp</code>指向的以空字符结尾的C风格字符串。<code>pos</code>默认是0</td>
+      </tr>
+      <tr>
+          <td><code>cp, pos, n</code></td>
+          <td>从<code>s</code>中位置<code>pos</code>开始查找指针<code>cp</code>指向的前<code>n</code>个字符。<code>pos</code>和<code>n</code>无默认值。</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09mdscompare的几种参数形式scompare的几种参数形式"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#scompare%e7%9a%84%e5%87%a0%e7%a7%8d%e5%8f%82%e6%95%b0%e5%bd%a2%e5%bc%8f"  target="_blank" rel="noopener"
+    ></a>s.compare的几种参数形式
+</h3><p>逻辑类似于C标准库的<code>strcmp</code>函数，根据<code>s</code>是等于、大于还是小于参数指定的字符串，<code>s.compare</code>返回0、正数或负数。</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>参数形式</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>s2</code></td>
+          <td>比较<code>s</code>和<code>s2</code></td>
+      </tr>
+      <tr>
+          <td><code>pos1, n1, s2</code></td>
+          <td>比较<code>s</code>从<code>pos1</code>开始的<code>n1</code>个字符和<code>s2</code></td>
+      </tr>
+      <tr>
+          <td><code>pos1, n1, s2, pos2, n2</code></td>
+          <td>比较<code>s</code>从<code>pos1</code>开始的<code>n1</code>个字符和<code>s2</code></td>
+      </tr>
+      <tr>
+          <td><code>cp</code></td>
+          <td>比较<code>s</code>和<code>cp</code>指向的以空字符结尾的字符数组</td>
+      </tr>
+      <tr>
+          <td><code>pos1, n1, cp</code></td>
+          <td>比较<code>s</code>从<code>pos1</code>开始的<code>n1</code>个字符和<code>cp</code>指向的以空字符结尾的字符数组</td>
+      </tr>
+      <tr>
+          <td><code>pos1, n1, cp, n2</code></td>
+          <td>比较<code>s</code>从<code>pos1</code>开始的<code>n1</code>个字符和<code>cp</code>指向的地址开始<code>n2</code>个字符</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09mdstring和数值转换string和数值转换"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#string%e5%92%8c%e6%95%b0%e5%80%bc%e8%bd%ac%e6%8d%a2"  target="_blank" rel="noopener"
+    ></a>string和数值转换
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>转换</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>to_string(val)</code></td>
+          <td>一组重载函数，返回数值<code>val</code>的<code>string</code>表示。<code>val</code>可以使任何算术类型。对每个浮点类型和<code>int</code>或更大的整型，都有相应版本的<code>to_string()</code>。和往常一样，小整型会被提升。</td>
+      </tr>
+      <tr>
+          <td><code>stoi(s, p, b)</code></td>
+          <td>返回<code>s</code>起始子串（表示整数内容）的数值，<code>p</code>是<code>s</code>中第一个非数值字符的下标，默认是0，<code>b</code>是转换所用的基数。返回<code>int</code></td>
+      </tr>
+      <tr>
+          <td><code>stol(s, p, b)</code></td>
+          <td>返回<code>long</code></td>
+      </tr>
+      <tr>
+          <td><code>stoul(s, p, b)</code></td>
+          <td>返回<code>unsigned long</code></td>
+      </tr>
+      <tr>
+          <td><code>stoll(s, p, b)</code></td>
+          <td>返回<code>long long</code></td>
+      </tr>
+      <tr>
+          <td><code>stoull(s, p, b)</code></td>
+          <td>返回<code>unsigned long long</code></td>
+      </tr>
+      <tr>
+          <td><code>stof(s, p)</code></td>
+          <td>返回<code>s</code>起始子串（表示浮点数内容）的数值，<code>p</code>是<code>s</code>中第一个非数值字符的下标，默认是0。返回<code>float</code></td>
+      </tr>
+      <tr>
+          <td><code>stod(s, p)</code></td>
+          <td>返回<code>double</code></td>
+      </tr>
+      <tr>
+          <td><code>stold(s, p)</code></td>
+          <td>返回<code>long double</code></td>
+      </tr>
+  </tbody>
+</table></div>
+<h2 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md容器适配器adapter容器适配器adapter"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e5%ae%b9%e5%99%a8%e9%80%82%e9%85%8d%e5%99%a8adapter"  target="_blank" rel="noopener"
+    ></a>容器适配器（adapter）
+</h2><ul>
+<li>适配器是使一事物的行为类似于另一事物的行为的一种机制，例如<code>stack</code>可以使任何一种顺序容器以栈的方式工作。</li>
+<li>初始化 <code>deque&lt;int&gt; deq; stack&lt;int&gt; stk(deq);</code> 从<code>deq</code>拷贝元素到<code>stk</code>。</li>
+<li>创建适配器时，指定一个顺序容器，可以覆盖默认的基础容器： <code>stack&lt;string, vector&lt;string&gt; &gt; str_stk;</code>。</li>
+</ul>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md适配器的通用操作和类型适配器的通用操作和类型"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e9%80%82%e9%85%8d%e5%99%a8%e7%9a%84%e9%80%9a%e7%94%a8%e6%93%8d%e4%bd%9c%e5%92%8c%e7%b1%bb%e5%9e%8b"  target="_blank" rel="noopener"
+    ></a>适配器的通用操作和类型
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>size_type</code></td>
+          <td>一种类型，须以保存当前类型的最大对象的大小</td>
+      </tr>
+      <tr>
+          <td><code>value_type</code></td>
+          <td>元素类型</td>
+      </tr>
+      <tr>
+          <td><code>container_type</code></td>
+          <td>实现适配器的底层容器类型</td>
+      </tr>
+      <tr>
+          <td><code>A a;</code></td>
+          <td>创建一个名为<code>a</code>的空适配器</td>
+      </tr>
+      <tr>
+          <td><code>A a(c)</code></td>
+          <td>创建一个名为<code>a</code>的适配器，带有容器<code>c</code>的一个拷贝</td>
+      </tr>
+      <tr>
+          <td>关系运算符</td>
+          <td>每个适配器都支持所有关系运算符：<code>==</code>、<code>!=</code>、<code>&lt;</code>、 <code>&lt;=</code>、<code>&gt;</code>、<code>&gt;=</code>这些运算符返回底层容器的比较结果</td>
+      </tr>
+      <tr>
+          <td><code>a.empty()</code></td>
+          <td>若<code>a</code>包含任何元素，返回<code>false</code>;否则返回<code>true</code></td>
+      </tr>
+      <tr>
+          <td><code>a.size()</code></td>
+          <td>返回<code>a</code>中的元素数目</td>
+      </tr>
+      <tr>
+          <td><code>swap(a, b)</code></td>
+          <td>交换<code>a</code>和<code>b</code>的内容，<code>a</code>和<code>b</code>必须有相同类型，包括底层容器类型也必须相同</td>
+      </tr>
+      <tr>
+          <td><code>a.swap(b)</code></td>
+          <td>同上</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09mdstackstack"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#stack"  target="_blank" rel="noopener"
+    ></a>stack
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>s.pop()</code></td>
+          <td>删除栈顶元素，不返回。</td>
+      </tr>
+      <tr>
+          <td><code>s.push(item)</code></td>
+          <td>创建一个新元素，压入栈顶，该元素通过拷贝或移动<code>item</code>而来</td>
+      </tr>
+      <tr>
+          <td><code>s.emplace(args)</code></td>
+          <td>同上，但元素由<code>args</code>来构造。</td>
+      </tr>
+      <tr>
+          <td><code>s.top()</code></td>
+          <td>返回栈顶元素，不删除。</td>
+      </tr>
+  </tbody>
+</table></div>
+<ul>
+<li>定义在<code>stack</code>头文件中。</li>
+<li><code>stack</code>默认基于<code>deque</code>实现，也可以在<code>list</code>或<code>vector</code>之上实现。</li>
+</ul>
+<h3 id="httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09mdqueue和priority_queuequeue和priority_queue"><a class="link" href="https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#queue%e5%92%8cpriority_queue"  target="_blank" rel="noopener"
+    ></a>queue和priority_queue
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>解释</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>q.pop()</code></td>
+          <td>删除队首元素，但不返回。</td>
+      </tr>
+      <tr>
+          <td><code>q.front()</code></td>
+          <td>返回队首元素的值，不删除。</td>
+      </tr>
+      <tr>
+          <td><code>q.back()</code></td>
+          <td>返回队尾元素的值，不删除。只适用于<code>queue</code></td>
+      </tr>
+      <tr>
+          <td><code>q.top()</code></td>
+          <td>返回具有最高优先级的元素值，不删除。</td>
+      </tr>
+      <tr>
+          <td><code>q.push(item)</code></td>
+          <td>在队尾压入一个新元素。</td>
+      </tr>
+      <tr>
+          <td><code>q.emplace(args)</code></td>
+          <td></td>
+      </tr>
+  </tbody>
+</table></div>
+<ul>
+<li>定义在<code>queue</code>头文件中。</li>
+<li><code>queue</code>默认基于<code>deque</code>实现，<code>priority_queue</code>默认基于<code>vector</code>实现。</li>
+<li><code>queue</code>可以在<code>list</code>或<code>vector</code>之上实现，<code>priority_queue</code>也可以用<code>deque</code>实现。</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/c&#43;&#43;/">C&#43;&#43;</a>
+        
+            <a href="/tags/c&#43;&#43;primer/">C&#43;&#43;Primer</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/99.%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/%E8%AF%BE%E5%90%8E%E4%B9%A0%E9%A2%98%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/images/1.png" loading="lazy" data-key="" data-hash="/images/1.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">99.重点记录/课后习题重点记录</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/12.-%E5%8A%A8%E6%80%81%E5%86%85%E5%AD%98/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">12. 动态内存</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/11.%E5%85%B3%E8%81%94%E5%AE%B9%E5%99%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">11.关联容器</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/8.-io%E5%BA%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">8. IO库</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/7.%E7%B1%BB-class/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">7.类 （Class）</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2025 SalmoneX Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
