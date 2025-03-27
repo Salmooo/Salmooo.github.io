@@ -2,24 +2,25 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Categories on SalmoneX Blog</title>
-        <link>https://salmooo.github.io/categories/</link>
+        <link>http://localhost:1313/categories/</link>
         <description>Recent content in Categories on SalmoneX Blog</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en</language>
-        <lastBuildDate>Mon, 07 Jan 2019 18:51:29 +0800</lastBuildDate><atom:link href="https://salmooo.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <copyright>salmone</copyright>
+        <lastBuildDate>Mon, 07 Jan 2019 18:51:29 +0800</lastBuildDate><atom:link href="http://localhost:1313/categories/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>C&#43;&#43;</title>
-        <link>https://salmooo.github.io/categories/c&#43;&#43;/</link>
+        <link>http://localhost:1313/categories/c&#43;&#43;/</link>
         <pubDate>Mon, 07 Jan 2019 18:51:29 +0800</pubDate>
         
-        <guid>https://salmooo.github.io/categories/c&#43;&#43;/</guid>
+        <guid>http://localhost:1313/categories/c&#43;&#43;/</guid>
         <description></description>
         </item>
         <item>
         <title>Git</title>
-        <link>https://salmooo.github.io/categories/git/</link>
+        <link>http://localhost:1313/categories/git/</link>
         <pubDate>Thu, 23 Aug 2018 19:20:22 +0800</pubDate>
         
-        <guid>https://salmooo.github.io/categories/git/</guid>
+        <guid>http://localhost:1313/categories/git/</guid>
         <description></description>
         </item>
         

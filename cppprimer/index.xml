@@ -2,18 +2,11 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>CppPrimers on SalmoneX Blog</title>
-        <link>https://salmooo.github.io/cppprimer/</link>
+        <link>http://localhost:1313/cppprimer/</link>
         <description>Recent content in CppPrimers on SalmoneX Blog</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en</language>
-        <lastBuildDate>Wed, 12 Apr 2023 11:18:41 +0800</lastBuildDate><atom:link href="https://salmooo.github.io/cppprimer/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>10</title>
-        <link>https://salmooo.github.io/cppprimer/10/</link>
-        <pubDate>Wed, 12 Apr 2023 11:18:41 +0800</pubDate>
-        
-        <guid>https://salmooo.github.io/cppprimer/10/</guid>
-        <description></description>
-        </item>
-        
+        <copyright>salmone</copyright>
+        <lastBuildDate></lastBuildDate><atom:link href="http://localhost:1313/cppprimer/index.xml" rel="self" type="application/rss+xml" />
     </channel>
 </rss>
