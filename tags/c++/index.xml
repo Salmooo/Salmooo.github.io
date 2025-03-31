@@ -2,25 +2,25 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>C&#43;&#43; on SalmoneX Blog</title>
-        <link>http://localhost:1313/tags/c&#43;&#43;/</link>
+        <link>https://Salmooo.github.io/tags/c&#43;&#43;/</link>
         <description>Recent content in C&#43;&#43; on SalmoneX Blog</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en</language>
         <copyright>salmone</copyright>
-        <lastBuildDate>Mon, 07 Jan 2019 18:51:29 +0800</lastBuildDate><atom:link href="http://localhost:1313/tags/c++/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Mon, 07 Jan 2019 18:51:29 +0800</lastBuildDate><atom:link href="https://Salmooo.github.io/tags/c++/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>代码随想录读后感</title>
-        <link>http://localhost:1313/p/%E4%BB%A3%E7%A0%81%E9%9A%8F%E6%83%B3%E5%BD%95%E8%AF%BB%E5%90%8E%E6%84%9F/</link>
+        <link>https://Salmooo.github.io/p/%E4%BB%A3%E7%A0%81%E9%9A%8F%E6%83%B3%E5%BD%95%E8%AF%BB%E5%90%8E%E6%84%9F/</link>
         <pubDate>Mon, 07 Jan 2019 18:51:29 +0800</pubDate>
         
-        <guid>http://localhost:1313/p/%E4%BB%A3%E7%A0%81%E9%9A%8F%E6%83%B3%E5%BD%95%E8%AF%BB%E5%90%8E%E6%84%9F/</guid>
+        <guid>https://Salmooo.github.io/p/%E4%BB%A3%E7%A0%81%E9%9A%8F%E6%83%B3%E5%BD%95%E8%AF%BB%E5%90%8E%E6%84%9F/</guid>
         <description></description>
         </item>
         <item>
         <title>C&#43;&#43; RAII</title>
-        <link>http://localhost:1313/p/c-raii/</link>
+        <link>https://Salmooo.github.io/p/c-raii/</link>
         <pubDate>Sun, 07 Oct 2018 18:51:29 +0800</pubDate>
         
-        <guid>http://localhost:1313/p/c-raii/</guid>
+        <guid>https://Salmooo.github.io/p/c-raii/</guid>
         <description>&lt;h2 id=&#34;1什么是raii&#34;&gt;1.什么是RAII
 &lt;/h2&gt;&lt;p&gt;RAII（&lt;strong&gt;R&lt;/strong&gt;esource &lt;strong&gt;A&lt;/strong&gt;cquisition &lt;strong&gt;I&lt;/strong&gt;s &lt;strong&gt;I&lt;/strong&gt;nitialization）是由c++之父Bjarne Stroustrup提出的，中文翻译为资源获取即初始化.&lt;br&gt;
 他说：使用局部对象来管理资源的技术称为资源获取即初始化；这里的资源主要是指操作系统中有限的东西如内存、网络套接字等等，局部对象是指存储在栈的对象，它的生命周期是由操作系统来管理的，无需人工介入.&lt;/p&gt;
@@ -324,10 +324,10 @@ c++之父给出了解决问题的方案：RAII，它充分的利用了C++语言�
         </item>
         <item>
         <title>99.重点记录/课后习题重点记录</title>
-        <link>http://localhost:1313/p/99.%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/%E8%AF%BE%E5%90%8E%E4%B9%A0%E9%A2%98%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/</link>
+        <link>https://Salmooo.github.io/p/99.%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/%E8%AF%BE%E5%90%8E%E4%B9%A0%E9%A2%98%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/</link>
         <pubDate>Thu, 30 Aug 2018 23:19:45 +0800</pubDate>
         
-        <guid>http://localhost:1313/p/99.%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/%E8%AF%BE%E5%90%8E%E4%B9%A0%E9%A2%98%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/</guid>
+        <guid>https://Salmooo.github.io/p/99.%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/%E8%AF%BE%E5%90%8E%E4%B9%A0%E9%A2%98%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/</guid>
         <description>&lt;h1 id=&#34;第九十九章-重点记录课后习题重点记录&#34;&gt;第九十九章 重点记录/课后习题重点记录
 &lt;/h1&gt;&lt;h2 id=&#34;1第一章的重点及练习&#34;&gt;1.第一章的重点及练习
 &lt;/h2&gt;&lt;h2 id=&#34;2第二章的重点及练习&#34;&gt;2.第二章的重点及练习
@@ -891,10 +891,10 @@ equal：确定两个序列是否保存相同的值。&lt;/p&gt;
         </item>
         <item>
         <title>12. 动态内存</title>
-        <link>http://localhost:1313/p/12.-%E5%8A%A8%E6%80%81%E5%86%85%E5%AD%98/</link>
+        <link>https://Salmooo.github.io/p/12.-%E5%8A%A8%E6%80%81%E5%86%85%E5%AD%98/</link>
         <pubDate>Mon, 30 Jul 2018 23:27:45 +0800</pubDate>
         
-        <guid>http://localhost:1313/p/12.-%E5%8A%A8%E6%80%81%E5%86%85%E5%AD%98/</guid>
+        <guid>https://Salmooo.github.io/p/12.-%E5%8A%A8%E6%80%81%E5%86%85%E5%AD%98/</guid>
         <description>&lt;h1 id=&#34;第八章-io库&#34;&gt;第八章 IO库
 &lt;/h1&gt;&lt;h2 id=&#34;httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch08md前面章节已经在用的io库设施前面章节已经在用的io库设施&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch08.md#%e5%89%8d%e9%9d%a2%e7%ab%a0%e8%8a%82%e5%b7%b2%e7%bb%8f%e5%9c%a8%e7%94%a8%e7%9a%84io%e5%ba%93%e8%ae%be%e6%96%bd&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;&lt;/a&gt;前面章节已经在用的IO库设施
@@ -1133,10 +1133,10 @@ equal：确定两个序列是否保存相同的值。&lt;/p&gt;
         </item>
         <item>
         <title>11.关联容器</title>
-        <link>http://localhost:1313/p/11.%E5%85%B3%E8%81%94%E5%AE%B9%E5%99%A8/</link>
+        <link>https://Salmooo.github.io/p/11.%E5%85%B3%E8%81%94%E5%AE%B9%E5%99%A8/</link>
         <pubDate>Mon, 30 Jul 2018 23:16:32 +0800</pubDate>
         
-        <guid>http://localhost:1313/p/11.%E5%85%B3%E8%81%94%E5%AE%B9%E5%99%A8/</guid>
+        <guid>https://Salmooo.github.io/p/11.%E5%85%B3%E8%81%94%E5%AE%B9%E5%99%A8/</guid>
         <description>&lt;h1 id=&#34;第十一章-关联容器&#34;&gt;第十一章 关联容器
 &lt;/h1&gt;&lt;ul&gt;
 &lt;li&gt;关联容器和顺序容器的不同：关联容器中的元素时按照&lt;strong&gt;关键字&lt;/strong&gt;来保存和访问的。&lt;/li&gt;
@@ -1494,10 +1494,10 @@ equal：确定两个序列是否保存相同的值。&lt;/p&gt;
         </item>
         <item>
         <title>8. IO库</title>
-        <link>http://localhost:1313/p/8.-io%E5%BA%93/</link>
+        <link>https://Salmooo.github.io/p/8.-io%E5%BA%93/</link>
         <pubDate>Mon, 30 Jul 2018 22:19:10 +0800</pubDate>
         
-        <guid>http://localhost:1313/p/8.-io%E5%BA%93/</guid>
+        <guid>https://Salmooo.github.io/p/8.-io%E5%BA%93/</guid>
         <description>&lt;h1 id=&#34;第八章-io库&#34;&gt;第八章 IO库
 &lt;/h1&gt;&lt;h2 id=&#34;httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch08md前面章节已经在用的io库设施前面章节已经在用的io库设施&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch08.md#%e5%89%8d%e9%9d%a2%e7%ab%a0%e8%8a%82%e5%b7%b2%e7%bb%8f%e5%9c%a8%e7%94%a8%e7%9a%84io%e5%ba%93%e8%ae%be%e6%96%bd&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;&lt;/a&gt;前面章节已经在用的IO库设施
@@ -1736,10 +1736,10 @@ equal：确定两个序列是否保存相同的值。&lt;/p&gt;
         </item>
         <item>
         <title>9. 顺序容器</title>
-        <link>http://localhost:1313/p/9.-%E9%A1%BA%E5%BA%8F%E5%AE%B9%E5%99%A8/</link>
+        <link>https://Salmooo.github.io/p/9.-%E9%A1%BA%E5%BA%8F%E5%AE%B9%E5%99%A8/</link>
         <pubDate>Mon, 30 Jul 2018 21:37:20 +0800</pubDate>
         
-        <guid>http://localhost:1313/p/9.-%E9%A1%BA%E5%BA%8F%E5%AE%B9%E5%99%A8/</guid>
+        <guid>https://Salmooo.github.io/p/9.-%E9%A1%BA%E5%BA%8F%E5%AE%B9%E5%99%A8/</guid>
         <description>&lt;h1 id=&#34;第八章-io库&#34;&gt;第八章 IO库
 &lt;/h1&gt;&lt;h1 id=&#34;第九章-顺序容器&#34;&gt;第九章 顺序容器
 &lt;/h1&gt;&lt;h2 id=&#34;httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch09md顺序容器概述顺序容器概述&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch09.md#%e9%a1%ba%e5%ba%8f%e5%ae%b9%e5%99%a8%e6%a6%82%e8%bf%b0&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -2635,10 +2635,10 @@ equal：确定两个序列是否保存相同的值。&lt;/p&gt;
         </item>
         <item>
         <title>7.类 （Class）</title>
-        <link>http://localhost:1313/p/7.%E7%B1%BB-class/</link>
+        <link>https://Salmooo.github.io/p/7.%E7%B1%BB-class/</link>
         <pubDate>Mon, 30 Jul 2018 20:18:41 +0800</pubDate>
         
-        <guid>http://localhost:1313/p/7.%E7%B1%BB-class/</guid>
+        <guid>https://Salmooo.github.io/p/7.%E7%B1%BB-class/</guid>
         <description>&lt;h1 id=&#34;第七章-类-class&#34;&gt;第七章 类 （Class）
 &lt;/h1&gt;&lt;h2 id=&#34;httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch07md定义抽象数据类型定义抽象数据类型&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch07.md#%e5%ae%9a%e4%b9%89%e6%8a%bd%e8%b1%a1%e6%95%b0%e6%8d%ae%e7%b1%bb%e5%9e%8b&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;&lt;/a&gt;定义抽象数据类型
@@ -2842,10 +2842,10 @@ equal：确定两个序列是否保存相同的值。&lt;/p&gt;
         </item>
         <item>
         <title>10. 泛型算法</title>
-        <link>http://localhost:1313/p/10.-%E6%B3%9B%E5%9E%8B%E7%AE%97%E6%B3%95/</link>
+        <link>https://Salmooo.github.io/p/10.-%E6%B3%9B%E5%9E%8B%E7%AE%97%E6%B3%95/</link>
         <pubDate>Mon, 30 Jul 2018 19:49:44 +0800</pubDate>
         
-        <guid>http://localhost:1313/p/10.-%E6%B3%9B%E5%9E%8B%E7%AE%97%E6%B3%95/</guid>
+        <guid>https://Salmooo.github.io/p/10.-%E6%B3%9B%E5%9E%8B%E7%AE%97%E6%B3%95/</guid>
         <description>&lt;h1 id=&#34;第八章-io库&#34;&gt;第八章 IO库
 &lt;/h1&gt;&lt;h2 id=&#34;httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch08md前面章节已经在用的io库设施前面章节已经在用的io库设施&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch08.md#%e5%89%8d%e9%9d%a2%e7%ab%a0%e8%8a%82%e5%b7%b2%e7%bb%8f%e5%9c%a8%e7%94%a8%e7%9a%84io%e5%ba%93%e8%ae%be%e6%96%bd&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;&lt;/a&gt;前面章节已经在用的IO库设施
@@ -3084,10 +3084,10 @@ equal：确定两个序列是否保存相同的值。&lt;/p&gt;
         </item>
         <item>
         <title>6.函数</title>
-        <link>http://localhost:1313/p/6.%E5%87%BD%E6%95%B0/</link>
+        <link>https://Salmooo.github.io/p/6.%E5%87%BD%E6%95%B0/</link>
         <pubDate>Sun, 29 Jul 2018 20:18:41 +0800</pubDate>
         
-        <guid>http://localhost:1313/p/6.%E5%87%BD%E6%95%B0/</guid>
+        <guid>https://Salmooo.github.io/p/6.%E5%87%BD%E6%95%B0/</guid>
         <description>&lt;h1 id=&#34;第三章-字符串向量和数组&#34;&gt;第三章 字符串，向量和数组
 &lt;/h1&gt;&lt;h2 id=&#34;using声明&#34;&gt;using声明
 &lt;/h2&gt;&lt;ul&gt;
@@ -3583,10 +3583,10 @@ equal：确定两个序列是否保存相同的值。&lt;/p&gt;
         </item>
         <item>
         <title>5.语句</title>
-        <link>http://localhost:1313/p/5.%E8%AF%AD%E5%8F%A5/</link>
+        <link>https://Salmooo.github.io/p/5.%E8%AF%AD%E5%8F%A5/</link>
         <pubDate>Sat, 28 Jul 2018 23:09:14 +0800</pubDate>
         
-        <guid>http://localhost:1313/p/5.%E8%AF%AD%E5%8F%A5/</guid>
+        <guid>https://Salmooo.github.io/p/5.%E8%AF%AD%E5%8F%A5/</guid>
         <description>&lt;h1 id=&#34;第五章-语句&#34;&gt;第五章 语句
 &lt;/h1&gt;&lt;h2 id=&#34;httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch05md简单语句简单语句&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch05.md#%e7%ae%80%e5%8d%95%e8%af%ad%e5%8f%a5&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;&lt;/a&gt;简单语句
@@ -3624,10 +3624,10 @@ equal：确定两个序列是否保存相同的值。&lt;/p&gt;
         </item>
         <item>
         <title>4.表达式</title>
-        <link>http://localhost:1313/p/4.%E8%A1%A8%E8%BE%BE%E5%BC%8F/</link>
+        <link>https://Salmooo.github.io/p/4.%E8%A1%A8%E8%BE%BE%E5%BC%8F/</link>
         <pubDate>Fri, 27 Jul 2018 20:38:41 +0800</pubDate>
         
-        <guid>http://localhost:1313/p/4.%E8%A1%A8%E8%BE%BE%E5%BC%8F/</guid>
+        <guid>https://Salmooo.github.io/p/4.%E8%A1%A8%E8%BE%BE%E5%BC%8F/</guid>
         <description>&lt;h1 id=&#34;第四章-表达式&#34;&gt;第四章 表达式
 &lt;/h1&gt;&lt;h2 id=&#34;httpsgithubcomapplenobcpp_primer_practiceblobmasternotesch04md表达式基础表达式基础&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/applenob/Cpp_Primer_Practice/blob/master/notes/ch04.md#%e8%a1%a8%e8%be%be%e5%bc%8f%e5%9f%ba%e7%a1%80&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;&lt;/a&gt;表达式基础
@@ -3888,10 +3888,10 @@ equal：确定两个序列是否保存相同的值。&lt;/p&gt;
         </item>
         <item>
         <title>3.字符串，向量和数组</title>
-        <link>http://localhost:1313/p/3.%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%90%91%E9%87%8F%E5%92%8C%E6%95%B0%E7%BB%84/</link>
+        <link>https://Salmooo.github.io/p/3.%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%90%91%E9%87%8F%E5%92%8C%E6%95%B0%E7%BB%84/</link>
         <pubDate>Thu, 26 Jul 2018 22:18:41 +0800</pubDate>
         
-        <guid>http://localhost:1313/p/3.%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%90%91%E9%87%8F%E5%92%8C%E6%95%B0%E7%BB%84/</guid>
+        <guid>https://Salmooo.github.io/p/3.%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%90%91%E9%87%8F%E5%92%8C%E6%95%B0%E7%BB%84/</guid>
         <description>&lt;h1 id=&#34;第三章-字符串向量和数组&#34;&gt;第三章 字符串，向量和数组
 &lt;/h1&gt;&lt;h2 id=&#34;using声明&#34;&gt;using声明
 &lt;/h2&gt;&lt;ul&gt;
@@ -4387,10 +4387,10 @@ equal：确定两个序列是否保存相同的值。&lt;/p&gt;
         </item>
         <item>
         <title>2.变量类型</title>
-        <link>http://localhost:1313/p/2.%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B/</link>
+        <link>https://Salmooo.github.io/p/2.%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B/</link>
         <pubDate>Wed, 25 Jul 2018 19:12:19 +0800</pubDate>
         
-        <guid>http://localhost:1313/p/2.%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B/</guid>
+        <guid>https://Salmooo.github.io/p/2.%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B/</guid>
         <description>&lt;h1 id=&#34;第二章-变量和基本类型&#34;&gt;第二章 变量和基本类型
 &lt;/h1&gt;&lt;p&gt;任何常用的编程语言都具备一组公共的语法特征，最基本的特征包括：&lt;/p&gt;
 &lt;ul&gt;
@@ -4810,10 +4810,10 @@ equal：确定两个序列是否保存相同的值。&lt;/p&gt;
         </item>
         <item>
         <title>1.开始</title>
-        <link>http://localhost:1313/p/1.%E5%BC%80%E5%A7%8B/</link>
+        <link>https://Salmooo.github.io/p/1.%E5%BC%80%E5%A7%8B/</link>
         <pubDate>Tue, 24 Jul 2018 15:25:20 +0800</pubDate>
         
-        <guid>http://localhost:1313/p/1.%E5%BC%80%E5%A7%8B/</guid>
+        <guid>https://Salmooo.github.io/p/1.%E5%BC%80%E5%A7%8B/</guid>
         <description>&lt;h1 id=&#34;第一章-开始&#34;&gt;第一章 开始
 &lt;/h1&gt;&lt;h2 id=&#34;httpsgithubcomsalmooocpp_primer_practiceblobmasternotesch01md熟悉编译器熟悉编译器&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Salmooo/Cpp_Primer_Practice/blob/master/notes/ch01.md#%e7%86%9f%e6%82%89%e7%bc%96%e8%af%91%e5%99%a8&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;&lt;/a&gt;熟悉编译器

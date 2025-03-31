@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Git on SalmoneX Blog</title>
-        <link>http://localhost:1313/tags/git/</link>
+        <link>https://Salmooo.github.io/tags/git/</link>
         <description>Recent content in Git on SalmoneX Blog</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en</language>
         <copyright>salmone</copyright>
-        <lastBuildDate>Thu, 23 Aug 2018 19:20:22 +0800</lastBuildDate><atom:link href="http://localhost:1313/tags/git/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Thu, 23 Aug 2018 19:20:22 +0800</lastBuildDate><atom:link href="https://Salmooo.github.io/tags/git/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Git Magic</title>
-        <link>http://localhost:1313/p/git-magic/</link>
+        <link>https://Salmooo.github.io/p/git-magic/</link>
         <pubDate>Thu, 23 Aug 2018 19:20:22 +0800</pubDate>
         
-        <guid>http://localhost:1313/p/git-magic/</guid>
+        <guid>https://Salmooo.github.io/p/git-magic/</guid>
         <description>&lt;h1 id=&#34;git魔法&#34;&gt;git魔法
 &lt;/h1&gt;&lt;p&gt;Git 是一个分布式版本管理工具，版本管理工具就是大家在写东西的时候都用过 &lt;strong&gt;回撤&lt;/strong&gt;这个功能，但是回撤只能回撤几步，假如想要找回我三天之前的修改，光用回撤是找不回来的。而&lt;strong&gt;版本管理工具能记录每次的修改&lt;/strong&gt;，只要提交到版本仓库，就可以找到之前任何时刻的状态（文本状态）。&lt;/p&gt;
 &lt;p&gt;下面的内容就是列举了常用的 Git 命令和一些小技巧，可以通过页面内查找的方式 Ctrl/Command+f 进行快速查找。&lt;/p&gt;

@@ -2,25 +2,41 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Categories on SalmoneX Blog</title>
-        <link>http://localhost:1313/categories/</link>
+        <link>https://Salmooo.github.io/categories/</link>
         <description>Recent content in Categories on SalmoneX Blog</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en</language>
         <copyright>salmone</copyright>
-        <lastBuildDate>Mon, 07 Jan 2019 18:51:29 +0800</lastBuildDate><atom:link href="http://localhost:1313/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Wed, 16 Oct 2019 19:32:27 +0800</lastBuildDate><atom:link href="https://Salmooo.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Computer Network</title>
+        <link>https://Salmooo.github.io/categories/computer-network/</link>
+        <pubDate>Wed, 16 Oct 2019 19:32:27 +0800</pubDate>
+        
+        <guid>https://Salmooo.github.io/categories/computer-network/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>LLVM</title>
+        <link>https://Salmooo.github.io/categories/llvm/</link>
+        <pubDate>Tue, 18 Jun 2019 12:23:21 +0800</pubDate>
+        
+        <guid>https://Salmooo.github.io/categories/llvm/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>C&#43;&#43;</title>
-        <link>http://localhost:1313/categories/c&#43;&#43;/</link>
+        <link>https://Salmooo.github.io/categories/c&#43;&#43;/</link>
         <pubDate>Mon, 07 Jan 2019 18:51:29 +0800</pubDate>
         
-        <guid>http://localhost:1313/categories/c&#43;&#43;/</guid>
+        <guid>https://Salmooo.github.io/categories/c&#43;&#43;/</guid>
         <description></description>
         </item>
         <item>
         <title>Git</title>
-        <link>http://localhost:1313/categories/git/</link>
+        <link>https://Salmooo.github.io/categories/git/</link>
         <pubDate>Thu, 23 Aug 2018 19:20:22 +0800</pubDate>
         
-        <guid>http://localhost:1313/categories/git/</guid>
+        <guid>https://Salmooo.github.io/categories/git/</guid>
         <description></description>
         </item>
         
