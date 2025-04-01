@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="计算机网络常见问题">
+<title>计算机网络常见问题2</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%982/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="计算机网络常见问题2">
+<meta property='og:description' content="计算机网络常见问题">
+<meta property='og:url' content='https://Salmooo.github.io/p/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%982/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Computer network' /><meta property='article:tag' content='408' /><meta property='article:published_time' content='2019-11-18T21:45:27&#43;08:00'/><meta property='article:modified_time' content='2019-11-18T21:45:27&#43;08:00'/>
+<meta name="twitter:title" content="计算机网络常见问题2">
+<meta name="twitter:description" content="计算机网络常见问题">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu13739649187745961479.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li>
+      <ol>
+        <li><a href="#1-对路由协议的了解与介绍内部网关协议igp包括ripospf和外部网关协议egp和bgp"><strong>1. 对路由协议的了解与介绍。内部网关协议IGP包括RIP，OSPF，和外部网关协议EGP和BGP.</strong></a></li>
+        <li><a href="#udp如何实现可靠传输"><strong>UDP如何实现可靠传输</strong></a></li>
+        <li><a href="#2-流量控制的介绍采用滑动窗口会有什么问题死锁可能糊涂窗口综合征"><strong>2. 流量控制的介绍，采用滑动窗口会有什么问题（死锁可能，糊涂窗口综合征）？</strong></a></li>
+        <li><a href="#3-一个机器能够使用的端口号上限是多少为什么可以改变吗那如果想要用的端口超过这个限制怎么办"><strong>3. 一个机器能够使用的端口号上限是多少，为什么？可以改变吗？那如果想要用的端口超过这个限制怎么办？</strong></a></li>
+        <li><a href="#4--对称密码和非对称密码体系"><strong>4.  对称密码和非对称密码体系</strong></a></li>
+        <li><a href="#5--数字证书的了解高频"><strong>5.  数字证书的了解（高频）</strong></a></li>
+        <li><a href="#6-消息摘要算法列举一下介绍md5算法为什么md5是不可逆的有什么办法可以加强消息摘要算法的安全性让它不那么容易被破解呢百度安全一面"><strong>6. 消息摘要算法列举一下，介绍MD5算法，为什么MD5是不可逆的，有什么办法可以加强消息摘要算法的安全性让它不那么容易被破解呢？（百度安全一面）</strong></a></li>
+        <li><a href="#7-单条记录高并发访问的优化"><strong>7. 单条记录高并发访问的优化</strong></a></li>
+        <li><a href="#8--介绍一下ping的过程分别用到了哪些协议-百度安全等"><strong>8.  介绍一下ping的过程，分别用到了哪些协议 （百度安全等）</strong></a></li>
+        <li><a href="#9--tcpip的粘包与避免介绍一下"><strong>9.  TCP/IP的粘包与避免介绍一下</strong></a></li>
+        <li><a href="#10-说一下tcp的封包和拆包"><strong>10. 说一下TCP的封包和拆包</strong></a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/computer-network/" >
+                Computer Network
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%982/">计算机网络常见问题2</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            计算机网络常见问题
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Nov 18, 2019</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    1 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h3 id="1-对路由协议的了解与介绍内部网关协议igp包括ripospf和外部网关协议egp和bgp"><strong>1. 对路由协议的了解与介绍。内部网关协议IGP包括RIP，OSPF，和外部网关协议EGP和BGP.</strong>
+</h3><ul>
+<li>
+<p>A</p>
+<p>路由协议是指在计算机网络中用于确定数据包如何从源节点传输到目标节点的规则集合。常见的路由协议包括内部网关协议（IGP）和外部网关协议（EGP）。</p>
+<ol>
+<li><strong>内部网关协议（IGP）</strong>：
+<ul>
+<li><strong>RIP（路由信息协议）</strong>：RIP是一种基于距离向量的路由协议，使用跳数作为度量标准。每隔一段时间，路由器会向相邻路由器发送路由更新信息。RIP“路由信息协议(Route Information Protocol)”的简写，主要传递路由信息，通过每隔30秒广播一次路由表，维护相邻路由器的位置关系，同时根据收到的路由表信息使用动态规划的方式计算自己的路由表信息。RIP是一个距离矢量路由协议,最大跳数为16跳,16跳以及超过16跳的网络则认为目标网络不可达。</li>
+<li><strong>OSPF（开放最短路径优先）</strong>：OSPF是一种基于链路状态的路由协议，使用最短路径优先算法（Dijkstra算法）计算最佳路由。OSPF支持VLSM（可变长度子网掩码）和路由聚合。</li>
+</ul>
+</li>
+<li><strong>外部网关协议（EGP）</strong>：
+<ul>
+<li><strong>EGP（外部网关协议）</strong>：EGP是一种早期的外部网关协议，已经不再广泛使用。</li>
+<li><strong>BGP（边界网关协议）</strong>：BGP是一种路径矢量协议，用于在不同自治系统之间交换路由信息。BGP是互联网核心路由协议，负责在全球范围内的路由选择。</li>
+</ul>
+</li>
+</ol>
+<p>这些协议在计算机网络中起着至关重要的作用，帮助数据包在网络中正确快速地传</p>
+</li>
+</ul>
+<h3 id="udp如何实现可靠传输"><strong>UDP如何实现可靠传输</strong>
+</h3><p>因为UDP是无连接的协议，所以在传输层上无法保证可靠传输，要想实现可靠传输，只能从应用层实现。需要实现seq/ack机制，重传机制和窗口确认机制。</p>
+<p>就要接收方收到UDP之后回复个确认包，发送方有个机制，收不到确认包就要重新发送，每个包有递增的序号，接收方发现中间丢了包就要发重传请求，当网络太差时候频繁丢包，防止越丢包越重传的恶性循环，要有个发送窗口的限制，发送窗口的大小根据网络传输情况调整，调整算法要有一定自适应性。</p>
+<h3 id="2-流量控制的介绍采用滑动窗口会有什么问题死锁可能糊涂窗口综合征"><strong>2. 流量控制的介绍，采用滑动窗口会有什么问题（死锁可能，糊涂窗口综合征）？</strong>
+</h3><p>所谓流量控制就是让发送方发送速率不要过快，让接收方来得及接收。利用TCP报文段中的窗口大小字段来控制发送方的发送窗口不大于接收方发回的窗口大小就可以实施流量控制。</p>
+<p>考虑一种特殊的情况，就是接收方若没有缓存足够使用，就会发送零窗口大小的报文，此时发送放将发送窗口设置为0，停止发送数据。之后接收方有足够的缓存，发送了非零窗口大小的报文，但是这个报文在中途丢失的，那么发送方的发送窗口就一直为零导致死锁。</p>
+<p>解决这个问题，<strong>TCP为每一个连接设置一个持续计时器（persistence timer）</strong>。只要TCP的一方收到对方的零窗口通知，就启动该计时器，周期性的发送一个零窗口探测报文段。对方就在确认这个报文的时候给出现在的窗口大小（注意：TCP规定，即使设置为零窗口，也必须接收以下几种报文段：零窗口探测报文段、确认报文段和携带紧急数据的报文段）。</p>
+<h3 id="3-一个机器能够使用的端口号上限是多少为什么可以改变吗那如果想要用的端口超过这个限制怎么办"><strong>3. 一个机器能够使用的端口号上限是多少，为什么？可以改变吗？那如果想要用的端口超过这个限制怎么办？</strong>
+</h3><ol>
+<li>因为TCP的报文头部中<strong>源端口号和目的端口号的长度是16位</strong>，也就是可以表示2^16=65536个</li>
+</ol>
+<p>不同端口号，因此TCP可供识别的端口号最多只有65536个。<strong>但是由于0到1023是知名服务端口</strong>，所以实际上还要少1024个端口号。</p>
+<p>而对于服务器来说，<strong>可以开的端口号与65536无关，其实是受限于Linux可以打开的文件数量</strong>，并且可以通过<strong>MaxUserPort来进行配置</strong></p>
+<h3 id="4--对称密码和非对称密码体系"><strong>4.  对称密码和非对称密码体系</strong>
+</h3><p><a class="link" href="https://blog.csdn.net/qq_29689487/article/details/81634057"  target="_blank" rel="noopener"
+    >https://blog.csdn.net/qq_29689487/article/details/81634057</a></p>
+<ul>
+<li>对称加密：加密和解密使用的密钥是同一个
+<ul>
+<li>优点：计算量小，算法速度快，加密效率高</li>
+<li>缺点：密钥容易泄漏。不同的会话需要不同的密钥，管理起来很费劲</li>
+<li>常用算法：<strong>DES，3DES，IDEA，CR4，CR5，CR6，AES</strong></li>
+</ul>
+</li>
+<li>非对称加密：需要公钥和私钥，公钥用来加密，私钥用来解密
+<ul>
+<li>优点：<strong>安全，不怕泄漏</strong></li>
+<li><strong>缺点：速度慢</strong></li>
+<li>常用算法：<strong>RSA，ECC，DSA</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="5--数字证书的了解高频"><strong>5.  数字证书的了解（高频）</strong>
+</h3><p><a class="link" href="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9qaWFudHVrdS1saXdlbmJpbi5vc3MtY24tc2hhbmdoYWkuYWxpeXVuY3MuY29tLyVFOSU5RCVBMiVFNyVCQiU4RiVFNSU5MCU4OCVFOSU5QiU4Ni8lRTYlOTUlQjAlRTUlQUQlOTclRTglQUYlODElRTQlQjklQTYuanBn?x-oss-process=image/format,png"  target="_blank" rel="noopener"
+    ></a></p>
+<p>权威CA使用**私钥将网站A的信息和消息摘要（签名S）**进行加密打包形成数字证书。</p>
+<p>公钥给客户端。</p>
+<p>网站A将自己的<strong>信息和数字证书发给客户端，客户端用CA的公钥对数字证书进行解密</strong>，得到签名S，与<strong>手动将网站的信息进行消息摘要</strong>得到的结果S*进行对比，如果签名一致就证明网站A可以信任。</p>
+<h3 id="6-消息摘要算法列举一下介绍md5算法为什么md5是不可逆的有什么办法可以加强消息摘要算法的安全性让它不那么容易被破解呢百度安全一面"><strong>6. 消息摘要算法列举一下，介绍MD5算法，为什么MD5是不可逆的，有什么办法可以加强消息摘要算法的安全性让它不那么容易被破解呢？（百度安全一面）</strong>
+</h3><ul>
+<li>
+<p>消息摘要算法有MD家族（MD2，MD4，MD5），SHA家族（SHA-1,SHA-256）和CRC家族（CRC8,CRC16,CRC32）等等</p>
+</li>
+<li>
+<p>MD5算法介绍：</p>
+<p>MD5以512位分组来处理输入的信息，且每一分组又被划分为若干个小分组（16个32位子分组），经过一些列的处理后，<strong>算法输出由四个散列值</strong>（32位分组组成的128位散列值。）</p>
+</li>
+</ul>
+<ol>
+<li>MD5首先将输入的信息分成若干个512字节长度的分组，如果<strong>不够就填充1和若干个0。</strong></li>
+<li>对每个512字节的分组进行循环运算。使用四个幻数对第一个分组的数据进行四轮变换，得到四个变量。</li>
+<li>接下来对其中三个使用线性函数进行计算，与剩下一个相加，并赋值给其中某个变量，得到新的四个变量，重复16次这个过程，得到的四个变量作为幻数，与下一个分组进行相似的计算。</li>
+<li>遍历所有分组后得到的四个变量即为结果。</li>
+</ol>
+<p>详见：https://blog.csdn.net/weixin_39640298/article/details/84555814</p>
+<ul>
+<li>为什么不可逆：因为MD5在进行消息摘要的过程中，<strong>数据与原始数据相比发生了丢失</strong>，所以不能由结果进行恢复。</li>
+<li>加强安全性：<strong>加盐（加随机数）</strong></li>
+</ul>
+<h3 id="7-单条记录高并发访问的优化"><strong>7. 单条记录高并发访问的优化</strong>
+</h3><p>服务器端：</p>
+<ul>
+<li><strong>使用缓存，如redis</strong>等</li>
+<li><strong>使用分布式架</strong>构进行处理</li>
+<li>将静态页面和静态<strong>资源存储在静态资源服务器</strong>，需要处理的数据<strong>使用服务器进行计算后返回</strong></li>
+<li>将<strong>静态资源尽可能在客户端进行缓存</strong></li>
+<li>采用<strong>ngnix进行负载均衡</strong> （nginx读作恩静埃克斯 = <strong>Engine X</strong>）</li>
+</ul>
+<p>数据库端：</p>
+<ul>
+<li>数据库<strong>采用主从赋值</strong>，<strong>读写分离措施</strong></li>
+<li>建立<strong>适当的索引</strong></li>
+<li><strong>分库分表</strong></li>
+</ul>
+<h3 id="8--介绍一下ping的过程分别用到了哪些协议-百度安全等"><strong>8.  介绍一下ping的过程，分别用到了哪些协议 （百度安全等）</strong>
+</h3><p>详见：<a class="link" href="https://www.cnblogs.com/Akagi201/archive/2012/03/26/2418475.html"  target="_blank" rel="noopener"
+    >Ping原理与ICMP协议</a></p>
+<p>ping是使用ICMP协议来进行工作的。 ICMP:网络控制报文协议</p>
+<ul>
+<li>首先，ping命令会构建一个ICMP请求数据包，然后由<strong>ICMP协议将这个数据包连同目的IP地址源IP地址一起交给IP协议。</strong></li>
+<li>然后IP协议就会构建一个IP数据报，并且<strong>在映射表中查找目的IP对应的mac地址</strong>，将其交给数据<strong>链路层。</strong></li>
+<li>然后数据链路层就会构建一个数据帧，附上<strong>源mac地址和目的mac地址发送出</strong>去。</li>
+</ul>
+<p>目的主机接收到数据帧后，就会检查包上的mac地址与本机mac是否相符，如果相符，<strong>就接收并把其中的信息提取出来交给IP协议</strong>，IP协议就会<strong>将其中的信息提取出来交给ICMP协议</strong>。然后构建一个ICMP应答包，<strong>用相同的过程发送回</strong>去。</p>
+<h3 id="9--tcpip的粘包与避免介绍一下"><strong>9.  TCP/IP的粘包与避免介绍一下</strong>
+</h3><p>因为TCP为了减少额外开销，采取的是流式传输，所以接收端在一次接收的时候有可能一次接收多个包。而TCP粘包就是发送方的若干个数据包到达接收方的时候粘成了一个包。多个包首尾相接，无法区分。</p>
+<p>导致TCP粘包的原因有三方面：</p>
+<ul>
+<li><strong>发送端等待缓冲区满才进行发送，造成粘包</strong></li>
+<li><strong>接收方来不及接收缓冲区内的数据，造成粘包</strong></li>
+<li>由于TCP协议在<strong>发送较小的数据包的时候</strong>，会将<strong>几个包合成一个包后发送</strong></li>
+</ul>
+<p>避免粘包的措施：</p>
+<ul>
+<li>通过编程，<strong>强制使TCP发生数据传送</strong>，不必<strong>等到缓冲区满</strong></li>
+<li>优化接收方接收数据的过程，使其<strong>来得及接收数据包，<strong>包括提高接</strong>收进程优先级</strong>等</li>
+<li>设置<strong>固定长度的报文</strong> 或者 <strong>设置报文头部指示报文的长度</strong>。</li>
+</ul>
+<h3 id="10-说一下tcp的封包和拆包"><strong>10. 说一下TCP的封包和拆包</strong>
+</h3><p>因为TCP是无边界的流传输，所以需要对TCP进行封包和拆包，确保发送和接收的数据不粘连。</p>
+<ul>
+<li>封包：封包就是在发送数据报的时候为<strong>每个TCP数据包加上一个包头</strong>，将数据报分为包头和包体两个部分。<strong>包头是一个固定长度的结构体，里面包含该数据包的总长度。</strong></li>
+<li>拆包：接收方在接收到报文后<strong>提取包头中的长度信息进行截取。</strong></li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/computer-network/">Computer Network</a>
+        
+            <a href="/tags/408/">408</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%981/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">计算机网络常见问题1</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E5%AD%A6%E4%B9%A0%E5%B0%8F%E7%BB%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">计算机网络学习小结</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2025 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
