@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="计算机系统常见问题">
+<title>计算机系统常见问题1</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%981/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="计算机系统常见问题1">
+<meta property='og:description' content="计算机系统常见问题">
+<meta property='og:url' content='https://Salmooo.github.io/p/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%981/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Computer system' /><meta property='article:tag' content='408' /><meta property='article:published_time' content='2020-01-10T21:56:12&#43;08:00'/><meta property='article:modified_time' content='2020-01-10T21:56:12&#43;08:00'/>
+<meta name="twitter:title" content="计算机系统常见问题1">
+<meta name="twitter:description" content="计算机系统常见问题">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu13739649187745961479.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#1-死锁">1. 死锁</a></li>
+    <li><a href="#什么是死锁"><strong>什么是死锁？</strong></a></li>
+    <li><a href="#产生死锁的原因"><strong>产生死锁的原因？</strong></a></li>
+    <li><a href="#死锁产生的4个必要条件"><strong>死锁产生的4个必要条件</strong></a></li>
+    <li><a href="#预防死锁"><strong>预防死锁：</strong></a></li>
+    <li><a href="#解决死锁的基本方法"><strong>解决死锁的基本方法</strong></a></li>
+    <li><a href="#2-用户态和内核态">2. 用户态和内核态</a></li>
+    <li><a href="#3-堆和栈的区别">3. 堆和栈的区别</a></li>
+    <li><a href="#4-程序进程线程">4. 程序、进程、线程</a></li>
+    <li><a href="#5-动态库与静态库">5. 动态库与静态库</a></li>
+    <li><a href="#6-锁-互斥锁旋锁读写锁乐观锁悲观锁">6. 锁-<strong>互斥锁、⾃旋锁、读写锁、乐观锁、悲观锁</strong></a></li>
+    <li><a href="#7-fork函数">7. fork()函数</a></li>
+    <li><a href="#8-计算机启动的时候内存做了什么">8. 计算机启动的时候内存做了什么？</a></li>
+    <li><a href="#9-数据是如何拷贝到网卡的">9. 数据是如何拷贝到网卡的</a></li>
+    <li><a href="#10冯诺依曼体系结构">10.冯诺依曼体系结构</a></li>
+    <li><a href="#12-用户堆栈和系统堆栈">12. 用户堆栈和系统堆栈</a></li>
+    <li><a href="#13-电脑32位和64位有什么区别">13. 电脑32位和64位有什么区别</a></li>
+    <li><a href="#14-cpu-执行程序的过程">14. CPU 执行程序的过程</a></li>
+    <li><a href="#15-linux内核-vs-windows内核">15. Linux内核 vs Windows内核</a></li>
+    <li><a href="#16-守护进程-孤儿进程-僵尸进程">16 守护进程 孤儿进程 僵尸进程</a></li>
+  </ol>
+
+  <ol>
+    <li><a href="#1-程序进程线程概念分别是什么">1. 程序、进程、线程概念分别是什么。</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/computer-system/" >
+                Computer System
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%981/">计算机系统常见问题1</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            计算机系统常见问题
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jan 10, 2020</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    4 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="1-死锁">1. 死锁
+</h2><h2 id="什么是死锁"><strong>什么是死锁？</strong>
+</h2><p><strong>所谓死锁，是指多个进程在运行过程中因争夺资源而造成的一种僵局</strong>，当进程处于这种僵持状态时，若无外力作用，它们都将无法再向前推进。</p>
+<p>因此我们举个例子来描述，如果此时有一个线程A，按照先锁a再获得锁b的的顺序获得锁，而在此同时又有另外一个线程B，按照先锁b再锁a的顺序获得锁。如下图所示：</p>
+<p><a class="link" href="https://img-blog.csdn.net/20180922173936964?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hkMTIzNzA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70"  target="_blank" rel="noopener"
+    ></a></p>
+<h2 id="产生死锁的原因"><strong>产生死锁的原因？</strong>
+</h2><p>可归结为如下两点：</p>
+<ol>
+<li><strong>竞争资源</strong></li>
+</ol>
+<ul>
+<li>系统中的资源可以分为两类：
+<ol>
+<li>可剥夺资源，是指某进程在获得这类资源后，该资源可以再被其他进程或系统剥夺，<strong>CPU和主存均属于可剥夺性资源</strong>；</li>
+<li>另一类资源是不可剥夺资源，当系统把这类资源分配给某进程后，再不能强行收回，<strong>只能在进程用完后自行释放，如磁带机、打印机等</strong>。</li>
+</ol>
+<ul>
+<li>产生死锁中的竞争资源之一指的是<strong>竞争不可剥夺资源</strong>（例如：系统中只有一台打印机，可供进程P1使用，假定P1已占用了打印机，若P2继续要求打印机打印将阻塞）</li>
+<li>产生死锁中的竞争资源另外一种资源指的是<strong>竞争临时资源</strong>（临时资源包括硬件中断、信号、消息、缓冲区内的消息等），通常消息通信顺序进行不当，则会产生死锁</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li><strong>进程间推进顺序非法</strong></li>
+</ol>
+<ul>
+<li>若P1保持了资源R1,P2保持了资源R2，系统处于<strong>不安全状态</strong>，因为这两个进程再向前推进，便可能发生死锁</li>
+<li>例如，当P1运行到P1：Request（R2）时，将因R2已被P2占用而阻塞；当P2运行到P2：Request（R1）时，也将因R1已被P1占用而阻塞，于是发生进程死锁</li>
+</ul>
+<h2 id="死锁产生的4个必要条件"><strong>死锁产生的4个必要条件</strong>
+</h2><p>产生死锁的必要条件：</p>
+<ol>
+<li><strong>互斥条件</strong>：进程要求对所分配的资源进行排它性控制，即在<strong>一段时间内某资源仅为一进程所占用</strong>。<strong>互斥条件是指多个线程不能同时使⽤同⼀个资源</strong></li>
+<li><strong>请求和保持条件</strong>：当进程因<strong>请求资源而阻塞时，对已获得的资源保持不放</strong>。当线程 A 已经持有了资源 1，⼜想申请资源 2，⽽资源 2 已经被线程 C 持有了，所以线程 A 就会处于等待状态，但是<strong>线程</strong> <strong>A</strong> <strong>在等待资源</strong> <strong>2</strong> <strong>的同时并不会释放⾃⼰已经持有的资源</strong> <strong>1</strong></li>
+<li><strong>不可剥夺条件</strong>：进程<strong>已获得的资源在未使用完之前，不能剥夺</strong>，只能在使用完时由自己释放。</li>
+<li><strong>循环等待条件</strong>：在发生死锁时，必然存在一个进程–资源的环形链。在死锁发⽣的时候，<strong>两个线程获取资源的顺序构成了环形链</strong>。</li>
+</ol>
+<h2 id="预防死锁"><strong>预防死锁：</strong>
+</h2><ul>
+<li><strong>资源一次性分配</strong>：<strong>一次性分配所有资源</strong>，这样就不会再有请求了：（<strong>破坏请求条件）</strong></li>
+<li><strong>只要有一个资源得不到分配</strong>，<strong>也不给这个进程分配其他的资源</strong>：<strong>（破坏保持条件）</strong></li>
+<li><strong>可剥夺资源</strong>：即当某进程获得了<strong>部分资源</strong>，但得不到其它资源，则释放已占有的资源（<strong>破坏不可剥夺条件</strong>）</li>
+<li><strong>资源有序分配法</strong>：系统给每类资源赋予一个编号，<strong>每一个进程按编号递增的顺序请求资源</strong>，释放则相反（<strong>破坏环路等待条件</strong>）</li>
+</ul>
+<h2 id="解决死锁的基本方法"><strong>解决死锁的基本方法</strong>
+</h2><p>1、<strong>以确定的顺序获得锁</strong></p>
+<p>如果必须获取多个锁，那么在设计的时候需要<strong>充分考虑不同线程之前获得锁的顺序。按照上面的例子，两个线程获得锁的时序图如</strong>下：</p>
+<p><a class="link" href="https://img-blog.csdn.net/20180922174807514?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hkMTIzNzA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70"  target="_blank" rel="noopener"
+    ></a></p>
+<p>如果此时把获得锁的时序改成：</p>
+<p><a class="link" href="https://img-blog.csdn.net/20180922174829303?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hkMTIzNzA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70"  target="_blank" rel="noopener"
+    ></a></p>
+<p>那么死锁就永远不会发生。 针对两个特定的锁，<strong>开发者可以尝试按照锁对象的hashCode值大小的顺序，分别获得两个锁</strong>，这样锁总是会以特定的顺序获得锁，那么死锁也不会发生。</p>
+<p>问题变得更加复杂一些，如果此时有多个线程，都在竞争不同的锁，简单按照锁对象的hashCode进行排序（<strong>单纯按照hashCode顺序排序会出现“环路等待”</strong>），可能就无法满足要求了，这个时候开发者可以使用银行家算法，所有的锁都按照特定的顺序获取，同样可以防止死锁的发生，该算法在这里就不再赘述了，有兴趣的可以自行了解一下。</p>
+<p>2、<strong>超时放弃</strong></p>
+<p>当使用<strong>synchronized关键词提供的内置锁时，只要线程没有获得锁，那么就会永远等待下去</strong>然</p>
+<p>而Lock接口提供了boolean tryLock(long time, TimeUnit unit) throws InterruptedException方法，<strong>该方法可以按照固定时长等待锁，因此线程可以在获取锁超时以后，主动释放之前已经获得的所有的锁</strong>。通过这种方式，也可以很有效地避免死锁。 还是按照之前的例子，时序图如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">pthread_mutex_t</span> <span class="n">mutex_A</span> <span class="o">=</span> <span class="n">PTHREAD_MUTEX_INITIALIZER</span><span class="p">;</span><span class="n">pthread_mutex_t</span> <span class="n">mutex_B</span> <span class="o">=</span> <span class="n">PTHREAD_MUTEX_INITIALIZER</span><span class="p">;</span><span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>    <span class="n">pthread_t</span> <span class="n">tidA</span><span class="p">,</span> <span class="n">tidB</span><span class="p">;</span>    <span class="c1">//创建两个线程    pthread_create(&amp;tidA, NULL, threadA_proc, NULL);    pthread_create(&amp;tidB, NULL, threadB_proc, NULL);    pthread_join(tidA, NULL);    pthread_join(tidB, NULL);    printf(&#34;exit\n&#34;);    return 0;}
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">//线程函数 Avoid *threadA_proc(void *data){    printf(&#34;thread A waiting get ResourceA \n&#34;);    pthread_mutex_lock(&amp;mutex_A);    printf(&#34;thread A got ResourceA \n&#34;);    sleep(1);    printf(&#34;thread A waiting get ResourceB \n&#34;);    pthread_mutex_lock(&amp;mutex_B);    printf(&#34;thread A got ResourceB \n&#34;);    pthread_mutex_unlock(&amp;mutex_B);    pthread_mutex_unlock(&amp;mutex_A);    return (void *)0;}
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">//线程函数 Bvoid *threadB_proc(void *data){    printf(&#34;thread B waiting get ResourceB \n&#34;);    pthread_mutex_lock(&amp;mutex_B);    printf(&#34;thread B got ResourceB \n&#34;);    sleep(1);    printf(&#34;thread B waiting  get ResourceA \n&#34;);    pthread_mutex_lock(&amp;mutex_A);    printf(&#34;thread B got ResourceA \n&#34;);    pthread_mutex_unlock(&amp;mutex_A);    pthread_mutex_unlock(&amp;mutex_B);    return (void *)0;}
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>避免死锁:</strong></p>
+<p><strong>使用资源有序分配法，来破环环路等待条件</strong>。</p>
+<ul>
+<li>
+<p>预防死锁的几种策略，会严重地损害系统性能。因此在避免死锁时，要施加较弱的限制，从而获得 较满意的系统性能。由于在避免死锁的策略中，允许进程动态地申请资源。</p>
+<p>因而，<strong>系统在进行资源分配之前预先计算资源分配的安全性</strong>。若<strong>此次分配不会导致系统进入不安全的状态，则将资源分配给进程</strong>；否则，进程等待。其中最具有代表性的避免死锁算法是<strong>银行家算法</strong>。</p>
+</li>
+<li>
+<p>银行家算法：首先需要<strong>定义状态和安全状态的概念</strong>。系统的状态是当前给进程分配的资源情况。因此，状态包含两个向量<strong>Resource（系统中每种资源的总量）和Available（未分配给进程的每种资源的总量）及两个矩阵Claim（表示进程对资源的需求）和Allocation（表示当前分配给进程的资源）</strong>。</p>
+</li>
+<li>
+<p><strong>安全状态是指至少有一个资源分配序列不会导致死锁</strong>。</p>
+</li>
+<li>
+<p>当进程请求一组资源时，假设同意该请求，从而改变了系统的状态，然后确定其结果是否还处于安全状态。如果是，同意这个请求；如果不是，阻塞该进程知道同意该请求后系统状态仍然是安全的。</p>
+</li>
+</ul>
+<p><strong>检测死锁</strong></p>
+<ol>
+<li>
+<p>首先为每个进程和每个资源指定一个<strong>唯一的号码</strong>；</p>
+</li>
+<li>
+<p><strong>然后建立资源分配表和进程等待表</strong>。</p>
+<p>在 Linux 下，我们可以使用 <strong><code>pstack</code> + <code>gdb</code> 工具来定位死锁问题。</strong></p>
+<p>pstack 命令可以显示每个线程的栈跟踪信息（函数调用过程），它的使用方式也很简单，只需要 <code>pstack &lt;pid&gt;</code> 就可以了。</p>
+<p>可以看到，Thread 2 和 Thread 3 一直阻塞获取锁（<em>pthread_mutex_lock</em>）的过程，<strong>而且 pstack 多次输出信息都没有变化，那么可能大概率发生了死锁。</strong></p>
+</li>
+</ol>
+<p><strong>解除死锁:</strong></p>
+<p>当发现有进程死锁后，便应立即把它从死锁状态中解脱出来，常采用的方法有：</p>
+<ul>
+<li><strong>剥夺资源</strong>：<strong>从其它进程剥夺足够数量的资源给死锁进程</strong>，以解除死锁状态；</li>
+<li><strong>撤消进程</strong>：<strong>可以直接撤消死锁进程或撤消代价最小的进程</strong>，直至有足够的资源可用，死锁状态.消除为止；<strong>所谓代价是指优先级、运行代价、进程的重要性和价值等。</strong></li>
+</ul>
+<h2 id="2-用户态和内核态">2. 用户态和内核态
+</h2><p>用户态变为内核态：</p>
+<ol>
+<li>
+<p><strong>系统调用</strong></p>
+<p>这是用户态进程主动要求切换到内核态的一种方式，<strong>用户态进程通过系统调用申请使用操作系统提供的服务程序完成工作</strong>，比如前例中fork()实际上就是执行了一个创建新进程的系统调用。而系统调用的机制其核心还是使用了操作系统为用户特别开放的一个中断来实现，例如Linux的int 80h中断。</p>
+</li>
+<li>
+<p><strong>异常</strong></p>
+<p>当CPU在执行运行在用户态下的程序时，发生了<strong>某些事先不可知的异常</strong>，这时会触发由<strong>当前运行进程切换到处理此异常的内核相关程序</strong>中，也就转到了内核态，比如缺页异常。</p>
+</li>
+<li>
+<p><strong>外围设备的中断</strong></p>
+<p><strong>当外围设备完成用户请求的操作后，会向CPU发出相应的中断信号</strong>，<strong>这时CPU会暂停执行下一条即将要执行的指令转而去执行与中断信号对应的处理程序</strong>，如果先前执行的指令是用户态下的程序，那么这个转换的过程自然也就发生了由用户态到内核态的切换。比如硬盘读写操作完成，系统会切换到硬盘读写的中断处理程序中执行后续操作等。</p>
+</li>
+</ol>
+<h2 id="3-堆和栈的区别">3. 堆和栈的区别
+</h2><p>堆与栈的区别有：</p>
+<p>1、栈由系统自动分配，<strong>而堆是人为申请开辟</strong>；</p>
+<p>2、栈获得的空间较小，<strong>而堆获得的空间较大</strong>；</p>
+<p>3、栈由系统自动分配，<strong>速度较快</strong>，但程序员是无法控制的. <strong>而堆是由new分配的内存, 一般速度比较慢</strong>,而且容易产生内存碎片,不过用起来最方便；</p>
+<p>4、栈是连续的空间，<strong>而堆是不连续的空间</strong>。</p>
+<p>1、栈区（stack）— 由编译器自动分配释放 ，<strong>存放函数的参数值，局部变量的值等</strong>。其 操作方式类似<strong>于数据结构中的栈。</strong></p>
+<p>2、堆区（heap） — 一般由程序员分配释放， <strong>若程序员不释放，程序结束时可能由OS回收</strong> 。注意它与数据结构中的堆是两回事，<strong>分配方式倒是类似于链表</strong></p>
+<p><strong>使用栈就象我们去饭馆里吃饭，只管点菜（发出申请）、付钱、和吃（使用），吃饱了就走，不必理会切菜、洗菜等准备工作和洗碗、刷锅等扫尾工作，他的好处是快捷，但是自由度小。</strong></p>
+<p><strong>使用堆就象是自己动手做喜欢吃的菜肴，比较麻烦，但是比较符合自己的口味，而且自由度大。比喻很形象，说的很通俗易懂，不知道你是否有点收获。</strong></p>
+<p>栈： <strong>在函数调用时，第一个进栈的是主函数中后的下一条指令</strong>（函数调用语句的下一条可 执行语句）的地址，<strong>然后是函数的各个参数</strong>，<strong>在大多数的C编译器中，参数是由右往左入栈 的</strong>，然后<strong>是函数中的局部变量</strong>。<strong>注意静态变量是不入栈的</strong>。</p>
+<p>当本次函数调用结束后，局部变量先出栈，然后是参数，最后栈顶指针指向最开始存的地址，也就是主函数中的下一条指令，程序由该点继续运行。</p>
+<p>JVM</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">栈内存:栈内存首先是一片内存区域，存储的都是局部变量，凡是定义在方法中的都是局部变量（方法外的是全局变量），**for循环内部定义的也是局部变量**，是先加载函数才能进行局部变量的定义，所以方法先进栈，然后再定义变量，变量有自己的作用域，一旦离开作用域，变量就会被释放。**栈内存的更新速度很快，因为局部变量的生命周期都很短。**
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">   堆内存:存储的是数组和对象（其实数组就是对象），凡是new建立的都是在堆中，**堆中存放的都是实体（对象**），实体用于封装数据，而且是封装多个（实体的多个属性），如果一个数据消失，这个实体也没有消失，还可以用，
+</span></span><span class="line"><span class="cl">   所以堆是不会随时释放的，但是栈不一样，栈里存放的都是单个变量，变量被释放了，那就没有了。**堆里的实体虽然不会被释放，但是会被当成垃圾**，**Java有垃圾回收机制不定时的收取。**
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="4-程序进程线程">4. 程序、进程、线程
+</h2><p><strong>程序</strong>是含有<strong>指令和数据的文件</strong>，被存储在磁盘或其他的数据存储设备中，也就是说<strong>程序是静态的代码</strong>。</p>
+<p><strong>进程</strong>是程序的<strong>一次执行过程</strong>，是<strong>系统运行程序的基本单位</strong>，因此进程是动态的。系统运行一个程序<strong>即是一个进程从创建，运行到消亡的过程</strong>。简单来说，一个进程就是一个执行中的程序，它在计算机中一个指令接着一个指令地执行着，同时，每个进程还占有某些系统资源如CPU时间，内存空间，文件，文件，输入输出设备的使用权等等。换句话说，<strong>当程序在执行时，将会被操作系统载入内存中</strong>。</p>
+<p><strong>线程</strong> 是 <strong>进程</strong> 划分成的更小的运行单位。线程和进程<strong>最大的不同在于基本上各进程是独立的</strong>，而各线程则不一定，因为同一进程中的线程极有可能会相互影响。从另一角度来说，进程属于操作系统的范畴，主要是同一段时间内，可以同时执行一个以上的程序，而线程则是在同一程序内几乎同时执行一个以上的程序段。</p>
+<h2 id="5-动态库与静态库">5. 动态库与静态库
+</h2><p><strong>静态（函数）库</strong> 一般扩展名为（.a或.lib）,这类的函数库通常扩展名为libxxx.a或xxx.lib 。 <strong>这类库在编译的时候会直接整合到目标程序中</strong>，所以利用静态函数库编译成的文件会比较大，这类函数库最大的优点就是编译成功的可执行文件可以独立运行，而不再需要向外部要求读取函数库的内容；但是从升级难易度来看明显没有优势，如果函数库更新，需要重新编译。</p>
+<p><strong>动态函数库</strong> 动态函数库的扩展名一般为（.so或.dll），这类函数库通常名为libxxx.so或xxx.dll 。 与静态函数库被整个捕捉到程序中不同，<strong>动态函数库在编译的时候，在程序里只有一个“指向”的位置而已，也就是说当可执行文件需要使用到函数库的机制时，程序才会去读取函数库来使用</strong>；也就是说<strong>可执行文件无法单独运行</strong>。这样从产品功能升级角度方便升级，只要替换对应动态库即可，不必重新编译整个可执行文件。</p>
+<p>静态库特点总结如下：</p>
+<ul>
+<li>静态库对函数库的链接是放在编译时期完成的。</li>
+<li>程序在运行时与函数库再无瓜葛，移植方便。</li>
+<li>浪费空间和资源，因为所有相关的目标文件与牵涉到的函数库被链接合成一个可执行文件。</li>
+</ul>
+<p>动态库特点总结：</p>
+<ul>
+<li>动态库把对一些库函数的链接载入推迟到程序运行的时期。</li>
+<li>可以实现进程之间的资源共享。（因此动态库也称为共享库）</li>
+<li>将一些程序升级变得简单。</li>
+<li>甚至可以真正做到链接载入完全由程序员在程序代码中控制（<strong>显式调用</strong>）。</li>
+</ul>
+<h2 id="6-锁-互斥锁旋锁读写锁乐观锁悲观锁">6. 锁-<strong>互斥锁、⾃旋锁、读写锁、乐观锁、悲观锁</strong>
+</h2><p><strong>互斥锁</strong>加锁失败后，线程会<strong>释放</strong> <strong>CPU</strong> ，给其他线程；</p>
+<p><strong>⾃旋锁</strong>加锁失败后，线程会<strong>忙等待</strong>，直到它拿到锁； 自旋锁是通过 CPU 提供的 <code>CAS</code> 函数（<em>Compare And Swap</em>）<strong>需要注意，在单核 CPU 上，需要抢占式的调度器（即不断通过时钟中断一个线程，运行其他线程）。否则，自旋锁在单 CPU 上无法使用，因为一个自旋的线程永远不会放弃 CPU。</strong></p>
+<p><strong>对于互斥锁加锁失败⽽阻塞的现象，是由操作系统内核实现的</strong>。</p>
+<p>互斥锁<strong>加锁失败时，会从⽤户态陷⼊到内核态，让内核帮我们切换线程</strong>，虽然简化了使⽤锁的难度，但是<strong>存在⼀定的性能开销成本</strong>。</p>
+<p>那这个开销成本是什么呢？会有**两次线程上下⽂切换的成本，**线程的上下文切换的是什么？当两个线程是属于同一个进程，<strong>因为虚拟内存是共享的，所以在切换时，虚拟内存这些资源就保持不动，只需要切换线程的私有数据、寄存器等不共享的数据。</strong></p>
+<p><strong>如果你能确定被锁住的代码执⾏时间很短，就不应该⽤互斥锁，⽽应该选⽤⾃旋</strong></p>
+<p><strong>当加锁失败时，互斥锁⽤「线程切换」来应</strong>对，**⾃旋锁则⽤「忙等待」**来应对。</p>
+<p>如果**只读取共享资源⽤「读锁」<strong>加锁，如果要</strong>修改共享资源则⽤「写锁」**加锁。</p>
+<p>当「写锁」没有被线程持有时，多个线程能够并发地持有读锁，这⼤⼤提⾼了共享资源的访问效率，因为「读锁」是⽤于读取共享资源的场景，所以多个线程同时持有读锁也不会破坏共享资源的数据。</p>
+<p>但是，<strong>⼀旦「写锁」被线程持有后，读线程的获取读锁的操作会被阻塞</strong>，⽽且其他写线程的获取写锁的操作也会被阻塞。</p>
+<p><strong>公平读写锁⽐较简单的⼀种⽅式是：⽤队列把获取锁的线程排队，不管是写线程还是读线程都按照先进先出的原则加锁即可，这样读线程仍然可以并发，也不会出现「饥饿」的现象。</strong></p>
+<p>前⾯提到的<strong>互斥锁、⾃旋锁、读写锁，都是属于悲观锁</strong>。</p>
+<p>悲观锁做事⽐较悲观，它认为<strong>多线程同时修改共享资源的概率⽐较⾼，于是很容易出现冲突，所以访问共享资源前，先要上锁</strong>。</p>
+<p>如果多线程同时修改共享资源的概率⽐较低，就<strong>可以采⽤乐观锁。</strong></p>
+<p>乐观锁做事⽐较乐观，它假定冲突的概率很低，它的⼯作⽅式是：<strong>先修改完共享资源，再验证这段时间内有没有发⽣冲突，如果没有其他线程在修改资源，那么操作完成，如果发现有其他线程已经修改过这个资源，就放弃本次操作</strong>。</p>
+<p>可⻅，乐观锁的⼼态是，不管三七⼆⼗⼀，先改了资源再说。另外，你会发现<strong>乐观锁全程并没有加锁，所以它也叫⽆锁编程，比如在线⽂档。</strong></p>
+<p>实际上，我们常见的 SVN 和 Git 也是用了<strong>乐观锁的思想，先让用户编辑代码，然后提交的时候，通过版本号来判断是否产生了冲突</strong>，发生了冲突的地方，需要我们自己修改后，再重新提交。</p>
+<p>乐观锁虽然去除了加锁解锁的操作，<strong>但是⼀旦发⽣冲突，重试的成本⾮常⾼</strong>，所以<strong>只有在冲突概率⾮常低，且加锁成本⾮常⾼的场景时，才考虑使⽤乐观锁。</strong></p>
+<h2 id="7-fork函数">7. fork()函数
+</h2><p>fork（）函数通过系统调用<strong>创建一个与原来进程几乎完全相同的进程</strong>，copy一个<strong>进程，包括代码、数据和分配给进程的资源</strong>。</p>
+<p>也就是两个进程可以做完全相同的事，<strong>但如果初始参数或者传入的变量不同，两个进程也可以做不同的事。</strong></p>
+<p>一个进程调用fork（）函数后，系统先给新的进程分配资源，例如存储数据和代码的空间。然后把原来的进程的所有值都复制到新的新进程中，只有少数值与原来的进程的值不同。<strong>相当于克隆了一个自己</strong>。</p>
+<p>fork的实现分为以下两步</p>
+<p><strong>1. 复制进程资源 2. 执行该进程</strong></p>
+<p>复制进程的资源包括以下几步</p>
+<ol>
+<li><strong>进程控制块（PCB）</strong>：包含了进程的基本信息，如<strong>进程状态、程序计数器、堆栈指针</strong>等。</li>
+<li><strong>程序体</strong>：即代码段、数据段等，表示进程的可执行程序和数据。</li>
+<li><strong>用户栈</strong>：包含了<strong>函数调用、局部变量</strong>等信息。</li>
+<li><strong>内核栈</strong>：用于<strong>处理系统调用和中断时保存现场信息</strong>。</li>
+<li><strong>虚拟内存池</strong>：包括<strong>进程的地址空间</strong>，即进程可以使用的<strong>虚拟内存范围。</strong></li>
+<li><strong>页表</strong>：<strong>用于将虚拟地址映射到物理地址的数据结构</strong>。</li>
+</ol>
+<p>除了上述资源外，还有一些其他的资源也会被复制：</p>
+<ul>
+<li><strong>文件描述符表</strong>：<strong>指向文件的引用会被复制</strong>，但文件本身不会被复制。</li>
+<li><strong>信号处理设置</strong>：父进程设置的<strong>信号处理函数和信号屏蔽字</strong>会被复制到子进程中。</li>
+<li><strong>环境变量</strong>：父进程的<strong>环境变量</strong>会被复制到子进程中。</li>
+<li><strong>资源限制</strong>：如文件描述符数、CPU 时间等<strong>资源限制会被复制</strong>。</li>
+</ul>
+<p><strong>进行进程的话</strong>就比较简单了，只需要将其加入到<strong>就绪队列</strong>即可，<strong>接下来就等待cpu的调度了。</strong></p>
+<h2 id="8-计算机启动的时候内存做了什么">8. 计算机启动的时候内存做了什么？
+</h2><p>内存映射，<strong>CPU 地址总线的宽度决定了可访问的内存空间的大小</strong>。</p>
+<p>比如 16 位的 CPU 地址总线宽度为 20 位，地址范围是 1M。32 位的 CPU 地址总线宽度为 32 位，地址范围是 4G。你可以算算我们现在的 64 位机的地址范围。</p>
+<p><strong>内存中划分出了一片一片区域分配给外设，BIOS</strong>(基本输入输出系统)</p>
+<p>BIOS 更狠，不但其空间被映射到了内存 0xC0000 - 0xFFFFF 位置，其里面的程序还占用了开头的一些区域. BIOS 程序的入口地址也就是开始地址是 0xFFFF0（人家就那么写的）</p>
+<p><strong>在你开机的一瞬间，CPU 的 PC 寄存器被强制初始化为 0xFFFF0</strong>。如果再说具体些**，CPU 将段基址寄存器 cs 初始化为 0xF000，将偏移地址寄存器 IP 初始化为 0xFFF0**，根据实模式下的最终地址计算规则，将段基址左移 4 位，加上偏移地址，得到最终的物理地址也就是抽象出来的 PC 寄存器地址为 0xFFFF0。</p>
+<p><strong>BIOS 被映射到了内存的某个位置</strong>，并且开机一瞬间 CPU 强制将自己的 <strong>pc 寄存器初始化为 BIOS 程序的入口地址</strong>, 跳转到物理地址 0xfe05b 处开始执行</p>
+<p>这块代码会<strong>检测一些外设信息，并初始化好硬件，建立中断向量表并填写中断例程</strong></p>
+<p>BIOS 把控制权转交给排在第一位的存储设备。</p>
+<p><strong>所以 BIOS 负责加载了启动区，而启动区又负责加载真正的操作系统内核</strong></p>
+<ol>
+<li><strong>按下开机键，CPU 将 PC 寄存器的值强制初始化为 0xffff0，这个位置是 BIOS 程序的入口地址（一跳）</strong></li>
+<li><strong>该入口地址处是一个跳转指令，跳转到 0xfe05b 位置，开始执行（二跳）</strong></li>
+<li><strong>执行了一些</strong>硬件检测工作<strong>后，最后一步将启动区内容加载到内存 0x7c00，并跳转到这里（三跳）</strong></li>
+<li><strong>启动区代码主要是加载操作系统内核，并跳转到加载处（四跳）</strong></li>
+</ol>
+<p>①加电→打开电源开关，给主板和内部风扇供电。</p>
+<p>②启动引导程序→CPU开始执行存储在ROM BIOS（基本输入输出系统）中的指令。</p>
+<p>③开机自检→计算机对系统的主要部件进行诊断测试。</p>
+<p>④加载操作系统→计算机将<strong>操作系统文件从磁盘读到RAM中</strong>。</p>
+<p>⑤<strong>检查配置文件</strong>，定制操作系统的运行环境→读取配置文件，<strong>根据用户的设置对操作系统进行定制。</strong></p>
+<p>⑥<strong>准备读取命令和数据</strong>→计算机等待用户输入命令</p>
+<h2 id="9-数据是如何拷贝到网卡的">9. 数据是如何拷贝到网卡的
+</h2><p>image-20210707232134178</p>
+<h2 id="10冯诺依曼体系结构">10.冯诺依曼体系结构
+</h2><ol>
+<li>计算机处理的<strong>数据和指令一律用二进制数</strong>表示；</li>
+<li>指令和数据不加区别混合存储在<strong>同一个存储器</strong>中；</li>
+<li>顺序执行程序的每一条指令；</li>
+<li>计算机硬件由<strong>运算器、控制器、存储器、输入设备和输出设备</strong>五大部分组成。</li>
+</ol>
+<p><a class="link" href="https://img-blog.csdn.net/20130828001944015"  target="_blank" rel="noopener"
+    ></a></p>
+<h2 id="12-用户堆栈和系统堆栈">12. 用户堆栈和系统堆栈
+</h2><p><strong>内核栈</strong>是属于<strong>操作系统空间的一块固定区域</strong>，可以用于<strong>保存中断现场、保存操作系统子程序间相互调用的参数、返回值等。</strong></p>
+<p><strong>用户栈</strong>是属于<strong>用户进程空间的一块区域，<strong>用户保存</strong>用户进程子程序间的相互调用的参数、返回值等。</strong></p>
+<p>**系统栈（也叫核心栈、内核栈）**是内存中属于操作系统空间的一块区域，其主要用途为：</p>
+<p>(1)<strong>保存中断现场，对于嵌套中断，被中断程序的现场信息依次压入系统栈</strong>，中断返回时逆序弹出；</p>
+<p>(2)<strong>保存操作系统子程序间相互调用的参数、返回值、返回点以及子程序(函数)的局部变量</strong>。</p>
+<p>用户栈是用户进程空间中的一块区域，用于保存用户进程的子程序间相互调用的参数、返回值、返回点以及子程序(函数)的局部变量。</p>
+<p>那么为什么不直接用一个栈，何必浪费那么多的空间呢？？原因有二：</p>
+<p>（1）如果<strong>只用系统栈。系统栈一般大小有限</strong>，如果<strong>中断有16个优先级</strong>，那么系统栈一般大小为15（只需保存15个低优先级的中断，另一个高优先级中断处理程序处于运行），但用户程序子程序调用次数可能很多，那样15次子程序调用以后的<strong>子程序调用的参数、返回值、返回点以及子程序(函数)的局部变量就不能被保存，用户程序也就无法正常运行了</strong>。</p>
+<p>（2）如果<strong>只用用户栈。我们知道系统程序需要在某种保护下运行</strong>，而用户栈在用户空间（即<strong>cpu处于用户态</strong>，而<strong>cpu处于核心态时是受保护的</strong>），不能提供相应的<strong>保护措施</strong>（或相当困难）。</p>
+<p>核心程序的工作栈就是当前运行的用户进程的系统栈。每个进程都有自己的用户栈和系统栈。而且系统栈的大小是确定的（<strong>取决于系统允许的中断嵌套数量，即中断优先级个数</strong>）。</p>
+<p>当系统因为系统调用（软中断）或硬件中断，CPU切换到<strong>特权工作模</strong>式，进程陷入内核态，<strong>进程使用的栈也要从用户栈转向系统栈。</strong></p>
+<p><strong>从用户态到内核态要两步骤，首先是将用户堆栈地址保存到内核堆栈中</strong>，然后将<strong>CPU堆栈指针寄存器指向内核堆栈</strong>。</p>
+<p>当由<strong>内核态转向用户态，步骤首先是将内核堆栈中得用户堆栈地址恢复到CPU堆栈指针寄存器</strong>中。</p>
+<h2 id="13-电脑32位和64位有什么区别">13. 电脑32位和64位有什么区别
+</h2><p>1、<strong>计算能力不同</strong>：<strong>64位的系统理论上比32位系统快一倍</strong>，并且它们的<strong>内存寻址</strong>也不一样。</p>
+<p>2、支<strong>持的最大运行内存不同</strong>：<strong>32位的电脑最大只支持4G（<strong>一般情况只能用</strong>3.25G</strong>左右），而64位的电脑则可以支持<strong>128G甚至更大。</strong></p>
+<p>3、运行的软件不同：<strong>32位的电脑只能运行32位的软件，而64位的电脑可以运行32位的软件也可以运行64位的软件。</strong></p>
+<p>4、支持的系统不同：32位电脑支持32位的系统，而64位的电脑支持<strong>支持32位的系统也支持64位的系统</strong>。</p>
+<blockquote>
+<p>64 位相比 32 位 CPU 的优势在哪吗？64 位 CPU 的计算性能一定比 32 位 CPU 高很多吗？</p>
+</blockquote>
+<p>64 位相比 32 位 CPU 的优势主要体现在两个方面：</p>
+<ul>
+<li>
+<p>64 位 CPU 可以<strong>一次计算超过 32 位的数字</strong>，而 32 位 CPU 如果要计算超过 32 位的数字，要分多步骤进行计算，效率就没那么高。</p>
+<p>但是大部分应用程序很少会计算那么大的数字，所以<strong>只有运算大数字的时候，64 位 CPU 的优势才能体现出来，否则和 32 位 CPU 的计算性能相差不大</strong>。</p>
+</li>
+<li>
+<p>64 位 CPU 可以<strong>寻址更大的内存空间</strong>，32 位 CPU 最大的寻址地址是 4G，即使你加了 8G 大小的内存，也还是只能寻址到 4G，而 64 位 CPU 最大寻址地址是 <code>2^64</code>，远超于 32 位 CPU 最大寻址地址的 <code>2^32</code>。</p>
+</li>
+</ul>
+<blockquote>
+<p>你知道软件的 32 位和 64 位之间的区别吗？再来 32 位的操作系统可以运行在 64 位的电脑上吗？64 位的操作系统可以运行在 32 位的电脑上吗？如果不行，原因是什么？</p>
+</blockquote>
+<p>64 位和 32 位软件，实际上代表指令是 64 位还是 32 位的：</p>
+<ul>
+<li>如果 32 位指令在 64 位机器上执行，需要一套兼容机制，就可以做到兼容运行了。但是<strong>如果 64 位指令在 32 位机器上执行，就比较困难了，因为 32 位的寄存器存不下 64 位的指令</strong>；</li>
+<li>操作系统其实也是一种程序，我们也会看到操作系统会分成 32 位操作系统、64 位操作系统，其代表意义就是<strong>操作系统中程序的指令是多少位</strong>，比如 64 位操作系统，指令也就是 64 位，因此不能装在 32 位机器上。</li>
+</ul>
+<p>总之，<strong>硬件的 64 位和 32 位指的是 CPU 的位宽</strong>，<strong>软件的 64 位和 32 位指的是指令的位宽</strong>。</p>
+<h2 id="14-cpu-执行程序的过程">14. CPU 执行程序的过程
+</h2><ul>
+<li>第一步，CPU 读取「程序计数器」的值，这个值是<strong>指令的内存地址</strong>，然后 CPU 的**「控制单元」操作「地址总线」指定需要访问的内存地址**，接着通知内存设备准备数据，数据准备好后<strong>通过「数据总线」将指令数据传给 CPU</strong>，CPU 收到内存传来的数据后，将这个指<strong>令数据存入到「指令寄存器」</strong>。</li>
+<li>第二步，CPU <strong>分析「指令寄存器」中的指令</strong>，确定指令的类型和参数，如果是计算类型的指令，就把指令交给**「逻辑运算单元」运算**；如果是存储类型的指令，则交<strong>由「控制单元」执行；</strong></li>
+<li>第三步，CPU 执行完指令后，「程序计数器」的值自增，表示指向下一条指令。这个自增的大小，由 CPU 的位宽决定，比如 32 位的 CPU，指令是 4 个字节，需要 4 个内存地址存放，<strong>因此「程序计数器」的值会自增 4；</strong></li>
+</ul>
+<p>一个程序执行的时候，<strong>CPU 会根据程序计数器里的内存地址，从内存里面把需要执行的指令读取到指令寄存器里面执行，然后根据指令长度自增，开始顺序读取下一条指令。</strong></p>
+<p>现代大多数 CPU 都使用来流水线的方式来执行指令，所谓的流水线就是把<strong>一个任务拆分成多个小任务</strong>，于是一条指令通常分为 4 个阶段，称为 <strong>4 级流水</strong></p>
+<p>四个阶段的具体含义：</p>
+<ol>
+<li>CPU 通过程序计数器读取对应内存地址的指令，这个部分称为 <strong>Fetch（取得指令）</strong>；</li>
+<li>CPU 对指令进行解码，这个部分称为 <strong>Decode（指令译码）</strong>；</li>
+<li>CPU 执行指令，这个部分称为 <strong>Execution（执行指令）</strong>；</li>
+<li>CPU 将计算结果存回寄存器或者将寄存器的值存入内存，这个部分称为 <strong>Store（数据回写）</strong>；</li>
+</ol>
+<p>上面这 4 个阶段，我们称为<strong>指令周期（<em>Instrution Cycle</em>）</strong>，CPU 的工作就是一个周期接着一个周期，周而复始。</p>
+<h2 id="15-linux内核-vs-windows内核">15. Linux内核 vs Windows内核
+</h2><p>Linux 内核设计的理念主要有这几个点：</p>
+<ul>
+<li><em>MutiTask</em>，<strong>多任务</strong></li>
+<li><em>SMP</em>，<strong>对称多处理</strong></li>
+<li><em>ELF</em>，<strong>可执行文件链接格式</strong></li>
+<li><em>Monolithic Kernel</em>，<strong>宏内核</strong></li>
+</ul>
+<p><strong>MutiTask 的意思是多任务</strong>，代表着 Linux 是一个多任务的操作系统。</p>
+<p>多任务意味着可以有多个任务同时执行，这里的**「同时」可以是并发或并行：**</p>
+<ul>
+<li>对于单核 CPU 时，可以让每个任务执行一小段时间，时间到就切换另外一个任务，从宏观角度看，一段时间内执行了多个任务，这被称为并发。</li>
+<li>对于多核 CPU 时，多个任务可以同时被不同核心的 CPU 同时执行，这被称为并行。</li>
+</ul>
+<p><strong>SMP 的意思是对称多处理</strong>，代表着<strong>每个 CPU 的地位是相等的，对资源的使用权限也是相同的，多个 CPU 共享同一个内存</strong>，每个 CPU 都可以访问完整的内存和硬件资源。</p>
+<p>这个特点决定了 Linux 操作系统不会有<strong>某个 CPU 单独服务应用程序或内核程序</strong>，而是每个程序都可以被分配到任意一个 CPU 上被执行。</p>
+<p>ELF 文件</p>
+<p>ELF（Executable and Linkable Format，<strong>可执行和可链接格式</strong>）是一种用于存储可执行程序、共享库、目标代码和核心转储文件的标准文件格式。ELF 文件是在类 Unix 系统中广泛使用的一种二进制文件格式，用于表示可执行程序和库。</p>
+<p>ELF 文件包含了以下几个主要部分：</p>
+<ol>
+<li><strong>ELF 文件头</strong>：包含了描述文件类型、目标体系结构、入口点地址等信息的结构。</li>
+<li><strong>程序头表</strong>：描述了可执行文件的段（segment）和段在内存中的加载位置、大小等信息。</li>
+<li><strong>节区头表</strong>：描述了文件中各个节（section）的信息，如代码段、数据段、符号表等。</li>
+<li><strong>节区</strong>：包含了程序的实际数据和代码，如可执行代码、全局变量、字符串等。</li>
+<li><strong>符号表</strong>：包含了程序中定义和引用的符号（如变量、函数名）的信息，用于链接时的符号解析。</li>
+</ol>
+<p>ELF 文件的优点包括了灵活性和可扩展性，它能够支持多种目标体系结构和操作系统，同时也支持调试信息和动态链接等特性。由于这些优点，ELF 成为了现代 Unix 和类 Unix 系统中标准的二进制文件格式。</p>
+<p><strong>Monolithic Kernel</strong></p>
+<p>Monolithic Kernel 的意思是<strong>宏内核</strong>，Linux 内核架构就是宏内核，意味着 Linux 的内核是一个完整的可执行程序，且拥有最高的权限。</p>
+<p>宏内核的特征是系统内核的所有模块，比如进程调度、内存管理、文件系统、设备驱动等，都运行在内核态。</p>
+<p>Windows 和 Linux 一样，同样支持 MutiTask 和 SMP，但不同的是，<strong>Window 的内核设计是混合型内核</strong>，</p>
+<p>对于内核的架构一般有这三种类型：</p>
+<ul>
+<li>宏内核，包含多个模块，整个内核像一个完整的程序；</li>
+<li>微内核，有一个最小版本的内核，<strong>一些模块和服务则由用户态管理；</strong></li>
+<li>混合内核，是宏内核和微内核的结合体，内核中抽象出了微内核的概念，也就是内核中会有一个小型的内核，其他模块就在这个基础上搭建，整个内核是个完整的程序；</li>
+</ul>
+<p>Linux 的内核设计是采用了宏内核，Window 的内核设计则是采用了混合内核。</p>
+<p>这两个操作系统的可执行文件格式也不一样， Linux 可执行文件格式叫作 ELF，<strong>Windows 可执行文件格式叫作 PE。</strong></p>
+<h2 id="16-守护进程-孤儿进程-僵尸进程">16 守护进程 孤儿进程 僵尸进程
+</h2><p><strong>守护进程</strong></p>
+<p><strong>守护进程</strong>指在后台运行的，<strong>没有控制终端与之相连的进程</strong>。</p>
+<p><strong>它独立于控制终端，周期性地执行某种任务</strong>。</p>
+<p>Linux的大多数<strong>服务器</strong>就是用守护进程的方式实现的，<strong>如web服务器进程http</strong>等，udevd负责维护/dev目录下的<strong>设备文件</strong> , acpid负责<strong>电源管理，<strong>syslogd负责维护/var/log下的</strong>日志文件</strong>,</p>
+<p><strong>可以看出守护进程通常采用以d结尾的名字,表示Daemo</strong>n。</p>
+<p>精灵进程作用：<strong>提供服务。eg:内核线程：完成操作系统级别服务</strong>.</p>
+<p>创建守护进程要点：</p>
+<p><strong>（1）让程序在后台执行。方法是调用fork（）产生一个子进程，然后使父进程退出。</strong></p>
+<p>（2）<strong>调用setsid（）创建一个新对话期</strong>。控制终端、登录会话和进程组通常是从父进程继承下来的，守护进程要摆脱它们，不受它们的影响，</p>
+<p>方法是<strong>调用setsid（）<strong>使进程</strong>成为一个会话组长</strong>。setsid（）调用成功后，进程成为新的会话组长和进程组长，并与原来的登录会话、进程组和控制终端脱离。</p>
+<p><strong>（3）禁止进程重新打开控制终端。<strong>经过以上步骤，进程已经成为一个无终端的会话组长，但是它可以</strong>重新申请打开一个终端</strong>。为了避免这种情况发生，可以通过使进程不再是会话组长来实现。<strong>再一次通过fork（）创建新的子进程，使调用fork的进程退出。</strong></p>
+<p>**（4）关闭不再需要的文件描述符。**子进程从父进程继承打开的文件描述符。如不关闭，将会浪费系统资源，造成进程所在的文件系统无法卸下以及引起无法预料的错误。首先获得最高文件描述符值，然后用一个循环程序，<strong>关闭0到最高文件描述符值的所有文件描述符。</strong></p>
+<p>（5）将<strong>当前目录更改为根目录。</strong></p>
+<p>（6）子进程从父进程继承的文件创建<strong>屏蔽字可能会拒绝某些许可权</strong>。为防止这一点，使用<strong>unmask（0）将屏蔽字清零。</strong></p>
+<p>（7）处理SIGCHLD信号。对于服务器进程，在请求到来时<strong>往往生成子进程处理请求</strong>。如果子进程等待父进程捕获状态，则子进程将成为僵尸进程（zombie），从而占用系统资源。</p>
+<p>如果父进程等待子进程结束，将增加父进程的负担，影响服务器进程的并发性能。<strong>在Linux下可以简单地将SIGCHLD信号的操作设为SIG_IGN</strong>。这样，<strong>子进程结束时不会产生僵尸进程。</strong></p>
+<p><strong>孤儿进程</strong></p>
+<p><strong>如果父进程先退出，子进程还没退出</strong>，那么<strong>子进程的父进程将变为init进程</strong>。（注：任何一个进程都必须有父进程）。</p>
+<p>一个父进程退出，而它的一个或多个子进程还在运行，那么那些子进程将成为孤儿进程。<strong>孤儿进程将被init进程(进程号为1)所收养，并由init进程对它们完成状态收集工作。</strong></p>
+<p><strong>僵尸进程</strong></p>
+<p>如果<strong>子进程先退出，父进程还没退出</strong>，那么子进程必须<strong>等到父进程捕获到了子进程的退出状态才真正结束</strong>，否则这个时候子进程就成为<strong>僵尸进程</strong>。</p>
+<p>设置<strong>僵尸进程的目</strong>的是<strong>维护子进程的信息</strong>，<strong>以便父进程在以后某个时候获取</strong>。这些信息至少包括<strong>进程ID，进程的终止状态，以及该进程使用的CPU时间</strong>，所以当终止子进程的<strong>父进程调用wait或waitpid时就可以得到这些信息</strong>。</p>
+<p>如果一个进程终止，而该进程有子进程处于僵尸状态，那么它的所有僵尸子进程的父进程ID将被重置为1（init进程）。继承这些子进程的init进程将清理它们（也就是说<strong>init进程将wait它们</strong>，从而<strong>去除它们的僵尸状态</strong>）。</p>
+<p><strong>如何避免僵尸进程？</strong></p>
+<p><strong>通过signal(SIGCHLD, SIG_IGN)通知内核对子进程的结束不关心，由内核回收</strong>。如果不想让父进程挂</p>
+<p>起，可以在父进程中加入一条语句：signal(SIGCHLD,SIG_IGN);表示父进程忽略SIGCHLD信号，该</p>
+<p>信号是子进程退出的时候向父进程发送的。</p>
+<p><strong>父进程调用wait/waitpid等函数等待子进程结束</strong>，如果尚无子进程退出wait会导致父进程阻塞。waitpid可以通过传递<strong>WNOHANG使父进程不阻塞立即返回</strong>。</p>
+<p><strong>如果父进程很忙可以用signal注册信号处理函数，在信号处理函数调用wait/waitpid等待子进程退出。</strong></p>
+<p>通过两次调用fork。<strong>父进程首先调用fork创建一个子进程然后waitpid等待子进程退出，子进程再fork一个孙进程后退出</strong>。这样子进程退出后会被父进程等待回收，而对<strong>于孙子进程其父进程已经退出所以孙进程成为一个孤儿进程</strong>，<strong>孤儿进程由init进程接管，孙进程结束后，init会等待回收</strong>。</p>
+<p>第一种方法<strong>忽略SIGCHLD信号，这常用于并发服务器的性能的一个技巧因为并发服务器常常fork很多子进程</strong>，子进程终结之后需要服务器进程去wait清理资源。如果将此信号的处理方式设为忽略，可让内核把僵尸子进程转交给init进程去处理，省去了大量僵尸进程占用系统资源</p>
+<h1 id="heading">————————————————
+</h1><h2 id="1-程序进程线程概念分别是什么">1. 程序、进程、线程概念分别是什么。
+</h2><p><strong>程序</strong>是含有<strong>指令和数据的文件</strong>，被存储在磁盘或其他的数据存储设备中，也就是说程序是静态的代码。</p>
+<p><strong>进程是资源分配的基本单位</strong>，它<strong>是程序执行时的一个实例</strong>，在程序运行时创建；</p>
+<p>线程是<strong>程序执行的最小单位</strong>，是<strong>进程的子任务，是进程的一个执行流，一个线程由多个线程组成的</strong></p>
+<p>具体来说：</p>
+<ul>
+<li><strong>进程是操作系统分配资源的单位</strong>，而<strong>线程是进程的一个实体，是CPU调度和分派的基本单位</strong>。</li>
+<li><strong>线程没有独立的内存单元，不能够独立执行，必须依存在应用程序中。</strong></li>
+<li><strong>资源开销</strong>：每个进程都有<strong>独立的代码和数据空间</strong>（程序上下文），程序之间的切换<strong>会有较大的开销</strong>；线程可以看做轻量级的进程，同一类线程共享代码和数据空间，每个线程都有自己独立的运行栈和程序计数器（PC），<strong>线程之间切换的开销小</strong>。</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/computer-system/">Computer System</a>
+        
+            <a href="/tags/408/">408</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%982/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">计算机系统常见问题2</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">计算机系统学习总结</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2025 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

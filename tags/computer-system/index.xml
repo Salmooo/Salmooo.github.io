@@ -7,10 +7,649 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en</language>
         <copyright>salmone</copyright>
-        <lastBuildDate>Wed, 16 Oct 2019 19:32:27 +0800</lastBuildDate><atom:link href="https://Salmooo.github.io/tags/computer-system/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Fri, 10 Jan 2020 21:56:12 +0800</lastBuildDate><atom:link href="https://Salmooo.github.io/tags/computer-system/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>计算机系统常见问题1</title>
+        <link>https://Salmooo.github.io/p/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%981/</link>
+        <pubDate>Fri, 10 Jan 2020 21:56:12 +0800</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%981/</guid>
+        <description>&lt;h2 id=&#34;1-死锁&#34;&gt;1. 死锁
+&lt;/h2&gt;&lt;h2 id=&#34;什么是死锁&#34;&gt;&lt;strong&gt;什么是死锁？&lt;/strong&gt;
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;所谓死锁，是指多个进程在运行过程中因争夺资源而造成的一种僵局&lt;/strong&gt;，当进程处于这种僵持状态时，若无外力作用，它们都将无法再向前推进。&lt;/p&gt;
+&lt;p&gt;因此我们举个例子来描述，如果此时有一个线程A，按照先锁a再获得锁b的的顺序获得锁，而在此同时又有另外一个线程B，按照先锁b再锁a的顺序获得锁。如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://img-blog.csdn.net/20180922173936964?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hkMTIzNzA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;产生死锁的原因&#34;&gt;&lt;strong&gt;产生死锁的原因？&lt;/strong&gt;
+&lt;/h2&gt;&lt;p&gt;可归结为如下两点：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;竞争资源&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;系统中的资源可以分为两类：
+&lt;ol&gt;
+&lt;li&gt;可剥夺资源，是指某进程在获得这类资源后，该资源可以再被其他进程或系统剥夺，&lt;strong&gt;CPU和主存均属于可剥夺性资源&lt;/strong&gt;；&lt;/li&gt;
+&lt;li&gt;另一类资源是不可剥夺资源，当系统把这类资源分配给某进程后，再不能强行收回，&lt;strong&gt;只能在进程用完后自行释放，如磁带机、打印机等&lt;/strong&gt;。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;产生死锁中的竞争资源之一指的是&lt;strong&gt;竞争不可剥夺资源&lt;/strong&gt;（例如：系统中只有一台打印机，可供进程P1使用，假定P1已占用了打印机，若P2继续要求打印机打印将阻塞）&lt;/li&gt;
+&lt;li&gt;产生死锁中的竞争资源另外一种资源指的是&lt;strong&gt;竞争临时资源&lt;/strong&gt;（临时资源包括硬件中断、信号、消息、缓冲区内的消息等），通常消息通信顺序进行不当，则会产生死锁&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;进程间推进顺序非法&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;若P1保持了资源R1,P2保持了资源R2，系统处于&lt;strong&gt;不安全状态&lt;/strong&gt;，因为这两个进程再向前推进，便可能发生死锁&lt;/li&gt;
+&lt;li&gt;例如，当P1运行到P1：Request（R2）时，将因R2已被P2占用而阻塞；当P2运行到P2：Request（R1）时，也将因R1已被P1占用而阻塞，于是发生进程死锁&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;死锁产生的4个必要条件&#34;&gt;&lt;strong&gt;死锁产生的4个必要条件&lt;/strong&gt;
+&lt;/h2&gt;&lt;p&gt;产生死锁的必要条件：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;互斥条件&lt;/strong&gt;：进程要求对所分配的资源进行排它性控制，即在&lt;strong&gt;一段时间内某资源仅为一进程所占用&lt;/strong&gt;。&lt;strong&gt;互斥条件是指多个线程不能同时使⽤同⼀个资源&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;请求和保持条件&lt;/strong&gt;：当进程因&lt;strong&gt;请求资源而阻塞时，对已获得的资源保持不放&lt;/strong&gt;。当线程 A 已经持有了资源 1，⼜想申请资源 2，⽽资源 2 已经被线程 C 持有了，所以线程 A 就会处于等待状态，但是&lt;strong&gt;线程&lt;/strong&gt; &lt;strong&gt;A&lt;/strong&gt; &lt;strong&gt;在等待资源&lt;/strong&gt; &lt;strong&gt;2&lt;/strong&gt; &lt;strong&gt;的同时并不会释放⾃⼰已经持有的资源&lt;/strong&gt; &lt;strong&gt;1&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;不可剥夺条件&lt;/strong&gt;：进程&lt;strong&gt;已获得的资源在未使用完之前，不能剥夺&lt;/strong&gt;，只能在使用完时由自己释放。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;循环等待条件&lt;/strong&gt;：在发生死锁时，必然存在一个进程–资源的环形链。在死锁发⽣的时候，&lt;strong&gt;两个线程获取资源的顺序构成了环形链&lt;/strong&gt;。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;预防死锁&#34;&gt;&lt;strong&gt;预防死锁：&lt;/strong&gt;
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;资源一次性分配&lt;/strong&gt;：&lt;strong&gt;一次性分配所有资源&lt;/strong&gt;，这样就不会再有请求了：（&lt;strong&gt;破坏请求条件）&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;只要有一个资源得不到分配&lt;/strong&gt;，&lt;strong&gt;也不给这个进程分配其他的资源&lt;/strong&gt;：&lt;strong&gt;（破坏保持条件）&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;可剥夺资源&lt;/strong&gt;：即当某进程获得了&lt;strong&gt;部分资源&lt;/strong&gt;，但得不到其它资源，则释放已占有的资源（&lt;strong&gt;破坏不可剥夺条件&lt;/strong&gt;）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;资源有序分配法&lt;/strong&gt;：系统给每类资源赋予一个编号，&lt;strong&gt;每一个进程按编号递增的顺序请求资源&lt;/strong&gt;，释放则相反（&lt;strong&gt;破坏环路等待条件&lt;/strong&gt;）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;解决死锁的基本方法&#34;&gt;&lt;strong&gt;解决死锁的基本方法&lt;/strong&gt;
+&lt;/h2&gt;&lt;p&gt;1、&lt;strong&gt;以确定的顺序获得锁&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;如果必须获取多个锁，那么在设计的时候需要&lt;strong&gt;充分考虑不同线程之前获得锁的顺序。按照上面的例子，两个线程获得锁的时序图如&lt;/strong&gt;下：&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://img-blog.csdn.net/20180922174807514?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hkMTIzNzA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;如果此时把获得锁的时序改成：&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://img-blog.csdn.net/20180922174829303?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hkMTIzNzA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;那么死锁就永远不会发生。 针对两个特定的锁，&lt;strong&gt;开发者可以尝试按照锁对象的hashCode值大小的顺序，分别获得两个锁&lt;/strong&gt;，这样锁总是会以特定的顺序获得锁，那么死锁也不会发生。&lt;/p&gt;
+&lt;p&gt;问题变得更加复杂一些，如果此时有多个线程，都在竞争不同的锁，简单按照锁对象的hashCode进行排序（&lt;strong&gt;单纯按照hashCode顺序排序会出现“环路等待”&lt;/strong&gt;），可能就无法满足要求了，这个时候开发者可以使用银行家算法，所有的锁都按照特定的顺序获取，同样可以防止死锁的发生，该算法在这里就不再赘述了，有兴趣的可以自行了解一下。&lt;/p&gt;
+&lt;p&gt;2、&lt;strong&gt;超时放弃&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;当使用&lt;strong&gt;synchronized关键词提供的内置锁时，只要线程没有获得锁，那么就会永远等待下去&lt;/strong&gt;然&lt;/p&gt;
+&lt;p&gt;而Lock接口提供了boolean tryLock(long time, TimeUnit unit) throws InterruptedException方法，&lt;strong&gt;该方法可以按照固定时长等待锁，因此线程可以在获取锁超时以后，主动释放之前已经获得的所有的锁&lt;/strong&gt;。通过这种方式，也可以很有效地避免死锁。 还是按照之前的例子，时序图如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;pthread_mutex_t&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;mutex_A&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;PTHREAD_MUTEX_INITIALIZER&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;pthread_mutex_t&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;mutex_B&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;PTHREAD_MUTEX_INITIALIZER&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(){&lt;/span&gt;    &lt;span class=&#34;n&#34;&gt;pthread_t&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;tidA&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;tidB&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;    &lt;span class=&#34;c1&#34;&gt;//创建两个线程    pthread_create(&amp;amp;tidA, NULL, threadA_proc, NULL);    pthread_create(&amp;amp;tidB, NULL, threadB_proc, NULL);    pthread_join(tidA, NULL);    pthread_join(tidB, NULL);    printf(&amp;#34;exit\n&amp;#34;);    return 0;}
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;//线程函数 Avoid *threadA_proc(void *data){    printf(&amp;#34;thread A waiting get ResourceA \n&amp;#34;);    pthread_mutex_lock(&amp;amp;mutex_A);    printf(&amp;#34;thread A got ResourceA \n&amp;#34;);    sleep(1);    printf(&amp;#34;thread A waiting get ResourceB \n&amp;#34;);    pthread_mutex_lock(&amp;amp;mutex_B);    printf(&amp;#34;thread A got ResourceB \n&amp;#34;);    pthread_mutex_unlock(&amp;amp;mutex_B);    pthread_mutex_unlock(&amp;amp;mutex_A);    return (void *)0;}
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;//线程函数 Bvoid *threadB_proc(void *data){    printf(&amp;#34;thread B waiting get ResourceB \n&amp;#34;);    pthread_mutex_lock(&amp;amp;mutex_B);    printf(&amp;#34;thread B got ResourceB \n&amp;#34;);    sleep(1);    printf(&amp;#34;thread B waiting  get ResourceA \n&amp;#34;);    pthread_mutex_lock(&amp;amp;mutex_A);    printf(&amp;#34;thread B got ResourceA \n&amp;#34;);    pthread_mutex_unlock(&amp;amp;mutex_A);    pthread_mutex_unlock(&amp;amp;mutex_B);    return (void *)0;}
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;避免死锁:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;使用资源有序分配法，来破环环路等待条件&lt;/strong&gt;。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;预防死锁的几种策略，会严重地损害系统性能。因此在避免死锁时，要施加较弱的限制，从而获得 较满意的系统性能。由于在避免死锁的策略中，允许进程动态地申请资源。&lt;/p&gt;
+&lt;p&gt;因而，&lt;strong&gt;系统在进行资源分配之前预先计算资源分配的安全性&lt;/strong&gt;。若&lt;strong&gt;此次分配不会导致系统进入不安全的状态，则将资源分配给进程&lt;/strong&gt;；否则，进程等待。其中最具有代表性的避免死锁算法是&lt;strong&gt;银行家算法&lt;/strong&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;银行家算法：首先需要&lt;strong&gt;定义状态和安全状态的概念&lt;/strong&gt;。系统的状态是当前给进程分配的资源情况。因此，状态包含两个向量&lt;strong&gt;Resource（系统中每种资源的总量）和Available（未分配给进程的每种资源的总量）及两个矩阵Claim（表示进程对资源的需求）和Allocation（表示当前分配给进程的资源）&lt;/strong&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;安全状态是指至少有一个资源分配序列不会导致死锁&lt;/strong&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;当进程请求一组资源时，假设同意该请求，从而改变了系统的状态，然后确定其结果是否还处于安全状态。如果是，同意这个请求；如果不是，阻塞该进程知道同意该请求后系统状态仍然是安全的。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;检测死锁&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;首先为每个进程和每个资源指定一个&lt;strong&gt;唯一的号码&lt;/strong&gt;；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;然后建立资源分配表和进程等待表&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;在 Linux 下，我们可以使用 &lt;strong&gt;&lt;code&gt;pstack&lt;/code&gt; + &lt;code&gt;gdb&lt;/code&gt; 工具来定位死锁问题。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;pstack 命令可以显示每个线程的栈跟踪信息（函数调用过程），它的使用方式也很简单，只需要 &lt;code&gt;pstack &amp;lt;pid&amp;gt;&lt;/code&gt; 就可以了。&lt;/p&gt;
+&lt;p&gt;可以看到，Thread 2 和 Thread 3 一直阻塞获取锁（&lt;em&gt;pthread_mutex_lock&lt;/em&gt;）的过程，&lt;strong&gt;而且 pstack 多次输出信息都没有变化，那么可能大概率发生了死锁。&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;解除死锁:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;当发现有进程死锁后，便应立即把它从死锁状态中解脱出来，常采用的方法有：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;剥夺资源&lt;/strong&gt;：&lt;strong&gt;从其它进程剥夺足够数量的资源给死锁进程&lt;/strong&gt;，以解除死锁状态；&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;撤消进程&lt;/strong&gt;：&lt;strong&gt;可以直接撤消死锁进程或撤消代价最小的进程&lt;/strong&gt;，直至有足够的资源可用，死锁状态.消除为止；&lt;strong&gt;所谓代价是指优先级、运行代价、进程的重要性和价值等。&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;2-用户态和内核态&#34;&gt;2. 用户态和内核态
+&lt;/h2&gt;&lt;p&gt;用户态变为内核态：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;系统调用&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;这是用户态进程主动要求切换到内核态的一种方式，&lt;strong&gt;用户态进程通过系统调用申请使用操作系统提供的服务程序完成工作&lt;/strong&gt;，比如前例中fork()实际上就是执行了一个创建新进程的系统调用。而系统调用的机制其核心还是使用了操作系统为用户特别开放的一个中断来实现，例如Linux的int 80h中断。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;异常&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;当CPU在执行运行在用户态下的程序时，发生了&lt;strong&gt;某些事先不可知的异常&lt;/strong&gt;，这时会触发由&lt;strong&gt;当前运行进程切换到处理此异常的内核相关程序&lt;/strong&gt;中，也就转到了内核态，比如缺页异常。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;外围设备的中断&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;当外围设备完成用户请求的操作后，会向CPU发出相应的中断信号&lt;/strong&gt;，&lt;strong&gt;这时CPU会暂停执行下一条即将要执行的指令转而去执行与中断信号对应的处理程序&lt;/strong&gt;，如果先前执行的指令是用户态下的程序，那么这个转换的过程自然也就发生了由用户态到内核态的切换。比如硬盘读写操作完成，系统会切换到硬盘读写的中断处理程序中执行后续操作等。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;3-堆和栈的区别&#34;&gt;3. 堆和栈的区别
+&lt;/h2&gt;&lt;p&gt;堆与栈的区别有：&lt;/p&gt;
+&lt;p&gt;1、栈由系统自动分配，&lt;strong&gt;而堆是人为申请开辟&lt;/strong&gt;；&lt;/p&gt;
+&lt;p&gt;2、栈获得的空间较小，&lt;strong&gt;而堆获得的空间较大&lt;/strong&gt;；&lt;/p&gt;
+&lt;p&gt;3、栈由系统自动分配，&lt;strong&gt;速度较快&lt;/strong&gt;，但程序员是无法控制的. &lt;strong&gt;而堆是由new分配的内存, 一般速度比较慢&lt;/strong&gt;,而且容易产生内存碎片,不过用起来最方便；&lt;/p&gt;
+&lt;p&gt;4、栈是连续的空间，&lt;strong&gt;而堆是不连续的空间&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;1、栈区（stack）— 由编译器自动分配释放 ，&lt;strong&gt;存放函数的参数值，局部变量的值等&lt;/strong&gt;。其 操作方式类似&lt;strong&gt;于数据结构中的栈。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;2、堆区（heap） — 一般由程序员分配释放， &lt;strong&gt;若程序员不释放，程序结束时可能由OS回收&lt;/strong&gt; 。注意它与数据结构中的堆是两回事，&lt;strong&gt;分配方式倒是类似于链表&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;使用栈就象我们去饭馆里吃饭，只管点菜（发出申请）、付钱、和吃（使用），吃饱了就走，不必理会切菜、洗菜等准备工作和洗碗、刷锅等扫尾工作，他的好处是快捷，但是自由度小。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;使用堆就象是自己动手做喜欢吃的菜肴，比较麻烦，但是比较符合自己的口味，而且自由度大。比喻很形象，说的很通俗易懂，不知道你是否有点收获。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;栈： &lt;strong&gt;在函数调用时，第一个进栈的是主函数中后的下一条指令&lt;/strong&gt;（函数调用语句的下一条可 执行语句）的地址，&lt;strong&gt;然后是函数的各个参数&lt;/strong&gt;，&lt;strong&gt;在大多数的C编译器中，参数是由右往左入栈 的&lt;/strong&gt;，然后&lt;strong&gt;是函数中的局部变量&lt;/strong&gt;。&lt;strong&gt;注意静态变量是不入栈的&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;当本次函数调用结束后，局部变量先出栈，然后是参数，最后栈顶指针指向最开始存的地址，也就是主函数中的下一条指令，程序由该点继续运行。&lt;/p&gt;
+&lt;p&gt;JVM&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;栈内存:栈内存首先是一片内存区域，存储的都是局部变量，凡是定义在方法中的都是局部变量（方法外的是全局变量），**for循环内部定义的也是局部变量**，是先加载函数才能进行局部变量的定义，所以方法先进栈，然后再定义变量，变量有自己的作用域，一旦离开作用域，变量就会被释放。**栈内存的更新速度很快，因为局部变量的生命周期都很短。**
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   堆内存:存储的是数组和对象（其实数组就是对象），凡是new建立的都是在堆中，**堆中存放的都是实体（对象**），实体用于封装数据，而且是封装多个（实体的多个属性），如果一个数据消失，这个实体也没有消失，还可以用，
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   所以堆是不会随时释放的，但是栈不一样，栈里存放的都是单个变量，变量被释放了，那就没有了。**堆里的实体虽然不会被释放，但是会被当成垃圾**，**Java有垃圾回收机制不定时的收取。**
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;4-程序进程线程&#34;&gt;4. 程序、进程、线程
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;程序&lt;/strong&gt;是含有&lt;strong&gt;指令和数据的文件&lt;/strong&gt;，被存储在磁盘或其他的数据存储设备中，也就是说&lt;strong&gt;程序是静态的代码&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;进程&lt;/strong&gt;是程序的&lt;strong&gt;一次执行过程&lt;/strong&gt;，是&lt;strong&gt;系统运行程序的基本单位&lt;/strong&gt;，因此进程是动态的。系统运行一个程序&lt;strong&gt;即是一个进程从创建，运行到消亡的过程&lt;/strong&gt;。简单来说，一个进程就是一个执行中的程序，它在计算机中一个指令接着一个指令地执行着，同时，每个进程还占有某些系统资源如CPU时间，内存空间，文件，文件，输入输出设备的使用权等等。换句话说，&lt;strong&gt;当程序在执行时，将会被操作系统载入内存中&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;线程&lt;/strong&gt; 是 &lt;strong&gt;进程&lt;/strong&gt; 划分成的更小的运行单位。线程和进程&lt;strong&gt;最大的不同在于基本上各进程是独立的&lt;/strong&gt;，而各线程则不一定，因为同一进程中的线程极有可能会相互影响。从另一角度来说，进程属于操作系统的范畴，主要是同一段时间内，可以同时执行一个以上的程序，而线程则是在同一程序内几乎同时执行一个以上的程序段。&lt;/p&gt;
+&lt;h2 id=&#34;5-动态库与静态库&#34;&gt;5. 动态库与静态库
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;静态（函数）库&lt;/strong&gt; 一般扩展名为（.a或.lib）,这类的函数库通常扩展名为libxxx.a或xxx.lib 。 &lt;strong&gt;这类库在编译的时候会直接整合到目标程序中&lt;/strong&gt;，所以利用静态函数库编译成的文件会比较大，这类函数库最大的优点就是编译成功的可执行文件可以独立运行，而不再需要向外部要求读取函数库的内容；但是从升级难易度来看明显没有优势，如果函数库更新，需要重新编译。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;动态函数库&lt;/strong&gt; 动态函数库的扩展名一般为（.so或.dll），这类函数库通常名为libxxx.so或xxx.dll 。 与静态函数库被整个捕捉到程序中不同，&lt;strong&gt;动态函数库在编译的时候，在程序里只有一个“指向”的位置而已，也就是说当可执行文件需要使用到函数库的机制时，程序才会去读取函数库来使用&lt;/strong&gt;；也就是说&lt;strong&gt;可执行文件无法单独运行&lt;/strong&gt;。这样从产品功能升级角度方便升级，只要替换对应动态库即可，不必重新编译整个可执行文件。&lt;/p&gt;
+&lt;p&gt;静态库特点总结如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;静态库对函数库的链接是放在编译时期完成的。&lt;/li&gt;
+&lt;li&gt;程序在运行时与函数库再无瓜葛，移植方便。&lt;/li&gt;
+&lt;li&gt;浪费空间和资源，因为所有相关的目标文件与牵涉到的函数库被链接合成一个可执行文件。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;动态库特点总结：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;动态库把对一些库函数的链接载入推迟到程序运行的时期。&lt;/li&gt;
+&lt;li&gt;可以实现进程之间的资源共享。（因此动态库也称为共享库）&lt;/li&gt;
+&lt;li&gt;将一些程序升级变得简单。&lt;/li&gt;
+&lt;li&gt;甚至可以真正做到链接载入完全由程序员在程序代码中控制（&lt;strong&gt;显式调用&lt;/strong&gt;）。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;6-锁-互斥锁旋锁读写锁乐观锁悲观锁&#34;&gt;6. 锁-&lt;strong&gt;互斥锁、⾃旋锁、读写锁、乐观锁、悲观锁&lt;/strong&gt;
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;互斥锁&lt;/strong&gt;加锁失败后，线程会&lt;strong&gt;释放&lt;/strong&gt; &lt;strong&gt;CPU&lt;/strong&gt; ，给其他线程；&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;⾃旋锁&lt;/strong&gt;加锁失败后，线程会&lt;strong&gt;忙等待&lt;/strong&gt;，直到它拿到锁； 自旋锁是通过 CPU 提供的 &lt;code&gt;CAS&lt;/code&gt; 函数（&lt;em&gt;Compare And Swap&lt;/em&gt;）&lt;strong&gt;需要注意，在单核 CPU 上，需要抢占式的调度器（即不断通过时钟中断一个线程，运行其他线程）。否则，自旋锁在单 CPU 上无法使用，因为一个自旋的线程永远不会放弃 CPU。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;对于互斥锁加锁失败⽽阻塞的现象，是由操作系统内核实现的&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;互斥锁&lt;strong&gt;加锁失败时，会从⽤户态陷⼊到内核态，让内核帮我们切换线程&lt;/strong&gt;，虽然简化了使⽤锁的难度，但是&lt;strong&gt;存在⼀定的性能开销成本&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;那这个开销成本是什么呢？会有**两次线程上下⽂切换的成本，**线程的上下文切换的是什么？当两个线程是属于同一个进程，&lt;strong&gt;因为虚拟内存是共享的，所以在切换时，虚拟内存这些资源就保持不动，只需要切换线程的私有数据、寄存器等不共享的数据。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;如果你能确定被锁住的代码执⾏时间很短，就不应该⽤互斥锁，⽽应该选⽤⾃旋&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;当加锁失败时，互斥锁⽤「线程切换」来应&lt;/strong&gt;对，**⾃旋锁则⽤「忙等待」**来应对。&lt;/p&gt;
+&lt;p&gt;如果**只读取共享资源⽤「读锁」&lt;strong&gt;加锁，如果要&lt;/strong&gt;修改共享资源则⽤「写锁」**加锁。&lt;/p&gt;
+&lt;p&gt;当「写锁」没有被线程持有时，多个线程能够并发地持有读锁，这⼤⼤提⾼了共享资源的访问效率，因为「读锁」是⽤于读取共享资源的场景，所以多个线程同时持有读锁也不会破坏共享资源的数据。&lt;/p&gt;
+&lt;p&gt;但是，&lt;strong&gt;⼀旦「写锁」被线程持有后，读线程的获取读锁的操作会被阻塞&lt;/strong&gt;，⽽且其他写线程的获取写锁的操作也会被阻塞。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;公平读写锁⽐较简单的⼀种⽅式是：⽤队列把获取锁的线程排队，不管是写线程还是读线程都按照先进先出的原则加锁即可，这样读线程仍然可以并发，也不会出现「饥饿」的现象。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;前⾯提到的&lt;strong&gt;互斥锁、⾃旋锁、读写锁，都是属于悲观锁&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;悲观锁做事⽐较悲观，它认为&lt;strong&gt;多线程同时修改共享资源的概率⽐较⾼，于是很容易出现冲突，所以访问共享资源前，先要上锁&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;如果多线程同时修改共享资源的概率⽐较低，就&lt;strong&gt;可以采⽤乐观锁。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;乐观锁做事⽐较乐观，它假定冲突的概率很低，它的⼯作⽅式是：&lt;strong&gt;先修改完共享资源，再验证这段时间内有没有发⽣冲突，如果没有其他线程在修改资源，那么操作完成，如果发现有其他线程已经修改过这个资源，就放弃本次操作&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;可⻅，乐观锁的⼼态是，不管三七⼆⼗⼀，先改了资源再说。另外，你会发现&lt;strong&gt;乐观锁全程并没有加锁，所以它也叫⽆锁编程，比如在线⽂档。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;实际上，我们常见的 SVN 和 Git 也是用了&lt;strong&gt;乐观锁的思想，先让用户编辑代码，然后提交的时候，通过版本号来判断是否产生了冲突&lt;/strong&gt;，发生了冲突的地方，需要我们自己修改后，再重新提交。&lt;/p&gt;
+&lt;p&gt;乐观锁虽然去除了加锁解锁的操作，&lt;strong&gt;但是⼀旦发⽣冲突，重试的成本⾮常⾼&lt;/strong&gt;，所以&lt;strong&gt;只有在冲突概率⾮常低，且加锁成本⾮常⾼的场景时，才考虑使⽤乐观锁。&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id=&#34;7-fork函数&#34;&gt;7. fork()函数
+&lt;/h2&gt;&lt;p&gt;fork（）函数通过系统调用&lt;strong&gt;创建一个与原来进程几乎完全相同的进程&lt;/strong&gt;，copy一个&lt;strong&gt;进程，包括代码、数据和分配给进程的资源&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;也就是两个进程可以做完全相同的事，&lt;strong&gt;但如果初始参数或者传入的变量不同，两个进程也可以做不同的事。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;一个进程调用fork（）函数后，系统先给新的进程分配资源，例如存储数据和代码的空间。然后把原来的进程的所有值都复制到新的新进程中，只有少数值与原来的进程的值不同。&lt;strong&gt;相当于克隆了一个自己&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;fork的实现分为以下两步&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1. 复制进程资源 2. 执行该进程&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;复制进程的资源包括以下几步&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;进程控制块（PCB）&lt;/strong&gt;：包含了进程的基本信息，如&lt;strong&gt;进程状态、程序计数器、堆栈指针&lt;/strong&gt;等。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;程序体&lt;/strong&gt;：即代码段、数据段等，表示进程的可执行程序和数据。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;用户栈&lt;/strong&gt;：包含了&lt;strong&gt;函数调用、局部变量&lt;/strong&gt;等信息。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;内核栈&lt;/strong&gt;：用于&lt;strong&gt;处理系统调用和中断时保存现场信息&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;虚拟内存池&lt;/strong&gt;：包括&lt;strong&gt;进程的地址空间&lt;/strong&gt;，即进程可以使用的&lt;strong&gt;虚拟内存范围。&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;页表&lt;/strong&gt;：&lt;strong&gt;用于将虚拟地址映射到物理地址的数据结构&lt;/strong&gt;。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;除了上述资源外，还有一些其他的资源也会被复制：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;文件描述符表&lt;/strong&gt;：&lt;strong&gt;指向文件的引用会被复制&lt;/strong&gt;，但文件本身不会被复制。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;信号处理设置&lt;/strong&gt;：父进程设置的&lt;strong&gt;信号处理函数和信号屏蔽字&lt;/strong&gt;会被复制到子进程中。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;环境变量&lt;/strong&gt;：父进程的&lt;strong&gt;环境变量&lt;/strong&gt;会被复制到子进程中。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;资源限制&lt;/strong&gt;：如文件描述符数、CPU 时间等&lt;strong&gt;资源限制会被复制&lt;/strong&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;进行进程的话&lt;/strong&gt;就比较简单了，只需要将其加入到&lt;strong&gt;就绪队列&lt;/strong&gt;即可，&lt;strong&gt;接下来就等待cpu的调度了。&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id=&#34;8-计算机启动的时候内存做了什么&#34;&gt;8. 计算机启动的时候内存做了什么？
+&lt;/h2&gt;&lt;p&gt;内存映射，&lt;strong&gt;CPU 地址总线的宽度决定了可访问的内存空间的大小&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;比如 16 位的 CPU 地址总线宽度为 20 位，地址范围是 1M。32 位的 CPU 地址总线宽度为 32 位，地址范围是 4G。你可以算算我们现在的 64 位机的地址范围。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;内存中划分出了一片一片区域分配给外设，BIOS&lt;/strong&gt;(基本输入输出系统)&lt;/p&gt;
+&lt;p&gt;BIOS 更狠，不但其空间被映射到了内存 0xC0000 - 0xFFFFF 位置，其里面的程序还占用了开头的一些区域. BIOS 程序的入口地址也就是开始地址是 0xFFFF0（人家就那么写的）&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;在你开机的一瞬间，CPU 的 PC 寄存器被强制初始化为 0xFFFF0&lt;/strong&gt;。如果再说具体些**，CPU 将段基址寄存器 cs 初始化为 0xF000，将偏移地址寄存器 IP 初始化为 0xFFF0**，根据实模式下的最终地址计算规则，将段基址左移 4 位，加上偏移地址，得到最终的物理地址也就是抽象出来的 PC 寄存器地址为 0xFFFF0。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;BIOS 被映射到了内存的某个位置&lt;/strong&gt;，并且开机一瞬间 CPU 强制将自己的 &lt;strong&gt;pc 寄存器初始化为 BIOS 程序的入口地址&lt;/strong&gt;, 跳转到物理地址 0xfe05b 处开始执行&lt;/p&gt;
+&lt;p&gt;这块代码会&lt;strong&gt;检测一些外设信息，并初始化好硬件，建立中断向量表并填写中断例程&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;BIOS 把控制权转交给排在第一位的存储设备。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;所以 BIOS 负责加载了启动区，而启动区又负责加载真正的操作系统内核&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;按下开机键，CPU 将 PC 寄存器的值强制初始化为 0xffff0，这个位置是 BIOS 程序的入口地址（一跳）&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;该入口地址处是一个跳转指令，跳转到 0xfe05b 位置，开始执行（二跳）&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;执行了一些&lt;/strong&gt;硬件检测工作&lt;strong&gt;后，最后一步将启动区内容加载到内存 0x7c00，并跳转到这里（三跳）&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;启动区代码主要是加载操作系统内核，并跳转到加载处（四跳）&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;①加电→打开电源开关，给主板和内部风扇供电。&lt;/p&gt;
+&lt;p&gt;②启动引导程序→CPU开始执行存储在ROM BIOS（基本输入输出系统）中的指令。&lt;/p&gt;
+&lt;p&gt;③开机自检→计算机对系统的主要部件进行诊断测试。&lt;/p&gt;
+&lt;p&gt;④加载操作系统→计算机将&lt;strong&gt;操作系统文件从磁盘读到RAM中&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;⑤&lt;strong&gt;检查配置文件&lt;/strong&gt;，定制操作系统的运行环境→读取配置文件，&lt;strong&gt;根据用户的设置对操作系统进行定制。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;⑥&lt;strong&gt;准备读取命令和数据&lt;/strong&gt;→计算机等待用户输入命令&lt;/p&gt;
+&lt;h2 id=&#34;9-数据是如何拷贝到网卡的&#34;&gt;9. 数据是如何拷贝到网卡的
+&lt;/h2&gt;&lt;p&gt;image-20210707232134178&lt;/p&gt;
+&lt;h2 id=&#34;10冯诺依曼体系结构&#34;&gt;10.冯诺依曼体系结构
+&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;计算机处理的&lt;strong&gt;数据和指令一律用二进制数&lt;/strong&gt;表示；&lt;/li&gt;
+&lt;li&gt;指令和数据不加区别混合存储在&lt;strong&gt;同一个存储器&lt;/strong&gt;中；&lt;/li&gt;
+&lt;li&gt;顺序执行程序的每一条指令；&lt;/li&gt;
+&lt;li&gt;计算机硬件由&lt;strong&gt;运算器、控制器、存储器、输入设备和输出设备&lt;/strong&gt;五大部分组成。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://img-blog.csdn.net/20130828001944015&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;12-用户堆栈和系统堆栈&#34;&gt;12. 用户堆栈和系统堆栈
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;内核栈&lt;/strong&gt;是属于&lt;strong&gt;操作系统空间的一块固定区域&lt;/strong&gt;，可以用于&lt;strong&gt;保存中断现场、保存操作系统子程序间相互调用的参数、返回值等。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;用户栈&lt;/strong&gt;是属于&lt;strong&gt;用户进程空间的一块区域，&lt;strong&gt;用户保存&lt;/strong&gt;用户进程子程序间的相互调用的参数、返回值等。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;**系统栈（也叫核心栈、内核栈）**是内存中属于操作系统空间的一块区域，其主要用途为：&lt;/p&gt;
+&lt;p&gt;(1)&lt;strong&gt;保存中断现场，对于嵌套中断，被中断程序的现场信息依次压入系统栈&lt;/strong&gt;，中断返回时逆序弹出；&lt;/p&gt;
+&lt;p&gt;(2)&lt;strong&gt;保存操作系统子程序间相互调用的参数、返回值、返回点以及子程序(函数)的局部变量&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;用户栈是用户进程空间中的一块区域，用于保存用户进程的子程序间相互调用的参数、返回值、返回点以及子程序(函数)的局部变量。&lt;/p&gt;
+&lt;p&gt;那么为什么不直接用一个栈，何必浪费那么多的空间呢？？原因有二：&lt;/p&gt;
+&lt;p&gt;（1）如果&lt;strong&gt;只用系统栈。系统栈一般大小有限&lt;/strong&gt;，如果&lt;strong&gt;中断有16个优先级&lt;/strong&gt;，那么系统栈一般大小为15（只需保存15个低优先级的中断，另一个高优先级中断处理程序处于运行），但用户程序子程序调用次数可能很多，那样15次子程序调用以后的&lt;strong&gt;子程序调用的参数、返回值、返回点以及子程序(函数)的局部变量就不能被保存，用户程序也就无法正常运行了&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;（2）如果&lt;strong&gt;只用用户栈。我们知道系统程序需要在某种保护下运行&lt;/strong&gt;，而用户栈在用户空间（即&lt;strong&gt;cpu处于用户态&lt;/strong&gt;，而&lt;strong&gt;cpu处于核心态时是受保护的&lt;/strong&gt;），不能提供相应的&lt;strong&gt;保护措施&lt;/strong&gt;（或相当困难）。&lt;/p&gt;
+&lt;p&gt;核心程序的工作栈就是当前运行的用户进程的系统栈。每个进程都有自己的用户栈和系统栈。而且系统栈的大小是确定的（&lt;strong&gt;取决于系统允许的中断嵌套数量，即中断优先级个数&lt;/strong&gt;）。&lt;/p&gt;
+&lt;p&gt;当系统因为系统调用（软中断）或硬件中断，CPU切换到&lt;strong&gt;特权工作模&lt;/strong&gt;式，进程陷入内核态，&lt;strong&gt;进程使用的栈也要从用户栈转向系统栈。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;从用户态到内核态要两步骤，首先是将用户堆栈地址保存到内核堆栈中&lt;/strong&gt;，然后将&lt;strong&gt;CPU堆栈指针寄存器指向内核堆栈&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;当由&lt;strong&gt;内核态转向用户态，步骤首先是将内核堆栈中得用户堆栈地址恢复到CPU堆栈指针寄存器&lt;/strong&gt;中。&lt;/p&gt;
+&lt;h2 id=&#34;13-电脑32位和64位有什么区别&#34;&gt;13. 电脑32位和64位有什么区别
+&lt;/h2&gt;&lt;p&gt;1、&lt;strong&gt;计算能力不同&lt;/strong&gt;：&lt;strong&gt;64位的系统理论上比32位系统快一倍&lt;/strong&gt;，并且它们的&lt;strong&gt;内存寻址&lt;/strong&gt;也不一样。&lt;/p&gt;
+&lt;p&gt;2、支&lt;strong&gt;持的最大运行内存不同&lt;/strong&gt;：&lt;strong&gt;32位的电脑最大只支持4G（&lt;strong&gt;一般情况只能用&lt;/strong&gt;3.25G&lt;/strong&gt;左右），而64位的电脑则可以支持&lt;strong&gt;128G甚至更大。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;3、运行的软件不同：&lt;strong&gt;32位的电脑只能运行32位的软件，而64位的电脑可以运行32位的软件也可以运行64位的软件。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;4、支持的系统不同：32位电脑支持32位的系统，而64位的电脑支持&lt;strong&gt;支持32位的系统也支持64位的系统&lt;/strong&gt;。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;64 位相比 32 位 CPU 的优势在哪吗？64 位 CPU 的计算性能一定比 32 位 CPU 高很多吗？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;64 位相比 32 位 CPU 的优势主要体现在两个方面：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;64 位 CPU 可以&lt;strong&gt;一次计算超过 32 位的数字&lt;/strong&gt;，而 32 位 CPU 如果要计算超过 32 位的数字，要分多步骤进行计算，效率就没那么高。&lt;/p&gt;
+&lt;p&gt;但是大部分应用程序很少会计算那么大的数字，所以&lt;strong&gt;只有运算大数字的时候，64 位 CPU 的优势才能体现出来，否则和 32 位 CPU 的计算性能相差不大&lt;/strong&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;64 位 CPU 可以&lt;strong&gt;寻址更大的内存空间&lt;/strong&gt;，32 位 CPU 最大的寻址地址是 4G，即使你加了 8G 大小的内存，也还是只能寻址到 4G，而 64 位 CPU 最大寻址地址是 &lt;code&gt;2^64&lt;/code&gt;，远超于 32 位 CPU 最大寻址地址的 &lt;code&gt;2^32&lt;/code&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;你知道软件的 32 位和 64 位之间的区别吗？再来 32 位的操作系统可以运行在 64 位的电脑上吗？64 位的操作系统可以运行在 32 位的电脑上吗？如果不行，原因是什么？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;64 位和 32 位软件，实际上代表指令是 64 位还是 32 位的：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果 32 位指令在 64 位机器上执行，需要一套兼容机制，就可以做到兼容运行了。但是&lt;strong&gt;如果 64 位指令在 32 位机器上执行，就比较困难了，因为 32 位的寄存器存不下 64 位的指令&lt;/strong&gt;；&lt;/li&gt;
+&lt;li&gt;操作系统其实也是一种程序，我们也会看到操作系统会分成 32 位操作系统、64 位操作系统，其代表意义就是&lt;strong&gt;操作系统中程序的指令是多少位&lt;/strong&gt;，比如 64 位操作系统，指令也就是 64 位，因此不能装在 32 位机器上。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;总之，&lt;strong&gt;硬件的 64 位和 32 位指的是 CPU 的位宽&lt;/strong&gt;，&lt;strong&gt;软件的 64 位和 32 位指的是指令的位宽&lt;/strong&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;14-cpu-执行程序的过程&#34;&gt;14. CPU 执行程序的过程
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;第一步，CPU 读取「程序计数器」的值，这个值是&lt;strong&gt;指令的内存地址&lt;/strong&gt;，然后 CPU 的**「控制单元」操作「地址总线」指定需要访问的内存地址**，接着通知内存设备准备数据，数据准备好后&lt;strong&gt;通过「数据总线」将指令数据传给 CPU&lt;/strong&gt;，CPU 收到内存传来的数据后，将这个指&lt;strong&gt;令数据存入到「指令寄存器」&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;第二步，CPU &lt;strong&gt;分析「指令寄存器」中的指令&lt;/strong&gt;，确定指令的类型和参数，如果是计算类型的指令，就把指令交给**「逻辑运算单元」运算**；如果是存储类型的指令，则交&lt;strong&gt;由「控制单元」执行；&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;第三步，CPU 执行完指令后，「程序计数器」的值自增，表示指向下一条指令。这个自增的大小，由 CPU 的位宽决定，比如 32 位的 CPU，指令是 4 个字节，需要 4 个内存地址存放，&lt;strong&gt;因此「程序计数器」的值会自增 4；&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;一个程序执行的时候，&lt;strong&gt;CPU 会根据程序计数器里的内存地址，从内存里面把需要执行的指令读取到指令寄存器里面执行，然后根据指令长度自增，开始顺序读取下一条指令。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;现代大多数 CPU 都使用来流水线的方式来执行指令，所谓的流水线就是把&lt;strong&gt;一个任务拆分成多个小任务&lt;/strong&gt;，于是一条指令通常分为 4 个阶段，称为 &lt;strong&gt;4 级流水&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;四个阶段的具体含义：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;CPU 通过程序计数器读取对应内存地址的指令，这个部分称为 &lt;strong&gt;Fetch（取得指令）&lt;/strong&gt;；&lt;/li&gt;
+&lt;li&gt;CPU 对指令进行解码，这个部分称为 &lt;strong&gt;Decode（指令译码）&lt;/strong&gt;；&lt;/li&gt;
+&lt;li&gt;CPU 执行指令，这个部分称为 &lt;strong&gt;Execution（执行指令）&lt;/strong&gt;；&lt;/li&gt;
+&lt;li&gt;CPU 将计算结果存回寄存器或者将寄存器的值存入内存，这个部分称为 &lt;strong&gt;Store（数据回写）&lt;/strong&gt;；&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;上面这 4 个阶段，我们称为&lt;strong&gt;指令周期（&lt;em&gt;Instrution Cycle&lt;/em&gt;）&lt;/strong&gt;，CPU 的工作就是一个周期接着一个周期，周而复始。&lt;/p&gt;
+&lt;h2 id=&#34;15-linux内核-vs-windows内核&#34;&gt;15. Linux内核 vs Windows内核
+&lt;/h2&gt;&lt;p&gt;Linux 内核设计的理念主要有这几个点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;MutiTask&lt;/em&gt;，&lt;strong&gt;多任务&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;SMP&lt;/em&gt;，&lt;strong&gt;对称多处理&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;ELF&lt;/em&gt;，&lt;strong&gt;可执行文件链接格式&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Monolithic Kernel&lt;/em&gt;，&lt;strong&gt;宏内核&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;MutiTask 的意思是多任务&lt;/strong&gt;，代表着 Linux 是一个多任务的操作系统。&lt;/p&gt;
+&lt;p&gt;多任务意味着可以有多个任务同时执行，这里的**「同时」可以是并发或并行：**&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;对于单核 CPU 时，可以让每个任务执行一小段时间，时间到就切换另外一个任务，从宏观角度看，一段时间内执行了多个任务，这被称为并发。&lt;/li&gt;
+&lt;li&gt;对于多核 CPU 时，多个任务可以同时被不同核心的 CPU 同时执行，这被称为并行。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;SMP 的意思是对称多处理&lt;/strong&gt;，代表着&lt;strong&gt;每个 CPU 的地位是相等的，对资源的使用权限也是相同的，多个 CPU 共享同一个内存&lt;/strong&gt;，每个 CPU 都可以访问完整的内存和硬件资源。&lt;/p&gt;
+&lt;p&gt;这个特点决定了 Linux 操作系统不会有&lt;strong&gt;某个 CPU 单独服务应用程序或内核程序&lt;/strong&gt;，而是每个程序都可以被分配到任意一个 CPU 上被执行。&lt;/p&gt;
+&lt;p&gt;ELF 文件&lt;/p&gt;
+&lt;p&gt;ELF（Executable and Linkable Format，&lt;strong&gt;可执行和可链接格式&lt;/strong&gt;）是一种用于存储可执行程序、共享库、目标代码和核心转储文件的标准文件格式。ELF 文件是在类 Unix 系统中广泛使用的一种二进制文件格式，用于表示可执行程序和库。&lt;/p&gt;
+&lt;p&gt;ELF 文件包含了以下几个主要部分：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;ELF 文件头&lt;/strong&gt;：包含了描述文件类型、目标体系结构、入口点地址等信息的结构。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;程序头表&lt;/strong&gt;：描述了可执行文件的段（segment）和段在内存中的加载位置、大小等信息。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;节区头表&lt;/strong&gt;：描述了文件中各个节（section）的信息，如代码段、数据段、符号表等。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;节区&lt;/strong&gt;：包含了程序的实际数据和代码，如可执行代码、全局变量、字符串等。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;符号表&lt;/strong&gt;：包含了程序中定义和引用的符号（如变量、函数名）的信息，用于链接时的符号解析。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;ELF 文件的优点包括了灵活性和可扩展性，它能够支持多种目标体系结构和操作系统，同时也支持调试信息和动态链接等特性。由于这些优点，ELF 成为了现代 Unix 和类 Unix 系统中标准的二进制文件格式。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Monolithic Kernel&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Monolithic Kernel 的意思是&lt;strong&gt;宏内核&lt;/strong&gt;，Linux 内核架构就是宏内核，意味着 Linux 的内核是一个完整的可执行程序，且拥有最高的权限。&lt;/p&gt;
+&lt;p&gt;宏内核的特征是系统内核的所有模块，比如进程调度、内存管理、文件系统、设备驱动等，都运行在内核态。&lt;/p&gt;
+&lt;p&gt;Windows 和 Linux 一样，同样支持 MutiTask 和 SMP，但不同的是，&lt;strong&gt;Window 的内核设计是混合型内核&lt;/strong&gt;，&lt;/p&gt;
+&lt;p&gt;对于内核的架构一般有这三种类型：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;宏内核，包含多个模块，整个内核像一个完整的程序；&lt;/li&gt;
+&lt;li&gt;微内核，有一个最小版本的内核，&lt;strong&gt;一些模块和服务则由用户态管理；&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;混合内核，是宏内核和微内核的结合体，内核中抽象出了微内核的概念，也就是内核中会有一个小型的内核，其他模块就在这个基础上搭建，整个内核是个完整的程序；&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Linux 的内核设计是采用了宏内核，Window 的内核设计则是采用了混合内核。&lt;/p&gt;
+&lt;p&gt;这两个操作系统的可执行文件格式也不一样， Linux 可执行文件格式叫作 ELF，&lt;strong&gt;Windows 可执行文件格式叫作 PE。&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id=&#34;16-守护进程-孤儿进程-僵尸进程&#34;&gt;16 守护进程 孤儿进程 僵尸进程
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;守护进程&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;守护进程&lt;/strong&gt;指在后台运行的，&lt;strong&gt;没有控制终端与之相连的进程&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;它独立于控制终端，周期性地执行某种任务&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;Linux的大多数&lt;strong&gt;服务器&lt;/strong&gt;就是用守护进程的方式实现的，&lt;strong&gt;如web服务器进程http&lt;/strong&gt;等，udevd负责维护/dev目录下的&lt;strong&gt;设备文件&lt;/strong&gt; , acpid负责&lt;strong&gt;电源管理，&lt;strong&gt;syslogd负责维护/var/log下的&lt;/strong&gt;日志文件&lt;/strong&gt;,&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;可以看出守护进程通常采用以d结尾的名字,表示Daemo&lt;/strong&gt;n。&lt;/p&gt;
+&lt;p&gt;精灵进程作用：&lt;strong&gt;提供服务。eg:内核线程：完成操作系统级别服务&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;创建守护进程要点：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;（1）让程序在后台执行。方法是调用fork（）产生一个子进程，然后使父进程退出。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;（2）&lt;strong&gt;调用setsid（）创建一个新对话期&lt;/strong&gt;。控制终端、登录会话和进程组通常是从父进程继承下来的，守护进程要摆脱它们，不受它们的影响，&lt;/p&gt;
+&lt;p&gt;方法是&lt;strong&gt;调用setsid（）&lt;strong&gt;使进程&lt;/strong&gt;成为一个会话组长&lt;/strong&gt;。setsid（）调用成功后，进程成为新的会话组长和进程组长，并与原来的登录会话、进程组和控制终端脱离。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;（3）禁止进程重新打开控制终端。&lt;strong&gt;经过以上步骤，进程已经成为一个无终端的会话组长，但是它可以&lt;/strong&gt;重新申请打开一个终端&lt;/strong&gt;。为了避免这种情况发生，可以通过使进程不再是会话组长来实现。&lt;strong&gt;再一次通过fork（）创建新的子进程，使调用fork的进程退出。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;**（4）关闭不再需要的文件描述符。**子进程从父进程继承打开的文件描述符。如不关闭，将会浪费系统资源，造成进程所在的文件系统无法卸下以及引起无法预料的错误。首先获得最高文件描述符值，然后用一个循环程序，&lt;strong&gt;关闭0到最高文件描述符值的所有文件描述符。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;（5）将&lt;strong&gt;当前目录更改为根目录。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;（6）子进程从父进程继承的文件创建&lt;strong&gt;屏蔽字可能会拒绝某些许可权&lt;/strong&gt;。为防止这一点，使用&lt;strong&gt;unmask（0）将屏蔽字清零。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;（7）处理SIGCHLD信号。对于服务器进程，在请求到来时&lt;strong&gt;往往生成子进程处理请求&lt;/strong&gt;。如果子进程等待父进程捕获状态，则子进程将成为僵尸进程（zombie），从而占用系统资源。&lt;/p&gt;
+&lt;p&gt;如果父进程等待子进程结束，将增加父进程的负担，影响服务器进程的并发性能。&lt;strong&gt;在Linux下可以简单地将SIGCHLD信号的操作设为SIG_IGN&lt;/strong&gt;。这样，&lt;strong&gt;子进程结束时不会产生僵尸进程。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;孤儿进程&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;如果父进程先退出，子进程还没退出&lt;/strong&gt;，那么&lt;strong&gt;子进程的父进程将变为init进程&lt;/strong&gt;。（注：任何一个进程都必须有父进程）。&lt;/p&gt;
+&lt;p&gt;一个父进程退出，而它的一个或多个子进程还在运行，那么那些子进程将成为孤儿进程。&lt;strong&gt;孤儿进程将被init进程(进程号为1)所收养，并由init进程对它们完成状态收集工作。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;僵尸进程&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;如果&lt;strong&gt;子进程先退出，父进程还没退出&lt;/strong&gt;，那么子进程必须&lt;strong&gt;等到父进程捕获到了子进程的退出状态才真正结束&lt;/strong&gt;，否则这个时候子进程就成为&lt;strong&gt;僵尸进程&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;设置&lt;strong&gt;僵尸进程的目&lt;/strong&gt;的是&lt;strong&gt;维护子进程的信息&lt;/strong&gt;，&lt;strong&gt;以便父进程在以后某个时候获取&lt;/strong&gt;。这些信息至少包括&lt;strong&gt;进程ID，进程的终止状态，以及该进程使用的CPU时间&lt;/strong&gt;，所以当终止子进程的&lt;strong&gt;父进程调用wait或waitpid时就可以得到这些信息&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;如果一个进程终止，而该进程有子进程处于僵尸状态，那么它的所有僵尸子进程的父进程ID将被重置为1（init进程）。继承这些子进程的init进程将清理它们（也就是说&lt;strong&gt;init进程将wait它们&lt;/strong&gt;，从而&lt;strong&gt;去除它们的僵尸状态&lt;/strong&gt;）。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;如何避免僵尸进程？&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;通过signal(SIGCHLD, SIG_IGN)通知内核对子进程的结束不关心，由内核回收&lt;/strong&gt;。如果不想让父进程挂&lt;/p&gt;
+&lt;p&gt;起，可以在父进程中加入一条语句：signal(SIGCHLD,SIG_IGN);表示父进程忽略SIGCHLD信号，该&lt;/p&gt;
+&lt;p&gt;信号是子进程退出的时候向父进程发送的。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;父进程调用wait/waitpid等函数等待子进程结束&lt;/strong&gt;，如果尚无子进程退出wait会导致父进程阻塞。waitpid可以通过传递&lt;strong&gt;WNOHANG使父进程不阻塞立即返回&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;如果父进程很忙可以用signal注册信号处理函数，在信号处理函数调用wait/waitpid等待子进程退出。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;通过两次调用fork。&lt;strong&gt;父进程首先调用fork创建一个子进程然后waitpid等待子进程退出，子进程再fork一个孙进程后退出&lt;/strong&gt;。这样子进程退出后会被父进程等待回收，而对&lt;strong&gt;于孙子进程其父进程已经退出所以孙进程成为一个孤儿进程&lt;/strong&gt;，&lt;strong&gt;孤儿进程由init进程接管，孙进程结束后，init会等待回收&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;第一种方法&lt;strong&gt;忽略SIGCHLD信号，这常用于并发服务器的性能的一个技巧因为并发服务器常常fork很多子进程&lt;/strong&gt;，子进程终结之后需要服务器进程去wait清理资源。如果将此信号的处理方式设为忽略，可让内核把僵尸子进程转交给init进程去处理，省去了大量僵尸进程占用系统资源&lt;/p&gt;
+&lt;h1 id=&#34;heading&#34;&gt;————————————————
+&lt;/h1&gt;&lt;h2 id=&#34;1-程序进程线程概念分别是什么&#34;&gt;1. 程序、进程、线程概念分别是什么。
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;程序&lt;/strong&gt;是含有&lt;strong&gt;指令和数据的文件&lt;/strong&gt;，被存储在磁盘或其他的数据存储设备中，也就是说程序是静态的代码。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;进程是资源分配的基本单位&lt;/strong&gt;，它&lt;strong&gt;是程序执行时的一个实例&lt;/strong&gt;，在程序运行时创建；&lt;/p&gt;
+&lt;p&gt;线程是&lt;strong&gt;程序执行的最小单位&lt;/strong&gt;，是&lt;strong&gt;进程的子任务，是进程的一个执行流，一个线程由多个线程组成的&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;具体来说：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;进程是操作系统分配资源的单位&lt;/strong&gt;，而&lt;strong&gt;线程是进程的一个实体，是CPU调度和分派的基本单位&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;线程没有独立的内存单元，不能够独立执行，必须依存在应用程序中。&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;资源开销&lt;/strong&gt;：每个进程都有&lt;strong&gt;独立的代码和数据空间&lt;/strong&gt;（程序上下文），程序之间的切换&lt;strong&gt;会有较大的开销&lt;/strong&gt;；线程可以看做轻量级的进程，同一类线程共享代码和数据空间，每个线程都有自己独立的运行栈和程序计数器（PC），&lt;strong&gt;线程之间切换的开销小&lt;/strong&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        <item>
+        <title>计算机系统常见问题2</title>
+        <link>https://Salmooo.github.io/p/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%982/</link>
+        <pubDate>Fri, 10 Jan 2020 21:56:12 +0800</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%982/</guid>
+        <description>&lt;h3 id=&#34;linux的io模型介绍以及同步异步阻塞非阻塞的区别超级重要&#34;&gt;&lt;strong&gt;Linux的I/O模型介绍以及同步异步阻塞非阻塞的区别（超级重要）&lt;/strong&gt;
+&lt;/h3&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://blog.csdn.net/sqsltr/article/details/92762279&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://blog.csdn.net/sqsltr/article/details/92762279&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.cnblogs.com/euphie/p/6376508.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://www.cnblogs.com/euphie/p/6376508.html&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;（IO过程包括两个阶段：&lt;/p&gt;
+&lt;p&gt;（1）内核从IO设备读写数据和&lt;/p&gt;
+&lt;p&gt;（2）进程从内核复制数据）&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;阻塞：调用IO操作的时候，如果缓冲区空或者满了，调用的进程或者线程就会处于阻塞状态直到IO可用并完成数据拷贝。&lt;/li&gt;
+&lt;li&gt;非阻塞：调用IO操作的时候，内核会马上返回结果，如果IO不可用，会返回错误，这种方式下进程需要不断轮询直到IO可用为止，但是当进程从内核拷贝数据时是阻塞的。&lt;/li&gt;
+&lt;li&gt;IO多路复用就是同时监听多个描述符，一旦某个描述符IO就绪（读就绪或者写就绪），就能够通知进程进行相应的IO操作，否则就将进程阻塞在select或者epoll语句上。&lt;/li&gt;
+&lt;li&gt;同步IO：同步IO模型包括阻塞IO，非阻塞IO和IO多路复用。特点就是当进程从内核复制数据的时候都是阻塞的。&lt;/li&gt;
+&lt;li&gt;异步IO：在检测IO是否可用和进程拷贝数据的两个阶段都是不阻塞的，进程可以做其他事情，当IO完成后内核会给进程发送一个信号。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Epoll是Linux进行IO多路复用的一种方式，用于在一个线程里监听多个IO源，在IO源可用的时候返回并进行操作。它的特点是基于事件驱动，性能很高。&lt;/p&gt;
+&lt;p&gt;epoll将文件描述符拷贝到内核空间后使用红黑树进行维护，同时向内核注册每个文件描述符的回调函数，当某个文件描述符可读可写的时候，将这个文件描述符加入到就绪链表里，并唤起进程，返回就绪链表到用户空间，由用户程序进行处理。&lt;/p&gt;
+&lt;p&gt;Epoll有三个系统调用：epoll_create(),epoll_ctl()和epoll_wait()。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;eoll_create()函数在内核中初始化一个eventpoll对象，同时初始化红黑树和就绪链表。&lt;/li&gt;
+&lt;li&gt;epoll_ctl()用来对监听的文件描述符进行管理。将文件描述符插入红黑树，或者从红黑树中删除，这个过程的时间复杂度是log(N)。同时向内核注册文件描述符的回调函数。&lt;/li&gt;
+&lt;li&gt;epoll_wait()会将进程放到eventpoll的等待队列中，将进程阻塞，当某个文件描述符IO可用时，内核通过回调函数将该文件描述符放到就绪链表里，epoll_wait()会将就绪链表里的文件描述符返回到用户空间。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;4-io复用的三种方法selectpollepoll深入理解包括三者区别内部原理实现&#34;&gt;&lt;strong&gt;（4） IO复用的三种方法（select,poll,epoll）深入理解，包括三者区别，内部原理实现？&lt;/strong&gt;
+&lt;/h3&gt;&lt;p&gt;（1）select的方法介绍：select把所有监听的文件描述符拷贝到内核中，挂起进程。当某个文件描述符可读或可写的时候，中断程序唤起进程，select将监听的文件描述符再次拷贝到用户空间，然select后遍历这些文件描述符找到IO可用的文件。下次监控的时候需要再次拷贝这些文件描述符到内核空间。select支持监听的描述符最大数量是1024.&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://imgconvert.csdnimg.cn/aHR0cHM6Ly9qaWFudHVrdS1saXdlbmJpbi5vc3MtY24tc2hhbmdoYWkuYWxpeXVuY3MuY29tLyVFOSU5RCVBMiVFNyVCQiU4RiVFNSU5MCU4OCVFOSU5QiU4Ni9zZWxlY3QucG5n?x-oss-process=image/format,png&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;（2）poll使用&lt;strong&gt;链表保存文件描述符&lt;/strong&gt;，其他的跟select没有什么不同。&lt;/p&gt;
+&lt;p&gt;（3）epoll将文件描述符拷贝到内核空间后使用红黑树进行维护，同&lt;strong&gt;时向内核注册每个文件描述符的回调函数&lt;/strong&gt;，当某个文件描述符可读可写的时候，将这个文件描述符加入到就绪链表里，并唤起进程，&lt;strong&gt;返回就绪链表到用户空间。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://imgconvert.csdnimg.cn/aHR0cHM6Ly9qaWFudHVrdS1saXdlbmJpbi5vc3MtY24tc2hhbmdoYWkuYWxpeXVuY3MuY29tLyVFOSU5RCVBMiVFNyVCQiU4RiVFNSU5MCU4OCVFOSU5QiU4Ni9lcG9sbC5wbmc?x-oss-process=image/format,png&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;详见 &lt;a class=&#34;link&#34; href=&#34;https://www.cnblogs.com/Anker/p/3265058.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://www.cnblogs.com/Anker/p/3265058.html&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;coredump产生的条件&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;shell资源控制限制&lt;/strong&gt;，使用 ulimit -c 命令查看shell执行程序时的资源 ，如果为0，则不会产生coredump。可以用ulimit -c unlimited设置为不限大小。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;读写越界&lt;/strong&gt;，包括：数组访问越界，指针指向错误的内存，字符串读写越界&lt;/li&gt;
+&lt;li&gt;使用了&lt;strong&gt;线程不安全的函数&lt;/strong&gt;，读写未加锁保护&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;错误使用指针转换&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;堆栈溢出&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;linux理论上最多可以创建多少个进程一个进程可以创建多少线程和什么有关&#34;&gt;&lt;strong&gt;Linux理论上最多可以创建多少个进程？一个进程可以创建多少线程，和什么有关&lt;/strong&gt;
+&lt;/h3&gt;&lt;h3 id=&#34;3-冯诺依曼结构有哪几个模块分别对应现代计算机的哪几个部分百度安全一面&#34;&gt;&lt;strong&gt;（3） 冯诺依曼结构有哪几个模块？分别对应现代计算机的哪几个部分？（百度安全一面）&lt;/strong&gt;
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;存储器：内存&lt;/li&gt;
+&lt;li&gt;控制器：南桥北桥&lt;/li&gt;
+&lt;li&gt;运算器：CPU&lt;/li&gt;
+&lt;li&gt;输入设备：键盘&lt;/li&gt;
+&lt;li&gt;输出设备：显示器、网卡&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;如果要你实现一个mutex互斥锁你要怎么实现&#34;&gt;&lt;strong&gt;如果要你实现一个mutex互斥锁你要怎么实现？&lt;/strong&gt;
+&lt;/h3&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://blog.csdn.net/kid551/article/details/84338619&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://blog.csdn.net/kid551/article/details/84338619&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;实现mutex最重要的就是实现它的lock()方法和unlock()方法。&lt;strong&gt;我们保存一个全局变量flag，flag=1表明该锁已经锁住，flag=0表明锁没有锁住。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;实现lock()时，&lt;strong&gt;使用一个while循环不断检测flag是否等于1，如果等于1就一直循环。然后将flag设置为1；unlock()方法就将flag置为0；&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;static int flag=0;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;void lock(){
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  while(TestAndSet(&amp;amp;flag,1)==1);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  //flag=1;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;void unlock(){
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  flag=0;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;123456789
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;因为while有可能被重入，所以可以用TestandSet()方法。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;int TestAndSet(int *ptr, int new) {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    int old = *ptr;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    *ptr = new;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    return old;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;线程之间通信：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用全局变量&lt;/li&gt;
+&lt;li&gt;使用信号机制&lt;/li&gt;
+&lt;li&gt;使用事件&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;进程之间同步：&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.cnblogs.com/sonic4x/archive/2011/07/05/2098036.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://www.cnblogs.com/sonic4x/archive/2011/07/05/2098036.html&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;信号量&lt;/li&gt;
+&lt;li&gt;管程&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;什么时候用多进程什么时候用多线程&#34;&gt;&lt;strong&gt;什么时候用多进程，什么时候用多线程&lt;/strong&gt;
+&lt;/h3&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://blog.csdn.net/yu876876/article/details/82810178&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://blog.csdn.net/yu876876/article/details/82810178&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;频繁修改：需要频繁创建和销毁的优先使用多线程&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;计算量：需要大量计算的优先使用&lt;strong&gt;多线程&lt;/strong&gt; 因为需要&lt;strong&gt;消耗大量CPU资源且切换频繁，所以多线程好一点&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;相关性：&lt;strong&gt;任务间相关性比较强的用多线程&lt;/strong&gt;，相关性比较弱的用多进程。因为线程之间的数据共享和同步比较简单。&lt;/li&gt;
+&lt;li&gt;多分布：可能要扩展到&lt;strong&gt;多机分布的用多进程&lt;/strong&gt;，&lt;strong&gt;多核分布的用多线程。&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;但是实际中更常见的是进程加线程的结合方式，并不是非此即彼的。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;孤儿进程是父进程退出后它的子进程还在执行&lt;/strong&gt;，这时候这些&lt;strong&gt;子进程就成为孤儿进程&lt;/strong&gt;。孤儿进程会被&lt;strong&gt;init进程收养并完成状态收集。&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;僵尸进程是指子进程完成并退出后父进程没有使用wait()或者waitpid()对它们进行状态收集，这些子&lt;strong&gt;进程的进程描述符仍然会留在系统&lt;/strong&gt;中。这些子进程就成为僵尸进程。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;协程就是子程序在&lt;strong&gt;执行时中断并转去执行别的子程序&lt;/strong&gt;，在适当的时候又返回来执行。&lt;/p&gt;
+&lt;p&gt;这种子程序间的跳转不是函数调用，也不是多线程执行，所以省去&lt;strong&gt;了线程切换的开销，效率很高&lt;/strong&gt;，并且不需要多线程间的锁机制，不会发生变量写冲突。&lt;/p&gt;
+&lt;h3 id=&#34;那协程的底层是怎么实现的怎么使用协程&#34;&gt;&lt;strong&gt;那协程的底层是怎么实现的，怎么使用协程？&lt;/strong&gt;
+&lt;/h3&gt;&lt;p&gt;协程进行中断跳转时将函数的&lt;strong&gt;上下文存放在其他位置&lt;/strong&gt;中，而不是&lt;strong&gt;存放在函数堆栈里&lt;/strong&gt;，当处理完其他事情跳转回来的时候，取回上下文继续执行原来的函数。&lt;/p&gt;
+&lt;h3 id=&#34;在执行malloc申请内存的时候操作系统是怎么做的内存分配的原理说一下malloc函数底层是怎么实现的进程是怎么分配内存的&#34;&gt;&lt;strong&gt;在执行malloc申请内存的时候，操作系统是怎么做的？/内存分配的原理说一下/malloc函数底层是怎么实现的？/进程是怎么分配内存的？&lt;/strong&gt;
+&lt;/h3&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://blog.csdn.net/yusiguyuan/article/details/39496057&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://blog.csdn.net/yusiguyuan/article/details/39496057&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;从操作系统层面上看，malloc是通过两个系统调用来实现的： &lt;strong&gt;brk和mmap&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;brk是将进程&lt;strong&gt;数据段(.data)的最高地址指针向高处移动&lt;/strong&gt;，这一步可以扩&lt;strong&gt;大进程在运行时的堆大小&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;mmap是在进程的&lt;strong&gt;虚拟地址空间中寻找一块空闲的虚拟内存&lt;/strong&gt;，这一步可以&lt;strong&gt;获得一块可以操作的堆内存。&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;通常，分配的内&lt;strong&gt;存小于128k时，使用brk调用来获得虚拟内&lt;/strong&gt;存，大&lt;strong&gt;于128k时就使&lt;/strong&gt;用mmap来获得虚拟内存。&lt;/p&gt;
+&lt;p&gt;进程先通过这两个系统调用获取或者扩大进程的虚拟内存，获得相应的虚拟地址，在访问这些虚拟地址的时候，通&lt;strong&gt;过缺页中断，让内核分配相应的物理内存，这样内存分配才算完成。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;在网络编程中不同字节序的机器发送和接收的顺序不同。&lt;/p&gt;
+&lt;p&gt;实现二维码登录通常涉及以下步骤：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;生成二维码&lt;/strong&gt;：
+&lt;ul&gt;
+&lt;li&gt;服务器端生成一个唯一的登录标识（如&lt;strong&gt;随机生成的Token或临时会话ID）。&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;使用生成的标&lt;strong&gt;识创建一个包含标识信息的二维码图像。&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;将二维码图像发送给客户端，以便用户扫描。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;扫描二维码&lt;/strong&gt;：
+&lt;ul&gt;
+&lt;li&gt;用户打开登录应用或扫描工具，并选择扫描二维码选项。&lt;/li&gt;
+&lt;li&gt;使用手机或摄像头扫描服务器生成的二维码。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;验证二维码&lt;/strong&gt;：
+&lt;ul&gt;
+&lt;li&gt;服务器端需要不断&lt;strong&gt;地轮询或等待客户端扫描并验证二维码。&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;当客户端扫描到二维码后，将扫描到的信息（通常是&lt;strong&gt;登录标识）发送回服务器。&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;创建登录会话&lt;/strong&gt;：
+&lt;ul&gt;
+&lt;li&gt;服务器接收到扫描信息后，验证该信息&lt;strong&gt;是否有效且未过期。&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;如果验证通过，服务器创建一个&lt;strong&gt;登录会话，将用户标识与会话关联，并生成一个会话密钥。&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;返回登录结果&lt;/strong&gt;：
+&lt;ul&gt;
+&lt;li&gt;服务器返回登录成功的响应，其中包括&lt;strong&gt;会话密钥或其他用于标识用户的信息。&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;客户端接收到登录成功的响应后，将&lt;strong&gt;会话信息存储在本地，以备后续请求使用。&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;保持会话状态&lt;/strong&gt;：
+&lt;ul&gt;
+&lt;li&gt;服务器和客户端都需要保持会话状态，以便在后续请求中验证用户身份。&lt;/li&gt;
+&lt;li&gt;客户端通常会将会话信息存储在本地，而服务器会维护会话状态并提供相应的会话管理机制。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;处理登录超时或失败&lt;/strong&gt;：
+&lt;ul&gt;
+&lt;li&gt;如果用&lt;strong&gt;户长时间未扫描或扫描失败，服务器可以定期清除未使用的登录标识。&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;如果扫描后验证失败，服务器应该返&lt;strong&gt;回登录失败的响应，并可能要求用户重新扫描。&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;安全性考虑&lt;/strong&gt;：
+&lt;ul&gt;
+&lt;li&gt;实现时需要考虑安全性问题，包括&lt;strong&gt;数据的传输加密、二维码生成的随机性、会话标识的有效期限制等&lt;/strong&gt;，以防止恶意攻击。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;请注意，二维码登录是一种方便的登录方式，但需要确保安全性和用户体验。每个应用可能会根据自己的需求和安全标准来实现二维码登录的细节。此外，二维码登录通常与单点登录（SSO）等身份认证机制结合使用，以实现更高级的用户身份管理和认证。&lt;/p&gt;
+&lt;h3 id=&#34;8g的int型数据计算机的内存只有2g怎么对它进行排序外部排序百度一面&#34;&gt;&lt;strong&gt;8G的int型数据，计算机的内存只有2G，怎么对它进行排序？（外部排序）（百度一面）&lt;/strong&gt;
+&lt;/h3&gt;&lt;p&gt;我们可以使用外部排序来对它进行处理。首先将&lt;strong&gt;整个文件分成许多份&lt;/strong&gt;，比如说m份，划分的依据就是使&lt;strong&gt;得每一份的大小都能放到内存里&lt;/strong&gt;。然后我们用快速排序或者&lt;strong&gt;堆排序等方法对每一份数据进行一个内部排&lt;/strong&gt;序，变成&lt;strong&gt;有序子&lt;/strong&gt;串。接着对这&lt;strong&gt;m份有序子串进行m路归并排序&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;取这&lt;strong&gt;m份数据的最小元素，进行排序，输出排序后最小的元素到结果中&lt;/strong&gt;，同时从该&lt;strong&gt;元素所在子串中读入一个元素&lt;/strong&gt;，直到所&lt;strong&gt;有数据都被输出到结果中为止。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;BitMap算法评价&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;优点：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;运算效率高，&lt;strong&gt;不进行比较和移位；&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;占用内存少，比如最大的数MAX=10000000；只需占用内存为MAX/8=1250000Byte=1.25M。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;缺点：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;所有的数据不能重复，即不&lt;strong&gt;可对重复的数据进行排序&lt;/strong&gt;。（少量重复数据查找还是可以的，用2-bitmap）。&lt;/li&gt;
+&lt;li&gt;所需要的空间随着最大元素的增大而增大，当数据类似（1，1000，10万）只有3个数据的时候，用&lt;strong&gt;bitmap时间复杂度和空间复杂度相当大&lt;/strong&gt;，只&lt;strong&gt;有当数据比较密集时才有优势。&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id=&#34;布隆过滤器原理与优点&#34;&gt;&lt;strong&gt;布隆过滤器原理与优点&lt;/strong&gt;
+&lt;/h1&gt;&lt;p&gt;布隆过滤器是一个比特向量或者比特数组，它本质上是&lt;strong&gt;一种概率型数据结构，用来查找一个元素是否在集合中，支持高效插入和查询某条记录&lt;/strong&gt;。常作为针对超大数据量下高效查找数据的一种方法。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;它的具体工作过程是这样子的：&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;假设布隆过滤器的大小为m（比特向量的长度为m），有k个哈希函数，它对每个数据用这k个哈希函数计算哈希，&lt;strong&gt;得到k个哈希值&lt;/strong&gt;，然后将向量中相应的位设为1。在查询某个数据是否存在的时候，对这&lt;strong&gt;个数据用k个哈希函数得到k个哈希值&lt;/strong&gt;，再在比特向量中相应的位查找是否为1，如果某一个相应的位不为1，那这个&lt;strong&gt;数据就肯定不存在。但是如果全找到&lt;/strong&gt;了，则这个数据有可能存在。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;为什么说有可能存在呢？&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;因为不同的数据经过哈希后可能有相同的哈希值，在比特向量上某个位置查找到1也可能是由于某个另外的数据映射得到的。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;支持删除操作吗&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;目前布隆过滤器只支持插入和查找操作，&lt;strong&gt;不支持删除操作&lt;/strong&gt;，如果要支持删除，就要另外使用一个计数变量，每次&lt;strong&gt;将相应的位置为1则计数加一&lt;/strong&gt;，删除则减一。&lt;/p&gt;
+&lt;p&gt;布隆&lt;strong&gt;过滤器中哈希函数的个数需要选择&lt;/strong&gt;。如果太多则很快所有位都置为1，如果太少会容易误报。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;布隆过滤器的大小以及哈希函数的个数怎么选择？&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;k 为哈希函数个数，m 为布隆过滤器长度，n 为插入的元素个数，&lt;strong&gt;p 为误报率&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://imgconvert.csdnimg.cn/aHR0cHM6Ly9qaWFudHVrdS1saXdlbmJpbi5vc3MtY24tc2hhbmdoYWkuYWxpeXVuY3MuY29tLyVFOSU5RCVBMiVFNyVCQiU4RiVFNSU5MCU4OCVFOSU5QiU4Ni8lRTUlQjglODMlRTklOUElODYlRTglQkYlODclRTYlQkIlQTQlRTUlOTklQTgucG5n?x-oss-process=image/format,png&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        <item>
         <title>计算机系统学习总结</title>
         <link>https://Salmooo.github.io/p/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/</link>
-        <pubDate>Wed, 16 Oct 2019 19:32:27 +0800</pubDate>
+        <pubDate>Thu, 19 Dec 2019 20:20:52 +0800</pubDate>
         
         <guid>https://Salmooo.github.io/p/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/</guid>
         <description>&lt;h1 id=&#34;1-总体概念&#34;&gt;1. 总体概念
