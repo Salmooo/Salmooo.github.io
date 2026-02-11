@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="C++ learning">
+<title>13. 拷贝控制</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/13.-%E6%8B%B7%E8%B4%9D%E6%8E%A7%E5%88%B6/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="13. 拷贝控制">
+<meta property='og:description' content="C++ learning">
+<meta property='og:url' content='https://Salmooo.github.io/p/13.-%E6%8B%B7%E8%B4%9D%E6%8E%A7%E5%88%B6/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='C&#43;&#43;' /><meta property='article:tag' content='C&#43;&#43;Primer' /><meta property='article:published_time' content='2018-08-02T16:29:01&#43;08:00'/><meta property='article:modified_time' content='2018-08-02T16:29:01&#43;08:00'/>
+<meta name="twitter:title" content="13. 拷贝控制">
+<meta name="twitter:description" content="C++ learning">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu13739649187745961479.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#拷贝赋值和销毁">拷贝、赋值和销毁</a>
+      <ol>
+        <li><a href="#拷贝构造函数">拷贝构造函数</a></li>
+        <li><a href="#拷贝赋值运算符">拷贝赋值运算符</a></li>
+        <li><a href="#析构函数">析构函数</a></li>
+        <li><a href="#三五法则">三/五法则</a></li>
+        <li><a href="#使用default">使用=default</a></li>
+        <li><a href="#阻止拷贝">阻止拷贝</a></li>
+      </ol>
+    </li>
+    <li><a href="#拷贝控制和资源管理">拷贝控制和资源管理</a></li>
+    <li><a href="#交换操作">交换操作</a></li>
+    <li><a href="#对象移动">对象移动</a>
+      <ol>
+        <li><a href="#右值引用">右值引用</a></li>
+        <li><a href="#移动构造函数和移动赋值运算符">移动构造函数和移动赋值运算符</a></li>
+        <li><a href="#右值引用和成员函数">右值引用和成员函数</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/c&#43;&#43;/" >
+                C&#43;&#43;
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/13.-%E6%8B%B7%E8%B4%9D%E6%8E%A7%E5%88%B6/">13. 拷贝控制</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            C&#43;&#43; learning
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Aug 02, 2018</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    1 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="第十三章-拷贝控制">第十三章 拷贝控制
+</h1><p><strong>拷贝控制操作</strong>（copy control）:</p>
+<ul>
+<li>拷贝构造函数（copy constructor）</li>
+<li>拷贝赋值运算符（copy-assignment operator）</li>
+<li>移动构造函数（move constructor）</li>
+<li>移动赋值函数（move-assignement operator）</li>
+<li>析构函数（destructor）</li>
+</ul>
+<h2 id="拷贝赋值和销毁">拷贝、赋值和销毁
+</h2><h3 id="拷贝构造函数">拷贝构造函数
+</h3><ul>
+<li>如果一个构造函数的第一个参数是<strong>自身类类型的引用</strong>，且任何额外参数都有默认值，则此构造函数是<strong>拷贝构造函数</strong>。</li>
+<li><code>class Foo{ public: Foo(const Foo&amp;); }</code></li>
+<li><strong>合成的拷贝构造函数</strong>（synthesized copy constructor）：会将参数的成员逐个拷贝到正在创建的对象中。</li>
+<li><strong>拷贝初始化</strong>：
+<ul>
+<li>将右侧运算对象拷贝到正在创建的对象中，如果需要，还需进行类型转换。</li>
+<li>通常使用拷贝构造函数完成。</li>
+<li><code>string book = &quot;9-99&quot;;</code></li>
+<li>出现场景：
+<ul>
+<li>用<code>=</code>定义变量时。</li>
+<li>将一个对象作为实参传递给一个非引用类型的形参。</li>
+<li>从一个返回类型为非引用类型的函数返回一个对象。</li>
+<li>用花括号列表初始化一个数组中的元素或者一个聚合类中的成员。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="拷贝赋值运算符">拷贝赋值运算符
+</h3><ul>
+<li><strong>重载赋值运算符</strong>：
+<ul>
+<li>重写一个名为<code>operator=</code>的函数.</li>
+<li>通常返回一个指向其左侧运算对象的引用。</li>
+<li><code>Foo&amp; operator=(const Foo&amp;);</code></li>
+</ul>
+</li>
+<li><strong>合成拷贝赋值运算符</strong>：
+<ul>
+<li>将右侧运算对象的每个非<code>static</code>成员赋予左侧运算对象的对应成员。</li>
+</ul>
+</li>
+</ul>
+<h3 id="析构函数">析构函数
+</h3><ul>
+<li>释放对象所使用的资源，并销毁对象的非<code>static</code>数据成员。</li>
+<li>名字由波浪号接类名构成。没有返回值，也不接受参数。</li>
+<li><code>~Foo();</code></li>
+<li>调用时机：
+<ul>
+<li>变量在离开其作用域时。</li>
+<li>当一个对象被销毁时，其成员被销毁。</li>
+<li>容器被销毁时，其元素被销毁。</li>
+<li>动态分配的对象，当对指向它的指针应用<code>delete</code>运算符时。</li>
+<li>对于临时对象，当创建它的完整表达式结束时。</li>
+</ul>
+</li>
+<li><strong>合成析构函数</strong>：
+<ul>
+<li>空函数体执行完后，<strong>成员会被自动销毁。</strong></li>
+<li>注意：析构函数体本身并不直接销毁成员。</li>
+</ul>
+</li>
+</ul>
+<h3 id="三五法则">三/五法则
+</h3><ul>
+<li>需要析构函数的类也需要拷贝和赋值操作。</li>
+<li>需要拷贝操作的类也需要赋值操作，反之亦然。</li>
+</ul>
+<h3 id="使用default">使用=default
+</h3><ul>
+<li>可以通过将拷贝控制成员定义为<code>=default</code>来显式地要求编译器生成合成的版本。</li>
+<li>合成的函数将隐式地声明为内联的。</li>
+</ul>
+<h3 id="阻止拷贝">阻止拷贝
+</h3><ul>
+<li>大多数类应该定义默认构造函数、拷贝构造函数和拷贝赋值运算符，无论是隐式地还是显式地。</li>
+<li>定义删除的函数：<code>=delete</code>。</li>
+<li>虽然声明了它们，但是不能以任何方式使用它们。</li>
+<li>析构函数不能是删除的成员。</li>
+<li>如果一个类有数据成员不能默认构造、拷贝、复制或者销毁，则对应的成员函数将被定义为删除的。</li>
+<li>老版本使用<code>private</code>声明来阻止拷贝。</li>
+</ul>
+<h2 id="拷贝控制和资源管理">拷贝控制和资源管理
+</h2><ul>
+<li>类的行为可以像一个值，也可以像一个指针。
+<ul>
+<li>行为像值：对象有自己的状态，副本和原对象是完全独立的。</li>
+<li>行为像指针：共享状态，拷贝一个这种类的对象时，副本和原对象使用相同的底层数据。</li>
+</ul>
+</li>
+</ul>
+<h2 id="交换操作">交换操作
+</h2><ul>
+<li>管理资源的类通常还定义一个名为<code>swap</code>的函数。</li>
+<li>经常用于重排元素顺序的算法。</li>
+<li>用<code>swap</code>而不是<code>std::swap</code>。</li>
+</ul>
+<h2 id="对象移动">对象移动
+</h2><ul>
+<li>很多拷贝操作后，原对象会被销毁，因此引入移动操作可以大幅度提升性能。</li>
+<li>在新标准中，我们可以用容器保存不可拷贝的类型，只要它们可以被移动即可。</li>
+<li>标准库容器、<code>string</code>和<code>shared_ptr</code>类既可以支持移动也支持拷贝。<code>IO</code>类和<code>unique_ptr</code>类可以移动但不能拷贝。</li>
+</ul>
+<h3 id="右值引用">右值引用
+</h3><ul>
+<li>新标准引入右值引用以支持移动操作。</li>
+<li>通过<code>&amp;&amp;</code>获得右值引用。</li>
+<li>只能绑定到一个将要销毁的对象。</li>
+<li>常规引用可以称之为左值引用。</li>
+<li>左值持久，右值短暂。</li>
+</ul>
+<p><strong>move函数</strong>：</p>
+<ul>
+<li><code>int &amp;&amp;rr2 = std::move(rr1);</code></li>
+<li><code>move</code>告诉编译器，我们有一个左值，但我希望像右值一样处理它。</li>
+<li>调用<code>move</code>意味着：除了对<code>rr1</code>赋值或者销毁它外，我们将不再使用它。</li>
+</ul>
+<h3 id="移动构造函数和移动赋值运算符">移动构造函数和移动赋值运算符
+</h3><ul>
+<li><strong>移动构造函数</strong>：
+<ul>
+<li>第一个参数是该类类型的一个引用，关键是，这个引用参数是一个<strong>右值引用</strong>。</li>
+<li><code>StrVec::StrVec(StrVec &amp;&amp;s) noexcept{}</code></li>
+<li>不分配任何新内存，只是接管给定的内存。</li>
+</ul>
+</li>
+<li><strong>移动赋值运算符</strong>：
+<ul>
+<li><code>StrVec&amp; StrVec::operator=(StrVec &amp;&amp; rhs) noexcept{}</code></li>
+</ul>
+</li>
+<li>移动右值，拷贝左值。</li>
+<li>如果没有移动构造函数，右值也被拷贝。</li>
+<li>更新三/五法则：如果一个类定义了任何一个拷贝操作，它就应该定义所有五个操作。</li>
+<li>移动迭代器：
+<ul>
+<li><code>make_move_iterator</code>函数讲一个普通迭代器转换为一个移动迭代器。</li>
+</ul>
+</li>
+<li>建议：小心地使用移动操作，以获得性能提升。</li>
+</ul>
+<h3 id="右值引用和成员函数">右值引用和成员函数
+</h3><ul>
+<li>区分移动和拷贝的重载函数通常有一个版本接受一个<code>const T&amp;</code>，而另一个版本接受一个<code>T&amp;&amp;</code>。</li>
+<li>引用限定符：
+<ul>
+<li>在参数列表后面防止一个<code>&amp;</code>，限定只能向可修改的左值赋值而不能向右值赋值。</li>
+</ul>
+</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/c&#43;&#43;/">C&#43;&#43;</a>
+        
+            <a href="/tags/c&#43;&#43;primer/">C&#43;&#43;Primer</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/99.%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/%E8%AF%BE%E5%90%8E%E4%B9%A0%E9%A2%98%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">99.重点记录/课后习题重点记录</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/19.-%E7%89%B9%E6%AE%8A%E5%B7%A5%E5%85%B7%E4%B8%8E%E6%8A%80%E6%9C%AF/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">19. 特殊工具与技术</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/18.-%E7%94%A8%E4%BA%8E%E5%A4%A7%E5%9E%8B%E7%A8%8B%E5%BA%8F%E7%9A%84%E5%B7%A5%E5%85%B7/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">18. 用于大型程序的工具</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/17.-%E6%A0%87%E5%87%86%E5%BA%93%E7%89%B9%E6%AE%8A%E8%AE%BE%E6%96%BD/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">17. 标准库特殊设施</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/16.-%E6%A8%A1%E6%9D%BF%E5%92%8C%E6%B3%9B%E5%9E%8B%E7%BC%96%E7%A8%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">16. 模板和泛型编程</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="C++ learning">
+<title>16. 模板和泛型编程</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/16.-%E6%A8%A1%E6%9D%BF%E5%92%8C%E6%B3%9B%E5%9E%8B%E7%BC%96%E7%A8%8B/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="16. 模板和泛型编程">
+<meta property='og:description' content="C++ learning">
+<meta property='og:url' content='https://Salmooo.github.io/p/16.-%E6%A8%A1%E6%9D%BF%E5%92%8C%E6%B3%9B%E5%9E%8B%E7%BC%96%E7%A8%8B/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='C&#43;&#43;' /><meta property='article:tag' content='C&#43;&#43;Primer' /><meta property='article:published_time' content='2018-08-08T23:05:07&#43;08:00'/><meta property='article:modified_time' content='2018-08-08T23:05:07&#43;08:00'/>
+<meta name="twitter:title" content="16. 模板和泛型编程">
+<meta name="twitter:description" content="C++ learning">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu13739649187745961479.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#定义模板">定义模板</a>
+      <ol>
+        <li><a href="#函数模板">函数模板</a></li>
+        <li><a href="#类模板">类模板</a></li>
+        <li><a href="#模板参数">模板参数</a></li>
+        <li><a href="#成员模板">成员模板</a></li>
+        <li><a href="#控制实例化">控制实例化</a></li>
+        <li><a href="#效率与灵活性">效率与灵活性</a></li>
+      </ol>
+    </li>
+    <li><a href="#模板实参推断">模板实参推断</a>
+      <ol>
+        <li><a href="#类型转换与模板类型参数">类型转换与模板类型参数</a></li>
+        <li><a href="#函数模板显式实参">函数模板显式实参</a></li>
+        <li><a href="#尾置返回类型与类型转换">尾置返回类型与类型转换</a></li>
+        <li><a href="#函数指针和实参推断">函数指针和实参推断</a></li>
+        <li><a href="#模板实参推断和引用">模板实参推断和引用</a></li>
+        <li><a href="#理解stdmove">理解std::move</a></li>
+        <li><a href="#转发">转发</a></li>
+      </ol>
+    </li>
+    <li><a href="#重载与模板">重载与模板</a></li>
+    <li><a href="#可变参数模板">可变参数模板</a>
+      <ol>
+        <li><a href="#编写可变参数函数模板">编写可变参数函数模板</a></li>
+        <li><a href="#包扩展">包扩展</a></li>
+        <li><a href="#转发参数包">转发参数包</a></li>
+      </ol>
+    </li>
+    <li><a href="#模板特例化specializations">模板特例化（Specializations）</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/c&#43;&#43;/" >
+                C&#43;&#43;
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/16.-%E6%A8%A1%E6%9D%BF%E5%92%8C%E6%B3%9B%E5%9E%8B%E7%BC%96%E7%A8%8B/">16. 模板和泛型编程</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            C&#43;&#43; learning
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Aug 08, 2018</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    2 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="第十六章-模板和泛型编程">第十六章 模板和泛型编程
+</h1><ul>
+<li>面向对象编程和泛型编程都能处理在编写程序时不知道类型的情况。
+<ul>
+<li>OOP能处理类型在程序运行之前都未知的情况；</li>
+<li>泛型编程中，在编译时就可以获知类型。</li>
+</ul>
+</li>
+</ul>
+<h2 id="定义模板">定义模板
+</h2><ul>
+<li><strong>模板</strong>：模板是泛型编程的基础。一个模板就是一个创建类或函数的蓝图或者说公式。</li>
+</ul>
+<h3 id="函数模板">函数模板
+</h3><ul>
+<li><code>template &lt;typename T&gt; int compare(const T &amp;v1, const T &amp;v2){}</code></li>
+<li>模板定义以关键字 <code>template</code>开始，后接<strong>模板形参表</strong>，模板形参表是用<strong>尖括号</strong><code>&lt;&gt;</code>括住的一个或多个<strong>模板形参</strong>的列表，用逗号分隔，<strong>不能为空</strong>。</li>
+<li>使用模板时，我们显式或隐式地指定模板实参，将其绑定到模板参数上。</li>
+<li>模板类型参数：类型参数前必须使用关键字<code>class</code>或者<code>typename</code>，这两个关键字含义相同，可以互换使用。旧的程序只能使用<code>class</code>。</li>
+<li>非类型模板参数：表示一个值而非一个类型。实参必须是常量表达式。<code>template &lt;class T, size_t N&gt; void array_init(T (&amp;parm)[N]){}</code></li>
+<li>内联函数模板： <code>template &lt;typename T&gt; inline T min(const T&amp;, const T&amp;);</code></li>
+<li>模板程序应该尽量减少对实参类型的要求。</li>
+<li>函数模板和类模板成员函数的定义通常放在头文件中。</li>
+</ul>
+<h3 id="类模板">类模板
+</h3><ul>
+<li>类模板用于生成类的蓝图。</li>
+<li>不同于函数模板，编译器不能推断模板参数类型。</li>
+<li><strong>定义类模板</strong>：
+<ul>
+<li><code>template &lt;class Type&gt; class Queue {};</code></li>
+</ul>
+</li>
+<li>实例化类模板：提供显式模板实参列表，来实例化出特定的类。</li>
+<li>一个类模板中所有的实例都形成一个独立的类。</li>
+<li><strong>模板形参作用域</strong>：模板形参的名字可以在声明为模板形参之后直到模板声明或定义的末尾处使用。</li>
+<li>类模板的成员函数：
+<ul>
+<li><code>template &lt;typename T&gt; ret-type Blob::member-name(parm-list)</code></li>
+</ul>
+</li>
+<li>默认情况下，对于一个实例化了的类模板，其成员只有在使用时才被实例化。</li>
+<li>新标准允许模板将自己的类型参数成为友元。<code>template &lt;typename T&gt; class Bar{friend T;};</code>。</li>
+<li>模板类型别名：因为模板不是一个类型，因此无法定义一个<code>typedef</code>引用一个模板，但是新标准允许我们为类模板定义一个类型别名：<code>template&lt;typename T&gt; using twin = pair&lt;T, T&gt;;</code></li>
+</ul>
+<h3 id="模板参数">模板参数
+</h3><ul>
+<li>模板参数与作用域：一个模板参数名的可用范围是在声明之后，至模板声明或定义结束前。</li>
+<li>一个特定文件所需要的所有模板的声明通常一起放置在文件开始位置。</li>
+<li>当我们希望通知编译器一个名字表示类型时，必须使用关键字<code>typename</code>，而不能使用<code>class</code>。</li>
+<li>默认模板实参：<code>template &lt;class T = int&gt; class Numbers{}</code></li>
+</ul>
+<h3 id="成员模板">成员模板
+</h3><ul>
+<li>成员模板（member template）：本身是模板的函数成员。
+<ul>
+<li>普通（非模板）类的成员模板。</li>
+<li>类模板的成员模板。</li>
+</ul>
+</li>
+</ul>
+<h3 id="控制实例化">控制实例化
+</h3><ul>
+<li>动机：在多个文件中实例化相同模板的额外开销可能非常严重。</li>
+<li>显式实例化：
+<ul>
+<li><code>extern template declaration;  // 实例化声明</code></li>
+<li><code>template declaration;  // 实例化定义</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="效率与灵活性">效率与灵活性
+</h3><h2 id="模板实参推断">模板实参推断
+</h2><ul>
+<li>对函数模板，编译器利用调用中的函数实参来确定其模板参数，这个过程叫<strong>模板实参推断</strong>。</li>
+</ul>
+<h3 id="类型转换与模板类型参数">类型转换与模板类型参数
+</h3><ul>
+<li>能够自动转换类型的只有：
+<ul>
+<li>和其他函数一样，顶层<code>const</code>会被忽略。</li>
+<li>数组实参或函数实参转换为指针。</li>
+</ul>
+</li>
+</ul>
+<h3 id="函数模板显式实参">函数模板显式实参
+</h3><ul>
+<li>某些情况下，编译器无法推断出模板实参的类型。</li>
+<li>定义：<code>template &lt;typename T1, typename T2, typename T3&gt; T1 sum(T2, T3);</code></li>
+<li>使用函数显式实参调用：<code>auto val3 = sum&lt;long long&gt;(i, lng); // T1是显式指定，T2和T3都是从函数实参类型推断而来</code></li>
+<li><strong>注意</strong>：正常类型转换可以应用于显式指定的实参。</li>
+</ul>
+<h3 id="尾置返回类型与类型转换">尾置返回类型与类型转换
+</h3><ul>
+<li>使用场景：并不清楚返回结果的准确类型，但知道所需类型是和参数相关的。</li>
+<li><code>template &lt;typename It&gt; auto fcn(It beg, It end) -&gt; decltype(*beg)</code></li>
+<li>尾置返回允许我们在参数列表之后声明返回类型。</li>
+</ul>
+<p>标准库的<strong>类型转换</strong>模板：</p>
+<ul>
+<li>定义在头文件<code>type_traits</code>中。</li>
+</ul>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>对<code>Mod&lt;T&gt;</code>，其中<code>Mod</code>是：</th>
+          <th>若<code>T</code>是：</th>
+          <th>则<code>Mod&lt;T&gt;::type</code>是：</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>remove_reference</code></td>
+          <td><code>X&amp;</code>或<code>X&amp;&amp;</code></td>
+          <td><code>X</code></td>
+      </tr>
+      <tr>
+          <td></td>
+          <td>否则</td>
+          <td><code>T</code></td>
+      </tr>
+      <tr>
+          <td><code>add_const</code></td>
+          <td><code>X&amp;</code>或<code>const X</code>或函数</td>
+          <td><code>T</code></td>
+      </tr>
+      <tr>
+          <td></td>
+          <td>否则</td>
+          <td><code>const T</code></td>
+      </tr>
+      <tr>
+          <td><code>add_lvalue_reference</code></td>
+          <td><code>X&amp;</code></td>
+          <td><code>T</code></td>
+      </tr>
+      <tr>
+          <td></td>
+          <td><code>X&amp;&amp;</code></td>
+          <td><code>X&amp;</code></td>
+      </tr>
+      <tr>
+          <td></td>
+          <td>否则</td>
+          <td><code>T&amp;</code></td>
+      </tr>
+      <tr>
+          <td><code>add_rvalue_reference</code></td>
+          <td><code>X&amp;</code>或<code>X&amp;&amp;</code></td>
+          <td><code>T</code></td>
+      </tr>
+      <tr>
+          <td></td>
+          <td>否则</td>
+          <td><code>T&amp;&amp;</code></td>
+      </tr>
+      <tr>
+          <td><code>remove_pointer</code></td>
+          <td><code>X*</code></td>
+          <td><code>X</code></td>
+      </tr>
+      <tr>
+          <td></td>
+          <td>否则</td>
+          <td><code>T</code></td>
+      </tr>
+      <tr>
+          <td><code>add_pointer</code></td>
+          <td><code>X&amp;</code>或<code>X&amp;&amp;</code></td>
+          <td><code>X*</code></td>
+      </tr>
+      <tr>
+          <td></td>
+          <td>否则</td>
+          <td><code>T*</code></td>
+      </tr>
+      <tr>
+          <td><code>make_signed</code></td>
+          <td><code>unsigned X</code></td>
+          <td><code>X</code></td>
+      </tr>
+      <tr>
+          <td></td>
+          <td>否则</td>
+          <td><code>T</code></td>
+      </tr>
+      <tr>
+          <td><code>make_unsigned</code></td>
+          <td>带符号类型</td>
+          <td><code>unsigned X</code></td>
+      </tr>
+      <tr>
+          <td></td>
+          <td>否则</td>
+          <td><code>T</code></td>
+      </tr>
+      <tr>
+          <td><code>remove_extent</code></td>
+          <td><code>X[n]</code></td>
+          <td><code>X</code></td>
+      </tr>
+      <tr>
+          <td></td>
+          <td>否则</td>
+          <td><code>T</code></td>
+      </tr>
+      <tr>
+          <td><code>remove_all_extents</code></td>
+          <td><code>X[n1][n2]...</code></td>
+          <td><code>X</code></td>
+      </tr>
+      <tr>
+          <td></td>
+          <td>否则</td>
+          <td><code>T</code></td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="函数指针和实参推断">函数指针和实参推断
+</h3><ul>
+<li>当使用一个函数模板初始化一个函数指针或为一个函数指针赋值时，编译器使用指针的类型来推断模板实参。</li>
+</ul>
+<h3 id="模板实参推断和引用">模板实参推断和引用
+</h3><ul>
+<li>从左值引用函数推断类型：若形如<code>T&amp;</code>，则只能传递给它一个左值。但如果是<code>const T&amp;</code>，则可以接受一个右值。</li>
+<li>从右值引用函数推断类型：若形如<code>T&amp;&amp;</code>，则只能传递给它一个右值。</li>
+<li>引用折叠和右值引用参数：
+<ul>
+<li>规则1：当我们将一个左值传递给函数的右值引用参数，且右值引用指向模板类型参数时（如<code>T&amp;&amp;</code>），编译器会推断模板类型参数为实参的左值引用类型。</li>
+<li>规则2：如果我们间接创造一个引用的引用，则这些引用形成了<strong>折叠</strong>。折叠引用只能应用在间接创造的引用的引用，如类型别名或模板参数。对于一个给定类型<code>X</code>：
+<ul>
+<li><code>X&amp; &amp;</code>、<code>X&amp; &amp;&amp;</code>和<code>X&amp;&amp; &amp;</code>都折叠成类型<code>X&amp;</code>。</li>
+<li>类型<code>X&amp;&amp; &amp;&amp;</code>折叠成<code>X&amp;&amp;</code>。</li>
+</ul>
+</li>
+<li>上面两个例外规则导致两个重要结果：
+<ul>
+<li>1.如果一个函数参数是一个指向模板类型参数的右值引用（如<code>T&amp;&amp;</code>），则它可以被绑定到一个左值上；</li>
+<li>2.如果实参是一个左值，则推断出的模板实参类型将是一个左值引用，且函数参数将被实例化为一个左值引用参数（<code>T&amp;</code>）。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="理解stdmove">理解std::move
+</h3><ul>
+<li>标准库<code>move</code>函数是使用右值引用的模板的一个很好的例子。</li>
+<li>从一个左值<code>static_cast</code>到一个右值引用是允许的。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">typename</span> <span class="n">remove_reference</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">type</span><span class="o">&amp;&amp;</span> <span class="n">move</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;&amp;</span> <span class="n">t</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">remove_reference</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">type</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="转发">转发
+</h3><ul>
+<li>使用一个名为<code>forward</code>的新标准库设施来传递参数，它能够保持原始实参的类型。</li>
+<li>定义在头文件<code>utility</code>中。</li>
+<li>必须通过显式模板实参来调用。</li>
+<li><code>forward</code>返回显式实参类型的右值引用。即，<code>forward&lt;T&gt;</code>的返回类型是<code>T&amp;&amp;</code>。</li>
+</ul>
+<h2 id="重载与模板">重载与模板
+</h2><ul>
+<li>多个可行模板：当有多个重载模板对一个调用提供同样好的匹配时，会选择最特例化的版本。</li>
+<li>非模板和模板重载：对于一个调用，如果一个非函数模板与一个函数模板提供同样好的匹配，则选择非模板版本。</li>
+</ul>
+<h2 id="可变参数模板">可变参数模板
+</h2><p><strong>可变参数模板</strong>就是一个接受可变数目参数的模板函数或模板类。</p>
+<ul>
+<li>可变数目的参数被称为参数包。
+<ul>
+<li>模板参数包：标识另个或多个模板参数。</li>
+<li>函数参数包：标识另个或者多个函数参数。</li>
+</ul>
+</li>
+<li>用一个省略号来指出一个模板参数或函数参数，表示一个包。</li>
+<li><code>template &lt;typename T, typename... Args&gt;</code>，<code>Args</code>第一个模板参数包。</li>
+<li><code>void foo(const T &amp;t, const Args&amp; ... rest);</code>，<code>rest</code>是一个函数参数包。</li>
+<li><code>sizeof...</code>运算符，返回参数的数目。</li>
+</ul>
+<h3 id="编写可变参数函数模板">编写可变参数函数模板
+</h3><ul>
+<li>可变参数函数通常是递归的：第一步调用处理包中的第一个实参，然后用剩余实参调用自身。</li>
+</ul>
+<h3 id="包扩展">包扩展
+</h3><ul>
+<li>对于一个参数包，除了获取它的大小，唯一能做的事情就是<strong>扩展</strong>（expand）。</li>
+<li>扩展一个包时，还要提供用于每个扩展元素的<strong>模式</strong>（pattern）。</li>
+</ul>
+<h3 id="转发参数包">转发参数包
+</h3><ul>
+<li>新标准下可以组合使用可变参数模板和<code>forward</code>机制，实现将实参不变地传递给其他函数。</li>
+</ul>
+<h2 id="模板特例化specializations">模板特例化（Specializations）
+</h2><ul>
+<li>定义函数模板特例化：关键字<code>template</code>后面跟一个空尖括号对（<code>&lt;&gt;</code>）。</li>
+<li>特例化的本质是实例化一个模板，而不是重载它。特例化不影响函数匹配。</li>
+<li>模板及其特例化版本应该声明在同一个头文件中。所有同名模板的声明应该放在前面，然后是特例化版本。</li>
+<li>我们可以部分特例化类模板，但不能部分特例化函数模板。</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/c&#43;&#43;/">C&#43;&#43;</a>
+        
+            <a href="/tags/c&#43;&#43;primer/">C&#43;&#43;Primer</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/99.%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/%E8%AF%BE%E5%90%8E%E4%B9%A0%E9%A2%98%E9%87%8D%E7%82%B9%E8%AE%B0%E5%BD%95/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">99.重点记录/课后习题重点记录</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/19.-%E7%89%B9%E6%AE%8A%E5%B7%A5%E5%85%B7%E4%B8%8E%E6%8A%80%E6%9C%AF/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">19. 特殊工具与技术</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/18.-%E7%94%A8%E4%BA%8E%E5%A4%A7%E5%9E%8B%E7%A8%8B%E5%BA%8F%E7%9A%84%E5%B7%A5%E5%85%B7/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">18. 用于大型程序的工具</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/17.-%E6%A0%87%E5%87%86%E5%BA%93%E7%89%B9%E6%AE%8A%E8%AE%BE%E6%96%BD/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">17. 标准库特殊设施</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/15.-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">15. 面向对象程序设计</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
