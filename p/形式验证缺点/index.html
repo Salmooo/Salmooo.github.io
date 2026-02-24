@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="形式验证">
+<title>形式验证缺点</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E7%BC%BA%E7%82%B9/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="形式验证缺点">
+<meta property='og:description' content="形式验证">
+<meta property='og:url' content='https://Salmooo.github.io/p/%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E7%BC%BA%E7%82%B9/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='IC Design' /><meta property='article:tag' content='Formal Verification' />
+<meta name="twitter:title" content="形式验证缺点">
+<meta name="twitter:description" content="形式验证">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#一形式化验证的主要问题"><strong>一、形式化验证的主要问题</strong></a></li>
+    <li><a href="#二如何使用形式化验证"><strong>二、如何使用形式化验证</strong></a></li>
+    <li><a href="#三形式化验证流程"><strong>三、形式化验证流程</strong></a></li>
+    <li><a href="#四作者眼中的现代验证方法学"><strong>四、作者眼中的现代验证方法学</strong></a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/formal/" >
+                Formal
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E7%BC%BA%E7%82%B9/">形式验证缺点</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            形式验证
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    1 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>在老石之前的文章中，作者介绍了<a class="link" href="https://zhida.zhihu.com/search?content_id=100636337&amp;content_type=Article&amp;match_order=1&amp;q=%E5%BD%A2%E5%BC%8F%E5%8C%96%E9%AA%8C%E8%AF%81&amp;zhida_source=entity"  target="_blank" rel="noopener"
+    >形式化验证</a>的主要特点和优势。在这篇文章中，作者将主要介绍一下形式化验证的主要缺点，以及作者眼中的验证方法学发展前景。</p>
+<h2 id="一形式化验证的主要问题"><strong>一、形式化验证的主要问题</strong>
+</h2><p>相比于传统的基于仿真的验证方法学，形式化验证有着似乎无可比拟的优势，看起来几乎是完美的验证方法学。可惜的是，形式化验证有着非常显著的缺点，其中最主要的就是所谓的**“<a class="link" href="https://zhida.zhihu.com/search?content_id=100636337&amp;content_type=Article&amp;match_order=1&amp;q=%E7%8A%B6%E6%80%81%E7%88%86%E7%82%B8&amp;zhida_source=entity"  target="_blank" rel="noopener"
+    >状态爆炸</a>”问题（state explosion）**。</p>
+<p>顾名思义，这代表了在某个设计中，理论上存在的状态可能非常多，超出了形式化验证工具可以处理的范围。</p>
+<p>例如，在一个简单的N位计数器中，可能存在2的N次方个状态，且状态数量随着计数器位数的增加呈指数级增长。同样的状态爆炸问题存在于存储器、各类数学运算单元如乘法器等等，如下图示意的是M1xM2结果的状态与M1和M2的状态数呈指数级关系。</p>
+<p><img src="https://pica.zhimg.com/v2-e12bf2b7fbcc2079474aa80f4c675d00_1440w.jpg"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>状态爆炸问题是由形式化验证——具体而言是形式化验证中最为常用的<a class="link" href="https://zhida.zhihu.com/search?content_id=100636337&amp;content_type=Article&amp;match_order=1&amp;q=%E6%A8%A1%E5%9E%8B%E9%AA%8C%E8%AF%81&amp;zhida_source=entity"  target="_blank" rel="noopener"
+    >模型验证</a>（Model Checking）——的工作机制决定的，是形式化验证的根本性问题，无法通过优化算法或者工具完全解决。</p>
+<p>但是，值得欣慰的是，学术界和业界也在不断探索用来缓解状态爆炸问题的各种方法。在理论上，有学者提出了以下方法，如：</p>
+<ol>
+<li><a class="link" href="https://zhida.zhihu.com/search?content_id=100636337&amp;content_type=Article&amp;match_order=1&amp;q=%E7%AC%A6%E5%8F%B7%E6%A8%A1%E5%9E%8B%E9%AA%8C%E8%AF%81&amp;zhida_source=entity"  target="_blank" rel="noopener"
+    ><strong>符号模型验证</strong></a>（Symbolic Model Checking），即使用二元决策图（Binary Decision Diagrams – BDD）而非独立的状态列表来表达状态空间；</li>
+<li><a class="link" href="https://zhida.zhihu.com/search?content_id=100636337&amp;content_type=Article&amp;match_order=1&amp;q=%E5%81%8F%E5%BA%8F%E7%BA%A6%E5%87%8F&amp;zhida_source=entity"  target="_blank" rel="noopener"
+    ><strong>偏序约减</strong></a>（Partial Order Reduction），即检查各个状态和行为间的独立性以减小整体的状态空间；</li>
+<li><a class="link" href="https://zhida.zhihu.com/search?content_id=100636337&amp;content_type=Article&amp;match_order=1&amp;q=%E5%9F%BA%E4%BA%8E%E5%8F%8D%E4%BE%8B%E7%9A%84%E6%8A%BD%E8%B1%A1%E4%BC%98%E5%8C%96&amp;zhida_source=entity"  target="_blank" rel="noopener"
+    ><strong>基于反例的抽象优化</strong></a>（Counterexample-Guided Abstraction Refinement），即自适应的寻找合适的抽象层次，实现精度和运行时间的折中。</li>
+<li><a class="link" href="https://zhida.zhihu.com/search?content_id=100636337&amp;content_type=Article&amp;match_order=1&amp;q=%E6%9C%89%E7%95%8C%E6%A8%A1%E5%9E%8B%E9%AA%8C%E8%AF%81&amp;zhida_source=entity"  target="_blank" rel="noopener"
+    ><strong>有界模型验证</strong></a>（Bounded Model Checking），即使用SAT（Boolean satisfiability）求解器在一定边界条件下寻找反例。</li>
+</ol>
+<p>在实际应用中，业界也有一系列应对状态爆炸问题的方法，我将在下一章进行详细阐述。</p>
+<h2 id="二如何使用形式化验证"><strong>二、如何使用形式化验证</strong>
+</h2><p>那么，应该如何着手使用形式化验证？首先需要考虑如何将设计规约和需求用形式化的方法表述出来。</p>
+<p>验证的本质就是将设计与设计规约进行一一比对的过程。在电路仿真中，通常使用参考模型（reference model）作为设计规约的实现形式。</p>
+<p>参考模型通常由高级语言，如C/C++、SystemC、MATLAB等实现，但有时也会通过RTL语言如SystemVerilog实现。与此不同的是，在形式化验证方法中，设计规约是通过形式化的语言进行抽象和描述的，而并不需要参考模型。</p>
+<p>设计规约通常会被拆分成若干条“属性”（Property），然后通过<a class="link" href="https://zhida.zhihu.com/search?content_id=100636337&amp;content_type=Article&amp;match_order=1&amp;q=SystemVerilog%E6%96%AD%E8%A8%80&amp;zhida_source=entity"  target="_blank" rel="noopener"
+    >**SystemVerilog断言</a>（SystemVerilog Assertion – SVA）**来进行描述。</p>
+<p>SVA是SystemVerilog语言的一个子集，其实它已然被广泛用于传统的电路仿真中，但使用范围比较受限，主要用来检查在仿真中某些状态（通常为异常状态）是否会发生。在形式化验证中，SVA则是作为主要的编程语言，用来描述设计规约的各条属性、对设计的行为进行建模、提供实际的约束、提取覆盖率等等。</p>
+<p>SVA的层次可以根据所表达的复杂度分为如下四级：</p>
+<p><strong>1. 布尔运算（Booleans</strong>），如</p>
+<p><code>data[0] &amp;&amp; data[1] &amp;&amp; data[2]</code></p>
+<p><strong>2. 序列（sequence）</strong>，用来表达在一段时间内发生的一系列布尔运算。因此可见序列的表示需要一个明确的时钟作为参考。例如：</p>
+<p><code>req ##2 grant</code></p>
+<p>这代表当req置一后再过两个时钟周期，grant再置一。</p>
+<p><strong>3. 属性（property）</strong>，用来组合多个序列，并以此表明在设计中需要满足的某种逻辑关系。如：</p>
+<p><code>A |-&gt; B A |=&gt; B</code></p>
+<p>其中A和B都为序列。本例中前者代表当A成立时，B在同一个周期内也必须成立；后者代表当A成立时，B在下一个周期必须成立。</p>
+<p><strong>4. 断言声明（assertion statements）</strong>，用来表示对一则SVA属性所进行的动作，例如：</p>
+<p><code>p1: assert property (A |-&gt; B);</code></p>
+<p>这代表将对括号内的property进行断言检查。</p>
+<p>断言声明通常使用以下三个关键词之一：assert，assume和cover。这三个关键词在形式化验证环境中的语义和在电路仿真中有所不同：</p>
+<ul>
+<li><strong>Assert</strong>：表示给定的断言声明（statement）必须在任何条件下都满足；</li>
+<li><strong>Assume</strong>：用来指定各种形式化验证的约束条件；</li>
+<li><strong>Cover</strong>：用来表明在形式化验证的过程中必须要覆盖到的情况。</li>
+</ul>
+<h2 id="三形式化验证流程"><strong>三、形式化验证流程</strong>
+</h2><p>由于篇幅所限，其他更深入的有关SVA的介绍和举例无法在本文给出。本文想强调的是，在形式化验证中，各种设计规约、约束条件、验证目标、覆盖点等，都是通过SVA进行表述和建模的。</p>
+<p>这样，可以把形式化验证流程图扩展为如下图所示：</p>
+<p><img src="https://pic4.zhimg.com/v2-3f0fbdcc84e9649052e3b735af3d2687_1440w.jpg"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>可以看到，形式化验证引擎的输入输出都进行了一些扩展。在输入端，除了在仿真中也需要的待测模块以外，形式化验证还需要对输入进行一定的约束，并通过SVA的描述，提供待验证的断言和覆盖点。</p>
+<p>通常来讲，使用形式化验证的第一步，并非是立即编写各种断言，而是构思需要对整个设计和验证环境添加怎样的约束。</p>
+<p>形式化约束的意义在于能很大程度上的减小状态空间，一方面能引导形式化验证工具在更加合理的状态区间中进行更有效的断言判定，另一方面能够从一开始就杜绝一些不合理的状态或条件的出现，从而避免验证出现漏报（false negative）。为形式化验证添加约束还能“强迫”设计者和验证工程师在整体上全面思考设计规约以及设计需求，从而在早期发现设计规约和需求中的漏洞和不足。</p>
+<p>在明确各种约束条件之后，接下来需要考虑设计中存在哪些目标状态，并通过覆盖点进行覆盖。这与使用随机约束的验证方法中，提取功能覆盖率的思想比较类似。通常这些目标状态都在验证计划中给出。</p>
+<p>需要注意的是，在形式化验证中，覆盖点还有一个重要作用是防止误报（false positive）的出现。最极端的例子是，如果不给出任何断言，那么形式化验证工具就会给出全部断言都被证明的误报。因此需要覆盖点对目标状态进行覆盖，确保工具对相关断言的确进行了证明。</p>
+<p><strong>在形式化验证工具的输出端，通常会给出三类信息</strong>：</p>
+<ol>
+<li>若断言得到证明，则会给出已经被证明的断言列表；</li>
+<li>若断言被证明有误，则会给出一个反例，如上文所述通常为最小实例；</li>
+<li>若在有限时间之内，工具无法给出证明或反证，则会标明该断言的证明没有定论（inconclusive）。</li>
+</ol>
+<p>有很多种可能性会导致出现最后一种情况，例如证明时间太短、断言及属性过于复杂等，但通常代表此时的状态空间太大，已经超出了形式化工具可以证明的范围。</p>
+<p>此时，应该考虑着手减小状态空间，例如考虑简化断言、提供更多约束、尝试其他的形式化验证引擎等。也可以使用更进一步形式化验证技巧，如使用抽象模型（abstraction），设置黑盒（blackbox）或断点（cut-point），对待测设计采用分而治之的策略等。</p>
+<p>再比如，对于一个大小为32位宽、512个存储单元的存储器，理论上它的状态空间存在2^(32*512)个状态， 即大约十亿的一千次方，已经远超计算机可以计算的范围。</p>
+<p>其实，对于存储器本身而言，它通常作为一个可配置的IP使用，对于使用存储器IP的设计，验证存储器自身的功能并非验证的目的。而且，我们往往可以安全的假设，存储器本身已经经过了IP提供商的完整验证，可以直接使用。此外，可以注意到每个存储器的存储单元均相互独立，很多情况下两个存储单元的内容并不会相互影响。</p>
+<p>在这种情况下，我们可以使用针对存储器的抽象模型，只对少数存储单元进行精确建模，而不需关心其他单元，那么可以将整体的状态空间下降为2^(32*3)个状态。</p>
+<p>对形式化验证中的抽象模型的研究一直是业界和学界的热点之一，比如，英国Imagination公司的Arshish Darbari等人曾经发表过多篇文章，详细阐述了关于FIFO、Arbiter等模块的形式化抽象方法。我的博士导师，伦敦帝国理工学院的Constantinides教授也曾对多项式数据通路的形式化验证开展过一系列理论研究工作。形式化验证咨询机构Oski也发表过一系列文章，详细讲解了诸如如何对FIFO等底层模块进行形式化抽象，如下图所示。</p>
+<p><img src="https://pic2.zhimg.com/v2-4265836eec44c75cd99b7bbe53f7e58f_1440w.jpg"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>同时，形式化验证工具的提供商，如Candence和Synopsys也都提供了一些常用模块，如FIFO、存储器、乘法器等的抽象模型。</p>
+<p>综上所述，一个较为完整的形式化验证环境会如下图所示。</p>
+<p><img src="https://pic1.zhimg.com/v2-06b2576d8964bb55dff597b8517ccd26_1440w.jpg"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<h2 id="四作者眼中的现代验证方法学"><strong>四、作者眼中的现代验证方法学</strong>
+</h2><p>在笔者眼中，形式化验证将在现代验证方法学中慢慢占有越来越重要的地位。这主要是由于形式化验证独特的工作原理，及其先天优于基于电路仿真的验证方法的各类特性。</p>
+<p>同时，形式化验证适用于多种不同的模块层级，从小规模的IP设计，到大规模的系统集成，都有可能使用形式化的方法进行验证。很多业界的公司都早已开展形式化验证的使用，比如英特尔就对其i7处理器的某核心部件全部使用形式化方法进行验证。</p>
+<p>随着EDA工具的不断完善，普通的工程师使用者并不需要掌握任何形式化理论或数学模型推导，这些过程都已被封装在工具中，这样大大简化了形式化验证的使用门槛。</p>
+<p>形式化验证另一个主要的作用在于，能够帮助设计者充分严谨的思考设计需求和规约，并在设计早期就能有效发现各类漏洞，而无需等待复杂的测试平台搭建完成。</p>
+<p>不过需要记住的是，形式化验证也伴随着先天的缺点，即不能有效处理拥有大量状态的设计，如存储器、数学运算器等。为了应对这样的情况，验证工程师需要掌握一些形式化验证技巧和抽象方法。</p>
+<p>此外，形式化验证与电路仿真的思考角度完全不同，一个熟练使用<a class="link" href="https://zhida.zhihu.com/search?content_id=100636337&amp;content_type=Article&amp;match_order=1&amp;q=UVM&amp;zhida_source=entity"  target="_blank" rel="noopener"
+    >UVM</a>和随机约束的验证工程师不一定能在短时间内很好的掌握形式化验证的思想和工作方法。这几点都使得形式化验证又不是那么简单易用。</p>
+<p>因此，<strong>业界的共识在于，充分利用形式化验证和电路仿真的优点，扬长避短，在一个完整的项目周期内协同使用不同的验证方法学</strong>。业界有关项目进行时间和漏洞数量关系、修复漏洞的花费三者关系的经验图如下所示，可见在项目开发初期，是各类漏洞存在的高发期，但此时修复漏洞所需要的成本最少。等到项目行将结束并流片的时候，漏洞很难被找到，但一旦出现就往往需要花费大量成本进行修复。</p>
+<p><img src="https://pic3.zhimg.com/v2-cc0c5ad1acc22999c240635ff6ff3eea_1440w.jpg"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>因此，在项目早期，可以利用形式化方法逐步完善设计规约，同时发现各类早期的问题和简单的漏洞。设计者也可以负责编写各类断言，而验证工程师负责形式化平台的搭建，以及更复杂断言的设计。</p>
+<p>与此同时，使用UVM等方法学搭建电路仿真平台，用以在更高层次（如系统集成时）、和项目中后期通过不间断的回归测试发现设计漏洞。当基本测试完成后，可以使用硬件模拟和<a class="link" href="https://zhida.zhihu.com/search?content_id=100636337&amp;content_type=Article&amp;match_order=1&amp;q=FPGA%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1&amp;zhida_source=entity"  target="_blank" rel="noopener"
+    >FPGA原型设计</a>等方法，再进行大量实际数据的测试。特别是对基于FPGA系统的设计，由于FPGA的可编程性，有条件的话可以更早进行硬件测试。</p>
+<p>综上，在作者看来，<strong>现代的验证方法学应该是形式化验证、电路仿真、硬件测试的三位一体的集合和统一</strong>。我也期待形式化验证方法能在业界受到更加广泛的使用。</p>
+<p>最后，推荐一本介绍形式化验证方法学的书：《Formal Verification: An Essential Toolkit For Modern VLSI Design》，由我的同事Eric Seligman等编写。Eric是英特尔在形式化验证领域的大牛，非常平易近人，对技术的传授和讨论不遗余力且毫无保留。这本应该是目前市面上最好的有关形式化验证的书籍，我通读过，获益匪浅。只可惜国内目前好像还没有引进，我正在和出版社积极联系，希望这本书的中文版能早日和国内的读者朋友们见面。</p>
+<p>ref:https://mp.weixin.qq.com/s/1VSvP4-vb9mmDDzAww_4Ug</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ic-design/">IC Design</a>
+        
+            <a href="/tags/formal-verification/">Formal Verification</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E5%8F%91%E5%B1%95%E7%AE%80%E5%8F%B2/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">形式验证发展简史</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E8%8A%AF%E7%89%87%E8%AE%BE%E8%AE%A1%E4%B8%AD%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E6%A6%82%E5%BF%B5/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">芯片设计中形式验证概念</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

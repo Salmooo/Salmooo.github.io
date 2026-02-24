@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="形式验证">
+<title>芯片设计中形式验证概念</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/%E8%8A%AF%E7%89%87%E8%AE%BE%E8%AE%A1%E4%B8%AD%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E6%A6%82%E5%BF%B5/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="芯片设计中形式验证概念">
+<meta property='og:description' content="形式验证">
+<meta property='og:url' content='https://Salmooo.github.io/p/%E8%8A%AF%E7%89%87%E8%AE%BE%E8%AE%A1%E4%B8%AD%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E6%A6%82%E5%BF%B5/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='IC Design' /><meta property='article:tag' content='Formal Verification' />
+<meta name="twitter:title" content="芯片设计中形式验证概念">
+<meta name="twitter:description" content="形式验证">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/formal/" >
+                Formal
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E8%8A%AF%E7%89%87%E8%AE%BE%E8%AE%A1%E4%B8%AD%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E6%A6%82%E5%BF%B5/">芯片设计中形式验证概念</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            形式验证
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    1 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p><strong>文章摘要</strong></p>
+<p><a class="link" href="https://mmbiz.qpic.cn/mmbiz_svg/3a3QxMHZ8YxgMUmB3vatZibQXSda6e7gJuib7VX4GicNVP4TGJ98BzFkDoQ5jORjfD205HPl81qhXwt0vdibPCQ1BTMV5DLVLH1ic/640?wx_fmt=svg&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1"  target="_blank" rel="noopener"
+    ></a></p>
+<p>芯片设计验证是对芯片设计是否正确与安全进行检查，在芯片设计流程中具有非常重要的地位，占其将近1/2的成本和时间。形式验证是保证计算机软硬件系统正确性与安全性的非常重要的手段，已经成功用于芯片设计验证。全世界三大电子设计自动化（EDA）软件厂商Cadence、Synopsis、Siemens的EDA软件均包含成熟的芯片设计形式验证工具。文章总结了芯片设计形式验证发展现状，分析了面临的挑战，展望了发展趋势，并对其在中国的发展提出建议。</p>
+<p><a class="link" href="https://mmbiz.qpic.cn/mmbiz_svg/3a3QxMHZ8YxgMUmB3vatZibQXSda6e7gJHmcVuM6z8NNBNibGs4fjibMu7yFskwh1vW5kKpEMb6u29Qe2u1GWX2QhM0emicdLic5j/640?wx_fmt=svg&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1"  target="_blank" rel="noopener"
+    ></a></p>
+<p><strong>文章速览</strong></p>
+<p><a class="link" href="https://mmbiz.qpic.cn/mmbiz_svg/3a3QxMHZ8YxgMUmB3vatZibQXSda6e7gJuib7VX4GicNVP4TGJ98BzFkDoQ5jORjfD205HPl81qhXwt0vdibPCQ1BTMV5DLVLH1ic/640?wx_fmt=svg&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1"  target="_blank" rel="noopener"
+    ></a></p>
+<p>电子设计自动化（Electronic Design Automation, EDA）软件对于芯片设计至关重要，属于中国亟须突破的卡脖子技术。芯片设计验证是对芯片设计是否正确与安全进行检查，在芯片设计流程中具有非常重要的地位，占其将近1/2的成本和时间。形式验证是保证计算机软硬件系统正确性与安全性的非常重要的手段，已经成为EDA软件不可或缺的组成部分，全世界三大EDA软件厂商Cadence、Synopsis、Siemens的EDA软件均包含成熟的芯片设计形式验证工具。</p>
+<p>芯片设计形式验证属于跨学科研究，涉及体系结构、EDA、形式化方法、编程语言等领域。本文将对芯片设计验证的发展现状、挑战和趋势进行分析总结，并对其在中国的发展提出建议，以期让更多人了解该领域，支持并推动该领域在中国的发展。</p>
+<p><strong>1 . 芯片设计形式验证发展现状</strong></p>
+<p>在芯片设计流程中，形式验证方法提供的核心功能包括等价性验证（Equivalence Checking）和基于断言的形式验证（Formal Assertion-based Verification）。与仿真不同，这些验证功能考虑了芯片设计的整个输入和状态空间，并且采用符号化的方法对状态空间进行整体遍历，避免显式地对状态进行枚举和遍历，从而缓解了状态爆炸问题。符号化的方法依赖对布尔公式的推理，主要基于二元决策图（Binary Decision Diagrams, BDD）或命题逻辑可满足性（Propositional Satisfiability, SAT）求解。</p>
+<p><strong>1）底层技术</strong></p>
+<p>二元决策图最初由Bryant提出，是一种简要表示布尔公式的数据结构，其主要思想是将布尔公式中的重复部分压缩成单个结点表示，从而减少需要的存储空间并加快对布尔公式的操作。现在使用的二元决策图一般首先固定布尔公式中变量的顺序，并要求相同的子图使用唯一的结点表示，因此称为约减有序二元决策图（Reduced Ordered BDD, ROBDD）。布尔公式上的运算可以转化为二元决策图上的高效操作，从而可以将电路设计的行为方便地转换为二元决策图，并快速比较2个二元决策图的等价性。二元决策图在等价性验证和基于断言的形式验证中均有使用。学术界开发了多个高效的BDD软件包，例如由美国科罗拉多大学Somenzi开发的CUDD，美国密西根大学研究人员开发的BuDDy等，方便了实际应用领域对BDD的使用。</p>
+<p>SAT问题是在给定一个命题逻辑公式后，判定是否存在一组布尔变元的赋值使得该公式满足。通常，SAT求解器的输入为合取范式（Conjunctive Normal Form, CNF），在使用之前需要首先将问题编码成合取范式。SAT虽然是NP（Nondeterministic Polynomial Time）完全问题，但现代的求解方法可以在实际案例中取得更好的效果。目前的主流方法分为完备算法和随机算法，其中完备算法更擅长求解工业案例，而随机算法更擅长求解随机案例。</p>
+<p>DPLL（Davis-Putnam-Logemann-Loveland）算法是现代完备求解算法的原型，其主要思想是在布尔变元的取值空间中递归搜索，每次选择1个变元和它的取值。在搜索过程中，如果某个子句只有1个文字未赋值，且其余文字的求值均为假，则可以唯一确定未赋值文字对应变元的赋值（单元传播）。SAT求解的一个主要突破来自基于冲突驱动的子句学习技术（Conflict Driven Clause Learning, CDCL），首次在Grasp求解器中被提出。其他一些现代SAT求解器使用的技术包括双文字监督的数据结构，基于VSIDS、LRB等策略的分支变元启发式选择，以及求解过程的定期重启。经过几十年的发展，目前最先进的SAT求解器可以处理由数十万个变元和数百万个子句组成的工业案例，在等价性验证和基于断言的形式验证算法中发挥着重要的作用。</p>
+<p><strong>2）等价性验证</strong></p>
+<p>等价性验证用于检查2个电路设计是否在功能上等价。这2个电路设计可以在同一抽象层次（如均为门级的设计）或不同抽象层次。等价性验证可用于在对门级电路设计完成之后做最后的确认（Sign-off），保证门级电路与寄存器传输级（Register Transfer Level, RTL）模型之间的一致性，从而避免综合工具实现的漏洞或人为修改造成的错误。此外，等价性验证也可作为设计过程中的辅助工具，快速检查对电路的局部修改是否改变了它的功能。这些应用场景使得等价性验证工具成为电路设计流程中必不可少的部分。</p>
+<p>等价性验证问题分为两大类：组合等价性验证（Combinatorial Equivalence Checking, CEC）和时序等价性验证（Sequential Equivalence Checking, SEC）。在CEC问题中，已经确定了2个电路之间状态和输入输出的对应关系，因此可以直接归结为二元决策图的比较或SAT求解问题。SEC问题更加复杂，对于2个电路设计，验证在任何合法的输入下，2个电路中每个节拍的输出都是相同的。这类问题要求找到2个电路之间的内部状态的对应关系。一种复杂情况来自时序重排（Retiming），导致修改后的电路中一些寄存器的含义相比之前出现延时或提前。现代的等价性验证工具可以根据时序重排的信息做特殊处理。</p>
+<p>除了以上基本功能，现代的等价性验证工具根据应用需求添加多种优化和改善。例如，通过分析2个电路之间相同的部分，只需对存在差异的部分进行逻辑上的比较。此外，当工具应用于辅助电路设计时，可以在发现错误之后提供更多调试信息，提高使用人员的工作效率。</p>
+<p><strong>3）基于断言的形式验证</strong></p>
+<p>在芯片设计过程中，开发者会插入各类断言，检查设计中寄存器的值是否符合预期，以及整个设计是否满足功能规范。前一类断言通常由设计工程师加入，便于在设计期间进行测试和调试；后一类断言通常由验证工程师加入，用于验证设计的整体正确性。这2类断言可以在仿真和测试过程中检查，也可以使用模型检测（Model Checking, MC）方法形式验证。模型检测由Clarke等提出，最初的模型检测算法通过显式地遍历系统状态空间验证系统满足安全性或时序性质，因此称为显式状态模型检测。Vardi等提出了基于Büchi自动机的线性时序逻辑（Linear Temporal Logic, LTL）模型检测算法。基于这些理论，1989年Holzmann开发了SPIN模型检测工具，支持使用LTL、Büchi自动机描述性质。为了更高效地验证并发系统，SPIN使用偏序约简（Partial Order Reduction）技术，利用状态转移关系的可交换性省略等价的路径搜索。</p>
+<p>显式状态模型检测之后的下一个重大突破是基于二元决策图的符号化模型检测（Symbolic Model Checking）。在模型检测的过程中，使用二元决策图表达不同步数后系统的可达状态空间，并使用二元决策图的规范性（即等价的公式对应的二元决策图相同）检测是否到达了不动点。1993年，McMillan开发了第一个基于二元决策图的模型检测工具SMV，而后与美国卡耐基-梅隆大学、瑞士日内瓦大学等多所高校的研究人员合作开发了NuSMV。1999年，Biere等提出的限界模型检测（Bounded Model Checking, BMC），使用SAT求解判定模型在有限多次状态转移内是否违反被验证的性质。BMC技术是一种非常有效的查错技术，BMC的使用允许在由上千个寄存器组成的芯片设计中找到错误。在BMC之后，又陆续提出了多种基于SAT求解，而且可用于证明完全正确性的模型检测算法，例如<em>k</em>-induction、基于插值的模型检测算法以及2011年Bradley提出的IC3算法。IC3算法经过Een等整理并优化后得到属性定向可达性（Property Directed Reachability, PDR）算法。到目前为止，IC3/PDR依然是综合性能最好的模型检测算法。</p>
+<p>除了模型检测算法本身的改善，研究人员也探索使用抽象和组合式验证方法简化需要验证的系统。在基于断言的形式验证中有多种常用的抽象方法，包括自动找到与验证无关的状态变量。另一种主要方法是谓词抽象，通过选择一些需要关注的谓词将系统抽象为由每个谓词取值组成的更简单的系统。与抽象对应的是精化过程，如果在抽象系统中找到了一个待验证性质的反例，这个反例可能是一个“伪反例”。在这种情况下，可以利用反例对抽象进行精化，使其更接近真实系统，称为反例引导的抽象精化。组合式验证将复杂系统分解为多个子系统，对每个子系统分别验证，然后将子系统的性质组合成为整体系统的性质。McMillan展示了这种方法在芯片验证中的作用，将其应用于Tomasulo乱序执行算法的验证。McMillan等的后续工作也将组合式验证方法应用于缓存一致性协议的验证。</p>
+<p><strong>4）主要工具</strong></p>
+<p>SAT求解器在等价性验证和基于断言的形式验证中被广泛使用。由于SAT求解和模型检测技术的快速进步，能够进行形式验证的硬件设计规模不断增长，工业界也已经普遍采用形式验证技术。全球知名EDA公司均开发了硬件设计形式验证工具，例如美国Cadence公司的JasperGold Formal Verification Platform、Synopsys公司的VCFormal，以及德国Siemens公司的360DV-Verify。很多在硬件设计领域有大量投入的企业也组建了验证团队。例如，Apple公司集结了业界顶级的形式化验证专家，几乎所有的GPU模块开发都使用了形式验证技术，ARM公司和AMD（超威半导体）公司在CPU/GPU核的开发过程中也使用了形式验证技术保证其功能正确性。英特尔（Intel）公司将符号轨迹执行和定理证明技术应用于包括Core i7产品的验证，并取得了显著的效果。商业芯片设计形式化验证工具结合了前面介绍的各种算法，并根据使用过程中的经验进行了很多优化。一个工具通常包含多个不同的算法，允许自动或用户手动选择。例如，Cadence JasperGold和Siemens 360DV-Verify分别包含15~20个形式化验证算法。这些工具普遍使用多个标准化的性质规约语言，例如Property Specification Language（PSL）和SystemVerilog Assertion（SVA）。这些语言以LTL等时序逻辑作为理论基础，但添加了更利于开发和测试人员理解的语法和特性。</p>
+<p>芯片设计形式验证在实际应用中的一个主要困难是待验证性质的规约需要人工写出。这需要设计与验证人员具备相关经验，耗时长且容易产生遗漏。近年来一个新进展是针对一些基本而常见的验证场景自动生成待验证性质，然后使用模型检测算法进行验证。这些基本而常见的验证场景包括连通性检查、冗余代码检查、时钟跨域验证、信息安全性验证等，这些功能被封装成形式应用工具（Formal Apps）。这些工具的出现，使很多之前需要大量人力才能完成检查甚至无法保证详尽的检查可以在较短的时间内完成。逻辑功能更正（Engineering Change Order, ECO）是形式化方法在工业EDA软件中的另一个重要应用。逻辑功能更正指的是在逻辑综合、物理综合等流程已经完成之后，通过直接修改RTL级的代码更改设计的逻辑功能，并添加到综合后的电路上，而不需要重复综合过程。逻辑功能更正最初在1991年由美国加州大学伯克利分校的研究人员提出，也产生了来自Cadence的Conformal ECO工具，但相关技术还没有完全成熟，依然有很多的提升空间。</p>
+<p>若干开源EDA工具也整合了形式验证技术。例如，针对Verilog/SystemVerilog的逻辑综合工具Yosys包含形式化验证模块SymbiYosys，支持限界和非限界的模型检测。美国加州大学伯克利分校的ABC工具提供了强大的等价性验证和基于断言的形式验证能力。这些主要关注逻辑综合与验证的工具也被集成到全过程的开源EDA框架OpenROAD和OpenLane中。在模型检测算法的探索方面存在一些来自学术界的开源工具，包括美国密西根大学的AVR工具、美国斯坦福大学的Pono工具、加拿大滑铁卢大学的Avy工具等，这些工具实现了处于学术界前沿的IC3/PDR算法及其扩展。</p>
+<p><strong>2. 芯片设计形式验证面临的挑战</strong></p>
+<p>芯片设计形式验证技术伴随着EDA软件的发展，已经有较长的历史，并成功应用于芯片设计验证的众多任务。然而，随着芯片设计技术的不断进步，芯片设计形式验证技术面临以下几方面的挑战。</p>
+<p><strong>1）可扩展性挑战</strong></p>
+<p>芯片设计形式验证广泛应用的主要障碍是底层引擎，如SAT求解器和模型检测工具的可扩展性不够。近10年来，这些底层引擎的能力提升不大，处于瓶颈期，如何进一步提升这些底层引擎的可扩展性是芯片设计形式验证的核心问题和挑战。</p>
+<p><strong>2）高层验证挑战</strong></p>
+<p>高层芯片构造/描述语言不断涌现，芯片设计抽象层次不断提高，EDA生态系统面临扩展和重构。如何针对这些高层语言研发相应的高层形式验证技术和工具，提高形式验证的抽象层次，缓解状态爆炸问题，是一个较大的挑战。</p>
+<p><strong>3）开源芯片设计挑战</strong></p>
+<p>RISC-V开源指令集已经成为继x86、ARM之后的第3种全球流行的指令集，由此引发了开源芯片设计和开源EDA的浪潮。处于垄断地位的全球三大EDA公司Cadence、Synopsis、Siemens的EDA软件均包含成熟的芯片设计形式验证工具，但目前开源EDA生态还不完善，其中的形式验证工具比较初步，无法满足开源芯片设计的需要。</p>
+<p><strong>4）人才培养挑战</strong></p>
+<p>芯片设计形式验证是计算机体系结构、形式化方法、编程语言的交叉学科，人才培养学习曲线陡、所需掌握的知识面广、培养周期长，因此芯片设计形式验证的人才培养存在较大挑战，目前全球尤其是中国在这方面的人才非常短缺。</p>
+<p><strong>3. 芯片设计形式验证发展趋势</strong></p>
+<p>芯片设计形式验证技术仍然在不断向前发展，呈现出以下几方面的趋势。</p>
+<p><strong>1）字级模型检测算法</strong></p>
+<p>传统的硬件模型检测算法是位级（Bit-level）的，也就是系统状态被拆分成若干布尔变量，迁移关系由布尔变量上的运算表示。然而，很多硬件模块涉及算术运算，例如整数上的加法、乘法和比较等。这些运算如果展开到布尔变量的运算会变得非常复杂。字级（Word-level）的模型检测算法指的是将部分状态和迁移关系使用字级和字级上的运算表达，并使用可满足性模理论（Satisfiability Modulo Theories, SMT）求解器结合模型检测算法进行验证。需要解决的主要问题包括如何将IC3/PDR与SMT求解有效结合，以及字级的不变式生成方法，这些方面已经有了众多研究。目前字级算法并不能完全取代位级模型检测算法，两者大致呈互补的关系。例如，相比于位级模型检测算法，字级算法通常更擅长处理和运算相关的数据通路上的性质；而对于与控制单元相关的性质，位级模型检测算法通常更具有性能优势。</p>
+<p><strong>2）机器学习辅助的约束求解与模型检测算法</strong></p>
+<p>芯片设计形式验证广泛应用的主要障碍是底层引擎（如SAT求解器和模型检测工具）的可扩展性不够。如何进一步提升这些底层引擎的可扩展性是芯片设计形式验证的核心问题和挑战。一个很有前景的方向是利用机器学习技术改善SAT求解和模型检测算法的可扩展性。目前，已有研究使用机器学习算法自动配置SAT求解器的参数，以及在给定实例之后从多个SAT求解器中选择更有可能解决该实例的求解器。另一个潜在的结合方向是不变式的自动生成。在不限界的符号模型检测算法中，一个主要目标是找到系统的不变式。目前已有众多通过数据驱动和机器学习的方法寻找不变式的研究，但如何与硬件模型检测算法结合还是需要探索的方向。</p>
+<p><strong>3）面向RISC-V处理器设计的形式验证技术</strong></p>
+<p>RISC-V是由美国加州大学伯克利分校的Asanović和Patterson等在2010年提出的一种精简计算机指令集的开源实现。在2010年提出RISC-V指令集之后，为了支持RISC-V处理器在众多应用场景下的敏捷设计，2012年美国加州大学伯克利分校的研究人员提出了硬件构建语言Chisel。Chisel语言是一种嵌入在函数式编程语言Scala之中的硬件构建语言。与硬件设计领域最流行的Verilog和SystemVerilog语言相比，Chisel具有如下明显优势：Chisel支持面向对象与函数式编程，提高了编程抽象层次与代码可读性；Chisel支持信号整体连接与模版编程，可以提高代码复用程度。</p>
+<p>为了充分利用Chisel模块化和参数化设计的特点，需要发展针对Chisel的形式验证工具，一个可行的思路是，首先对处理器Chisel设计进行高层的形式验证，然后对Chisel编译过程进行形式验证，保证编译生成的低层代码与Chisel代码的一致性，从而实现处理器设计的高效验证，缓解底层引擎SAT求解器和模型检测工具的可扩展性问题。而且，受针对Chisel语言的中间表示FIRRTL的启发，一种基于MLIR的硬件设计中间表示CIRCT已经提出，其生态正在蓬勃发展，各种围绕CIRCT的开源EDA工具正在不断涌现，围绕CIRCT研究形式验证技术与工具是一个很有前景的方向。</p>
+<p><strong>4）面向领域专用处理器设计的形式验证技术</strong></p>
+<p>领域专用处理器一般基于领域专用指令集进行设计，例如AI芯片可以基于中国科学院计算技术研究所陈云霁等提出的寒武纪指令集进行设计。寒武纪指令集涵盖了标量、向量、矩阵、逻辑、数据传输和控制指令，而经典的处理器一般只包括标量、逻辑、数据传输和控制指令。针对这些领域专用处理器研制形式验证技术需要解决以下问题：如何对领域专用指令集的语义进行形式化；如何在芯片形式验证技术中根据这些不同指令的特点设计高效的验证算法。</p>
+<p><strong>4. 芯片设计形式验证发展建议</strong></p>
+<p>鉴于芯片形式验证技术的重要性，需要大力促进芯片设计形式验证技术在中国的发展。为此提出如下发展建议。</p>
+<p><strong>1）改进基础研究评价机制</strong></p>
+<p>芯片设计形式验证是涉及计算机体系结构、形式化方法、编程语言的交叉研究领域，这些领域都属于计算机基础研究。如果要促进芯片设计形式验证在中国的发展，首先需要改善中国计算机基础研究的生态环境。中国计算机基础研究总体薄弱，从事体系结构、操作系统、编程语言与编译、计算机理论等基础研究方向的研究人员少，相对从事计算机应用研究的人员处于弱势地位。为此，需要改进科研成果评价机制、对从事基础研究的人员进行相对宽松的考核，避免简单量化考核，鼓励他们针对一些基础核心问题坚持长期原创探索，改善计算机基础研究的生态环境。</p>
+<p><strong>2）巩固和加强核心引擎基础研究</strong></p>
+<p>在芯片设计形式验证的核心引擎（SAT/SMT求解器和模型检测工具）方面，国内有较好的研究基础，在一些方面达到了国际前沿甚至国际领先水平。例如，中国科学院软件研究所蔡少伟团队开发的SAT/SMT求解器在国际SAT/SMT竞赛中多次获得第一名，而且成功用于国内知名芯片设计团队的芯片设计形式验证中。</p>
+<p>虽然SAT/SMT求解器和模型检测工具的能力取得了长足的进步，但还远远无法满足芯片产业快速发展的需要，因此有必要加强这些方面的基础研究，实现SAT/SMT和模型检测基础算法与工具可扩展性的突破。</p>
+<p><strong>3）加强人才培养</strong></p>
+<p>国内外在芯片设计形式验证方面最大的差距是人才的差距，国际EDA三大巨头均有具有形式化方法背景的从事芯片设计形式验证工具研发的专门团队，美国普林斯顿大学、美国加州大学伯克利分校、美国斯坦福大学等高校也都有从事芯片设计形式验证研究的团队，而国内从事相关领域研究的高校或研究所的研究人员不足10人。</p>
+<p>建议联合中国计算机学会体系结构专业委员会、集成电路设计专业委员会、形式化方法专业委员会开设芯片设计形式验证的相关课程，组织暑期班、研讨会等培养相关人才，同时建立相关网站整合相关教育资源。</p>
+<p><strong>4）加强跨学科合作</strong></p>
+<p>EDA和芯片设计形式验证是跨学科的研究领域，国内形式化方法研究人员应与体系结构研究人员和产业界从事芯片设计开发的人员加强沟通交流，将形式验证技术与芯片设计领域知识深度结合，争取在某几个点上先形成突破，形成示范效应，进一步促进形式验证技术在芯片设计行业的应用推广。</p>
+<p><strong>5）实现产学研协同发展</strong></p>
+<p>芯片设计形式验证的商业工具基本为美国和欧洲的Cadence、Synopsis、Siemens 3家公司所垄断。近年来，美国对中国的半导体产业进行限制，国内产学研各界对EDA日益重视，EDA的发展正在加速，并涌现出一批EDA初创公司，如全芯智造、阿卡思微、芯华章、行芯科技等，其中一些公司（如阿卡思微和芯华章）的EDA工具也开始包括形式验证功能。由于国内整个EDA产业还处于比较初级的阶段，整体上芯片设计形式验证工具都还比较初步，与国际EDA巨头的相关工具在功能覆盖面和性能方面都还存在较大差距。有必要加强产学研各界的交流合作，共建国内芯片设计形式验证的生态，实现协同发展。</p>
+<p><strong>6）抓住RISC-V带来的开源芯片设计和开源EDA发展的历史机遇</strong></p>
+<p>抓住RISC-V开源芯片、开源EDA在中国和世界蓬勃发展的历史机遇，在新的赛道上贡献中国力量，进行相关技术工具的研发，争取在这些新赛道上开发有影响的芯片设计形式验证工具。开源芯片同时带动了芯片敏捷设计方法的发展，芯片设计抽象层次不断提高，新的硬件描述/构造语言和中间表示不断出现。敏捷设计方法使得对芯片设计进行高层形式验证成为必要，芯片高层形式验证不仅可以使验证的关口前移，同时还可以缓解芯片设计形式验证的状态爆炸问题。</p>
+<p><strong>7）抓住领域专用处理器设计蓬勃发展的历史机遇</strong></p>
+<p>针对人机物融合时代领域专用处理器（尤其是AI处理器）广泛流行的趋势，发展针对领域专用处理器设计的专用形式验证技术，利用领域专用处理器指令集和体系架构相对高层的特点来缓解形式验证技术的状态爆炸问题，促进形式验证技术在领域专用处理器设计中的真正落地。</p>
+<p><strong>5.结束语</strong></p>
+<p>随着形式验证技术与工具的不断进步，形式验证在芯片设计流程中发挥着越来越重要的作用，已经成为商业EDA软件不可或缺的组成部分。随着美国对中国芯片产业限制的不断升级，中国产学研各界对于EDA软件日益重视，开源指令集、开源芯片设计、开源EDA成为中国应对美国限制的一种有效的策略，人机物融合时代带来了领域专用处理器的设计需求，为芯片设计形式验证技术带来了挑战和发展机遇。国内产学研各界已经在芯片形式验证技术和工具方面有了初步的积累，未来需要通力合作，协同推进芯片设计形式验证技术在中国的发展，为缓解EDA软件“卡脖子”问题贡献力量。</p>
+<p>ref：https://mp.weixin.qq.com/s/AZC0qPmMNlpE8YV8uzoOgw</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ic-design/">IC Design</a>
+        
+            <a href="/tags/formal-verification/">Formal Verification</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E5%8F%91%E5%B1%95%E7%AE%80%E5%8F%B2/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">形式验证发展简史</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E7%BC%BA%E7%82%B9/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">形式验证缺点</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

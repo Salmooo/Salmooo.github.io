@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Formal on SalmoneX Blog</title>
+        <link>https://Salmooo.github.io/categories/formal/</link>
+        <description>Recent content in Formal on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright><atom:link href="https://Salmooo.github.io/categories/formal/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>形式验证发展简史</title>
+        <link>https://Salmooo.github.io/p/%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E5%8F%91%E5%B1%95%E7%AE%80%E5%8F%B2/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E5%8F%91%E5%B1%95%E7%AE%80%E5%8F%B2/</guid>
+        <description>&lt;p&gt;&lt;strong&gt;导言&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;经过几代形式化方法人的不断努力，中国形式化方法取得长足进步，已经在国际形式化方法大家庭中占有重要地位。今年，著名计算机理论专家，也是形式化方法旗舰会议FM及杂志Formal Aspects of Computing （FAC）创始人，Cliff Jones教授组织了FAC一个专刊，介绍形式化方法发展历史。CCF形式化方法专委主任詹乃军教授，与FAC前主编Jim Woodcock教授，CCF形式化方法专委前主任王戟教授及CCF形式化方法专委执行委员陈明帅研究员共同撰写了“A Brief History of Formal Methods in China”论文，系统介绍形式化方法在中国从萌芽到快速发展，到成为国际形式化方法不可分割一部分的发展历程，重点介绍了各个阶段重要工作及重要学者。文章是几位作者个人的观点，可能存在一些重要工作和重要学者没有提及，或者介绍不够准确情况。&lt;/p&gt;
+&lt;p&gt;詹乃军&lt;/p&gt;
+&lt;p&gt;CCF形式化方法专委主任&lt;/p&gt;
+&lt;p&gt;北京大学教授&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;em&gt;&amp;ldquo;During Hilbert&amp;rsquo;s life, Leibniz&amp;rsquo;s Dream &amp;ndash; all truths of the reason would be reduced to a kind of calculation directed by symbols &amp;ndash; by and large, just stayed a dream. [&amp;hellip;] In the 2nd half of the 20th century, things shifted with the advent of computers, as more and more people began to adopt formal techniques. Parts of Leibniz&amp;rsquo;s Dream became reality [&amp;hellip;].&amp;rdquo;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Edsger W. Dijkstra (1930-2002), &lt;em&gt;Under the Spell of Leibniz&amp;rsquo;s Dream&lt;/em&gt;.&lt;strong&gt;¹&lt;/strong&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;strong&gt;形式化方法（Formal Methods）是一类具有严格数学基础的技术与工具，其通过严谨的数学模型和逻辑推理，对计算系统进行规约、设计、构建、分析、验证与演进，是保障和提升软硬件系统质量的重要手段。随着理论计算机科学和软件理论的深入发展，形式化方法的模型、技术与工具已延伸成为计算思维的重要载体。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;“形式化方法”这一概念——更准确地说，是“形式化准则”（The Principle of Formalization）——可追溯至20世纪20年代著名的希尔伯特计划²（Hilbert’s Program）。该计划旨在为全部数学建立一个完备、一致且可判定的公理化基础。尽管哥德尔于1931年提出的不完备定理³（Gödel’s Incompleteness Theorems）几乎彻底否定了希尔伯特的哲学设想，但希尔伯特计划仍留下了一项影响深远的遗产，即形式化准则：使用一种统一的、未解释的、严格的形式语言来表达命题，并按照一套明确定义的逻辑规则进行推演。此后，这一准则逐步发展成为理论计算机科学诸多基础内容的核心支撑，由此衍生出的逻辑演算、形式语言、自动机理论及程序语义等基础理论与方法，共同构成了如今所称的形式化方法。在工程实践中，形式化方法已被广泛应用于航空航天、交通运输、医疗健康和国防军事等安全攸关领域，用以保障软硬件系统的可靠性与有效性。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;形式化方法领域的早期研究主要关注“可计算性”问题，由Church、Turing等人于20世纪30至40年代奠基，旨在借助形式语言为计算与程序设计建立严格的数学基础。自20世纪60年代起，该领域的研究重心逐渐转向“计算可信性”问题，其奠基性工作包括McCarthy、Floyd、Hoare、Dijkstra等人在程序形式语义、规约及正确性证明方面的研究。此后，形式化方法逐步发展成为一门独立的学科，并成为程序设计与软件工程基础的重要组成部分，产生了大量具有深远影响的研究成果，其中包括（但不限于）18位图灵奖获得者的相关工作&lt;/strong&gt;⁴**。**&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;在这一国际背景下，中国的形式化方法研究始于20世纪50年代初。当时，包括胡世华（1912–1998）、王湘浩（1915–1993）和莫绍揆（1917–2011）在内的一批逻辑学家，将研究重心从数学转向理论计算机科学，并积极倡导运用数理逻辑提升计算系统的严谨性。20世纪80年代，伴随改革开放的深入推进，一批具有英国、美国等西方国家访学或工作经历的计算机科学家，引领了中国形式化方法研究的系统发展。1990年代初期，在澳门成立的联合国大学国际软件技术研究所（UNU/IIST）成为中国形式化方法发展的重要里程碑，在促进学术研究与国际合作方面发挥了关键作用。近年来，越来越多具有海外学习和研究经历的优秀青年学者回国发展，进一步壮大了中国形式化方法研究队伍，显著提升了中国在国际形式化方法领域的影响力。&lt;/strong&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;strong&gt;近期，形式化方法领域国际期刊Formal Aspects of Computing组织了题为“History of Formal Methods”的专刊，聚焦形式化方法的发展历史，探讨其演进脉络、代表人物、标志性项目以及对软件与硬件工程产生的深远影响。CCF形式化方法专委会受邀撰写综述论文“A Brief History of Formal Methods in China”，系统回顾了中国形式化方法的发展历程。论文作者包括：专委会主任、北京大学詹乃军教授，西南大学、英国约克大学Jim Woodcock教授，专委会前主任、国防科技大学王戟教授，以及专委会执行委员、浙江大学陈明帅研究员。论文成文过程中得到了专委会多位成员的大力支持与宝贵的建设性意见。&lt;/strong&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;该综述论文将&lt;strong&gt;中国形式化方法的发展划分为三个主要阶段：起步阶段（1950年代–1970年代）、初步发展阶段（1980年代–1990年代）及扩展与成熟阶段（21世纪以来）。文章系统梳理了各阶段的重要里程碑事件、代表性成果与重大应用，并重点回顾了过去20年来中国形式化方法社区在自动推理、程序验证和安全攸关系统设计等方向上取得的具有显著国际影响力的研究进展。同时，论文对中国形式化方法在研究、应用与人才培养等方面所面临的挑战及未来发展方向进行了讨论。作者希望该文能够为青年研究学者了解中国形式化方法的发展脉络提供参考，同时也为国际同行深入了解中国形式化方法研究提供一个窗口。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;**论文链接：**&lt;a class=&#34;link&#34; href=&#34;https://dl.acm.org/doi/10.1145/3783996&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://dl.acm.org/doi/10.1145/3783996&lt;/a&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;strong&gt;1.&lt;/strong&gt; Edsger W. Dijkstra. Under the Spell of Leibniz&amp;rsquo;s Dream. https://www.cs.utexas.edu/~EWD/ewd12xx/EWD1298.PDF&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2.&lt;/strong&gt; Richard Zach. 2023. Hilbert’s Program. In The Stanford Encyclopedia of Philosophy (Winter 2023 ed.). Metaphysics Research Lab, Stanford University. &lt;a class=&#34;link&#34; href=&#34;https://plato.stanford.edu/archives/win2023/entries/hilbert-program/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://plato.stanford.edu/archives/win2023/entries/hilbert-program/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3.&lt;/strong&gt; Kurt Gödel. 1967. On Formally Undecidable Propositions of Principia Mathematica and Related Systems I. In From Frege to Gödel: A Source Book in Mathematical Logic, 1879–1931. Harvard University Press, Cambridge, MA, 596–616. Originally published in Monatshefte für Mathematik und Physik, 38:173–198 (1931). https://archive.org/details/fromfregetogodel0025unse/page/664/mode/2up&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;4.&lt;/strong&gt; Ji Wang, Naijun Zhan, Xinyu Feng, and Zhiming Liu. 2019. Overview of Formal Methods. Journal of Software 30, 1 (2019), 33–61. http://www.jos.org.cn/1000-9825/5652.htm (In Chinese).&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>形式验证缺点</title>
+        <link>https://Salmooo.github.io/p/%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E7%BC%BA%E7%82%B9/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E7%BC%BA%E7%82%B9/</guid>
+        <description>&lt;p&gt;在老石之前的文章中，作者介绍了&lt;a class=&#34;link&#34; href=&#34;https://zhida.zhihu.com/search?content_id=100636337&amp;amp;content_type=Article&amp;amp;match_order=1&amp;amp;q=%E5%BD%A2%E5%BC%8F%E5%8C%96%E9%AA%8C%E8%AF%81&amp;amp;zhida_source=entity&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;形式化验证&lt;/a&gt;的主要特点和优势。在这篇文章中，作者将主要介绍一下形式化验证的主要缺点，以及作者眼中的验证方法学发展前景。&lt;/p&gt;
+&lt;h2 id=&#34;一形式化验证的主要问题&#34;&gt;&lt;strong&gt;一、形式化验证的主要问题&lt;/strong&gt;
+&lt;/h2&gt;&lt;p&gt;相比于传统的基于仿真的验证方法学，形式化验证有着似乎无可比拟的优势，看起来几乎是完美的验证方法学。可惜的是，形式化验证有着非常显著的缺点，其中最主要的就是所谓的**“&lt;a class=&#34;link&#34; href=&#34;https://zhida.zhihu.com/search?content_id=100636337&amp;amp;content_type=Article&amp;amp;match_order=1&amp;amp;q=%E7%8A%B6%E6%80%81%E7%88%86%E7%82%B8&amp;amp;zhida_source=entity&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;状态爆炸&lt;/a&gt;”问题（state explosion）**。&lt;/p&gt;
+&lt;p&gt;顾名思义，这代表了在某个设计中，理论上存在的状态可能非常多，超出了形式化验证工具可以处理的范围。&lt;/p&gt;
+&lt;p&gt;例如，在一个简单的N位计数器中，可能存在2的N次方个状态，且状态数量随着计数器位数的增加呈指数级增长。同样的状态爆炸问题存在于存储器、各类数学运算单元如乘法器等等，如下图示意的是M1xM2结果的状态与M1和M2的状态数呈指数级关系。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://pica.zhimg.com/v2-e12bf2b7fbcc2079474aa80f4c675d00_1440w.jpg&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;状态爆炸问题是由形式化验证——具体而言是形式化验证中最为常用的&lt;a class=&#34;link&#34; href=&#34;https://zhida.zhihu.com/search?content_id=100636337&amp;amp;content_type=Article&amp;amp;match_order=1&amp;amp;q=%E6%A8%A1%E5%9E%8B%E9%AA%8C%E8%AF%81&amp;amp;zhida_source=entity&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;模型验证&lt;/a&gt;（Model Checking）——的工作机制决定的，是形式化验证的根本性问题，无法通过优化算法或者工具完全解决。&lt;/p&gt;
+&lt;p&gt;但是，值得欣慰的是，学术界和业界也在不断探索用来缓解状态爆炸问题的各种方法。在理论上，有学者提出了以下方法，如：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://zhida.zhihu.com/search?content_id=100636337&amp;amp;content_type=Article&amp;amp;match_order=1&amp;amp;q=%E7%AC%A6%E5%8F%B7%E6%A8%A1%E5%9E%8B%E9%AA%8C%E8%AF%81&amp;amp;zhida_source=entity&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;strong&gt;符号模型验证&lt;/strong&gt;&lt;/a&gt;（Symbolic Model Checking），即使用二元决策图（Binary Decision Diagrams – BDD）而非独立的状态列表来表达状态空间；&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://zhida.zhihu.com/search?content_id=100636337&amp;amp;content_type=Article&amp;amp;match_order=1&amp;amp;q=%E5%81%8F%E5%BA%8F%E7%BA%A6%E5%87%8F&amp;amp;zhida_source=entity&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;strong&gt;偏序约减&lt;/strong&gt;&lt;/a&gt;（Partial Order Reduction），即检查各个状态和行为间的独立性以减小整体的状态空间；&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://zhida.zhihu.com/search?content_id=100636337&amp;amp;content_type=Article&amp;amp;match_order=1&amp;amp;q=%E5%9F%BA%E4%BA%8E%E5%8F%8D%E4%BE%8B%E7%9A%84%E6%8A%BD%E8%B1%A1%E4%BC%98%E5%8C%96&amp;amp;zhida_source=entity&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;strong&gt;基于反例的抽象优化&lt;/strong&gt;&lt;/a&gt;（Counterexample-Guided Abstraction Refinement），即自适应的寻找合适的抽象层次，实现精度和运行时间的折中。&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://zhida.zhihu.com/search?content_id=100636337&amp;amp;content_type=Article&amp;amp;match_order=1&amp;amp;q=%E6%9C%89%E7%95%8C%E6%A8%A1%E5%9E%8B%E9%AA%8C%E8%AF%81&amp;amp;zhida_source=entity&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;strong&gt;有界模型验证&lt;/strong&gt;&lt;/a&gt;（Bounded Model Checking），即使用SAT（Boolean satisfiability）求解器在一定边界条件下寻找反例。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;在实际应用中，业界也有一系列应对状态爆炸问题的方法，我将在下一章进行详细阐述。&lt;/p&gt;
+&lt;h2 id=&#34;二如何使用形式化验证&#34;&gt;&lt;strong&gt;二、如何使用形式化验证&lt;/strong&gt;
+&lt;/h2&gt;&lt;p&gt;那么，应该如何着手使用形式化验证？首先需要考虑如何将设计规约和需求用形式化的方法表述出来。&lt;/p&gt;
+&lt;p&gt;验证的本质就是将设计与设计规约进行一一比对的过程。在电路仿真中，通常使用参考模型（reference model）作为设计规约的实现形式。&lt;/p&gt;
+&lt;p&gt;参考模型通常由高级语言，如C/C++、SystemC、MATLAB等实现，但有时也会通过RTL语言如SystemVerilog实现。与此不同的是，在形式化验证方法中，设计规约是通过形式化的语言进行抽象和描述的，而并不需要参考模型。&lt;/p&gt;
+&lt;p&gt;设计规约通常会被拆分成若干条“属性”（Property），然后通过&lt;a class=&#34;link&#34; href=&#34;https://zhida.zhihu.com/search?content_id=100636337&amp;amp;content_type=Article&amp;amp;match_order=1&amp;amp;q=SystemVerilog%E6%96%AD%E8%A8%80&amp;amp;zhida_source=entity&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;**SystemVerilog断言&lt;/a&gt;（SystemVerilog Assertion – SVA）**来进行描述。&lt;/p&gt;
+&lt;p&gt;SVA是SystemVerilog语言的一个子集，其实它已然被广泛用于传统的电路仿真中，但使用范围比较受限，主要用来检查在仿真中某些状态（通常为异常状态）是否会发生。在形式化验证中，SVA则是作为主要的编程语言，用来描述设计规约的各条属性、对设计的行为进行建模、提供实际的约束、提取覆盖率等等。&lt;/p&gt;
+&lt;p&gt;SVA的层次可以根据所表达的复杂度分为如下四级：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1. 布尔运算（Booleans&lt;/strong&gt;），如&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;data[0] &amp;amp;&amp;amp; data[1] &amp;amp;&amp;amp; data[2]&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2. 序列（sequence）&lt;/strong&gt;，用来表达在一段时间内发生的一系列布尔运算。因此可见序列的表示需要一个明确的时钟作为参考。例如：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;req ##2 grant&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;这代表当req置一后再过两个时钟周期，grant再置一。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3. 属性（property）&lt;/strong&gt;，用来组合多个序列，并以此表明在设计中需要满足的某种逻辑关系。如：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;A |-&amp;gt; B A |=&amp;gt; B&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;其中A和B都为序列。本例中前者代表当A成立时，B在同一个周期内也必须成立；后者代表当A成立时，B在下一个周期必须成立。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;4. 断言声明（assertion statements）&lt;/strong&gt;，用来表示对一则SVA属性所进行的动作，例如：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;p1: assert property (A |-&amp;gt; B);&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;这代表将对括号内的property进行断言检查。&lt;/p&gt;
+&lt;p&gt;断言声明通常使用以下三个关键词之一：assert，assume和cover。这三个关键词在形式化验证环境中的语义和在电路仿真中有所不同：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Assert&lt;/strong&gt;：表示给定的断言声明（statement）必须在任何条件下都满足；&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Assume&lt;/strong&gt;：用来指定各种形式化验证的约束条件；&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Cover&lt;/strong&gt;：用来表明在形式化验证的过程中必须要覆盖到的情况。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;三形式化验证流程&#34;&gt;&lt;strong&gt;三、形式化验证流程&lt;/strong&gt;
+&lt;/h2&gt;&lt;p&gt;由于篇幅所限，其他更深入的有关SVA的介绍和举例无法在本文给出。本文想强调的是，在形式化验证中，各种设计规约、约束条件、验证目标、覆盖点等，都是通过SVA进行表述和建模的。&lt;/p&gt;
+&lt;p&gt;这样，可以把形式化验证流程图扩展为如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://pic4.zhimg.com/v2-3f0fbdcc84e9649052e3b735af3d2687_1440w.jpg&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;可以看到，形式化验证引擎的输入输出都进行了一些扩展。在输入端，除了在仿真中也需要的待测模块以外，形式化验证还需要对输入进行一定的约束，并通过SVA的描述，提供待验证的断言和覆盖点。&lt;/p&gt;
+&lt;p&gt;通常来讲，使用形式化验证的第一步，并非是立即编写各种断言，而是构思需要对整个设计和验证环境添加怎样的约束。&lt;/p&gt;
+&lt;p&gt;形式化约束的意义在于能很大程度上的减小状态空间，一方面能引导形式化验证工具在更加合理的状态区间中进行更有效的断言判定，另一方面能够从一开始就杜绝一些不合理的状态或条件的出现，从而避免验证出现漏报（false negative）。为形式化验证添加约束还能“强迫”设计者和验证工程师在整体上全面思考设计规约以及设计需求，从而在早期发现设计规约和需求中的漏洞和不足。&lt;/p&gt;
+&lt;p&gt;在明确各种约束条件之后，接下来需要考虑设计中存在哪些目标状态，并通过覆盖点进行覆盖。这与使用随机约束的验证方法中，提取功能覆盖率的思想比较类似。通常这些目标状态都在验证计划中给出。&lt;/p&gt;
+&lt;p&gt;需要注意的是，在形式化验证中，覆盖点还有一个重要作用是防止误报（false positive）的出现。最极端的例子是，如果不给出任何断言，那么形式化验证工具就会给出全部断言都被证明的误报。因此需要覆盖点对目标状态进行覆盖，确保工具对相关断言的确进行了证明。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;在形式化验证工具的输出端，通常会给出三类信息&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;若断言得到证明，则会给出已经被证明的断言列表；&lt;/li&gt;
+&lt;li&gt;若断言被证明有误，则会给出一个反例，如上文所述通常为最小实例；&lt;/li&gt;
+&lt;li&gt;若在有限时间之内，工具无法给出证明或反证，则会标明该断言的证明没有定论（inconclusive）。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;有很多种可能性会导致出现最后一种情况，例如证明时间太短、断言及属性过于复杂等，但通常代表此时的状态空间太大，已经超出了形式化工具可以证明的范围。&lt;/p&gt;
+&lt;p&gt;此时，应该考虑着手减小状态空间，例如考虑简化断言、提供更多约束、尝试其他的形式化验证引擎等。也可以使用更进一步形式化验证技巧，如使用抽象模型（abstraction），设置黑盒（blackbox）或断点（cut-point），对待测设计采用分而治之的策略等。&lt;/p&gt;
+&lt;p&gt;再比如，对于一个大小为32位宽、512个存储单元的存储器，理论上它的状态空间存在2^(32*512)个状态， 即大约十亿的一千次方，已经远超计算机可以计算的范围。&lt;/p&gt;
+&lt;p&gt;其实，对于存储器本身而言，它通常作为一个可配置的IP使用，对于使用存储器IP的设计，验证存储器自身的功能并非验证的目的。而且，我们往往可以安全的假设，存储器本身已经经过了IP提供商的完整验证，可以直接使用。此外，可以注意到每个存储器的存储单元均相互独立，很多情况下两个存储单元的内容并不会相互影响。&lt;/p&gt;
+&lt;p&gt;在这种情况下，我们可以使用针对存储器的抽象模型，只对少数存储单元进行精确建模，而不需关心其他单元，那么可以将整体的状态空间下降为2^(32*3)个状态。&lt;/p&gt;
+&lt;p&gt;对形式化验证中的抽象模型的研究一直是业界和学界的热点之一，比如，英国Imagination公司的Arshish Darbari等人曾经发表过多篇文章，详细阐述了关于FIFO、Arbiter等模块的形式化抽象方法。我的博士导师，伦敦帝国理工学院的Constantinides教授也曾对多项式数据通路的形式化验证开展过一系列理论研究工作。形式化验证咨询机构Oski也发表过一系列文章，详细讲解了诸如如何对FIFO等底层模块进行形式化抽象，如下图所示。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://pic2.zhimg.com/v2-4265836eec44c75cd99b7bbe53f7e58f_1440w.jpg&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;同时，形式化验证工具的提供商，如Candence和Synopsys也都提供了一些常用模块，如FIFO、存储器、乘法器等的抽象模型。&lt;/p&gt;
+&lt;p&gt;综上所述，一个较为完整的形式化验证环境会如下图所示。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://pic1.zhimg.com/v2-06b2576d8964bb55dff597b8517ccd26_1440w.jpg&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h2 id=&#34;四作者眼中的现代验证方法学&#34;&gt;&lt;strong&gt;四、作者眼中的现代验证方法学&lt;/strong&gt;
+&lt;/h2&gt;&lt;p&gt;在笔者眼中，形式化验证将在现代验证方法学中慢慢占有越来越重要的地位。这主要是由于形式化验证独特的工作原理，及其先天优于基于电路仿真的验证方法的各类特性。&lt;/p&gt;
+&lt;p&gt;同时，形式化验证适用于多种不同的模块层级，从小规模的IP设计，到大规模的系统集成，都有可能使用形式化的方法进行验证。很多业界的公司都早已开展形式化验证的使用，比如英特尔就对其i7处理器的某核心部件全部使用形式化方法进行验证。&lt;/p&gt;
+&lt;p&gt;随着EDA工具的不断完善，普通的工程师使用者并不需要掌握任何形式化理论或数学模型推导，这些过程都已被封装在工具中，这样大大简化了形式化验证的使用门槛。&lt;/p&gt;
+&lt;p&gt;形式化验证另一个主要的作用在于，能够帮助设计者充分严谨的思考设计需求和规约，并在设计早期就能有效发现各类漏洞，而无需等待复杂的测试平台搭建完成。&lt;/p&gt;
+&lt;p&gt;不过需要记住的是，形式化验证也伴随着先天的缺点，即不能有效处理拥有大量状态的设计，如存储器、数学运算器等。为了应对这样的情况，验证工程师需要掌握一些形式化验证技巧和抽象方法。&lt;/p&gt;
+&lt;p&gt;此外，形式化验证与电路仿真的思考角度完全不同，一个熟练使用&lt;a class=&#34;link&#34; href=&#34;https://zhida.zhihu.com/search?content_id=100636337&amp;amp;content_type=Article&amp;amp;match_order=1&amp;amp;q=UVM&amp;amp;zhida_source=entity&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;UVM&lt;/a&gt;和随机约束的验证工程师不一定能在短时间内很好的掌握形式化验证的思想和工作方法。这几点都使得形式化验证又不是那么简单易用。&lt;/p&gt;
+&lt;p&gt;因此，&lt;strong&gt;业界的共识在于，充分利用形式化验证和电路仿真的优点，扬长避短，在一个完整的项目周期内协同使用不同的验证方法学&lt;/strong&gt;。业界有关项目进行时间和漏洞数量关系、修复漏洞的花费三者关系的经验图如下所示，可见在项目开发初期，是各类漏洞存在的高发期，但此时修复漏洞所需要的成本最少。等到项目行将结束并流片的时候，漏洞很难被找到，但一旦出现就往往需要花费大量成本进行修复。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://pic3.zhimg.com/v2-cc0c5ad1acc22999c240635ff6ff3eea_1440w.jpg&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;因此，在项目早期，可以利用形式化方法逐步完善设计规约，同时发现各类早期的问题和简单的漏洞。设计者也可以负责编写各类断言，而验证工程师负责形式化平台的搭建，以及更复杂断言的设计。&lt;/p&gt;
+&lt;p&gt;与此同时，使用UVM等方法学搭建电路仿真平台，用以在更高层次（如系统集成时）、和项目中后期通过不间断的回归测试发现设计漏洞。当基本测试完成后，可以使用硬件模拟和&lt;a class=&#34;link&#34; href=&#34;https://zhida.zhihu.com/search?content_id=100636337&amp;amp;content_type=Article&amp;amp;match_order=1&amp;amp;q=FPGA%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1&amp;amp;zhida_source=entity&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;FPGA原型设计&lt;/a&gt;等方法，再进行大量实际数据的测试。特别是对基于FPGA系统的设计，由于FPGA的可编程性，有条件的话可以更早进行硬件测试。&lt;/p&gt;
+&lt;p&gt;综上，在作者看来，&lt;strong&gt;现代的验证方法学应该是形式化验证、电路仿真、硬件测试的三位一体的集合和统一&lt;/strong&gt;。我也期待形式化验证方法能在业界受到更加广泛的使用。&lt;/p&gt;
+&lt;p&gt;最后，推荐一本介绍形式化验证方法学的书：《Formal Verification: An Essential Toolkit For Modern VLSI Design》，由我的同事Eric Seligman等编写。Eric是英特尔在形式化验证领域的大牛，非常平易近人，对技术的传授和讨论不遗余力且毫无保留。这本应该是目前市面上最好的有关形式化验证的书籍，我通读过，获益匪浅。只可惜国内目前好像还没有引进，我正在和出版社积极联系，希望这本书的中文版能早日和国内的读者朋友们见面。&lt;/p&gt;
+&lt;p&gt;ref:https://mp.weixin.qq.com/s/1VSvP4-vb9mmDDzAww_4Ug&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>芯片设计中形式验证概念</title>
+        <link>https://Salmooo.github.io/p/%E8%8A%AF%E7%89%87%E8%AE%BE%E8%AE%A1%E4%B8%AD%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E6%A6%82%E5%BF%B5/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/%E8%8A%AF%E7%89%87%E8%AE%BE%E8%AE%A1%E4%B8%AD%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E6%A6%82%E5%BF%B5/</guid>
+        <description>&lt;p&gt;&lt;strong&gt;文章摘要&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://mmbiz.qpic.cn/mmbiz_svg/3a3QxMHZ8YxgMUmB3vatZibQXSda6e7gJuib7VX4GicNVP4TGJ98BzFkDoQ5jORjfD205HPl81qhXwt0vdibPCQ1BTMV5DLVLH1ic/640?wx_fmt=svg&amp;amp;wxfrom=5&amp;amp;wx_lazy=1&amp;amp;wx_co=1&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;芯片设计验证是对芯片设计是否正确与安全进行检查，在芯片设计流程中具有非常重要的地位，占其将近1/2的成本和时间。形式验证是保证计算机软硬件系统正确性与安全性的非常重要的手段，已经成功用于芯片设计验证。全世界三大电子设计自动化（EDA）软件厂商Cadence、Synopsis、Siemens的EDA软件均包含成熟的芯片设计形式验证工具。文章总结了芯片设计形式验证发展现状，分析了面临的挑战，展望了发展趋势，并对其在中国的发展提出建议。&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://mmbiz.qpic.cn/mmbiz_svg/3a3QxMHZ8YxgMUmB3vatZibQXSda6e7gJHmcVuM6z8NNBNibGs4fjibMu7yFskwh1vW5kKpEMb6u29Qe2u1GWX2QhM0emicdLic5j/640?wx_fmt=svg&amp;amp;wxfrom=5&amp;amp;wx_lazy=1&amp;amp;wx_co=1&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;文章速览&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://mmbiz.qpic.cn/mmbiz_svg/3a3QxMHZ8YxgMUmB3vatZibQXSda6e7gJuib7VX4GicNVP4TGJ98BzFkDoQ5jORjfD205HPl81qhXwt0vdibPCQ1BTMV5DLVLH1ic/640?wx_fmt=svg&amp;amp;wxfrom=5&amp;amp;wx_lazy=1&amp;amp;wx_co=1&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;电子设计自动化（Electronic Design Automation, EDA）软件对于芯片设计至关重要，属于中国亟须突破的卡脖子技术。芯片设计验证是对芯片设计是否正确与安全进行检查，在芯片设计流程中具有非常重要的地位，占其将近1/2的成本和时间。形式验证是保证计算机软硬件系统正确性与安全性的非常重要的手段，已经成为EDA软件不可或缺的组成部分，全世界三大EDA软件厂商Cadence、Synopsis、Siemens的EDA软件均包含成熟的芯片设计形式验证工具。&lt;/p&gt;
+&lt;p&gt;芯片设计形式验证属于跨学科研究，涉及体系结构、EDA、形式化方法、编程语言等领域。本文将对芯片设计验证的发展现状、挑战和趋势进行分析总结，并对其在中国的发展提出建议，以期让更多人了解该领域，支持并推动该领域在中国的发展。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1 . 芯片设计形式验证发展现状&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;在芯片设计流程中，形式验证方法提供的核心功能包括等价性验证（Equivalence Checking）和基于断言的形式验证（Formal Assertion-based Verification）。与仿真不同，这些验证功能考虑了芯片设计的整个输入和状态空间，并且采用符号化的方法对状态空间进行整体遍历，避免显式地对状态进行枚举和遍历，从而缓解了状态爆炸问题。符号化的方法依赖对布尔公式的推理，主要基于二元决策图（Binary Decision Diagrams, BDD）或命题逻辑可满足性（Propositional Satisfiability, SAT）求解。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1）底层技术&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;二元决策图最初由Bryant提出，是一种简要表示布尔公式的数据结构，其主要思想是将布尔公式中的重复部分压缩成单个结点表示，从而减少需要的存储空间并加快对布尔公式的操作。现在使用的二元决策图一般首先固定布尔公式中变量的顺序，并要求相同的子图使用唯一的结点表示，因此称为约减有序二元决策图（Reduced Ordered BDD, ROBDD）。布尔公式上的运算可以转化为二元决策图上的高效操作，从而可以将电路设计的行为方便地转换为二元决策图，并快速比较2个二元决策图的等价性。二元决策图在等价性验证和基于断言的形式验证中均有使用。学术界开发了多个高效的BDD软件包，例如由美国科罗拉多大学Somenzi开发的CUDD，美国密西根大学研究人员开发的BuDDy等，方便了实际应用领域对BDD的使用。&lt;/p&gt;
+&lt;p&gt;SAT问题是在给定一个命题逻辑公式后，判定是否存在一组布尔变元的赋值使得该公式满足。通常，SAT求解器的输入为合取范式（Conjunctive Normal Form, CNF），在使用之前需要首先将问题编码成合取范式。SAT虽然是NP（Nondeterministic Polynomial Time）完全问题，但现代的求解方法可以在实际案例中取得更好的效果。目前的主流方法分为完备算法和随机算法，其中完备算法更擅长求解工业案例，而随机算法更擅长求解随机案例。&lt;/p&gt;
+&lt;p&gt;DPLL（Davis-Putnam-Logemann-Loveland）算法是现代完备求解算法的原型，其主要思想是在布尔变元的取值空间中递归搜索，每次选择1个变元和它的取值。在搜索过程中，如果某个子句只有1个文字未赋值，且其余文字的求值均为假，则可以唯一确定未赋值文字对应变元的赋值（单元传播）。SAT求解的一个主要突破来自基于冲突驱动的子句学习技术（Conflict Driven Clause Learning, CDCL），首次在Grasp求解器中被提出。其他一些现代SAT求解器使用的技术包括双文字监督的数据结构，基于VSIDS、LRB等策略的分支变元启发式选择，以及求解过程的定期重启。经过几十年的发展，目前最先进的SAT求解器可以处理由数十万个变元和数百万个子句组成的工业案例，在等价性验证和基于断言的形式验证算法中发挥着重要的作用。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2）等价性验证&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;等价性验证用于检查2个电路设计是否在功能上等价。这2个电路设计可以在同一抽象层次（如均为门级的设计）或不同抽象层次。等价性验证可用于在对门级电路设计完成之后做最后的确认（Sign-off），保证门级电路与寄存器传输级（Register Transfer Level, RTL）模型之间的一致性，从而避免综合工具实现的漏洞或人为修改造成的错误。此外，等价性验证也可作为设计过程中的辅助工具，快速检查对电路的局部修改是否改变了它的功能。这些应用场景使得等价性验证工具成为电路设计流程中必不可少的部分。&lt;/p&gt;
+&lt;p&gt;等价性验证问题分为两大类：组合等价性验证（Combinatorial Equivalence Checking, CEC）和时序等价性验证（Sequential Equivalence Checking, SEC）。在CEC问题中，已经确定了2个电路之间状态和输入输出的对应关系，因此可以直接归结为二元决策图的比较或SAT求解问题。SEC问题更加复杂，对于2个电路设计，验证在任何合法的输入下，2个电路中每个节拍的输出都是相同的。这类问题要求找到2个电路之间的内部状态的对应关系。一种复杂情况来自时序重排（Retiming），导致修改后的电路中一些寄存器的含义相比之前出现延时或提前。现代的等价性验证工具可以根据时序重排的信息做特殊处理。&lt;/p&gt;
+&lt;p&gt;除了以上基本功能，现代的等价性验证工具根据应用需求添加多种优化和改善。例如，通过分析2个电路之间相同的部分，只需对存在差异的部分进行逻辑上的比较。此外，当工具应用于辅助电路设计时，可以在发现错误之后提供更多调试信息，提高使用人员的工作效率。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3）基于断言的形式验证&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;在芯片设计过程中，开发者会插入各类断言，检查设计中寄存器的值是否符合预期，以及整个设计是否满足功能规范。前一类断言通常由设计工程师加入，便于在设计期间进行测试和调试；后一类断言通常由验证工程师加入，用于验证设计的整体正确性。这2类断言可以在仿真和测试过程中检查，也可以使用模型检测（Model Checking, MC）方法形式验证。模型检测由Clarke等提出，最初的模型检测算法通过显式地遍历系统状态空间验证系统满足安全性或时序性质，因此称为显式状态模型检测。Vardi等提出了基于Büchi自动机的线性时序逻辑（Linear Temporal Logic, LTL）模型检测算法。基于这些理论，1989年Holzmann开发了SPIN模型检测工具，支持使用LTL、Büchi自动机描述性质。为了更高效地验证并发系统，SPIN使用偏序约简（Partial Order Reduction）技术，利用状态转移关系的可交换性省略等价的路径搜索。&lt;/p&gt;
+&lt;p&gt;显式状态模型检测之后的下一个重大突破是基于二元决策图的符号化模型检测（Symbolic Model Checking）。在模型检测的过程中，使用二元决策图表达不同步数后系统的可达状态空间，并使用二元决策图的规范性（即等价的公式对应的二元决策图相同）检测是否到达了不动点。1993年，McMillan开发了第一个基于二元决策图的模型检测工具SMV，而后与美国卡耐基-梅隆大学、瑞士日内瓦大学等多所高校的研究人员合作开发了NuSMV。1999年，Biere等提出的限界模型检测（Bounded Model Checking, BMC），使用SAT求解判定模型在有限多次状态转移内是否违反被验证的性质。BMC技术是一种非常有效的查错技术，BMC的使用允许在由上千个寄存器组成的芯片设计中找到错误。在BMC之后，又陆续提出了多种基于SAT求解，而且可用于证明完全正确性的模型检测算法，例如&lt;em&gt;k&lt;/em&gt;-induction、基于插值的模型检测算法以及2011年Bradley提出的IC3算法。IC3算法经过Een等整理并优化后得到属性定向可达性（Property Directed Reachability, PDR）算法。到目前为止，IC3/PDR依然是综合性能最好的模型检测算法。&lt;/p&gt;
+&lt;p&gt;除了模型检测算法本身的改善，研究人员也探索使用抽象和组合式验证方法简化需要验证的系统。在基于断言的形式验证中有多种常用的抽象方法，包括自动找到与验证无关的状态变量。另一种主要方法是谓词抽象，通过选择一些需要关注的谓词将系统抽象为由每个谓词取值组成的更简单的系统。与抽象对应的是精化过程，如果在抽象系统中找到了一个待验证性质的反例，这个反例可能是一个“伪反例”。在这种情况下，可以利用反例对抽象进行精化，使其更接近真实系统，称为反例引导的抽象精化。组合式验证将复杂系统分解为多个子系统，对每个子系统分别验证，然后将子系统的性质组合成为整体系统的性质。McMillan展示了这种方法在芯片验证中的作用，将其应用于Tomasulo乱序执行算法的验证。McMillan等的后续工作也将组合式验证方法应用于缓存一致性协议的验证。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;4）主要工具&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;SAT求解器在等价性验证和基于断言的形式验证中被广泛使用。由于SAT求解和模型检测技术的快速进步，能够进行形式验证的硬件设计规模不断增长，工业界也已经普遍采用形式验证技术。全球知名EDA公司均开发了硬件设计形式验证工具，例如美国Cadence公司的JasperGold Formal Verification Platform、Synopsys公司的VCFormal，以及德国Siemens公司的360DV-Verify。很多在硬件设计领域有大量投入的企业也组建了验证团队。例如，Apple公司集结了业界顶级的形式化验证专家，几乎所有的GPU模块开发都使用了形式验证技术，ARM公司和AMD（超威半导体）公司在CPU/GPU核的开发过程中也使用了形式验证技术保证其功能正确性。英特尔（Intel）公司将符号轨迹执行和定理证明技术应用于包括Core i7产品的验证，并取得了显著的效果。商业芯片设计形式化验证工具结合了前面介绍的各种算法，并根据使用过程中的经验进行了很多优化。一个工具通常包含多个不同的算法，允许自动或用户手动选择。例如，Cadence JasperGold和Siemens 360DV-Verify分别包含15~20个形式化验证算法。这些工具普遍使用多个标准化的性质规约语言，例如Property Specification Language（PSL）和SystemVerilog Assertion（SVA）。这些语言以LTL等时序逻辑作为理论基础，但添加了更利于开发和测试人员理解的语法和特性。&lt;/p&gt;
+&lt;p&gt;芯片设计形式验证在实际应用中的一个主要困难是待验证性质的规约需要人工写出。这需要设计与验证人员具备相关经验，耗时长且容易产生遗漏。近年来一个新进展是针对一些基本而常见的验证场景自动生成待验证性质，然后使用模型检测算法进行验证。这些基本而常见的验证场景包括连通性检查、冗余代码检查、时钟跨域验证、信息安全性验证等，这些功能被封装成形式应用工具（Formal Apps）。这些工具的出现，使很多之前需要大量人力才能完成检查甚至无法保证详尽的检查可以在较短的时间内完成。逻辑功能更正（Engineering Change Order, ECO）是形式化方法在工业EDA软件中的另一个重要应用。逻辑功能更正指的是在逻辑综合、物理综合等流程已经完成之后，通过直接修改RTL级的代码更改设计的逻辑功能，并添加到综合后的电路上，而不需要重复综合过程。逻辑功能更正最初在1991年由美国加州大学伯克利分校的研究人员提出，也产生了来自Cadence的Conformal ECO工具，但相关技术还没有完全成熟，依然有很多的提升空间。&lt;/p&gt;
+&lt;p&gt;若干开源EDA工具也整合了形式验证技术。例如，针对Verilog/SystemVerilog的逻辑综合工具Yosys包含形式化验证模块SymbiYosys，支持限界和非限界的模型检测。美国加州大学伯克利分校的ABC工具提供了强大的等价性验证和基于断言的形式验证能力。这些主要关注逻辑综合与验证的工具也被集成到全过程的开源EDA框架OpenROAD和OpenLane中。在模型检测算法的探索方面存在一些来自学术界的开源工具，包括美国密西根大学的AVR工具、美国斯坦福大学的Pono工具、加拿大滑铁卢大学的Avy工具等，这些工具实现了处于学术界前沿的IC3/PDR算法及其扩展。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2. 芯片设计形式验证面临的挑战&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;芯片设计形式验证技术伴随着EDA软件的发展，已经有较长的历史，并成功应用于芯片设计验证的众多任务。然而，随着芯片设计技术的不断进步，芯片设计形式验证技术面临以下几方面的挑战。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1）可扩展性挑战&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;芯片设计形式验证广泛应用的主要障碍是底层引擎，如SAT求解器和模型检测工具的可扩展性不够。近10年来，这些底层引擎的能力提升不大，处于瓶颈期，如何进一步提升这些底层引擎的可扩展性是芯片设计形式验证的核心问题和挑战。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2）高层验证挑战&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;高层芯片构造/描述语言不断涌现，芯片设计抽象层次不断提高，EDA生态系统面临扩展和重构。如何针对这些高层语言研发相应的高层形式验证技术和工具，提高形式验证的抽象层次，缓解状态爆炸问题，是一个较大的挑战。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3）开源芯片设计挑战&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;RISC-V开源指令集已经成为继x86、ARM之后的第3种全球流行的指令集，由此引发了开源芯片设计和开源EDA的浪潮。处于垄断地位的全球三大EDA公司Cadence、Synopsis、Siemens的EDA软件均包含成熟的芯片设计形式验证工具，但目前开源EDA生态还不完善，其中的形式验证工具比较初步，无法满足开源芯片设计的需要。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;4）人才培养挑战&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;芯片设计形式验证是计算机体系结构、形式化方法、编程语言的交叉学科，人才培养学习曲线陡、所需掌握的知识面广、培养周期长，因此芯片设计形式验证的人才培养存在较大挑战，目前全球尤其是中国在这方面的人才非常短缺。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3. 芯片设计形式验证发展趋势&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;芯片设计形式验证技术仍然在不断向前发展，呈现出以下几方面的趋势。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1）字级模型检测算法&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;传统的硬件模型检测算法是位级（Bit-level）的，也就是系统状态被拆分成若干布尔变量，迁移关系由布尔变量上的运算表示。然而，很多硬件模块涉及算术运算，例如整数上的加法、乘法和比较等。这些运算如果展开到布尔变量的运算会变得非常复杂。字级（Word-level）的模型检测算法指的是将部分状态和迁移关系使用字级和字级上的运算表达，并使用可满足性模理论（Satisfiability Modulo Theories, SMT）求解器结合模型检测算法进行验证。需要解决的主要问题包括如何将IC3/PDR与SMT求解有效结合，以及字级的不变式生成方法，这些方面已经有了众多研究。目前字级算法并不能完全取代位级模型检测算法，两者大致呈互补的关系。例如，相比于位级模型检测算法，字级算法通常更擅长处理和运算相关的数据通路上的性质；而对于与控制单元相关的性质，位级模型检测算法通常更具有性能优势。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2）机器学习辅助的约束求解与模型检测算法&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;芯片设计形式验证广泛应用的主要障碍是底层引擎（如SAT求解器和模型检测工具）的可扩展性不够。如何进一步提升这些底层引擎的可扩展性是芯片设计形式验证的核心问题和挑战。一个很有前景的方向是利用机器学习技术改善SAT求解和模型检测算法的可扩展性。目前，已有研究使用机器学习算法自动配置SAT求解器的参数，以及在给定实例之后从多个SAT求解器中选择更有可能解决该实例的求解器。另一个潜在的结合方向是不变式的自动生成。在不限界的符号模型检测算法中，一个主要目标是找到系统的不变式。目前已有众多通过数据驱动和机器学习的方法寻找不变式的研究，但如何与硬件模型检测算法结合还是需要探索的方向。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3）面向RISC-V处理器设计的形式验证技术&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;RISC-V是由美国加州大学伯克利分校的Asanović和Patterson等在2010年提出的一种精简计算机指令集的开源实现。在2010年提出RISC-V指令集之后，为了支持RISC-V处理器在众多应用场景下的敏捷设计，2012年美国加州大学伯克利分校的研究人员提出了硬件构建语言Chisel。Chisel语言是一种嵌入在函数式编程语言Scala之中的硬件构建语言。与硬件设计领域最流行的Verilog和SystemVerilog语言相比，Chisel具有如下明显优势：Chisel支持面向对象与函数式编程，提高了编程抽象层次与代码可读性；Chisel支持信号整体连接与模版编程，可以提高代码复用程度。&lt;/p&gt;
+&lt;p&gt;为了充分利用Chisel模块化和参数化设计的特点，需要发展针对Chisel的形式验证工具，一个可行的思路是，首先对处理器Chisel设计进行高层的形式验证，然后对Chisel编译过程进行形式验证，保证编译生成的低层代码与Chisel代码的一致性，从而实现处理器设计的高效验证，缓解底层引擎SAT求解器和模型检测工具的可扩展性问题。而且，受针对Chisel语言的中间表示FIRRTL的启发，一种基于MLIR的硬件设计中间表示CIRCT已经提出，其生态正在蓬勃发展，各种围绕CIRCT的开源EDA工具正在不断涌现，围绕CIRCT研究形式验证技术与工具是一个很有前景的方向。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;4）面向领域专用处理器设计的形式验证技术&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;领域专用处理器一般基于领域专用指令集进行设计，例如AI芯片可以基于中国科学院计算技术研究所陈云霁等提出的寒武纪指令集进行设计。寒武纪指令集涵盖了标量、向量、矩阵、逻辑、数据传输和控制指令，而经典的处理器一般只包括标量、逻辑、数据传输和控制指令。针对这些领域专用处理器研制形式验证技术需要解决以下问题：如何对领域专用指令集的语义进行形式化；如何在芯片形式验证技术中根据这些不同指令的特点设计高效的验证算法。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;4. 芯片设计形式验证发展建议&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;鉴于芯片形式验证技术的重要性，需要大力促进芯片设计形式验证技术在中国的发展。为此提出如下发展建议。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1）改进基础研究评价机制&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;芯片设计形式验证是涉及计算机体系结构、形式化方法、编程语言的交叉研究领域，这些领域都属于计算机基础研究。如果要促进芯片设计形式验证在中国的发展，首先需要改善中国计算机基础研究的生态环境。中国计算机基础研究总体薄弱，从事体系结构、操作系统、编程语言与编译、计算机理论等基础研究方向的研究人员少，相对从事计算机应用研究的人员处于弱势地位。为此，需要改进科研成果评价机制、对从事基础研究的人员进行相对宽松的考核，避免简单量化考核，鼓励他们针对一些基础核心问题坚持长期原创探索，改善计算机基础研究的生态环境。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2）巩固和加强核心引擎基础研究&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;在芯片设计形式验证的核心引擎（SAT/SMT求解器和模型检测工具）方面，国内有较好的研究基础，在一些方面达到了国际前沿甚至国际领先水平。例如，中国科学院软件研究所蔡少伟团队开发的SAT/SMT求解器在国际SAT/SMT竞赛中多次获得第一名，而且成功用于国内知名芯片设计团队的芯片设计形式验证中。&lt;/p&gt;
+&lt;p&gt;虽然SAT/SMT求解器和模型检测工具的能力取得了长足的进步，但还远远无法满足芯片产业快速发展的需要，因此有必要加强这些方面的基础研究，实现SAT/SMT和模型检测基础算法与工具可扩展性的突破。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3）加强人才培养&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;国内外在芯片设计形式验证方面最大的差距是人才的差距，国际EDA三大巨头均有具有形式化方法背景的从事芯片设计形式验证工具研发的专门团队，美国普林斯顿大学、美国加州大学伯克利分校、美国斯坦福大学等高校也都有从事芯片设计形式验证研究的团队，而国内从事相关领域研究的高校或研究所的研究人员不足10人。&lt;/p&gt;
+&lt;p&gt;建议联合中国计算机学会体系结构专业委员会、集成电路设计专业委员会、形式化方法专业委员会开设芯片设计形式验证的相关课程，组织暑期班、研讨会等培养相关人才，同时建立相关网站整合相关教育资源。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;4）加强跨学科合作&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;EDA和芯片设计形式验证是跨学科的研究领域，国内形式化方法研究人员应与体系结构研究人员和产业界从事芯片设计开发的人员加强沟通交流，将形式验证技术与芯片设计领域知识深度结合，争取在某几个点上先形成突破，形成示范效应，进一步促进形式验证技术在芯片设计行业的应用推广。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;5）实现产学研协同发展&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;芯片设计形式验证的商业工具基本为美国和欧洲的Cadence、Synopsis、Siemens 3家公司所垄断。近年来，美国对中国的半导体产业进行限制，国内产学研各界对EDA日益重视，EDA的发展正在加速，并涌现出一批EDA初创公司，如全芯智造、阿卡思微、芯华章、行芯科技等，其中一些公司（如阿卡思微和芯华章）的EDA工具也开始包括形式验证功能。由于国内整个EDA产业还处于比较初级的阶段，整体上芯片设计形式验证工具都还比较初步，与国际EDA巨头的相关工具在功能覆盖面和性能方面都还存在较大差距。有必要加强产学研各界的交流合作，共建国内芯片设计形式验证的生态，实现协同发展。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;6）抓住RISC-V带来的开源芯片设计和开源EDA发展的历史机遇&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;抓住RISC-V开源芯片、开源EDA在中国和世界蓬勃发展的历史机遇，在新的赛道上贡献中国力量，进行相关技术工具的研发，争取在这些新赛道上开发有影响的芯片设计形式验证工具。开源芯片同时带动了芯片敏捷设计方法的发展，芯片设计抽象层次不断提高，新的硬件描述/构造语言和中间表示不断出现。敏捷设计方法使得对芯片设计进行高层形式验证成为必要，芯片高层形式验证不仅可以使验证的关口前移，同时还可以缓解芯片设计形式验证的状态爆炸问题。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;7）抓住领域专用处理器设计蓬勃发展的历史机遇&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;针对人机物融合时代领域专用处理器（尤其是AI处理器）广泛流行的趋势，发展针对领域专用处理器设计的专用形式验证技术，利用领域专用处理器指令集和体系架构相对高层的特点来缓解形式验证技术的状态爆炸问题，促进形式验证技术在领域专用处理器设计中的真正落地。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;5.结束语&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;随着形式验证技术与工具的不断进步，形式验证在芯片设计流程中发挥着越来越重要的作用，已经成为商业EDA软件不可或缺的组成部分。随着美国对中国芯片产业限制的不断升级，中国产学研各界对于EDA软件日益重视，开源指令集、开源芯片设计、开源EDA成为中国应对美国限制的一种有效的策略，人机物融合时代带来了领域专用处理器的设计需求，为芯片设计形式验证技术带来了挑战和发展机遇。国内产学研各界已经在芯片形式验证技术和工具方面有了初步的积累，未来需要通力合作，协同推进芯片设计形式验证技术在中国的发展，为缓解EDA软件“卡脖子”问题贡献力量。&lt;/p&gt;
+&lt;p&gt;ref：https://mp.weixin.qq.com/s/AZC0qPmMNlpE8YV8uzoOgw&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

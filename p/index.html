@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
     <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="形式验证">
 <title></title>
 
 <link rel='canonical' href='http://localhost:1313/p/'>
 
 <link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="">
-<meta property='og:description' content="">
+<meta property='og:description' content="形式验证">
 <meta property='og:url' content='http://localhost:1313/p/'>
 <meta property='og:site_name' content='SalmoneX Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='IC Design' /><meta property='article:tag' content='Formal Verification' />
 <meta name="twitter:title" content="">
-<meta name="twitter:description" content="">
+<meta name="twitter:description" content="形式验证">
     </head>
     <body class="
     article-page
@@ -157,12 +157,24 @@
 
     <div class="article-details">
     
+    <header class="article-category">
+        
+            <a href="/categories/formal/" >
+                Formal
+            </a>
+        
+    </header>
+    
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
             <a href="/p/"></a>
         </h2>
     
+        
+        <h3 class="article-subtitle">
+            形式验证
+        </h3>
         
     </div>
 
@@ -184,7 +196,7 @@
 
 
                 <time class="article-time--reading">
-                    0 minute read
+                    2 minute read
                 </time>
             </div>
         
@@ -199,12 +211,45 @@
     <section class="article-content">
     
     
-    
+    <p><strong>导言</strong></p>
+<p>经过几代形式化方法人的不断努力，中国形式化方法取得长足进步，已经在国际形式化方法大家庭中占有重要地位。今年，著名计算机理论专家，也是形式化方法旗舰会议FM及杂志Formal Aspects of Computing （FAC）创始人，Cliff Jones教授组织了FAC一个专刊，介绍形式化方法发展历史。CCF形式化方法专委主任詹乃军教授，与FAC前主编Jim Woodcock教授，CCF形式化方法专委前主任王戟教授及CCF形式化方法专委执行委员陈明帅研究员共同撰写了“A Brief History of Formal Methods in China”论文，系统介绍形式化方法在中国从萌芽到快速发展，到成为国际形式化方法不可分割一部分的发展历程，重点介绍了各个阶段重要工作及重要学者。文章是几位作者个人的观点，可能存在一些重要工作和重要学者没有提及，或者介绍不够准确情况。</p>
+<p>詹乃军</p>
+<p>CCF形式化方法专委主任</p>
+<p>北京大学教授</p>
+<hr>
+<p><em>&ldquo;During Hilbert&rsquo;s life, Leibniz&rsquo;s Dream &ndash; all truths of the reason would be reduced to a kind of calculation directed by symbols &ndash; by and large, just stayed a dream. [&hellip;] In the 2nd half of the 20th century, things shifted with the advent of computers, as more and more people began to adopt formal techniques. Parts of Leibniz&rsquo;s Dream became reality [&hellip;].&rdquo;</em></p>
+<p>Edsger W. Dijkstra (1930-2002), <em>Under the Spell of Leibniz&rsquo;s Dream</em>.<strong>¹</strong></p>
+<hr>
+<p><strong>形式化方法（Formal Methods）是一类具有严格数学基础的技术与工具，其通过严谨的数学模型和逻辑推理，对计算系统进行规约、设计、构建、分析、验证与演进，是保障和提升软硬件系统质量的重要手段。随着理论计算机科学和软件理论的深入发展，形式化方法的模型、技术与工具已延伸成为计算思维的重要载体。</strong></p>
+<p><strong>“形式化方法”这一概念——更准确地说，是“形式化准则”（The Principle of Formalization）——可追溯至20世纪20年代著名的希尔伯特计划²（Hilbert’s Program）。该计划旨在为全部数学建立一个完备、一致且可判定的公理化基础。尽管哥德尔于1931年提出的不完备定理³（Gödel’s Incompleteness Theorems）几乎彻底否定了希尔伯特的哲学设想，但希尔伯特计划仍留下了一项影响深远的遗产，即形式化准则：使用一种统一的、未解释的、严格的形式语言来表达命题，并按照一套明确定义的逻辑规则进行推演。此后，这一准则逐步发展成为理论计算机科学诸多基础内容的核心支撑，由此衍生出的逻辑演算、形式语言、自动机理论及程序语义等基础理论与方法，共同构成了如今所称的形式化方法。在工程实践中，形式化方法已被广泛应用于航空航天、交通运输、医疗健康和国防军事等安全攸关领域，用以保障软硬件系统的可靠性与有效性。</strong></p>
+<p><strong>形式化方法领域的早期研究主要关注“可计算性”问题，由Church、Turing等人于20世纪30至40年代奠基，旨在借助形式语言为计算与程序设计建立严格的数学基础。自20世纪60年代起，该领域的研究重心逐渐转向“计算可信性”问题，其奠基性工作包括McCarthy、Floyd、Hoare、Dijkstra等人在程序形式语义、规约及正确性证明方面的研究。此后，形式化方法逐步发展成为一门独立的学科，并成为程序设计与软件工程基础的重要组成部分，产生了大量具有深远影响的研究成果，其中包括（但不限于）18位图灵奖获得者的相关工作</strong>⁴**。**</p>
+<p><strong>在这一国际背景下，中国的形式化方法研究始于20世纪50年代初。当时，包括胡世华（1912–1998）、王湘浩（1915–1993）和莫绍揆（1917–2011）在内的一批逻辑学家，将研究重心从数学转向理论计算机科学，并积极倡导运用数理逻辑提升计算系统的严谨性。20世纪80年代，伴随改革开放的深入推进，一批具有英国、美国等西方国家访学或工作经历的计算机科学家，引领了中国形式化方法研究的系统发展。1990年代初期，在澳门成立的联合国大学国际软件技术研究所（UNU/IIST）成为中国形式化方法发展的重要里程碑，在促进学术研究与国际合作方面发挥了关键作用。近年来，越来越多具有海外学习和研究经历的优秀青年学者回国发展，进一步壮大了中国形式化方法研究队伍，显著提升了中国在国际形式化方法领域的影响力。</strong></p>
+<hr>
+<p><strong>近期，形式化方法领域国际期刊Formal Aspects of Computing组织了题为“History of Formal Methods”的专刊，聚焦形式化方法的发展历史，探讨其演进脉络、代表人物、标志性项目以及对软件与硬件工程产生的深远影响。CCF形式化方法专委会受邀撰写综述论文“A Brief History of Formal Methods in China”，系统回顾了中国形式化方法的发展历程。论文作者包括：专委会主任、北京大学詹乃军教授，西南大学、英国约克大学Jim Woodcock教授，专委会前主任、国防科技大学王戟教授，以及专委会执行委员、浙江大学陈明帅研究员。论文成文过程中得到了专委会多位成员的大力支持与宝贵的建设性意见。</strong></p>
+<hr>
+<p>该综述论文将<strong>中国形式化方法的发展划分为三个主要阶段：起步阶段（1950年代–1970年代）、初步发展阶段（1980年代–1990年代）及扩展与成熟阶段（21世纪以来）。文章系统梳理了各阶段的重要里程碑事件、代表性成果与重大应用，并重点回顾了过去20年来中国形式化方法社区在自动推理、程序验证和安全攸关系统设计等方向上取得的具有显著国际影响力的研究进展。同时，论文对中国形式化方法在研究、应用与人才培养等方面所面临的挑战及未来发展方向进行了讨论。作者希望该文能够为青年研究学者了解中国形式化方法的发展脉络提供参考，同时也为国际同行深入了解中国形式化方法研究提供一个窗口。</strong></p>
+<p>**论文链接：**<a class="link" href="https://dl.acm.org/doi/10.1145/3783996"  target="_blank" rel="noopener"
+    >https://dl.acm.org/doi/10.1145/3783996</a></p>
+<hr>
+<p><strong>1.</strong> Edsger W. Dijkstra. Under the Spell of Leibniz&rsquo;s Dream. https://www.cs.utexas.edu/~EWD/ewd12xx/EWD1298.PDF</p>
+<p><strong>2.</strong> Richard Zach. 2023. Hilbert’s Program. In The Stanford Encyclopedia of Philosophy (Winter 2023 ed.). Metaphysics Research Lab, Stanford University. <a class="link" href="https://plato.stanford.edu/archives/win2023/entries/hilbert-program/"  target="_blank" rel="noopener"
+    >https://plato.stanford.edu/archives/win2023/entries/hilbert-program/</a></p>
+<p><strong>3.</strong> Kurt Gödel. 1967. On Formally Undecidable Propositions of Principia Mathematica and Related Systems I. In From Frege to Gödel: A Source Book in Mathematical Logic, 1879–1931. Harvard University Press, Cambridge, MA, 596–616. Originally published in Monatshefte für Mathematik und Physik, 38:173–198 (1931). https://archive.org/details/fromfregetogodel0025unse/page/664/mode/2up</p>
+<p><strong>4.</strong> Ji Wang, Naijun Zhan, Xinyu Feng, and Zhiming Liu. 2019. Overview of Formal Methods. Journal of Software 30, 1 (2019), 33–61. http://www.jos.org.cn/1000-9825/5652.htm (In Chinese).</p>
+
 </section>
 
 
     <footer class="article-footer">
     
+    <section class="article-tags">
+        
+            <a href="/tags/ic-design/">IC Design</a>
+        
+            <a href="/tags/formal-verification/">Formal Verification</a>
+        
+    </section>
+
 
     
     <section class="article-copyright">
@@ -227,6 +272,41 @@
     
 
     
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E7%BC%BA%E7%82%B9/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">形式验证缺点</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E8%8A%AF%E7%89%87%E8%AE%BE%E8%AE%A1%E4%B8%AD%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E6%A6%82%E5%BF%B5/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">芯片设计中形式验证概念</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
 
      
     
