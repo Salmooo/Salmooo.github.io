@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Acl2 on SalmoneX Blog</title>
+        <link>https://Salmooo.github.io/tags/acl2/</link>
+        <description>Recent content in Acl2 on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright><atom:link href="https://Salmooo.github.io/tags/acl2/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>ACL2证明</title>
+        <link>https://Salmooo.github.io/p/acl2%E8%AF%81%E6%98%8E/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/acl2%E8%AF%81%E6%98%8E/</guid>
+        <description>&lt;p&gt;ACL2 (A Computational Logic for Applicative Common Lisp) 是一种计算机程序和计算机系统的形式验证和推理系统。它是在公理化的公共Lisp中的一个计算逻辑，提供了一个特殊的函数式编程语言，并允许用户定义函数并进行归纳推理。&lt;/p&gt;
+&lt;p&gt;ACL2用于很多场景，包括硬件和软件设计的验证、算法的正确性证明、以及教育等。其中最有名的可能是在AMD的微处理器设计中的应用，其中ACL2被用于验证一些关键部分的设计。&lt;/p&gt;
+&lt;p&gt;ACL2 的语法类似于 Lisp，举一个非常基础的例子，比如定义一个计算阶乘的函数和验证一些简单的定理：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;23
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lispCopy code
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;(defun factorial (n)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  (if (zp n)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    (* n (factorial (1- n)))))
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;(defthm zero-factorial
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  (equal (factorial 0) 1))
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;(defthm one-factorial
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  (equal (factorial 1) 1))
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;(defthm two-factorial
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  (equal (factorial 2) 2))
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;(defthm three-factorial
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  (equal (factorial 3) 6))
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;(defthm factorial-non-zero
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  (implies (natp n) (not (zp (factorial n)))))
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;(defthm factorial-positive
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  (implies (natp n) (&amp;lt; 0 (factorial n))))
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这段代码首先定义了一个计算阶乘的函数 &lt;strong&gt;&lt;code&gt;factorial&lt;/code&gt;&lt;/strong&gt;。接着定义了几个关于阶乘函数的定理，包括0的阶乘等于1，1的阶乘等于1，2的阶乘等于2，3的阶乘等于6，以及对任意自然数n，n的阶乘不会等于0，n的阶乘总是大于0。这些定理可以通过ACL2的定理证明器进行证明。&lt;/p&gt;
+&lt;p&gt;请注意，ACL2的高级用法需要更深入的理解，这只是一个基本的例子。&lt;/p&gt;
+&lt;p&gt;在形式验证领域，ACL2证明和SAT（满足性问题）证明是两种不同的方法，它们分别属于演绎推理和模型检查这两大类形式验证技术。以下是它们的主要区别：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;基础理论：ACL2是一种基于逻辑的程序设计和证明系统，采用的是一种叫做重写逻辑的推理方法，它直接对程序代码进行推理和证明，适合证明复杂的系统性质和不变性。而SAT证明是基于模型检查的技术，它将问题抽象为一个布尔表达式，然后尝试找到满足该表达式的解，或者证明不存在这样的解。&lt;/li&gt;
+&lt;li&gt;使用场景：由于ACL2可以直接对代码进行推理，所以它通常被用于验证软件或硬件设计的功能正确性。而SAT证明则通常被用于硬件电路验证，它可以找出导致某个特定输出的电路配置，或者证明不存在这样的配置。&lt;/li&gt;
+&lt;li&gt;计算性能：一般来说，SAT证明在处理大型问题时的性能更优，因为它可以利用高效的搜索算法和启发式策略。而ACL2证明需要进行大量的逻辑推理和证明，对于复杂的问题，计算量可能会很大。&lt;/li&gt;
+&lt;li&gt;可信度：在证明系统的可信度方面，ACL2由于其严格的逻辑推理过程，可以提供非常高的可信度，它可以确保所证明的性质在所有可能的情况下都是正确的。而SAT证明只能证明当前给定模型的满足性，对模型的完整性和准确性有一定的依赖，如果模型存在错误或者不完整，得出的结果可能会出现问题。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;总的来说，ACL2证明和SAT证明都是形式验证的重要工具，它们各有优点，适用于不同的场景。在实际应用中，可能需要根据问题的具体情况选择合适的方法。&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
