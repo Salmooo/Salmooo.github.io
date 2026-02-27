@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-        <title>LLVM on SalmoneX Blog</title>
-        <link>https://Salmooo.github.io/categories/llvm/</link>
-        <description>Recent content in LLVM on SalmoneX Blog</description>
+        <title>MLIR on SalmoneX Blog</title>
+        <link>https://Salmooo.github.io/tags/mlir/</link>
+        <description>Recent content in MLIR on SalmoneX Blog</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en</language>
         <copyright>salmone</copyright>
-        <lastBuildDate>Tue, 18 Jun 2019 12:23:21 +0800</lastBuildDate><atom:link href="https://Salmooo.github.io/categories/llvm/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Tue, 18 Jun 2019 12:23:21 +0800</lastBuildDate><atom:link href="https://Salmooo.github.io/tags/mlir/index.xml" rel="self" type="application/rss+xml" /><item>
         <title></title>
         <link>https://Salmooo.github.io/p/</link>
         <pubDate>Tue, 18 Jun 2019 12:23:21 +0800</pubDate>

@@ -2,6 +2,27 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://Salmooo.github.io/</loc>
+    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+    <xhtml:link
+                rel="alternate"
+                hreflang="zh-cn"
+                href="https://Salmooo.github.io/zh-cn/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="ar"
+                href="https://Salmooo.github.io/ar/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://Salmooo.github.io/"
+                />
+  </url><url>
+    <loc>https://Salmooo.github.io/post/</loc>
+    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+  </url><url>
     <loc>https://Salmooo.github.io/tags/408/</loc>
     <lastmod>2020-01-10T21:56:12+08:00</lastmod>
   </url><url>
@@ -29,24 +50,6 @@
     <loc>https://Salmooo.github.io/categories/computer-system/</loc>
     <lastmod>2020-01-10T21:56:12+08:00</lastmod>
   </url><url>
-    <loc>https://Salmooo.github.io/</loc>
-    <lastmod>2020-01-10T21:56:12+08:00</lastmod>
-    <xhtml:link
-                rel="alternate"
-                hreflang="zh-cn"
-                href="https://Salmooo.github.io/zh-cn/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="ar"
-                href="https://Salmooo.github.io/ar/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="en"
-                href="https://Salmooo.github.io/"
-                />
-  </url><url>
     <loc>https://Salmooo.github.io/tags/</loc>
     <lastmod>2020-01-10T21:56:12+08:00</lastmod>
     <xhtml:link
@@ -64,9 +67,6 @@
                 hreflang="en"
                 href="https://Salmooo.github.io/tags/"
                 />
-  </url><url>
-    <loc>https://Salmooo.github.io/post/</loc>
-    <lastmod>2020-01-10T21:56:12+08:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/p/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%981/</loc>
     <lastmod>2020-01-10T21:56:12+08:00</lastmod>
@@ -92,7 +92,7 @@
     <loc>https://Salmooo.github.io/p/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E5%AD%A6%E4%B9%A0%E5%B0%8F%E7%BB%93/</loc>
     <lastmod>2019-10-16T19:32:27+08:00</lastmod>
   </url><url>
-    <loc>https://Salmooo.github.io/p/1.-%E5%85%A5%E9%97%A8/</loc>
+    <loc>https://Salmooo.github.io/p/</loc>
     <lastmod>2019-06-18T12:23:21+08:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/tags/compiler/</loc>
@@ -102,6 +102,9 @@
     <lastmod>2019-06-18T12:23:21+08:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/categories/llvm/</loc>
+    <lastmod>2019-06-18T12:23:21+08:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/mlir/</loc>
     <lastmod>2019-06-18T12:23:21+08:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/tags/c&#43;&#43;/</loc>
