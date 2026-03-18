@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="C++ learning">
+<title>C&#43;&#43; CRTP模版奇特递归</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/c-crtp%E6%A8%A1%E7%89%88%E5%A5%87%E7%89%B9%E9%80%92%E5%BD%92/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="C++ CRTP模版奇特递归">
+<meta property='og:description' content="C++ learning">
+<meta property='og:url' content='https://Salmooo.github.io/p/c-crtp%E6%A8%A1%E7%89%88%E5%A5%87%E7%89%B9%E9%80%92%E5%BD%92/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='C&#43;&#43;' /><meta property='article:tag' content='C&#43;&#43; Experience' /><meta property='article:published_time' content='2019-10-07T18:51:29&#43;08:00'/><meta property='article:modified_time' content='2019-10-07T18:51:29&#43;08:00'/>
+<meta name="twitter:title" content="C++ CRTP模版奇特递归">
+<meta name="twitter:description" content="C++ learning">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li>
+      <ol>
+        <li><a href="#场景一实现编译期多态静态多态">场景一：实现编译期多态（静态多态）</a></li>
+        <li><a href="#-场景二实现代码复用与功能注入">🧩 场景二：实现代码复用与功能注入</a></li>
+        <li><a href="#-场景三实现策略模式与扩展接口">🏗️ 场景三：实现策略模式与扩展接口</a></li>
+        <li><a href="#-总结">💎 总结</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/c&#43;&#43;/" >
+                C&#43;&#43;
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/c-crtp%E6%A8%A1%E7%89%88%E5%A5%87%E7%89%B9%E9%80%92%E5%BD%92/">C&#43;&#43; CRTP模版奇特递归</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            C&#43;&#43; learning
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Oct 07, 2019</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    2 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>模版奇特递归模式（CRTP）的核心思想其实很直接：<strong>让一个派生类（<code>Derived</code>）将自己作为模板参数传递给它的基类（<code>Base</code>）。</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">template &lt;typename T&gt;
+</span></span><span class="line"><span class="cl">class Base {
+</span></span><span class="line"><span class="cl">    // 基类中可以通过 static_cast&lt;T*&gt;(this) 来调用派生类的成员
+</span></span><span class="line"><span class="cl">};
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">class Derived : public Base&lt;Derived&gt; {
+</span></span><span class="line"><span class="cl">    // ...
+</span></span><span class="line"><span class="cl">};
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这种看似自己继承自己的写法，主要用来解决 C++ 中一类特定问题：<strong>在编译期绑定行为，避免运行时的虚函数开销，同时实现代码的复用和扩展</strong> <a class="link" href="https://cloud.tencent.cn/developer/information/%E4%BB%80%E4%B9%88%E6%98%AF%E5%A5%87%E6%80%AA%E7%9A%84%E9%87%8D%E5%A4%8D%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8F%28CRTP%29%EF%BC%9F"  target="_blank" rel="noopener"
+    >-1</a><a class="link" href="https://baike.baidu.com/item/%E5%A5%87%E5%BC%82%E9%80%92%E5%BD%92%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8F/18112952"  target="_blank" rel="noopener"
+    >-3</a><a class="link" href="https://zhuanlan.zhihu.com/p/408668787"  target="_blank" rel="noopener"
+    >-10</a>。</p>
+<p>它的主要应用场景可以分为以下三大类：</p>
+<h3 id="场景一实现编译期多态静态多态">场景一：实现编译期多态（静态多态）
+</h3><p>这是 CRTP 最经典的应用。它允许基类定义一套接口，而派生类提供具体实现，这一切都在编译期完成。</p>
+<ul>
+<li>
+<p><strong>解决的问题</strong>：替代虚函数，消除虚函数表（vtable）带来的运行时开销（如指针间接寻址、难以内联优化）。</p>
+</li>
+<li>
+<p><strong>典型示例</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">template</span> <span class="o">&lt;</span><span class="n">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">struct</span> <span class="ne">Shape</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">void</span> <span class="n">draw</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="o">//</span> <span class="err">编译时绑定到派生类的</span> <span class="n">drawImpl</span>
+</span></span><span class="line"><span class="cl">        <span class="n">static_cast</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">T</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">this</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">drawImpl</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">struct</span> <span class="n">Circle</span> <span class="p">:</span> <span class="ne">Shape</span><span class="o">&lt;</span><span class="n">Circle</span><span class="o">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">void</span> <span class="n">drawImpl</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="n">std</span><span class="p">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s2">&#34;Drawing a Circle</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">struct</span> <span class="n">Square</span> <span class="p">:</span> <span class="ne">Shape</span><span class="o">&lt;</span><span class="n">Square</span><span class="o">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">void</span> <span class="n">drawImpl</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="n">std</span><span class="p">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s2">&#34;Drawing a Square</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">template</span><span class="o">&lt;</span><span class="n">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">void</span> <span class="n">render</span><span class="p">(</span><span class="k">const</span> <span class="ne">Shape</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span> <span class="n">shape</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">shape</span><span class="o">.</span><span class="n">draw</span><span class="p">();</span> <span class="o">//</span> <span class="err">静态多态调用</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p><strong>优势</strong>：相比虚函数，CRTP 没有运行时开销，调用可能被内联，性能更高 <a class="link" href="https://cloud.tencent.cn/developer/information/%E4%BB%80%E4%B9%88%E6%98%AF%E5%A5%87%E6%80%AA%E7%9A%84%E9%87%8D%E5%A4%8D%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8F%28CRTP%29%EF%BC%9F"  target="_blank" rel="noopener"
+    >1</a><a class="link" href="https://baike.baidu.com/item/%E5%A5%87%E5%BC%82%E9%80%92%E5%BD%92%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8F/18112952"  target="_blank" rel="noopener"
+    >3</a>。</p>
+</li>
+<li>
+<p><strong>权衡</strong>：这是编译期绑定的，不支持运行时多态（例如，不能将 <code>Circle</code> 和 <code>Square</code> 放入同一个 <code>vector&lt;Shape*&gt;</code> 中并正确调用）<a class="link" href="https://cloud.tencent.cn/developer/article/2071215?from=15425"  target="_blank" rel="noopener"
+    >6</a><a class="link" href="https://zhuanlan.zhihu.com/p/408668787"  target="_blank" rel="noopener"
+    >10</a>。此外，模板代码可能会增加编译时间和最终二进制文件的大小。</p>
+</li>
+</ul>
+<h3 id="-场景二实现代码复用与功能注入">🧩 场景二：实现代码复用与功能注入
+</h3><p>CRTP 可以作为“混入”（Mixin）工具，将一些通用的功能注入到派生类中，避免为每个类重复编写相同逻辑。</p>
+<ul>
+<li>
+<p><strong>对象计数器</strong>：统计每个类的实例数量，并且每个类的计数是独立的 <a class="link" href="https://baike.baidu.com/item/%E5%A5%87%E5%BC%82%E9%80%92%E5%BD%92%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8F/18112952"  target="_blank" rel="noopener"
+    >3</a><a class="link" href="https://zhuanlan.zhihu.com/p/408668787"  target="_blank" rel="noopener"
+    >10</a>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">template &lt;typename T&gt;
+</span></span><span class="line"><span class="cl">struct ObjectCounter {
+</span></span><span class="line"><span class="cl">    static int objects_created;
+</span></span><span class="line"><span class="cl">    static int objects_alive;
+</span></span><span class="line"><span class="cl">    ObjectCounter() { ++objects_created; ++objects_alive; }
+</span></span><span class="line"><span class="cl">    ~ObjectCounter() { --objects_alive; }
+</span></span><span class="line"><span class="cl">};
+</span></span><span class="line"><span class="cl">template &lt;typename T&gt; int ObjectCounter&lt;T&gt;::objects_created = 0;
+</span></span><span class="line"><span class="cl">template &lt;typename T&gt; int ObjectCounter&lt;T&gt;::objects_alive = 0;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">class MyClass : public ObjectCounter&lt;MyClass&gt; { };
+</span></span><span class="line"><span class="cl">class YourClass : public ObjectCounter&lt;YourClass&gt; { };
+</span></span><span class="line"><span class="cl">// MyClass 和 YourClass 拥有独立的计数器
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p><strong>标准库中的例子 <code>std::enable_shared_from_this</code></strong>：这个类允许你在成员函数中安全地创建一个指向当前对象的 <code>shared_ptr</code>。它正是通过 CRTP 实现的：你的类 <code>MyClass</code> 继承自 <code>enable_shared_from_this&lt;MyClass&gt;</code>，从而获得了 <code>shared_from_this()</code> 方法 <a class="link" href="https://baike.baidu.com/item/%E5%A5%87%E5%BC%82%E9%80%92%E5%BD%92%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8F/18112952"  target="_blank" rel="noopener"
+    >3</a><a class="link" href="https://cloud.tencent.cn/developer/article/2497418?policyId=1003"  target="_blank" rel="noopener"
+    >4</a>。</p>
+</li>
+<li>
+<p><strong>多态复制（克隆）</strong>：在基类中提供统一的 <code>clone()</code> 接口，派生类无需重复编写克隆代码 <a class="link" href="https://baike.baidu.com/item/%E5%A5%87%E5%BC%82%E9%80%92%E5%BD%92%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8F/18112952"  target="_blank" rel="noopener"
+    >3</a>。</p>
+</li>
+</ul>
+<h3 id="-场景三实现策略模式与扩展接口">🏗️ 场景三：实现策略模式与扩展接口
+</h3><p>CRTP 可以用来构建灵活的框架，允许用户通过派生类来提供特定的策略或扩展基类的功能。</p>
+<ul>
+<li><strong>策略模式</strong>：基类定义算法的骨架，派生类通过 CRTP 提供特定步骤的实现。这类似于模板方法模式，但避免了虚函数 <a class="link" href="https://cloud.tencent.cn/developer/article/2497418?policyId=1003"  target="_blank" rel="noopener"
+    >4</a><a class="link" href="https://cloud.tencent.cn/developer/information/CRTP%3A%E4%BD%BF%E7%94%A8%E6%B4%BE%E7%94%9F%E7%B1%BB%E4%B8%AD%E7%9A%84%E9%9D%99%E6%80%81%E5%B8%B8%E9%87%8F%E8%A1%A8%E8%BE%BE%E5%BC%8F-ask"  target="_blank" rel="noopener"
+    >8</a>。</li>
+<li><strong>运算符重载</strong>：在编写数值计算库（如 Eigen、Boost.Units）时，可以在 CRTP 基类中统一实现 <code>+</code>、、 等运算符，这些运算符操作的是派生类类型，从而为所有派生类自动提供一致的运算接口 <a class="link" href="https://baike.baidu.com/item/%E5%A5%87%E5%BC%82%E9%80%92%E5%BD%92%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8F/18112952"  target="_blank" rel="noopener"
+    >3</a><a class="link" href="https://zhuanlan.zhihu.com/p/408668787"  target="_blank" rel="noopener"
+    >10</a>。</li>
+<li><strong>ATL/WTL 库</strong>：微软的 ATL 和 WTL 库广泛使用 CRTP 来允许用户类继承窗口实现类，从而获得处理窗口消息等能力，这是一种典型的接口扩展 <a class="link" href="https://cloud.tencent.cn/developer/information/%E4%BB%80%E4%B9%88%E6%98%AF%E5%A5%87%E6%80%AA%E7%9A%84%E9%87%8D%E5%A4%8D%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8F%28CRTP%29%EF%BC%9F"  target="_blank" rel="noopener"
+    >1</a><a class="link" href="https://baike.baidu.com/item/%E5%A5%87%E5%BC%82%E9%80%92%E5%BD%92%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8F/18112952"  target="_blank" rel="noopener"
+    >3</a>。</li>
+</ul>
+<h3 id="-总结">💎 总结
+</h3><p>CRTP 是一种“零成本抽象”的典范，它把工作从运行时转移到了编译期。选择使用 CRTP 还是传统的虚函数，主要看你的需求：</p>
+<ul>
+<li>如果你需要<strong>运行时多态</strong>（例如，处理一个容器中不同类型的对象），虚函数是合适的选择。</li>
+<li>如果你追求<strong>极致性能</strong>、需要在<strong>编译期绑定行为</strong>，或者想为类<strong>注入通用功能</strong>，那么 CRTP 是一个非常强大的工具。</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/c&#43;&#43;/">C&#43;&#43;</a>
+        
+            <a href="/tags/c&#43;&#43;-experience/">C&#43;&#43; Experience</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/c-rvonrvo/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">C&#43;&#43; RVO&amp;NRVO</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/c-copy-and-swap/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">C&#43;&#43; Copy and Swap</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/c-type-erasure-%E8%AF%A6%E8%A7%A3/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">C&#43;&#43; Type Erasure 详解</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/c-tag-dispatch-%E8%AF%A6%E8%A7%A3/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">C&#43;&#43; Tag Dispatch 详解</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/c-pimpl%E6%83%AF%E7%94%A8%E6%B3%95/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">C&#43;&#43; PIMPL惯用法</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
