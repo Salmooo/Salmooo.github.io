@@ -56,7 +56,7 @@
                     
                     
                         
-                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                        <img src="/images/sal.png" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -288,7 +288,8 @@
 <p><code>req ##2 grant</code></p>
 <p>这代表当req置一后再过两个时钟周期，grant再置一。</p>
 <p><strong>3. 属性（property）</strong>，用来组合多个序列，并以此表明在设计中需要满足的某种逻辑关系。如：</p>
-<p><code>A |-&gt; B A |=&gt; B</code></p>
+<p><code>A |-&gt; B
+ A |=&gt; B</code></p>
 <p>其中A和B都为序列。本例中前者代表当A成立时，B在同一个周期内也必须成立；后者代表当A成立时，B在下一个周期必须成立。</p>
 <p><strong>4. 断言声明（assertion statements）</strong>，用来表示对一则SVA属性所进行的动作，例如：</p>
 <p><code>p1: assert property (A |-&gt; B);</code></p>
