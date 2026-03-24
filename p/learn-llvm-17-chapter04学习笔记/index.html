@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="LLVM 17 learning">
+<title>Learn-LLVM-17 chapter04学习笔记</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/learn-llvm-17-chapter04%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="Learn-LLVM-17 chapter04学习笔记">
+<meta property='og:description' content="LLVM 17 learning">
+<meta property='og:url' content='https://Salmooo.github.io/p/learn-llvm-17-chapter04%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Compiler' /><meta property='article:tag' content='LLVM' /><meta property='article:tag' content='LLVM-17' />
+<meta name="twitter:title" content="Learn-LLVM-17 chapter04学习笔记">
+<meta name="twitter:description" content="LLVM 17 learning">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#1-本章概览">1. 本章概览</a>
+      <ol>
+        <li><a href="#11-学习目标">1.1 学习目标</a></li>
+      </ol>
+    </li>
+    <li><a href="#2-llvm-ir-基础">2. LLVM IR 基础</a>
+      <ol>
+        <li><a href="#21-ir-语言主要元素">2.1 IR 语言主要元素</a></li>
+        <li><a href="#22-类型与数据布局">2.2 类型与数据布局</a></li>
+        <li><a href="#23-静态单赋值-ssa-形式">2.3 静态单赋值 (SSA) 形式</a></li>
+        <li><a href="#24-生成-ir-的两种策略">2.4 生成 IR 的两种策略</a></li>
+      </ol>
+    </li>
+    <li><a href="#3-控制流映射到基本块">3. 控制流映射到基本块</a>
+      <ol>
+        <li><a href="#31-基本块规则">3.1 基本块规则</a></li>
+        <li><a href="#32-while-语句的基本块结构">3.2 WHILE 语句的基本块结构</a></li>
+        <li><a href="#33-代码实现emitstmtwhilestatement">3.3 代码实现：emitStmt(WhileStatement)</a></li>
+        <li><a href="#34-if-语句的基本块结构">3.4 IF 语句的基本块结构</a></li>
+      </ol>
+    </li>
+    <li><a href="#4-ssa-形式构造算法">4. SSA 形式构造算法</a>
+      <ol>
+        <li><a href="#41-算法来源">4.1 算法来源</a></li>
+        <li><a href="#42-基本数据结构">4.2 基本数据结构</a></li>
+        <li><a href="#43-读写局部变量">4.3 读写局部变量</a></li>
+        <li><a href="#44-递归读取与-phi-插入">4.4 递归读取与 phi 插入</a></li>
+        <li><a href="#45-密封块-sealblock">4.5 密封块 (sealBlock)</a></li>
+        <li><a href="#46-phi-指令优化">4.6 phi 指令优化</a></li>
+      </ol>
+    </li>
+    <li><a href="#5-变量与参数访问">5. 变量与参数访问</a>
+      <ol>
+        <li><a href="#51-readvariable--writevariable-分发">5.1 readVariable / writeVariable 分发</a></li>
+        <li><a href="#52-类型映射">5.2 类型映射</a></li>
+        <li><a href="#53-var-参数属性">5.3 VAR 参数属性</a></li>
+      </ol>
+    </li>
+    <li><a href="#6-代码生成器架构">6. 代码生成器架构</a>
+      <ol>
+        <li><a href="#61-三层结构">6.1 三层结构</a></li>
+        <li><a href="#62-codegenerator">6.2 CodeGenerator</a></li>
+        <li><a href="#63-cgmodule">6.3 CGModule</a></li>
+        <li><a href="#64-名称修饰-name-mangling">6.4 名称修饰 (Name Mangling)</a></li>
+      </ol>
+    </li>
+    <li><a href="#7-表达式生成">7. 表达式生成</a>
+      <ol>
+        <li><a href="#71-emitexpr-分发">7.1 emitExpr 分发</a></li>
+        <li><a href="#72-中缀运算符映射">7.2 中缀运算符映射</a></li>
+        <li><a href="#73-前缀运算符">7.3 前缀运算符</a></li>
+      </ol>
+    </li>
+    <li><a href="#8-函数体生成">8. 函数体生成</a>
+      <ol>
+        <li><a href="#81-run-流程">8.1 run 流程</a></li>
+        <li><a href="#82-创建函数">8.2 创建函数</a></li>
+      </ol>
+    </li>
+    <li><a href="#9-驱动程序与目标">9. 驱动程序与目标</a>
+      <ol>
+        <li><a href="#91-driver-流程">9.1 Driver 流程</a></li>
+        <li><a href="#92-createtargetmachine">9.2 createTargetMachine</a></li>
+        <li><a href="#93-emit-输出类型">9.3 emit 输出类型</a></li>
+        <li><a href="#94-命令行选项">9.4 命令行选项</a></li>
+      </ol>
+    </li>
+    <li><a href="#10-编译与测试">10. 编译与测试</a>
+      <ol>
+        <li><a href="#101-生成目标文件">10.1 生成目标文件</a></li>
+        <li><a href="#102-生成-ir">10.2 生成 IR</a></li>
+        <li><a href="#103-与-c-链接测试">10.3 与 C 链接测试</a></li>
+      </ol>
+    </li>
+    <li><a href="#11-项目目录结构">11. 项目目录结构</a></li>
+    <li><a href="#12-小结">12. 小结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/llvm/" >
+                LLVM
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/learn-llvm-17-chapter04%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">Learn-LLVM-17 chapter04学习笔记</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            LLVM 17 learning
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    8 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="第-4-章-生成-ir-代码的基础知识---学习笔记">第 4 章 生成 IR 代码的基础知识 - 学习笔记
+</h1><blockquote>
+<p>本文为《Learn LLVM 17》第 4 章的学习笔记，主要介绍如何从修饰后的 AST 生成 LLVM IR 代码，包括 SSA 形式构造、控制流映射、模块与驱动程序设置。</p>
+</blockquote>
+<h2 id="1-本章概览">1. 本章概览
+</h2><p>完成 AST 构建后，下一步是<strong>代码生成</strong>：将 AST 转换为 LLVM IR。LLVM IR 类似人类可读的三地址码，需要系统化地将语言概念（如控制结构）翻译成低层 IR。</p>
+<h3 id="11-学习目标">1.1 学习目标
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>主题</th>
+          <th>内容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>IR 生成</td>
+          <td>从 AST 生成 IR，控制流映射到基本块</td>
+      </tr>
+      <tr>
+          <td>SSA 形式</td>
+          <td>使用 AST 编号算法生成 SSA 格式 IR</td>
+      </tr>
+      <tr>
+          <td>模块与驱动</td>
+          <td>CodeGenerator、CGModule、CGProcedure 三层结构</td>
+      </tr>
+      <tr>
+          <td>输出</td>
+          <td>汇编文本、目标代码、IR 文件</td>
+      </tr>
+  </tbody>
+</table></div>
+<hr>
+<h2 id="2-llvm-ir-基础">2. LLVM IR 基础
+</h2><h3 id="21-ir-语言主要元素">2.1 IR 语言主要元素
+</h3><ul>
+<li><strong>模块 (Module)</strong>：编译单元，包含函数和数据对象</li>
+<li><strong>函数 (Function)</strong>：至少一个基本块</li>
+<li><strong>基本块 (BasicBlock)</strong>：线性指令序列，以终止指令结束</li>
+<li><strong>终止指令 (Terminator)</strong>：<code>br</code>、<code>switch</code>、<code>ret</code> 等，控制流转移</li>
+</ul>
+<h3 id="22-类型与数据布局">2.2 类型与数据布局
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>源类型</th>
+          <th>LLVM 类型</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>INTEGER</td>
+          <td>i64</td>
+          <td>64 位整数</td>
+      </tr>
+      <tr>
+          <td>BOOLEAN</td>
+          <td>i1</td>
+          <td>1 位布尔</td>
+      </tr>
+      <tr>
+          <td>void</td>
+          <td>void</td>
+          <td>无返回值</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>目标数据布局 (target datalayout)</strong>：指定字节序、对齐、栈对齐等。格式如 <code>e-m:e-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128</code>。</p>
+<p><strong>目标三元组 (target triple)</strong>：<code>架构-厂商-操作系统</code>，例如 <code>x86_64-pc-linux-gnu</code>、<code>aarch64-unknown-linux-gnu</code>。</p>
+<h3 id="23-静态单赋值-ssa-形式">2.3 静态单赋值 (SSA) 形式
+</h3><p>SSA 的核心规则：<strong>每个虚拟寄存器只写入一次</strong>。好处：</p>
+<ul>
+<li>建立 def-use 和 use-def 链</li>
+<li>便于常量传播、公共子表达式消除等优化</li>
+<li>所有现代编译器广泛使用</li>
+</ul>
+<p><strong>phi 指令</strong>：在基本块合并处选择来自不同前驱的值：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-llvm" data-lang="llvm"><span class="line"><span class="cl"><span class="nv">%b.loop</span> <span class="p">=</span> <span class="k">phi</span> <span class="k">i32</span> <span class="p">[</span> <span class="nv">%rem</span><span class="p">,</span> <span class="nv">%while.body</span> <span class="p">],</span> <span class="p">[</span> <span class="nv">%b</span><span class="p">,</span> <span class="nv">%entry</span> <span class="p">]</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>phi 必须是基本块的第一条指令</li>
+<li>第一个基本块（entry）不能以 phi 开头</li>
+</ul>
+<h3 id="24-生成-ir-的两种策略">2.4 生成 IR 的两种策略
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>策略</th>
+          <th>方法</th>
+          <th>优点</th>
+          <th>缺点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>load/store</td>
+          <td>为局部变量分配内存槽，用 load/store 读写</td>
+          <td>实现简单</td>
+          <td>需 mem2reg 优化转为 SSA，会删除大量的IR指令</td>
+      </tr>
+      <tr>
+          <td>直接 SSA</td>
+          <td>使用 phi 等直接生成 SSA</td>
+          <td>生成的 IR 更优</td>
+          <td>实现复杂</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>tinylang 采用<strong>直接 SSA</strong>，基于 Braun 等人的论文实现。</p>
+<hr>
+<h2 id="3-控制流映射到基本块">3. 控制流映射到基本块
+</h2><h3 id="31-基本块规则">3.1 基本块规则
+</h3><ul>
+<li>格式良好的基本块：线性指令序列，以终止指令结束</li>
+<li>每个基本块只有一个入口点和一个出口点</li>
+<li>基本块内不允许 phi 或分支（除终止指令）</li>
+</ul>
+<h3 id="32-while-语句的基本块结构">3.2 WHILE 语句的基本块结构
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">[前序语句] → while.cond → while.body → while.cond
+</span></span><span class="line"><span class="cl">                ↓              ↓
+</span></span><span class="line"><span class="cl">            after.while ← (循环出口)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="33-代码实现emitstmtwhilestatement">3.3 代码实现：emitStmt(WhileStatement)
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// Chapter04/tinylang/lib/CodeGen/CGProcedure.cpp:352-375
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">CGProcedure</span><span class="o">::</span><span class="n">emitStmt</span><span class="p">(</span><span class="n">WhileStatement</span> <span class="o">*</span><span class="n">Stmt</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">BasicBlock</span> <span class="o">*</span><span class="n">WhileCondBB</span> <span class="o">=</span> <span class="n">llvm</span><span class="o">::</span><span class="n">BasicBlock</span><span class="o">::</span><span class="n">Create</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="n">CGM</span><span class="p">.</span><span class="n">getLLVMCtx</span><span class="p">(),</span> <span class="s">&#34;while.cond&#34;</span><span class="p">,</span> <span class="n">Fn</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">BasicBlock</span> <span class="o">*</span><span class="n">WhileBodyBB</span> <span class="o">=</span> <span class="n">llvm</span><span class="o">::</span><span class="n">BasicBlock</span><span class="o">::</span><span class="n">Create</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="n">CGM</span><span class="p">.</span><span class="n">getLLVMCtx</span><span class="p">(),</span> <span class="s">&#34;while.body&#34;</span><span class="p">,</span> <span class="n">Fn</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">BasicBlock</span> <span class="o">*</span><span class="n">AfterWhileBB</span> <span class="o">=</span> <span class="n">llvm</span><span class="o">::</span><span class="n">BasicBlock</span><span class="o">::</span><span class="n">Create</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="n">CGM</span><span class="p">.</span><span class="n">getLLVMCtx</span><span class="p">(),</span> <span class="s">&#34;after.while&#34;</span><span class="p">,</span> <span class="n">Fn</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">Builder</span><span class="p">.</span><span class="n">CreateBr</span><span class="p">(</span><span class="n">WhileCondBB</span><span class="p">);</span>   <span class="c1">// 当前块跳到条件块
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">sealBlock</span><span class="p">(</span><span class="n">Curr</span><span class="p">);</span>                 <span class="c1">// 密封当前块
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">  <span class="n">setCurr</span><span class="p">(</span><span class="n">WhileCondBB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">Value</span> <span class="o">*</span><span class="n">Cond</span> <span class="o">=</span> <span class="n">emitExpr</span><span class="p">(</span><span class="n">Stmt</span><span class="o">-&gt;</span><span class="n">getCond</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Builder</span><span class="p">.</span><span class="n">CreateCondBr</span><span class="p">(</span><span class="n">Cond</span><span class="p">,</span> <span class="n">WhileBodyBB</span><span class="p">,</span> <span class="n">AfterWhileBB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">setCurr</span><span class="p">(</span><span class="n">WhileBodyBB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">emit</span><span class="p">(</span><span class="n">Stmt</span><span class="o">-&gt;</span><span class="n">getWhileStmts</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Builder</span><span class="p">.</span><span class="n">CreateBr</span><span class="p">(</span><span class="n">WhileCondBB</span><span class="p">);</span>   <span class="c1">// 循环体末尾回到条件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">sealBlock</span><span class="p">(</span><span class="n">WhileCondBB</span><span class="p">);</span>          <span class="c1">// 密封条件块（前驱已全部确定）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">sealBlock</span><span class="p">(</span><span class="n">Curr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">setCurr</span><span class="p">(</span><span class="n">AfterWhileBB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="34-if-语句的基本块结构">3.4 IF 语句的基本块结构
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// Chapter04/tinylang/lib/CodeGen/CGProcedure.cpp:316-350
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">CGProcedure</span><span class="o">::</span><span class="n">emitStmt</span><span class="p">(</span><span class="n">IfStatement</span> <span class="o">*</span><span class="n">Stmt</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">bool</span> <span class="n">HasElse</span> <span class="o">=</span> <span class="n">Stmt</span><span class="o">-&gt;</span><span class="n">getElseStmts</span><span class="p">().</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">BasicBlock</span> <span class="o">*</span><span class="n">IfBB</span> <span class="o">=</span> <span class="n">llvm</span><span class="o">::</span><span class="n">BasicBlock</span><span class="o">::</span><span class="n">Create</span><span class="p">(...);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">BasicBlock</span> <span class="o">*</span><span class="n">ElseBB</span> <span class="o">=</span> <span class="n">HasElse</span> <span class="o">?</span> <span class="p">...</span> <span class="o">:</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">BasicBlock</span> <span class="o">*</span><span class="n">AfterIfBB</span> <span class="o">=</span> <span class="n">llvm</span><span class="o">::</span><span class="n">BasicBlock</span><span class="o">::</span><span class="n">Create</span><span class="p">(...);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">Value</span> <span class="o">*</span><span class="n">Cond</span> <span class="o">=</span> <span class="n">emitExpr</span><span class="p">(</span><span class="n">Stmt</span><span class="o">-&gt;</span><span class="n">getCond</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Builder</span><span class="p">.</span><span class="n">CreateCondBr</span><span class="p">(</span><span class="n">Cond</span><span class="p">,</span> <span class="n">IfBB</span><span class="p">,</span> <span class="n">HasElse</span> <span class="o">?</span> <span class="nl">ElseBB</span> <span class="p">:</span> <span class="n">AfterIfBB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">sealBlock</span><span class="p">(</span><span class="n">Curr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">setCurr</span><span class="p">(</span><span class="n">IfBB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">emit</span><span class="p">(</span><span class="n">Stmt</span><span class="o">-&gt;</span><span class="n">getIfStmts</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Curr</span><span class="o">-&gt;</span><span class="n">getTerminator</span><span class="p">())</span> <span class="n">Builder</span><span class="p">.</span><span class="n">CreateBr</span><span class="p">(</span><span class="n">AfterIfBB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">sealBlock</span><span class="p">(</span><span class="n">Curr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">HasElse</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">setCurr</span><span class="p">(</span><span class="n">ElseBB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">emit</span><span class="p">(</span><span class="n">Stmt</span><span class="o">-&gt;</span><span class="n">getElseStmts</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Curr</span><span class="o">-&gt;</span><span class="n">getTerminator</span><span class="p">())</span> <span class="n">Builder</span><span class="p">.</span><span class="n">CreateBr</span><span class="p">(</span><span class="n">AfterIfBB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">sealBlock</span><span class="p">(</span><span class="n">Curr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">setCurr</span><span class="p">(</span><span class="n">AfterIfBB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="4-ssa-形式构造算法">4. SSA 形式构造算法
+</h2><h3 id="41-算法来源">4.1 算法来源
+</h3><p>基于 Braun et al. 的论文《Simple and Efficient Construction of Static Single Assignment Form》(CC 2013)，适用于<strong>结构化控制流</strong>（无 goto）。</p>
+<h3 id="42-基本数据结构">4.2 基本数据结构
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// Chapter04/tinylang/include/tinylang/CodeGen/CGProcedure.h:26-41
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="k">struct</span> <span class="nc">BasicBlockDef</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">DenseMap</span><span class="o">&lt;</span><span class="n">Decl</span> <span class="o">*</span><span class="p">,</span> <span class="n">llvm</span><span class="o">::</span><span class="n">TrackingVH</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">Value</span><span class="o">&gt;&gt;</span> <span class="n">Defs</span><span class="p">;</span>  <span class="c1">// 变量/形参 → 当前值
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">llvm</span><span class="o">::</span><span class="n">DenseMap</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">PHINode</span> <span class="o">*</span><span class="p">,</span> <span class="n">Decl</span> <span class="o">*&gt;</span> <span class="n">IncompletePhis</span><span class="p">;</span>    <span class="c1">// 待补全的 phi
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kt">unsigned</span> <span class="nl">Sealed</span> <span class="p">:</span> <span class="mi">1</span><span class="p">;</span>                                        <span class="c1">// 块是否已密封
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">llvm</span><span class="o">::</span><span class="n">DenseMap</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">BasicBlock</span> <span class="o">*</span><span class="p">,</span> <span class="n">BasicBlockDef</span><span class="o">&gt;</span> <span class="n">CurrentDef</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>Defs</strong>：本块内变量/形参的当前 SSA 值</li>
+<li><strong>IncompletePhis</strong>：块尚未密封时创建的 phi，需在密封时补全操作数</li>
+<li><strong>Sealed</strong>：块的所有前驱已知时置为 true</li>
+</ul>
+<h3 id="43-读写局部变量">4.3 读写局部变量
+</h3><p><strong>写</strong>：<code>writeLocalVariable(BB, Decl, Val)</code> → <code>CurrentDef[BB].Defs[Decl] = Val</code></p>
+<p><strong>读</strong>：<code>readLocalVariable(BB, Decl)</code>：</p>
+<ol>
+<li>若 <code>Defs</code> 中有定义，直接返回</li>
+<li>否则调用 <code>readLocalVariableRecursive</code></li>
+</ol>
+<h3 id="44-递归读取与-phi-插入">4.4 递归读取与 phi 插入
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// Chapter04/tinylang/lib/CodeGen/CGProcedure.cpp:33-53
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="n">llvm</span><span class="o">::</span><span class="n">Value</span> <span class="o">*</span><span class="n">CGProcedure</span><span class="o">::</span><span class="n">readLocalVariableRecursive</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">llvm</span><span class="o">::</span><span class="n">BasicBlock</span> <span class="o">*</span><span class="n">BB</span><span class="p">,</span> <span class="n">Decl</span> <span class="o">*</span><span class="n">Decl</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">Value</span> <span class="o">*</span><span class="n">Val</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">CurrentDef</span><span class="p">[</span><span class="n">BB</span><span class="p">].</span><span class="n">Sealed</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 块未密封：插入空 phi，避免循环
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">llvm</span><span class="o">::</span><span class="n">PHINode</span> <span class="o">*</span><span class="n">Phi</span> <span class="o">=</span> <span class="n">addEmptyPhi</span><span class="p">(</span><span class="n">BB</span><span class="p">,</span> <span class="n">Decl</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CurrentDef</span><span class="p">[</span><span class="n">BB</span><span class="p">].</span><span class="n">IncompletePhis</span><span class="p">[</span><span class="n">Phi</span><span class="p">]</span> <span class="o">=</span> <span class="n">Decl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Val</span> <span class="o">=</span> <span class="n">Phi</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="k">auto</span> <span class="o">*</span><span class="n">PredBB</span> <span class="o">=</span> <span class="n">BB</span><span class="o">-&gt;</span><span class="n">getSinglePredecessor</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 单前驱：直接从前驱读取
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Val</span> <span class="o">=</span> <span class="n">readLocalVariable</span><span class="p">(</span><span class="n">PredBB</span><span class="p">,</span> <span class="n">Decl</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 多前驱：创建 phi，收集所有前驱的值
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">llvm</span><span class="o">::</span><span class="n">PHINode</span> <span class="o">*</span><span class="n">Phi</span> <span class="o">=</span> <span class="n">addEmptyPhi</span><span class="p">(</span><span class="n">BB</span><span class="p">,</span> <span class="n">Decl</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">writeLocalVariable</span><span class="p">(</span><span class="n">BB</span><span class="p">,</span> <span class="n">Decl</span><span class="p">,</span> <span class="n">Phi</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Val</span> <span class="o">=</span> <span class="n">addPhiOperands</span><span class="p">(</span><span class="n">BB</span><span class="p">,</span> <span class="n">Decl</span><span class="p">,</span> <span class="n">Phi</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">writeLocalVariable</span><span class="p">(</span><span class="n">BB</span><span class="p">,</span> <span class="n">Decl</span><span class="p">,</span> <span class="n">Val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">Val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="45-密封块-sealblock">4.5 密封块 (sealBlock)
+</h3><p>当块的所有前驱已知时调用：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// Chapter04/tinylang/lib/CodeGen/CGProcedure.cpp:98-106
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">CGProcedure</span><span class="o">::</span><span class="n">sealBlock</span><span class="p">(</span><span class="n">llvm</span><span class="o">::</span><span class="n">BasicBlock</span> <span class="o">*</span><span class="n">BB</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">PhiDecl</span> <span class="p">:</span> <span class="n">CurrentDef</span><span class="p">[</span><span class="n">BB</span><span class="p">].</span><span class="n">IncompletePhis</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">addPhiOperands</span><span class="p">(</span><span class="n">BB</span><span class="p">,</span> <span class="n">PhiDecl</span><span class="p">.</span><span class="n">second</span><span class="p">,</span> <span class="n">PhiDecl</span><span class="p">.</span><span class="n">first</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CurrentDef</span><span class="p">[</span><span class="n">BB</span><span class="p">].</span><span class="n">IncompletePhis</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CurrentDef</span><span class="p">[</span><span class="n">BB</span><span class="p">].</span><span class="n">Sealed</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="46-phi-指令优化">4.6 phi 指令优化
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// Chapter04/tinylang/lib/CodeGen/CGProcedure.cpp:72-96
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="n">llvm</span><span class="o">::</span><span class="n">Value</span> <span class="o">*</span><span class="n">CGProcedure</span><span class="o">::</span><span class="n">optimizePhi</span><span class="p">(</span><span class="n">llvm</span><span class="o">::</span><span class="n">PHINode</span> <span class="o">*</span><span class="n">Phi</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">Value</span> <span class="o">*</span><span class="n">Same</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="n">llvm</span><span class="o">::</span><span class="n">Value</span> <span class="o">*</span><span class="nl">V</span> <span class="p">:</span> <span class="n">Phi</span><span class="o">-&gt;</span><span class="n">incoming_values</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">V</span> <span class="o">==</span> <span class="n">Same</span> <span class="o">||</span> <span class="n">V</span> <span class="o">==</span> <span class="n">Phi</span><span class="p">)</span> <span class="k">continue</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">Same</span> <span class="o">&amp;&amp;</span> <span class="n">V</span> <span class="o">!=</span> <span class="n">Same</span><span class="p">)</span> <span class="k">return</span> <span class="n">Phi</span><span class="p">;</span>  <span class="c1">// 有不同值，保留 phi
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Same</span> <span class="o">=</span> <span class="n">V</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">Same</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Same</span> <span class="o">=</span> <span class="n">llvm</span><span class="o">::</span><span class="n">UndefValue</span><span class="o">::</span><span class="n">get</span><span class="p">(</span><span class="n">Phi</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 替换 phi 后，递归优化使用该 phi 的其他 phi
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">Phi</span><span class="o">-&gt;</span><span class="n">replaceAllUsesWith</span><span class="p">(</span><span class="n">Same</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Phi</span><span class="o">-&gt;</span><span class="n">eraseFromParent</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="o">*</span><span class="nl">P</span> <span class="p">:</span> <span class="n">CandidatePhis</span><span class="p">)</span> <span class="n">optimizePhi</span><span class="p">(</span><span class="n">P</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">Same</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>所有操作数相同：用该值替换 phi</li>
+<li>无操作数：用 <code>UndefValue</code> 替换</li>
+<li>替换后递归优化其他 phi</li>
+</ul>
+<hr>
+<h2 id="5-变量与参数访问">5. 变量与参数访问
+</h2><h3 id="51-readvariable--writevariable-分发">5.1 readVariable / writeVariable 分发
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>声明类型</th>
+          <th>作用域</th>
+          <th>读取方式</th>
+          <th>写入方式</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>局部变量</td>
+          <td>当前过程</td>
+          <td>readLocalVariable</td>
+          <td>writeLocalVariable</td>
+      </tr>
+      <tr>
+          <td>全局变量</td>
+          <td>模块</td>
+          <td>CreateLoad(CGM.getGlobal(D))</td>
+          <td>CreateStore(Val, CGM.getGlobal(D))</td>
+      </tr>
+      <tr>
+          <td>按值形参</td>
+          <td>当前过程</td>
+          <td>readLocalVariable</td>
+          <td>writeLocalVariable</td>
+      </tr>
+      <tr>
+          <td>VAR 形参</td>
+          <td>引用</td>
+          <td>CreateLoad(FormalParams[FP])</td>
+          <td>CreateStore(Val, FormalParams[FP])</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="52-类型映射">5.2 类型映射
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// Chapter04/tinylang/lib/CodeGen/CGProcedure.cpp:154-166
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="n">llvm</span><span class="o">::</span><span class="n">Type</span> <span class="o">*</span><span class="n">CGProcedure</span><span class="o">::</span><span class="n">mapType</span><span class="p">(</span><span class="n">Decl</span> <span class="o">*</span><span class="n">Decl</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">HonorReference</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="k">auto</span> <span class="o">*</span><span class="n">FP</span> <span class="o">=</span> <span class="n">llvm</span><span class="o">::</span><span class="n">dyn_cast</span><span class="o">&lt;</span><span class="n">FormalParameterDeclaration</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Decl</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">FP</span><span class="o">-&gt;</span><span class="n">isVar</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">HonorReference</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="n">llvm</span><span class="o">::</span><span class="n">PointerType</span><span class="o">::</span><span class="n">get</span><span class="p">(</span><span class="n">CGM</span><span class="p">.</span><span class="n">getLLVMCtx</span><span class="p">(),</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">CGM</span><span class="p">.</span><span class="n">convertType</span><span class="p">(</span><span class="n">FP</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="k">auto</span> <span class="o">*</span><span class="n">V</span> <span class="o">=</span> <span class="n">llvm</span><span class="o">::</span><span class="n">dyn_cast</span><span class="o">&lt;</span><span class="n">VariableDeclaration</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Decl</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">CGM</span><span class="p">.</span><span class="n">convertType</span><span class="p">(</span><span class="n">V</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">CGM</span><span class="p">.</span><span class="n">convertType</span><span class="p">(</span><span class="n">llvm</span><span class="o">::</span><span class="n">cast</span><span class="o">&lt;</span><span class="n">TypeDeclaration</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Decl</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>VAR 参数：<code>HonorReference=true</code> 时返回指针类型</li>
+<li>读取 VAR 参数值：<code>mapType(FP, false)</code> 返回底层类型</li>
+</ul>
+<h3 id="53-var-参数属性">5.3 VAR 参数属性
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// Chapter04/tinylang/lib/CodeGen/CGProcedure.cpp:195-204
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">FP</span><span class="o">-&gt;</span><span class="n">isVar</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">AttrBuilder</span> <span class="n">Attr</span><span class="p">(</span><span class="n">CGM</span><span class="p">.</span><span class="n">getLLVMCtx</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">TypeSize</span> <span class="n">Sz</span> <span class="o">=</span> <span class="n">CGM</span><span class="p">.</span><span class="n">getModule</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">getDataLayout</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">      <span class="p">.</span><span class="n">getTypeStoreSize</span><span class="p">(</span><span class="n">CGM</span><span class="p">.</span><span class="n">convertType</span><span class="p">(</span><span class="n">FP</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">()));</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Attr</span><span class="p">.</span><span class="n">addDereferenceableAttr</span><span class="p">(</span><span class="n">Sz</span><span class="p">);</span>   <span class="c1">// 指针可解引用
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">Attr</span><span class="p">.</span><span class="n">addAttribute</span><span class="p">(</span><span class="n">llvm</span><span class="o">::</span><span class="n">Attribute</span><span class="o">::</span><span class="n">NoCapture</span><span class="p">);</span>  <span class="c1">// 不捕获
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">Arg</span><span class="p">.</span><span class="n">addAttrs</span><span class="p">(</span><span class="n">Attr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="6-代码生成器架构">6. 代码生成器架构
+</h2><h3 id="61-三层结构">6.1 三层结构
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">CodeGenerator (顶层入口)
+</span></span><span class="line"><span class="cl">    └── CGModule (模块级：全局变量、过程)
+</span></span><span class="line"><span class="cl">            └── CGProcedure (过程级：函数体、SSA)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="62-codegenerator">6.2 CodeGenerator
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// Chapter04/tinylang/lib/CodeGen/CodeGenerator.cpp
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">Module</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">CodeGenerator</span><span class="o">::</span><span class="n">run</span><span class="p">(</span><span class="n">ModuleDeclaration</span> <span class="o">*</span><span class="n">Mod</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">FileName</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">Module</span><span class="o">&gt;</span> <span class="n">M</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">      <span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">Module</span><span class="o">&gt;</span><span class="p">(</span><span class="n">FileName</span><span class="p">,</span> <span class="n">Ctx</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">M</span><span class="o">-&gt;</span><span class="n">setTargetTriple</span><span class="p">(</span><span class="n">TM</span><span class="o">-&gt;</span><span class="n">getTargetTriple</span><span class="p">().</span><span class="n">getTriple</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="n">M</span><span class="o">-&gt;</span><span class="n">setDataLayout</span><span class="p">(</span><span class="n">TM</span><span class="o">-&gt;</span><span class="n">createDataLayout</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CGModule</span> <span class="nf">CGM</span><span class="p">(</span><span class="n">M</span><span class="p">.</span><span class="n">get</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CGM</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">Mod</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">M</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="63-cgmodule">6.3 CGModule
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// Chapter04/tinylang/lib/CodeGen/CGModule.cpp:42-60
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">CGModule</span><span class="o">::</span><span class="n">run</span><span class="p">(</span><span class="n">ModuleDeclaration</span> <span class="o">*</span><span class="n">Mod</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="o">*</span><span class="nl">Decl</span> <span class="p">:</span> <span class="n">Mod</span><span class="o">-&gt;</span><span class="n">getDecls</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="k">auto</span> <span class="o">*</span><span class="n">Var</span> <span class="o">=</span> <span class="n">llvm</span><span class="o">::</span><span class="n">dyn_cast</span><span class="o">&lt;</span><span class="n">VariableDeclaration</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Decl</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">GlobalVariable</span> <span class="o">*</span><span class="n">V</span> <span class="o">=</span> <span class="k">new</span> <span class="n">llvm</span><span class="o">::</span><span class="n">GlobalVariable</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="o">*</span><span class="n">M</span><span class="p">,</span> <span class="n">convertType</span><span class="p">(</span><span class="n">Var</span><span class="o">-&gt;</span><span class="n">getType</span><span class="p">()),</span>
+</span></span><span class="line"><span class="cl">          <span class="cm">/*isConstant=*/</span><span class="nb">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="n">llvm</span><span class="o">::</span><span class="n">GlobalValue</span><span class="o">::</span><span class="n">PrivateLinkage</span><span class="p">,</span> <span class="k">nullptr</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="n">mangleName</span><span class="p">(</span><span class="n">Var</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">      <span class="n">Globals</span><span class="p">[</span><span class="n">Var</span><span class="p">]</span> <span class="o">=</span> <span class="n">V</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="k">auto</span> <span class="o">*</span><span class="n">Proc</span> <span class="o">=</span> <span class="n">llvm</span><span class="o">::</span><span class="n">dyn_cast</span><span class="o">&lt;</span><span class="n">ProcedureDeclaration</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Decl</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">CGProcedure</span> <span class="n">CGP</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">CGP</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">Proc</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>注意</strong>：若 <code>readVariable</code>/<code>writeVariable</code> 需要区分全局变量，需在 <code>run</code> 开头设置 <code>this-&gt;Mod = Mod</code>（当前实现中 <code>Mod</code> 成员可能未正确初始化）。</p>
+<h3 id="64-名称修饰-name-mangling">6.4 名称修饰 (Name Mangling)
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// Chapter04/tinylang/lib/CodeGen/CGModule.cpp:25-35
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">CGModule</span><span class="o">::</span><span class="n">mangleName</span><span class="p">(</span><span class="n">Decl</span> <span class="o">*</span><span class="n">D</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">Mangled</span><span class="p">(</span><span class="s">&#34;_t&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">SmallVector</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">StringRef</span><span class="p">,</span> <span class="mi">4</span><span class="o">&gt;</span> <span class="n">Parts</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(;</span> <span class="n">D</span><span class="p">;</span> <span class="n">D</span> <span class="o">=</span> <span class="n">D</span><span class="o">-&gt;</span><span class="n">getEnclosingDecl</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Parts</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">D</span><span class="o">-&gt;</span><span class="n">getName</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">Parts</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">llvm</span><span class="o">::</span><span class="n">StringRef</span> <span class="n">Name</span> <span class="o">=</span> <span class="n">Parts</span><span class="p">.</span><span class="n">pop_back_val</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Mangled</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">llvm</span><span class="o">::</span><span class="n">Twine</span><span class="p">(</span><span class="n">Name</span><span class="p">.</span><span class="n">size</span><span class="p">()).</span><span class="n">concat</span><span class="p">(</span><span class="n">Name</span><span class="p">).</span><span class="n">str</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">Mangled</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>格式：<code>_t</code> + 长度前缀 + 名称</li>
+<li>例：<code>Gcd.GCD</code> → <code>_t3Gcd3GCD</code></li>
+</ul>
+<hr>
+<h2 id="7-表达式生成">7. 表达式生成
+</h2><h3 id="71-emitexpr-分发">7.1 emitExpr 分发
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>表达式类型</th>
+          <th>处理</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>InfixExpression</td>
+          <td>emitInfixExpr</td>
+      </tr>
+      <tr>
+          <td>PrefixExpression</td>
+          <td>emitPrefixExpr</td>
+      </tr>
+      <tr>
+          <td>VariableAccess</td>
+          <td>readVariable</td>
+      </tr>
+      <tr>
+          <td>ConstantAccess</td>
+          <td>emitExpr(Decl-&gt;getExpr())</td>
+      </tr>
+      <tr>
+          <td>IntegerLiteral</td>
+          <td>ConstantInt::get</td>
+      </tr>
+      <tr>
+          <td>BooleanLiteral</td>
+          <td>ConstantInt::get</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="72-中缀运算符映射">7.2 中缀运算符映射
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// Chapter04/tinylang/lib/CodeGen/CGProcedure.cpp:210-261
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="n">plus</span>      <span class="err">→</span> <span class="n">CreateNSWAdd</span>
+</span></span><span class="line"><span class="cl"><span class="n">minus</span>     <span class="err">→</span> <span class="n">CreateNSWSub</span>
+</span></span><span class="line"><span class="cl"><span class="n">star</span>      <span class="err">→</span> <span class="n">CreateNSWMul</span>
+</span></span><span class="line"><span class="cl"><span class="n">kw_DIV</span>    <span class="err">→</span> <span class="n">CreateSDiv</span>
+</span></span><span class="line"><span class="cl"><span class="n">kw_MOD</span>    <span class="err">→</span> <span class="n">CreateSRem</span>
+</span></span><span class="line"><span class="cl"><span class="n">equal</span>     <span class="err">→</span> <span class="n">CreateICmpEQ</span>
+</span></span><span class="line"><span class="cl"><span class="n">hash</span>      <span class="err">→</span> <span class="n">CreateICmpNE</span>
+</span></span><span class="line"><span class="cl"><span class="n">less</span>      <span class="err">→</span> <span class="n">CreateICmpSLT</span>
+</span></span><span class="line"><span class="cl"><span class="n">lessequal</span> <span class="err">→</span> <span class="n">CreateICmpSLE</span>
+</span></span><span class="line"><span class="cl"><span class="n">greater</span>   <span class="err">→</span> <span class="n">CreateICmpSGT</span>
+</span></span><span class="line"><span class="cl"><span class="n">greaterequal</span> <span class="err">→</span> <span class="n">CreateICmpSGE</span>
+</span></span><span class="line"><span class="cl"><span class="n">kw_AND</span>    <span class="err">→</span> <span class="n">CreateAnd</span>
+</span></span><span class="line"><span class="cl"><span class="n">kw_OR</span>     <span class="err">→</span> <span class="n">CreateOr</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="73-前缀运算符">7.3 前缀运算符
+</h3><ul>
+<li><code>+</code>：恒等</li>
+<li><code>-</code>：CreateNeg</li>
+<li><code>NOT</code>：CreateNot</li>
+</ul>
+<hr>
+<h2 id="8-函数体生成">8. 函数体生成
+</h2><h3 id="81-run-流程">8.1 run 流程
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// Chapter04/tinylang/lib/CodeGen/CGProcedure.cpp:402-340
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">CGProcedure</span><span class="o">::</span><span class="n">run</span><span class="p">(</span><span class="n">ProcedureDeclaration</span> <span class="o">*</span><span class="n">Proc</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">this</span><span class="o">-&gt;</span><span class="n">Proc</span> <span class="o">=</span> <span class="n">Proc</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Fty</span> <span class="o">=</span> <span class="n">createFunctionType</span><span class="p">(</span><span class="n">Proc</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Fn</span> <span class="o">=</span> <span class="n">createFunction</span><span class="p">(</span><span class="n">Proc</span><span class="p">,</span> <span class="n">Fty</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">BasicBlock</span> <span class="o">*</span><span class="n">BB</span> <span class="o">=</span> <span class="n">llvm</span><span class="o">::</span><span class="n">BasicBlock</span><span class="o">::</span><span class="n">Create</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="n">CGM</span><span class="p">.</span><span class="n">getLLVMCtx</span><span class="p">(),</span> <span class="s">&#34;entry&#34;</span><span class="p">,</span> <span class="n">Fn</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">setCurr</span><span class="p">(</span><span class="n">BB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// 初始化形参映射
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">Pair</span> <span class="p">:</span> <span class="n">llvm</span><span class="o">::</span><span class="n">enumerate</span><span class="p">(</span><span class="n">Fn</span><span class="o">-&gt;</span><span class="n">args</span><span class="p">()))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">FormalParams</span><span class="p">[</span><span class="n">FP</span><span class="p">]</span> <span class="o">=</span> <span class="n">Arg</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">writeLocalVariable</span><span class="p">(</span><span class="n">Curr</span><span class="p">,</span> <span class="n">FP</span><span class="p">,</span> <span class="n">Arg</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// 聚合类型局部变量（如有）分配 alloca
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="o">*</span><span class="nl">D</span> <span class="p">:</span> <span class="n">Proc</span><span class="o">-&gt;</span><span class="n">getDecls</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="k">auto</span> <span class="o">*</span><span class="n">Var</span> <span class="o">=</span> <span class="n">llvm</span><span class="o">::</span><span class="n">dyn_cast</span><span class="o">&lt;</span><span class="n">VariableDeclaration</span><span class="o">&gt;</span><span class="p">(</span><span class="n">D</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">Ty</span><span class="o">-&gt;</span><span class="n">isAggregateType</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">llvm</span><span class="o">::</span><span class="n">Value</span> <span class="o">*</span><span class="n">Val</span> <span class="o">=</span> <span class="n">Builder</span><span class="p">.</span><span class="n">CreateAlloca</span><span class="p">(</span><span class="n">Ty</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">writeLocalVariable</span><span class="p">(</span><span class="n">Curr</span><span class="p">,</span> <span class="n">Var</span><span class="p">,</span> <span class="n">Val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">emit</span><span class="p">(</span><span class="n">Proc</span><span class="o">-&gt;</span><span class="n">getStmts</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Curr</span><span class="o">-&gt;</span><span class="n">getTerminator</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Builder</span><span class="p">.</span><span class="n">CreateRetVoid</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">sealBlock</span><span class="p">(</span><span class="n">Curr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="82-创建函数">8.2 创建函数
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">createFunctionType</span><span class="p">(</span><span class="n">Proc</span><span class="p">)</span>  <span class="err">→</span> <span class="n">llvm</span><span class="o">::</span><span class="n">FunctionType</span><span class="o">::</span><span class="n">get</span><span class="p">(</span><span class="n">ResultTy</span><span class="p">,</span> <span class="n">ParamTypes</span><span class="p">,</span> <span class="nb">false</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">createFunction</span><span class="p">(</span><span class="n">Proc</span><span class="p">,</span> <span class="n">Fty</span><span class="p">)</span> <span class="err">→</span> <span class="n">llvm</span><span class="o">::</span><span class="n">Function</span><span class="o">::</span><span class="n">Create</span><span class="p">(</span><span class="n">FTy</span><span class="p">,</span> <span class="n">ExternalLinkage</span><span class="p">,</span> <span class="n">mangleName</span><span class="p">(</span><span class="n">Proc</span><span class="p">),</span> <span class="n">M</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="9-驱动程序与目标">9. 驱动程序与目标
+</h2><h3 id="91-driver-流程">9.1 Driver 流程
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">main → InitLLVM → 初始化目标 → createTargetMachine
+</span></span><span class="line"><span class="cl">     → 解析 (Lexer → Parser → Sema)
+</span></span><span class="line"><span class="cl">     → CodeGenerator::create(Ctx, TM) → CG-&gt;run(Mod, InputFile)
+</span></span><span class="line"><span class="cl">     → emit(Argv[0], M.get(), TM, InputFile)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="92-createtargetmachine">9.2 createTargetMachine
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// Chapter04/tinylang/tools/driver/Driver.cpp:58-85
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="n">llvm</span><span class="o">::</span><span class="n">TargetMachine</span> <span class="o">*</span><span class="n">createTargetMachine</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">Argv0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">Triple</span> <span class="n">Triple</span> <span class="o">=</span> <span class="o">!</span><span class="n">MTriple</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">      <span class="o">?</span> <span class="n">llvm</span><span class="o">::</span><span class="n">Triple</span><span class="o">::</span><span class="n">normalize</span><span class="p">(</span><span class="n">MTriple</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="o">:</span> <span class="n">llvm</span><span class="o">::</span><span class="n">sys</span><span class="o">::</span><span class="n">getDefaultTargetTriple</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">TargetOptions</span> <span class="n">TargetOptions</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">      <span class="n">codegen</span><span class="o">::</span><span class="n">InitTargetOptionsFromCodeGenFlags</span><span class="p">(</span><span class="n">Triple</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">CPUStr</span> <span class="o">=</span> <span class="n">codegen</span><span class="o">::</span><span class="n">getCPUStr</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">FeatureStr</span> <span class="o">=</span> <span class="n">codegen</span><span class="o">::</span><span class="n">getFeaturesStr</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">const</span> <span class="n">llvm</span><span class="o">::</span><span class="n">Target</span> <span class="o">*</span><span class="n">Target</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">TargetRegistry</span><span class="o">::</span><span class="n">lookupTarget</span><span class="p">(</span><span class="n">codegen</span><span class="o">::</span><span class="n">getMArch</span><span class="p">(),</span> <span class="n">Triple</span><span class="p">,</span> <span class="n">Error</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Target</span><span class="p">)</span> <span class="p">{</span> <span class="cm">/* 错误处理 */</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">Target</span><span class="o">-&gt;</span><span class="n">createTargetMachine</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="n">Triple</span><span class="p">.</span><span class="n">getTriple</span><span class="p">(),</span> <span class="n">CPUStr</span><span class="p">,</span> <span class="n">FeatureStr</span><span class="p">,</span> <span class="n">TargetOptions</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">Reloc</span><span class="o">::</span><span class="n">Model</span><span class="o">&gt;</span><span class="p">(</span><span class="n">codegen</span><span class="o">::</span><span class="n">getRelocModel</span><span class="p">()));</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="93-emit-输出类型">9.3 emit 输出类型
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>选项</th>
+          <th>输出</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>--filetype=asm --emit-llvm</code></td>
+          <td><code>.ll</code> IR 文件</td>
+      </tr>
+      <tr>
+          <td><code>--filetype=asm</code></td>
+          <td><code>.s</code> 汇编文件</td>
+      </tr>
+      <tr>
+          <td><code>--filetype=obj</code></td>
+          <td><code>.o</code> 目标文件</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="94-命令行选项">9.4 命令行选项
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">InputFile</span>           <span class="c1">// 位置参数，默认 &#34;-&#34;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">OutputFilename</span> <span class="p">(</span><span class="o">-</span><span class="n">o</span><span class="p">)</span> <span class="c1">// 输出文件名
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">MTriple</span>             <span class="c1">// 覆盖目标三元组
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">EmitLLVM</span>            <span class="c1">// 输出 IR 而非汇编
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="o">+</span> <span class="n">codegen</span><span class="o">::</span><span class="n">RegisterCodeGenFlags</span>  <span class="c1">// -march, -mcpu, -mattr 等
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="10-编译与测试">10. 编译与测试
+</h2><h3 id="101-生成目标文件">10.1 生成目标文件
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">tinylang --filetype<span class="o">=</span>obj Gcd.mod
+</span></span><span class="line"><span class="cl"><span class="c1"># 生成 Gcd.o</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="102-生成-ir">10.2 生成 IR
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">tinylang --filetype<span class="o">=</span>asm --emit-llvm -o - Gcd.mod
+</span></span><span class="line"><span class="cl"><span class="c1"># 输出到标准输出</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="103-与-c-链接测试">10.3 与 C 链接测试
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// callgcd.c
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">extern</span> <span class="kt">long</span> <span class="nf">_t3Gcd3GCD</span><span class="p">(</span><span class="kt">long</span><span class="p">,</span> <span class="kt">long</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;gcd(25, 20) = %ld</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">_t3Gcd3GCD</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">20</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;gcd(3, 5) = %ld</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">_t3Gcd3GCD</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;gcd(21, 28) = %ld</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">_t3Gcd3GCD</span><span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="mi">28</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">tinylang --filetype<span class="o">=</span>obj Gcd.mod
+</span></span><span class="line"><span class="cl">clang callgcd.c Gcd.o -o gcd
+</span></span><span class="line"><span class="cl">./gcd
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="11-项目目录结构">11. 项目目录结构
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">Chapter04</span><span class="o">/</span><span class="n">tinylang</span><span class="o">/</span>
+</span></span><span class="line"><span class="cl"><span class="err">├──</span> <span class="n">include</span><span class="o">/</span><span class="n">tinylang</span><span class="o">/</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>   <span class="err">├──</span> <span class="n">CodeGen</span><span class="o">/</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>   <span class="err">│</span>   <span class="err">├──</span> <span class="n">CodeGenerator</span><span class="o">.</span><span class="n">h</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>   <span class="err">│</span>   <span class="err">├──</span> <span class="n">CGModule</span><span class="o">.</span><span class="n">h</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>   <span class="err">│</span>   <span class="err">└──</span> <span class="n">CGProcedure</span><span class="o">.</span><span class="n">h</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>   <span class="err">├──</span> <span class="n">AST</span><span class="o">/</span><span class="err">、</span><span class="n">Basic</span><span class="o">/</span><span class="err">、</span><span class="n">Lexer</span><span class="o">/</span><span class="err">、</span><span class="n">Parser</span><span class="o">/</span><span class="err">、</span><span class="n">Sema</span><span class="o">/</span>
+</span></span><span class="line"><span class="cl"><span class="err">├──</span> <span class="n">lib</span><span class="o">/</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>   <span class="err">├──</span> <span class="n">CodeGen</span><span class="o">/</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>   <span class="err">│</span>   <span class="err">├──</span> <span class="n">CodeGenerator</span><span class="o">.</span><span class="n">cpp</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>   <span class="err">│</span>   <span class="err">├──</span> <span class="n">CGModule</span><span class="o">.</span><span class="n">cpp</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>   <span class="err">│</span>   <span class="err">└──</span> <span class="n">CGProcedure</span><span class="o">.</span><span class="n">cpp</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>   <span class="err">└──</span> <span class="o">...</span>
+</span></span><span class="line"><span class="cl"><span class="err">├──</span> <span class="n">tools</span><span class="o">/</span><span class="n">driver</span><span class="o">/</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>   <span class="err">└──</span> <span class="n">Driver</span><span class="o">.</span><span class="n">cpp</span>
+</span></span><span class="line"><span class="cl"><span class="err">└──</span> <span class="n">examples</span><span class="o">/</span>
+</span></span><span class="line"><span class="cl">    <span class="err">├──</span> <span class="n">Gcd</span><span class="o">.</span><span class="n">mod</span>
+</span></span><span class="line"><span class="cl">    <span class="err">└──</span> <span class="n">callgcd</span><span class="o">.</span><span class="n">ll</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="12-小结">12. 小结
+</h2><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>内容</th>
+          <th>要点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>IR 生成</td>
+          <td>基本块、控制流、终止指令</td>
+      </tr>
+      <tr>
+          <td>SSA</td>
+          <td>块密封、phi 插入、optimizePhi</td>
+      </tr>
+      <tr>
+          <td>变量</td>
+          <td>局部/全局、按值/VAR 形参</td>
+      </tr>
+      <tr>
+          <td>驱动</td>
+          <td>TargetMachine、PassManager、emit</td>
+      </tr>
+      <tr>
+          <td>输出</td>
+          <td>.ll / .s / .o</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>下一章将处理聚合数据结构、函数调用约定等。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/compiler/">Compiler</a>
+        
+            <a href="/tags/llvm/">LLVM</a>
+        
+            <a href="/tags/llvm-17/">LLVM-17</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/learn-llvm-17-chapter01%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Learn-LLVM-17 chapter01学习笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/learn-llvm-17-chapter02%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Learn-LLVM-17 chapter02学习笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/learn-llvm-17-chapter03%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Learn-LLVM-17 chapter03学习笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title"></h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
