@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="LLVM 17 learning">
+<title>Learn-LLVM-17 chapter07学习笔记</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/learn-llvm-17-chapter07%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="Learn-LLVM-17 chapter07学习笔记">
+<meta property='og:description' content="LLVM 17 learning">
+<meta property='og:url' content='https://Salmooo.github.io/p/learn-llvm-17-chapter07%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Compiler' /><meta property='article:tag' content='LLVM' /><meta property='article:tag' content='LLVM-17' />
+<meta name="twitter:title" content="Learn-LLVM-17 chapter07学习笔记">
+<meta name="twitter:description" content="LLVM 17 learning">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#1-本章概览">1. 本章概览</a>
+      <ol>
+        <li><a href="#11-学习目标">1.1 学习目标</a></li>
+        <li><a href="#12-代码结构">1.2 代码结构</a></li>
+      </ol>
+    </li>
+    <li><a href="#2-llvm-通道管理器">2. LLVM 通道管理器</a>
+      <ol>
+        <li><a href="#21-通道的作用与分类">2.1 通道的作用与分类</a></li>
+        <li><a href="#22-通道管理器的职责">2.2 通道管理器的职责</a></li>
+        <li><a href="#23-为何不硬编码通道顺序">2.3 为何不硬编码通道顺序？</a></li>
+      </ol>
+    </li>
+    <li><a href="#3-实现-ppprofiler-通道">3. 实现 PPProfiler 通道</a>
+      <ol>
+        <li><a href="#31-通道目标">3.1 通道目标</a></li>
+        <li><a href="#32-核心实现分析">3.2 核心实现分析</a>
+          <ol>
+            <li><a href="#321-通道类定义">3.2.1 通道类定义</a></li>
+            <li><a href="#322-instrument-插装逻辑">3.2.2 instrument() 插装逻辑</a></li>
+            <li><a href="#323-run-主逻辑">3.2.3 run() 主逻辑</a></li>
+          </ol>
+        </li>
+        <li><a href="#33-统计与调试">3.3 统计与调试</a></li>
+      </ol>
+    </li>
+    <li><a href="#4-通道的多种集成方式">4. 通道的多种集成方式</a>
+      <ol>
+        <li><a href="#41-独立插件ppprofiler">4.1 独立插件（ppprofiler/）</a></li>
+        <li><a href="#42-llvm-树内插件ppprofiler-intree-plugin">4.2 LLVM 树内插件（ppprofiler-intree-plugin）</a></li>
+        <li><a href="#43-llvm-树内注册表集成ppprofiler-intree">4.3 LLVM 树内注册表集成（ppprofiler-intree）</a></li>
+      </ol>
+    </li>
+    <li><a href="#5-使用-ppprofiler">5. 使用 PPProfiler</a>
+      <ol>
+        <li><a href="#51-与-opt-一起使用">5.1 与 opt 一起使用</a></li>
+        <li><a href="#52-流水线组合">5.2 流水线组合</a></li>
+        <li><a href="#53-与-clang-一起使用">5.3 与 clang 一起使用</a></li>
+        <li><a href="#54-运行时实现runtimec">5.4 运行时实现（runtime.c）</a></li>
+        <li><a href="#55-分析-ppprofilecsv">5.5 分析 ppprofile.csv</a></li>
+      </ol>
+    </li>
+    <li><a href="#6-向-tinylang-添加优化流水线">6. 向 tinylang 添加优化流水线</a>
+      <ol>
+        <li><a href="#61-drivercpp-核心改动">6.1 Driver.cpp 核心改动</a>
+          <ol>
+            <li><a href="#611-新增头文件与选项">6.1.1 新增头文件与选项</a></li>
+            <li><a href="#612-emit-流程概览">6.1.2 emit() 流程概览</a></li>
+            <li><a href="#613-插件加载">6.1.3 插件加载</a></li>
+            <li><a href="#614-流水线选择">6.1.4 流水线选择</a></li>
+            <li><a href="#615-双-pass-管理器">6.1.5 双 Pass 管理器</a></li>
+          </ol>
+        </li>
+        <li><a href="#62-cmakeliststxt-依赖">6.2 CMakeLists.txt 依赖</a></li>
+        <li><a href="#63-扩展点自定义流水线入口">6.3 扩展点：自定义流水线入口</a></li>
+        <li><a href="#64-调试选项">6.4 调试选项</a></li>
+        <li><a href="#65-o0-与扩展点">6.5 O0 与扩展点</a></li>
+      </ol>
+    </li>
+    <li><a href="#7-关键-api-速查">7. 关键 API 速查</a></li>
+    <li><a href="#8-总结">8. 总结</a></li>
+    <li><a href="#9-参考">9. 参考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/llvm/" >
+                LLVM
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/learn-llvm-17-chapter07%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">Learn-LLVM-17 chapter07学习笔记</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            LLVM 17 learning
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    6 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="第-7-章-优化-ir---学习笔记">第 7 章 优化 IR - 学习笔记
+</h1><blockquote>
+<p>本文为《Learn LLVM 17》第 7 章的学习笔记，主要介绍 LLVM 通道管理器、如何实现新的 IR 转换通道（ppprofiler 插装通道）、通道的多种集成方式，以及如何向 tinylang 编译器添加优化流水线。</p>
+</blockquote>
+<h2 id="1-本章概览">1. 本章概览
+</h2><h3 id="11-学习目标">1.1 学习目标
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>主题</th>
+          <th>内容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>通道管理器</td>
+          <td>通道流水线、分析结果共享、通道分类</td>
+      </tr>
+      <tr>
+          <td>新通道实现</td>
+          <td>PPProfiler 插装通道、插件开发、LLVM 树内集成</td>
+      </tr>
+      <tr>
+          <td>通道使用</td>
+          <td>opt/clang 加载插件、扩展点、流水线描述</td>
+      </tr>
+      <tr>
+          <td>编译器集成</td>
+          <td>tinylang 添加 PassBuilder、优化级别、代码生成</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="12-代码结构">1.2 代码结构
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">Chapter07</span><span class="o">/</span>
+</span></span><span class="line"><span class="cl"><span class="err">├──</span> <span class="n">ppprofiler</span><span class="o">/</span>                    <span class="c1"># 独立插件</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>   <span class="err">├──</span> <span class="n">PPProfiler</span><span class="o">.</span><span class="n">cpp</span>             <span class="c1"># 通道实现</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>   <span class="err">├──</span> <span class="n">CMakeLists</span><span class="o">.</span><span class="n">txt</span>             <span class="c1"># add_llvm_pass_plugin</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>   <span class="err">├──</span> <span class="n">runtime</span><span class="o">/</span><span class="n">runtime</span><span class="o">.</span><span class="n">c</span>          <span class="c1"># __ppp_enter/__ppp_exit 实现</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>   <span class="err">└──</span> <span class="n">scripts</span><span class="o">/</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>       <span class="err">├──</span> <span class="n">join</span><span class="o">.</span><span class="n">awk</span>               <span class="c1"># 匹配 enter/exit 事件</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>       <span class="err">├──</span> <span class="n">avg</span><span class="o">.</span><span class="n">awk</span>                <span class="c1"># 统计调用次数与执行时间</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>       <span class="err">└──</span> <span class="n">demangle</span><span class="o">.</span><span class="n">awk</span>           <span class="c1"># 符号还原</span>
+</span></span><span class="line"><span class="cl"><span class="err">├──</span> <span class="n">ppprofiler</span><span class="o">-</span><span class="n">intree</span><span class="o">/</span>             <span class="c1"># LLVM 树内集成（注册表方式）</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>   <span class="err">└──</span> <span class="n">ppprofiler</span><span class="o">.</span><span class="n">diff</span>            <span class="c1"># 修改清单</span>
+</span></span><span class="line"><span class="cl"><span class="err">├──</span> <span class="n">ppprofiler</span><span class="o">-</span><span class="n">intree</span><span class="o">-</span><span class="n">plugin</span><span class="o">/</span>      <span class="c1"># LLVM 树内插件方式</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>   <span class="err">└──</span> <span class="n">ppprofiler</span><span class="o">.</span><span class="n">diff</span>
+</span></span><span class="line"><span class="cl"><span class="err">└──</span> <span class="n">tinylang</span><span class="o">/</span>                      <span class="c1"># 带优化流水线的编译器</span>
+</span></span><span class="line"><span class="cl">    <span class="err">└──</span> <span class="n">tools</span><span class="o">/</span><span class="n">driver</span><span class="o">/</span>
+</span></span><span class="line"><span class="cl">        <span class="err">├──</span> <span class="n">Driver</span><span class="o">.</span><span class="n">cpp</span>             <span class="c1"># PassBuilder、MPM、扩展点</span>
+</span></span><span class="line"><span class="cl">        <span class="err">└──</span> <span class="n">CMakeLists</span><span class="o">.</span><span class="n">txt</span>         <span class="c1"># LLVM 组件依赖</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="2-llvm-通道管理器">2. LLVM 通道管理器
+</h2><h3 id="21-通道的作用与分类">2.1 通道的作用与分类
+</h3><p>LLVM 将 IR 优化和代码生成分解为独立的<strong>通道 (Pass)</strong>，通道管理器负责以正确顺序执行这些通道。</p>
+<p><strong>通道按作用范围分类：</strong></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>类型</th>
+          <th>作用范围</th>
+          <th>典型用途</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>模块通道 (Module Pass)</td>
+          <td>整个 Module</td>
+          <td>过程间优化、全局分析</td>
+      </tr>
+      <tr>
+          <td>调用图通道 (CGSCC Pass)</td>
+          <td>调用图强连通分量</td>
+          <td>自底向上遍历、内联决策</td>
+      </tr>
+      <tr>
+          <td>函数通道 (Function Pass)</td>
+          <td>单个函数</td>
+          <td>过程内优化</td>
+      </tr>
+      <tr>
+          <td>循环通道 (Loop Pass)</td>
+          <td>函数内循环</td>
+          <td>循环优化</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="22-通道管理器的职责">2.2 通道管理器的职责
+</h3><ul>
+<li><strong>分析结果共享</strong>：跟踪通道依赖的分析、缓存状态，避免重复计算，及时释放内存</li>
+<li><strong>流水线执行</strong>：按流水线顺序执行，函数通道通常按「每个函数依次跑完所有函数通道」的方式执行，以改善缓存局部性</li>
+</ul>
+<h3 id="23-为何不硬编码通道顺序">2.3 为何不硬编码通道顺序？
+</h3><ul>
+<li>不同优化级别（O0/O1/O2/O3/Os/Oz）需要不同通道组合</li>
+<li>用户可能希望添加自定义通道（如语言特定优化）</li>
+<li>通道之间可能有依赖，需要灵活编排（如死代码删除应在产生死代码的通道之后运行）</li>
+</ul>
+<hr>
+<h2 id="3-实现-ppprofiler-通道">3. 实现 PPProfiler 通道
+</h2><h3 id="31-通道目标">3.1 通道目标
+</h3><p>PPProfiler（&ldquo;穷人&quot;分析器）在以下位置插入调用：</p>
+<ul>
+<li><strong>函数入口</strong>：调用 <code>__ppp_enter(FnName)</code></li>
+<li><strong>每个返回指令前</strong>：调用 <code>__ppp_exit(FnName)</code></li>
+</ul>
+<p>用于统计函数调用次数和粗略执行时间。</p>
+<h3 id="32-核心实现分析">3.2 核心实现分析
+</h3><h4 id="321-通道类定义">3.2.1 通道类定义
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// PPProfiler.cpp
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">namespace</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">PPProfilerIRPass</span> <span class="o">:</span> <span class="k">public</span> <span class="n">llvm</span><span class="o">::</span><span class="n">PassInfoMixin</span><span class="o">&lt;</span><span class="n">PPProfilerIRPass</span><span class="o">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">PreservedAnalyses</span> <span class="n">run</span><span class="p">(</span><span class="n">llvm</span><span class="o">::</span><span class="n">Module</span> <span class="o">&amp;</span><span class="n">M</span><span class="p">,</span> <span class="n">llvm</span><span class="o">::</span><span class="n">ModuleAnalysisManager</span> <span class="o">&amp;</span><span class="n">AM</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">private</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="n">instrument</span><span class="p">(</span><span class="n">llvm</span><span class="o">::</span><span class="n">Function</span> <span class="o">&amp;</span><span class="n">F</span><span class="p">,</span> <span class="n">llvm</span><span class="o">::</span><span class="n">Function</span> <span class="o">*</span><span class="n">EnterFn</span><span class="p">,</span> <span class="n">llvm</span><span class="o">::</span><span class="n">Function</span> <span class="o">*</span><span class="n">ExitFn</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>继承 <code>PassInfoMixin&lt;PPProfilerIRPass&gt;</code> 获得 <code>name()</code> 等样板</li>
+<li><code>run()</code> 由 LLVM 调用，返回 <code>PreservedAnalyses</code> 表示保留/使哪些分析失效</li>
+</ul>
+<h4 id="322-instrument-插装逻辑">3.2.2 instrument() 插装逻辑
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">PPProfilerIRPass</span><span class="o">::</span><span class="n">instrument</span><span class="p">(</span><span class="n">llvm</span><span class="o">::</span><span class="n">Function</span> <span class="o">&amp;</span><span class="n">F</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                                  <span class="n">Function</span> <span class="o">*</span><span class="n">EnterFn</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                                  <span class="n">Function</span> <span class="o">*</span><span class="n">ExitFn</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="o">++</span><span class="n">NumOfFunc</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// 1. 在入口块首条指令处插入
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">IRBuilder</span><span class="o">&lt;&gt;</span> <span class="n">Builder</span><span class="p">(</span><span class="o">&amp;*</span><span class="n">F</span><span class="p">.</span><span class="n">getEntryBlock</span><span class="p">().</span><span class="n">begin</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// 2. 创建函数名全局常量
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">GlobalVariable</span> <span class="o">*</span><span class="n">FnName</span> <span class="o">=</span> <span class="n">Builder</span><span class="p">.</span><span class="n">CreateGlobalString</span><span class="p">(</span><span class="n">F</span><span class="p">.</span><span class="n">getName</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// 3. 在入口插入 __ppp_enter(FnName)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">Builder</span><span class="p">.</span><span class="n">CreateCall</span><span class="p">(</span><span class="n">EnterFn</span><span class="o">-&gt;</span><span class="n">getFunctionType</span><span class="p">(),</span> <span class="n">EnterFn</span><span class="p">,</span> <span class="p">{</span><span class="n">FnName</span><span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// 4. 遍历所有 Ret 指令，在每条 ret 前插入 __ppp_exit(FnName)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">for</span> <span class="p">(</span><span class="n">BasicBlock</span> <span class="o">&amp;</span><span class="nl">BB</span> <span class="p">:</span> <span class="n">F</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">Instruction</span> <span class="o">&amp;</span><span class="nl">Inst</span> <span class="p">:</span> <span class="n">BB</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">Inst</span><span class="p">.</span><span class="n">getOpcode</span><span class="p">()</span> <span class="o">==</span> <span class="n">Instruction</span><span class="o">::</span><span class="n">Ret</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Builder</span><span class="p">.</span><span class="n">SetInsertPoint</span><span class="p">(</span><span class="o">&amp;</span><span class="n">Inst</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Builder</span><span class="p">.</span><span class="n">CreateCall</span><span class="p">(</span><span class="n">ExitFn</span><span class="o">-&gt;</span><span class="n">getFunctionType</span><span class="p">(),</span> <span class="n">ExitFn</span><span class="p">,</span> <span class="p">{</span><span class="n">FnName</span><span class="p">});</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>要点：</p>
+<ul>
+<li><code>SetInsertPoint(&amp;Inst)</code> 在指定指令<strong>之前</strong>插入</li>
+<li><code>CreateGlobalString()</code> 生成 <code>private unnamed_addr constant [N x i8]</code> 常量</li>
+</ul>
+<h4 id="323-run-主逻辑">3.2.3 run() 主逻辑
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">PreservedAnalyses</span> <span class="n">PPProfilerIRPass</span><span class="o">::</span><span class="n">run</span><span class="p">(</span><span class="n">Module</span> <span class="o">&amp;</span><span class="n">M</span><span class="p">,</span> <span class="n">ModuleAnalysisManager</span> <span class="o">&amp;</span><span class="n">AM</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 避免检测 runtime 自身，防止无限递归
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="n">M</span><span class="p">.</span><span class="n">getFunction</span><span class="p">(</span><span class="s">&#34;__ppp_enter&#34;</span><span class="p">)</span> <span class="o">||</span> <span class="n">M</span><span class="p">.</span><span class="n">getFunction</span><span class="p">(</span><span class="s">&#34;__ppp_exit&#34;</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">PreservedAnalyses</span><span class="o">::</span><span class="n">all</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// 声明 void __ppp_enter(ptr), void __ppp_exit(ptr)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">Type</span> <span class="o">*</span><span class="n">VoidTy</span> <span class="o">=</span> <span class="n">Type</span><span class="o">::</span><span class="n">getVoidTy</span><span class="p">(</span><span class="n">M</span><span class="p">.</span><span class="n">getContext</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="n">PointerType</span> <span class="o">*</span><span class="n">PtrTy</span> <span class="o">=</span> <span class="n">PointerType</span><span class="o">::</span><span class="n">getUnqual</span><span class="p">(</span><span class="n">M</span><span class="p">.</span><span class="n">getContext</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="n">FunctionType</span> <span class="o">*</span><span class="n">EnterExitFty</span> <span class="o">=</span> <span class="n">FunctionType</span><span class="o">::</span><span class="n">get</span><span class="p">(</span><span class="n">VoidTy</span><span class="p">,</span> <span class="p">{</span><span class="n">PtrTy</span><span class="p">},</span> <span class="nb">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Function</span> <span class="o">*</span><span class="n">EnterFn</span> <span class="o">=</span> <span class="n">Function</span><span class="o">::</span><span class="n">Create</span><span class="p">(</span><span class="n">EnterExitFty</span><span class="p">,</span> <span class="n">GlobalValue</span><span class="o">::</span><span class="n">ExternalLinkage</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                                       <span class="s">&#34;__ppp_enter&#34;</span><span class="p">,</span> <span class="n">M</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Function</span> <span class="o">*</span><span class="n">ExitFn</span> <span class="o">=</span> <span class="n">Function</span><span class="o">::</span><span class="n">Create</span><span class="p">(</span><span class="n">EnterExitFty</span><span class="p">,</span> <span class="n">GlobalValue</span><span class="o">::</span><span class="n">ExternalLinkage</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                                      <span class="s">&#34;__ppp_exit&#34;</span><span class="p">,</span> <span class="n">M</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="o">&amp;</span><span class="nl">F</span> <span class="p">:</span> <span class="n">M</span><span class="p">.</span><span class="n">functions</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">F</span><span class="p">.</span><span class="n">isDeclaration</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">F</span><span class="p">.</span><span class="n">hasName</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">      <span class="n">instrument</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">EnterFn</span><span class="p">,</span> <span class="n">ExitFn</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">PreservedAnalyses</span><span class="o">::</span><span class="n">none</span><span class="p">();</span>  <span class="c1">// 不保留任何分析
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>跳过声明、无名函数</li>
+<li><code>PreservedAnalyses::none()</code> 表示所有分析可能失效，保守但安全</li>
+</ul>
+<h3 id="33-统计与调试">3.3 统计与调试
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#define DEBUG_TYPE &#34;ppprofiler&#34;
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="n">ALWAYS_ENABLED_STATISTIC</span><span class="p">(</span><span class="n">NumOfFunc</span><span class="p">,</span> <span class="s">&#34;Number of instrumented functions.&#34;</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>STATISTIC</code>：仅在断言或 <code>LLVM_FORCE_ENABLE_STATS</code> 时收集</li>
+<li><code>ALWAYS_ENABLED_STATISTIC</code>：始终收集，可用 <code>-stats</code> 或 <code>PrintStatistics()</code> 输出</li>
+</ul>
+<hr>
+<h2 id="4-通道的多种集成方式">4. 通道的多种集成方式
+</h2><h3 id="41-独立插件ppprofiler">4.1 独立插件（ppprofiler/）
+</h3><p><strong>CMakeLists.txt：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cmake" data-lang="cmake"><span class="line"><span class="cl"><span class="nb">add_llvm_pass_plugin</span><span class="p">(</span><span class="s">PPProfiler</span> <span class="s">MODULE</span> <span class="s">PPProfiler.cpp</span><span class="p">)</span><span class="err">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>MODULE</code> 表示构建为动态库（<code>.so</code>）</li>
+<li>生成 <code>PPProfiler.so</code>，可由 opt/clang 通过 <code>--load-pass-plugin</code> 加载</li>
+</ul>
+<p><strong>插件注册：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">RegisterCB</span><span class="p">(</span><span class="n">PassBuilder</span> <span class="o">&amp;</span><span class="n">PB</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 1. 流水线解析：支持 --passes=&#34;ppprofiler&#34;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">PB</span><span class="p">.</span><span class="n">registerPipelineParsingCallback</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="p">[](</span><span class="n">StringRef</span> <span class="n">Name</span><span class="p">,</span> <span class="n">ModulePassManager</span> <span class="o">&amp;</span><span class="n">MPM</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">         <span class="n">ArrayRef</span><span class="o">&lt;</span><span class="n">PassBuilder</span><span class="o">::</span><span class="n">PipelineElement</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">Name</span> <span class="o">==</span> <span class="s">&#34;ppprofiler&#34;</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="n">MPM</span><span class="p">.</span><span class="n">addPass</span><span class="p">(</span><span class="n">PPProfilerIRPass</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">          <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">});</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 2. 扩展点：在流水线开头自动添加
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">PB</span><span class="p">.</span><span class="n">registerPipelineStartEPCallback</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="p">[](</span><span class="n">ModulePassManager</span> <span class="o">&amp;</span><span class="n">PM</span><span class="p">,</span> <span class="n">OptimizationLevel</span> <span class="n">Level</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">PM</span><span class="p">.</span><span class="n">addPass</span><span class="p">(</span><span class="n">PPProfilerIRPass</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">      <span class="p">});</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">llvm</span><span class="o">::</span><span class="n">PassPluginLibraryInfo</span> <span class="n">getPPProfilerPluginInfo</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="p">{</span><span class="n">LLVM_PLUGIN_API_VERSION</span><span class="p">,</span> <span class="s">&#34;PPProfiler&#34;</span><span class="p">,</span> <span class="s">&#34;v0.1&#34;</span><span class="p">,</span> <span class="n">RegisterCB</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#ifndef LLVM_PPPROFILER_LINK_INTO_TOOLS
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="k">extern</span> <span class="s">&#34;C&#34;</span> <span class="n">LLVM_ATTRIBUTE_WEAK</span> <span class="o">::</span><span class="n">llvm</span><span class="o">::</span><span class="n">PassPluginLibraryInfo</span>
+</span></span><span class="line"><span class="cl"><span class="n">llvmGetPassPluginInfo</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nf">getPPProfilerPluginInfo</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#endif
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>LLVM_ATTRIBUTE_WEAK</code>：静态链接时避免重复定义</li>
+<li><code>LLVM_PPPROFILER_LINK_INTO_TOOLS</code>：静态链接到工具时定义，不导出 <code>llvmGetPassPluginInfo</code></li>
+</ul>
+<h3 id="42-llvm-树内插件ppprofiler-intree-plugin">4.2 LLVM 树内插件（ppprofiler-intree-plugin）
+</h3><ul>
+<li>在 <code>llvm/lib/Transforms/PPProfiler/</code> 创建目录</li>
+<li><code>CMakeLists.txt</code>：<code>add_llvm_pass_plugin(PPProfiler PPProfiler.cpp)</code></li>
+<li>在 <code>llvm/lib/Transforms/CMakeLists.txt</code> 中 <code>add_subdirectory(PPProfiler)</code></li>
+<li>构建后得到 <code>PPProfiler.so</code>，与独立插件用法相同</li>
+<li>静态链接：<code>-DLLVM_PPPROFILER_LINK_INTO_TOOLS=ON</code>，会写入 <code>Extension.def</code></li>
+</ul>
+<h3 id="43-llvm-树内注册表集成ppprofiler-intree">4.3 LLVM 树内注册表集成（ppprofiler-intree）
+</h3><p>需要将通道加入 Pass 注册表，供所有 LLVM 工具使用：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>修改项</th>
+          <th>内容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>头文件</td>
+          <td><code>llvm/include/llvm/Transforms/PPProfiler/PPProfiler.h</code>，类定义移出匿名命名空间</td>
+      </tr>
+      <tr>
+          <td>PassBuilder.cpp</td>
+          <td><code>#include &quot;llvm/Transforms/PPProfiler/PPProfiler.h&quot;</code></td>
+      </tr>
+      <tr>
+          <td>PassRegistry.def</td>
+          <td><code>MODULE_PASS(&quot;ppprofiler&quot;, PPProfilerIRPass())</code></td>
+      </tr>
+      <tr>
+          <td>CMakeLists.txt</td>
+          <td><code>add_llvm_component_library(LLVMPPProfiler ...)</code></td>
+      </tr>
+      <tr>
+          <td>Passes/CMakeLists.txt</td>
+          <td><code>LINK_COMPONENTS</code> 添加 <code>PPProfiler</code></td>
+      </tr>
+      <tr>
+          <td>PPProfiler.cpp</td>
+          <td>删除 <code>llvmGetPassPluginInfo()</code>，包含头文件</td>
+      </tr>
+  </tbody>
+</table></div>
+<hr>
+<h2 id="5-使用-ppprofiler">5. 使用 PPProfiler
+</h2><h3 id="51-与-opt-一起使用">5.1 与 opt 一起使用
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 生成 IR</span>
+</span></span><span class="line"><span class="cl">clang -S -emit-llvm -O1 hello.c -o hello.ll
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 运行通道</span>
+</span></span><span class="line"><span class="cl">opt --load-pass-plugin<span class="o">=</span>./PPProfiler.so --passes<span class="o">=</span><span class="s2">&#34;ppprofiler&#34;</span> --stats hello.ll -o hello_inst.bc
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 查看结果 IR</span>
+</span></span><span class="line"><span class="cl">llvm-dis hello_inst.bc -o -
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>插装后的 IR 示例：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-llvm" data-lang="llvm"><span class="line"><span class="cl"><span class="vg">@0</span> <span class="p">=</span> <span class="k">private</span> <span class="k">unnamed_addr</span> <span class="k">constant</span> <span class="p">[</span><span class="m">5</span> <span class="k">x</span> <span class="k">i8</span><span class="p">]</span> <span class="k">c</span><span class="s">&#34;main\00&#34;</span><span class="p">,</span> <span class="k">align</span> <span class="m">1</span>
+</span></span><span class="line"><span class="cl"><span class="k">define</span> <span class="err">dso_local</span> <span class="k">i32</span> <span class="vg">@main</span><span class="p">(...)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">call</span> <span class="kt">void</span> <span class="vg">@__ppp_enter</span><span class="p">(</span><span class="err">ptr</span> <span class="vg">@0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="n">%3</span> <span class="p">=</span> <span class="k">tail</span> <span class="k">call</span> <span class="k">i32</span> <span class="vg">@puts</span><span class="p">(...)</span>
+</span></span><span class="line"><span class="cl">  <span class="k">call</span> <span class="kt">void</span> <span class="vg">@__ppp_exit</span><span class="p">(</span><span class="err">ptr</span> <span class="vg">@0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="k">ret</span> <span class="k">i32</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="52-流水线组合">5.2 流水线组合
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 在默认 O2 流水线前运行 ppprofiler</span>
+</span></span><span class="line"><span class="cl">opt --load-pass-plugin<span class="o">=</span>./PPProfiler.so --passes<span class="o">=</span><span class="s2">&#34;ppprofiler,default&lt;O2&gt;&#34;</span> hello.ll -o hello_opt.bc
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>注意：流水线中通道类型需一致（此处均为 Module Pass）。</p>
+<h3 id="53-与-clang-一起使用">5.3 与 clang 一起使用
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">clang -fpass-plugin<span class="o">=</span>./PPProfiler.so hello.c runtime.c -o a.out
+</span></span><span class="line"><span class="cl">./a.out  <span class="c1"># 生成 ppprofile.csv</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>扩展点回调会在填充默认流水线时自动添加 ppprofiler，因此无需显式写 <code>--passes</code>。</p>
+<h3 id="54-运行时实现runtimec">5.4 运行时实现（runtime.c）
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">__ppp_enter</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">FnName</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Time</span> <span class="n">T</span> <span class="o">=</span> <span class="nf">get_time</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="o">*</span><span class="n">Frame</span> <span class="o">=</span> <span class="nf">__builtin_frame_address</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">fprintf</span><span class="p">(</span><span class="n">FileFD</span><span class="p">,</span> <span class="s">&#34;enter|%s|%llu|%p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">FnName</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">Frame</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">__ppp_exit</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">FnName</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Time</span> <span class="n">T</span> <span class="o">=</span> <span class="nf">get_time</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="o">*</span><span class="n">Frame</span> <span class="o">=</span> <span class="nf">__builtin_frame_address</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">fprintf</span><span class="p">(</span><span class="n">FileFD</span><span class="p">,</span> <span class="s">&#34;exit|%s|%llu|%p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">FnName</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">Frame</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>注意</strong>：书中示例 <code>cleanup()</code> 中 <code>if (FileFD == NULL)</code> 应为 <code>if (FileFD != NULL)</code>，否则不会正确关闭文件。</p>
+<p><strong>局限性</strong>：</p>
+<ul>
+<li>非线程安全（单文件描述符）</li>
+<li>未检查 I/O 返回值</li>
+<li>时间戳包含 I/O 开销，不宜作为精确性能指标；调用次数较可靠</li>
+</ul>
+<h3 id="55-分析-ppprofilecsv">5.5 分析 ppprofile.csv
+</h3><p><strong>join.awk</strong>：匹配 enter/exit，输出 <code>函数名|进入时间|退出时间|耗时|frame</code></p>
+<p><strong>avg.awk</strong>：按函数统计调用次数、总时间、平均时间</p>
+<p><strong>demangle.awk</strong>：用 <code>llvm-cxxfilt</code> 还原 C++ 符号</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cat ppprofile.csv <span class="p">|</span> awk -f join.awk <span class="p">|</span> awk -f avg.awk <span class="p">|</span> sort -nr <span class="p">|</span> head -15 <span class="p">|</span> awk -f demangle.awk
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="6-向-tinylang-添加优化流水线">6. 向 tinylang 添加优化流水线
+</h2><h3 id="61-drivercpp-核心改动">6.1 Driver.cpp 核心改动
+</h3><h4 id="611-新增头文件与选项">6.1.1 新增头文件与选项
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;llvm/Passes/PassBuilder.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;llvm/Passes/PassPlugin.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;llvm/Analysis/TargetTransformInfo.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="n">cl</span><span class="o">::</span><span class="n">opt</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">DebugPM</span><span class="p">(</span><span class="s">&#34;debug-pass-manager&#34;</span><span class="p">,</span> <span class="p">...);</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="n">cl</span><span class="o">::</span><span class="n">opt</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">PassPipeline</span><span class="p">(</span><span class="s">&#34;passes&#34;</span><span class="p">,</span> <span class="p">...);</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="n">cl</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">PassPlugins</span><span class="p">(</span><span class="s">&#34;load-pass-plugin&#34;</span><span class="p">,</span> <span class="p">...);</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="n">cl</span><span class="o">::</span><span class="n">opt</span><span class="o">&lt;</span><span class="kt">signed</span> <span class="kt">char</span><span class="o">&gt;</span> <span class="n">OptLevel</span><span class="p">(...);</span>  <span class="c1">// O0/O1/O2/O3/Os/Oz
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="612-emit-流程概览">6.1.2 emit() 流程概览
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">PassBuilder PB(TM)
+</span></span><span class="line"><span class="cl">    ↓
+</span></span><span class="line"><span class="cl">加载插件 (PassPlugins, Extension.def) → registerPassBuilderCallbacks(PB)
+</span></span><span class="line"><span class="cl">    ↓
+</span></span><span class="line"><span class="cl">创建分析管理器 LAM, FAM, CGAM, MAM
+</span></span><span class="line"><span class="cl">    ↓
+</span></span><span class="line"><span class="cl">FAM.registerPass(buildDefaultAAPipeline)
+</span></span><span class="line"><span class="cl">PB.register*Analyses(...)
+</span></span><span class="line"><span class="cl">PB.crossRegisterProxies(...)
+</span></span><span class="line"><span class="cl">    ↓
+</span></span><span class="line"><span class="cl">ModulePassManager MPM
+</span></span><span class="line"><span class="cl">    ↓
+</span></span><span class="line"><span class="cl">if (PassPipeline 非空)  parsePassPipeline(MPM, PassPipeline)
+</span></span><span class="line"><span class="cl">else                     parsePassPipeline(MPM, &#34;default&lt;O?&#34; )
+</span></span><span class="line"><span class="cl">    ↓
+</span></span><span class="line"><span class="cl">legacy::PassManager CodeGenPM  (TargetTransformInfo, addPassesToEmitFile)
+</span></span><span class="line"><span class="cl">    ↓
+</span></span><span class="line"><span class="cl">MPM.run(*M, MAM)
+</span></span><span class="line"><span class="cl">CodeGenPM.run(*M)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="613-插件加载">6.1.3 插件加载
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="o">&amp;</span><span class="nl">PluginFN</span> <span class="p">:</span> <span class="n">PassPlugins</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="n">PassPlugin</span> <span class="o">=</span> <span class="n">PassPlugin</span><span class="o">::</span><span class="n">Load</span><span class="p">(</span><span class="n">PluginFN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">PassPlugin</span><span class="p">)</span> <span class="p">{</span> <span class="cm">/* 错误 */</span> <span class="k">continue</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">PassPlugin</span><span class="o">-&gt;</span><span class="n">registerPassBuilderCallbacks</span><span class="p">(</span><span class="n">PB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define HANDLE_EXTENSION(Ext) get##Ext##PluginInfo().RegisterPassBuilderCallbacks(PB);
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;llvm/Support/Extension.def&#34;</span><span class="cp">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="614-流水线选择">6.1.4 流水线选择
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">PassPipeline</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="k">auto</span> <span class="n">Err</span> <span class="o">=</span> <span class="n">PB</span><span class="p">.</span><span class="n">parsePassPipeline</span><span class="p">(</span><span class="n">MPM</span><span class="p">,</span> <span class="n">PassPipeline</span><span class="p">))</span> <span class="p">{</span> <span class="cm">/* 错误 */</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">StringRef</span> <span class="n">DefaultPass</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">switch</span> <span class="p">(</span><span class="n">OptLevel</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">case</span> <span class="mi">0</span><span class="o">:</span>  <span class="n">DefaultPass</span> <span class="o">=</span> <span class="s">&#34;default&lt;O0&gt;&#34;</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">case</span> <span class="mi">1</span><span class="o">:</span>  <span class="n">DefaultPass</span> <span class="o">=</span> <span class="s">&#34;default&lt;O1&gt;&#34;</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">case</span> <span class="mi">2</span><span class="o">:</span>  <span class="n">DefaultPass</span> <span class="o">=</span> <span class="s">&#34;default&lt;O2&gt;&#34;</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">case</span> <span class="mi">3</span><span class="o">:</span>  <span class="n">DefaultPass</span> <span class="o">=</span> <span class="s">&#34;default&lt;O3&gt;&#34;</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">case</span> <span class="o">-</span><span class="mi">1</span><span class="o">:</span> <span class="n">DefaultPass</span> <span class="o">=</span> <span class="s">&#34;default&lt;Os&gt;&#34;</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">case</span> <span class="o">-</span><span class="mi">2</span><span class="o">:</span> <span class="n">DefaultPass</span> <span class="o">=</span> <span class="s">&#34;default&lt;Oz&gt;&#34;</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="k">auto</span> <span class="n">Err</span> <span class="o">=</span> <span class="n">PB</span><span class="p">.</span><span class="n">parsePassPipeline</span><span class="p">(</span><span class="n">MPM</span><span class="p">,</span> <span class="n">DefaultPass</span><span class="p">))</span> <span class="p">{</span> <span class="cm">/* 错误 */</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="615-双-pass-管理器">6.1.5 双 Pass 管理器
+</h4><ul>
+<li><strong>ModulePassManager (MPM)</strong>：新 PM，运行 IR 优化</li>
+<li><strong>legacy::PassManager (CodeGenPM)</strong>：旧 PM，运行代码生成</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">legacy</span><span class="o">::</span><span class="n">PassManager</span> <span class="n">CodeGenPM</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">CodeGenPM</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">createTargetTransformInfoWrapperPass</span><span class="p">(</span><span class="n">TM</span><span class="o">-&gt;</span><span class="n">getTargetIRAnalysis</span><span class="p">()));</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">FileType</span> <span class="o">==</span> <span class="n">CGFT_AssemblyFile</span> <span class="o">&amp;&amp;</span> <span class="n">EmitLLVM</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CodeGenPM</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">createPrintModulePass</span><span class="p">(</span><span class="n">Out</span><span class="o">-&gt;</span><span class="n">os</span><span class="p">()));</span>
+</span></span><span class="line"><span class="cl"><span class="k">else</span>
+</span></span><span class="line"><span class="cl">  <span class="n">TM</span><span class="o">-&gt;</span><span class="n">addPassesToEmitFile</span><span class="p">(</span><span class="n">CodeGenPM</span><span class="p">,</span> <span class="n">Out</span><span class="o">-&gt;</span><span class="n">os</span><span class="p">(),</span> <span class="k">nullptr</span><span class="p">,</span> <span class="n">FileType</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">MPM</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="o">*</span><span class="n">M</span><span class="p">,</span> <span class="n">MAM</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">CodeGenPM</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="o">*</span><span class="n">M</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="62-cmakeliststxt-依赖">6.2 CMakeLists.txt 依赖
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cmake" data-lang="cmake"><span class="line"><span class="cl"><span class="nb">set</span><span class="p">(</span><span class="s">LLVM_LINK_COMPONENTS</span>
+</span></span><span class="line"><span class="cl">  <span class="s">AllTargetsAsmParsers</span> <span class="s">AllTargetsCodeGens</span> <span class="s">...</span>
+</span></span><span class="line"><span class="cl">  <span class="s">AggressiveInstCombine</span> <span class="s">Analysis</span> <span class="s">AsmParser</span> <span class="s">BitWriter</span> <span class="s">CFGuard</span> <span class="s">CodeGen</span>
+</span></span><span class="line"><span class="cl">  <span class="s">Core</span> <span class="s">Coroutines</span> <span class="s">Extensions</span> <span class="s">IPO</span> <span class="s">IRReader</span> <span class="s">IRPrinter</span> <span class="s">InstCombine</span>
+</span></span><span class="line"><span class="cl">  <span class="s">Instrumentation</span> <span class="s">MC</span> <span class="s">ObjCARCOpts</span> <span class="s">Remarks</span> <span class="s">ScalarOpts</span> <span class="s">Support</span>
+</span></span><span class="line"><span class="cl">  <span class="s">Target</span> <span class="s">TargetParser</span> <span class="s">TransformUtils</span> <span class="s">Vectorize</span> <span class="s">Passes</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span><span class="err">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="63-扩展点自定义流水线入口">6.3 扩展点：自定义流水线入口
+</h3><p>可为流水线起始扩展点添加用户指定的通道描述：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">static</span> <span class="n">cl</span><span class="o">::</span><span class="n">opt</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">PipelineStartEPPipeline</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;passes-ep-pipeline-start&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">cl</span><span class="o">::</span><span class="n">desc</span><span class="p">(</span><span class="s">&#34;Pipeline start extension point&#34;</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">PB</span><span class="p">.</span><span class="n">registerPipelineStartEPCallback</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="o">&amp;</span><span class="n">PB</span><span class="p">,</span> <span class="n">Argv0</span><span class="p">](</span><span class="n">ModulePassManager</span> <span class="o">&amp;</span><span class="n">PM</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="k">auto</span> <span class="n">Err</span> <span class="o">=</span> <span class="n">PB</span><span class="p">.</span><span class="n">parsePassPipeline</span><span class="p">(</span><span class="n">PM</span><span class="p">,</span> <span class="n">PipelineStartEPPipeline</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">WithColor</span><span class="o">::</span><span class="n">error</span><span class="p">(...)</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Could not parse pipeline ...</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">});</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="64-调试选项">6.4 调试选项
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>选项</th>
+          <th>作用</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>--debug-pass-manager</code></td>
+          <td>打印通道执行信息</td>
+      </tr>
+      <tr>
+          <td><code>--print-before-all</code></td>
+          <td>每个通道前打印 IR</td>
+      </tr>
+      <tr>
+          <td><code>--print-after-all</code></td>
+          <td>每个通道后打印 IR</td>
+      </tr>
+      <tr>
+          <td><code>--print-changed</code></td>
+          <td>仅在 IR 变化时打印</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="65-o0-与扩展点">6.5 O0 与扩展点
+</h3><p>O0 时默认流水线为空，<code>registerPipelineStartEPCallback</code> 等扩展点不会被调用。若要在 O0 也运行扩展点通道，可调用 <code>runRegisteredEPCallbacks()</code> 手动执行回调。</p>
+<hr>
+<h2 id="7-关键-api-速查">7. 关键 API 速查
+</h2><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>API</th>
+          <th>用途</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>PassInfoMixin&lt;T&gt;</code></td>
+          <td>通道基类模板</td>
+      </tr>
+      <tr>
+          <td><code>PreservedAnalyses::all()</code></td>
+          <td>保留所有分析</td>
+      </tr>
+      <tr>
+          <td><code>PreservedAnalyses::none()</code></td>
+          <td>使所有分析失效</td>
+      </tr>
+      <tr>
+          <td><code>IRBuilder::SetInsertPoint(Inst)</code></td>
+          <td>在指令前插入</td>
+      </tr>
+      <tr>
+          <td><code>Builder.CreateGlobalString(Name)</code></td>
+          <td>创建字符串常量</td>
+      </tr>
+      <tr>
+          <td><code>PB.registerPipelineParsingCallback</code></td>
+          <td>注册流水线解析</td>
+      </tr>
+      <tr>
+          <td><code>PB.registerPipelineStartEPCallback</code></td>
+          <td>注册流水线起始扩展点</td>
+      </tr>
+      <tr>
+          <td><code>PB.parsePassPipeline(MPM, &quot;default&lt;O2&gt;&quot;)</code></td>
+          <td>解析并填充流水线</td>
+      </tr>
+      <tr>
+          <td><code>PassPlugin::Load(path)</code></td>
+          <td>加载插件</td>
+      </tr>
+      <tr>
+          <td><code>add_llvm_pass_plugin</code></td>
+          <td>CMake 构建插件</td>
+      </tr>
+      <tr>
+          <td><code>add_llvm_component_library</code></td>
+          <td>CMake 构建 LLVM 组件</td>
+      </tr>
+      <tr>
+          <td><code>MODULE_PASS(&quot;name&quot;, Pass())</code></td>
+          <td>PassRegistry.def 注册</td>
+      </tr>
+  </tbody>
+</table></div>
+<hr>
+<h2 id="8-总结">8. 总结
+</h2><ol>
+<li><strong>通道管理器</strong>：负责通道顺序、分析共享与流水线执行。</li>
+<li><strong>PPProfiler</strong>：模块级插装通道，在入口和返回前插入 <code>__ppp_enter</code>/<code>__ppp_exit</code>。</li>
+<li><strong>集成方式</strong>：独立插件、树内插件、树内注册表，按需求选择。</li>
+<li><strong>tinylang</strong>：通过 PassBuilder 支持 <code>--passes</code>、<code>--load-pass-plugin</code>、<code>-O</code>，并区分新 PM（优化）与旧 PM（代码生成）。</li>
+<li><strong>扩展点</strong>：在流水线构造时注入自定义通道，无需修改默认流水线描述。</li>
+</ol>
+<hr>
+<h2 id="9-参考">9. 参考
+</h2><ul>
+<li>本章代码：<a class="link" href="https://github.com/PacktPublishing/Learn-LLVM-17/tree/main/Chapter07"  target="_blank" rel="noopener"
+    >https://github.com/PacktPublishing/Learn-LLVM-17/tree/main/Chapter07</a></li>
+<li>LLVM Pass 文档：<a class="link" href="https://llvm.org/docs/Passes.html"  target="_blank" rel="noopener"
+    >https://llvm.org/docs/Passes.html</a></li>
+<li>新 PM 设计：<a class="link" href="https://llvm.org/docs/NewPassManager.html"  target="_blank" rel="noopener"
+    >https://llvm.org/docs/NewPassManager.html</a></li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/compiler/">Compiler</a>
+        
+            <a href="/tags/llvm/">LLVM</a>
+        
+            <a href="/tags/llvm-17/">LLVM-17</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/learn-llvm-17-chapter01%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Learn-LLVM-17 chapter01学习笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/learn-llvm-17-chapter02%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Learn-LLVM-17 chapter02学习笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/learn-llvm-17-chapter03%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Learn-LLVM-17 chapter03学习笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/learn-llvm-17-chapter04%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Learn-LLVM-17 chapter04学习笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/learn-llvm-17-chapter05%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Learn-LLVM-17 chapter05学习笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
