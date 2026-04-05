@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="LLVM 17 learning">
+<title>Learn-LLVM-17 chapter08学习笔记</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/learn-llvm-17-chapter08%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="Learn-LLVM-17 chapter08学习笔记">
+<meta property='og:description' content="LLVM 17 learning">
+<meta property='og:url' content='https://Salmooo.github.io/p/learn-llvm-17-chapter08%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Compiler' /><meta property='article:tag' content='LLVM' /><meta property='article:tag' content='LLVM-17' />
+<meta name="twitter:title" content="Learn-LLVM-17 chapter08学习笔记">
+<meta name="twitter:description" content="LLVM 17 learning">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#1-本章概览">1. 本章概览</a>
+      <ol>
+        <li><a href="#11-学习目标">1.1 学习目标</a></li>
+        <li><a href="#12-代码结构">1.2 代码结构</a></li>
+        <li><a href="#13-环境要求">1.3 环境要求</a></li>
+      </ol>
+    </li>
+    <li><a href="#2-tablegen-语言概述">2. TableGen 语言概述</a>
+      <ol>
+        <li><a href="#21-为何使用-tablegen">2.1 为何使用 TableGen</a></li>
+        <li><a href="#22-核心概念">2.2 核心概念</a></li>
+        <li><a href="#23-工具链">2.3 工具链</a></li>
+      </ol>
+    </li>
+    <li><a href="#3-tablegen-语法">3. TableGen 语法</a>
+      <ol>
+        <li><a href="#31-定义记录-def">3.1 定义记录 (def)</a></li>
+        <li><a href="#32-定义类-class">3.2 定义类 (class)</a></li>
+        <li><a href="#33-数据类型">3.3 数据类型</a></li>
+        <li><a href="#34-默认值与-let">3.4 默认值与 let</a></li>
+        <li><a href="#35-继承">3.5 继承</a></li>
+        <li><a href="#36-multiclass-与-defm">3.6 multiclass 与 defm</a></li>
+        <li><a href="#37-bang-操作符">3.7 Bang 操作符</a></li>
+        <li><a href="#38-foreach-与模拟函数调用">3.8 foreach 与“模拟函数调用”</a></li>
+      </ol>
+    </li>
+    <li><a href="#4-chapter08-代码分析">4. Chapter08 代码分析</a>
+      <ol>
+        <li><a href="#41-keywordtd基类定义">4.1 Keyword.td：基类定义</a></li>
+        <li><a href="#42-keywordctdcc-关键字">4.2 KeywordC.td：C/C++ 关键字</a></li>
+        <li><a href="#43-tokenemittercpp后端实现">4.3 TokenEmitter.cpp：后端实现</a>
+          <ol>
+            <li><a href="#431-整体结构">4.3.1 整体结构</a></li>
+            <li><a href="#432-emitflagsfragment生成标志枚举">4.3.2 emitFlagsFragment：生成标志枚举</a></li>
+            <li><a href="#433-emittokenkindtokenkind-与辅助函数">4.3.3 emitTokenKind：TokenKind 与辅助函数</a></li>
+            <li><a href="#434-emitkeywordfilterlookupkeyword-实现">4.3.4 emitKeywordFilter：lookupKeyword 实现</a></li>
+          </ol>
+        </li>
+        <li><a href="#44-tablegencpp驱动">4.4 TableGen.cpp：驱动</a></li>
+        <li><a href="#45-使用方式">4.5 使用方式</a></li>
+      </ol>
+    </li>
+    <li><a href="#5-生成代码的预期用法">5. 生成代码的预期用法</a>
+      <ol>
+        <li><a href="#51-性能说明">5.1 性能说明</a></li>
+      </ol>
+    </li>
+    <li><a href="#6-tablegen-的缺点">6. TableGen 的缺点</a></li>
+    <li><a href="#7-关键-api-速查">7. 关键 API 速查</a></li>
+    <li><a href="#8-总结">8. 总结</a></li>
+    <li><a href="#9-参考">9. 参考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/llvm/" >
+                LLVM
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/learn-llvm-17-chapter08%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">Learn-LLVM-17 chapter08学习笔记</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            LLVM 17 learning
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    7 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="第-8-章-tablegen-语言---学习笔记">第 8 章 TableGen 语言 - 学习笔记
+</h1><blockquote>
+<p>本文为《Learn LLVM 17》第 8 章的学习笔记，主要介绍 TableGen 领域特定语言、语法与语义、如何定义类与记录，以及如何开发 TableGen 后端生成 C++ 代码。</p>
+</blockquote>
+<h2 id="1-本章概览">1. 本章概览
+</h2><h3 id="11-学习目标">1.1 学习目标
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>主题</th>
+          <th>内容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>TableGen 思想</td>
+          <td>领域特定语言、记录定义、减少手写代码</td>
+      </tr>
+      <tr>
+          <td>TableGen 语法</td>
+          <td>类、记录、multiclass、def/defm、let、foreach</td>
+      </tr>
+      <tr>
+          <td>数据类型</td>
+          <td>string、int、bit、bits&lt;n&gt;、list&lt;type&gt;、dag</td>
+      </tr>
+      <tr>
+          <td>Bang 操作符</td>
+          <td>!add、!strconcat、!cond、!or、!eq 等</td>
+      </tr>
+      <tr>
+          <td>TableGen 后端</td>
+          <td>RecordKeeper、Emitter 实现、生成 C++ 片段</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="12-代码结构">1.2 代码结构
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Chapter08/
+</span></span><span class="line"><span class="cl">└── TableGen/
+</span></span><span class="line"><span class="cl">    ├── Keyword.td          # 基类定义：Flag、Token、Tok、Punctuator、Keyword、TokenFilter
+</span></span><span class="line"><span class="cl">    ├── KeywordC.td         # C/C++ 关键字与标点符（include Keyword.td）
+</span></span><span class="line"><span class="cl">    ├── KeywordM2.td        # Modula-2 关键字（include Keyword.td）
+</span></span><span class="line"><span class="cl">    ├── TokenEmitter.cpp    # 后端实现：生成 TokenKind、lookupKeyword 等
+</span></span><span class="line"><span class="cl">    ├── TableGenBackends.h  # 后端声明
+</span></span><span class="line"><span class="cl">    ├── TableGen.cpp        # 驱动：解析 .td、调用后端
+</span></span><span class="line"><span class="cl">    └── CMakeLists.txt      # 构建 tinylang-tblgen 可执行文件
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="13-环境要求">1.3 环境要求
+</h3><ul>
+<li>本章代码：<a class="link" href="https://github.com/PacktPublishing/Learn-LLVM-17/tree/main/Chapter08"  target="_blank" rel="noopener"
+    >https://github.com/PacktPublishing/Learn-LLVM-17/tree/main/Chapter08</a></li>
+<li>官方文档：<a class="link" href="https://llvm.org/docs/TableGen/ProgRef.html"  target="_blank" rel="noopener"
+    >TableGen 开发者参考</a>、<a class="link" href="https://llvm.org/docs/TableGen/BackGuide.html"  target="_blank" rel="noopener"
+    >后端开发者指南</a></li>
+</ul>
+<hr>
+<h2 id="2-tablegen-语言概述">2. TableGen 语言概述
+</h2><h3 id="21-为何使用-tablegen">2.1 为何使用 TableGen
+</h3><p>LLVM 后端的大部分描述（寄存器、指令、调用约定、调度模型等）都用 TableGen 编写，以减少重复代码和源码量。</p>
+<p><strong>典型应用场景：</strong></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>用途</th>
+          <th>示例</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>后端</td>
+          <td>寄存器文件、指令助记符与编码、指令选择模式、调度模型</td>
+      </tr>
+      <tr>
+          <td>Clang</td>
+          <td>命令行选项、内部函数、属性</td>
+      </tr>
+      <tr>
+          <td>通用</td>
+          <td>从 .td 文件生成 C++ 片段</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="22-核心概念">2.2 核心概念
+</h3><ul>
+<li><strong>记录 (Record)</strong>：名称与值的集合，类似 C++ 结构体</li>
+<li><strong>类 (Class)</strong>：记录的蓝图，可参数化、可继承</li>
+<li><strong>TableGen 不是编程语言</strong>：只用于定义记录，所有计算在构造记录时完成</li>
+</ul>
+<h3 id="23-工具链">2.3 工具链
+</h3><ul>
+<li><strong>llvm-tblgen</strong>：LLVM 项目用，包含 LLVM 所需代码生成器</li>
+<li><strong>clang-tblgen</strong>：Clang 项目用</li>
+<li><strong>tinylang-tblgen</strong>：本章自定义工具，用于生成 Token 与关键字过滤器</li>
+</ul>
+<hr>
+<h2 id="3-tablegen-语法">3. TableGen 语法
+</h2><h3 id="31-定义记录-def">3.1 定义记录 (def)
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-tablegen" data-lang="tablegen"><span class="line"><span class="cl"><span class="k">def</span> <span class="nv">ADD</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">string</span> <span class="nv">Mnemonic</span> <span class="p">=</span> <span class="s">&#34;add&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">int</span> <span class="nv">Opcode</span> <span class="p">=</span> <span class="nv">0xA0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>def</code> 关键字定义一条记录</li>
+<li>花括号内为字段定义，类似 C++ 结构体</li>
+</ul>
+<p><strong>验证：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">llvm-tblgen --print-records inst.td
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="32-定义类-class">3.2 定义类 (class)
+</h3><p>类作为蓝图，避免大量重复定义：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-tablegen" data-lang="tablegen"><span class="line"><span class="cl"><span class="k">class</span> <span class="nv">Inst</span><span class="p">&lt;</span><span class="k">string</span> <span class="nv">mnemonic</span><span class="p">,</span> <span class="k">int</span> <span class="nv">opcode</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">string</span> <span class="nv">Mnemonic</span> <span class="p">=</span> <span class="nv">mnemonic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">int</span> <span class="nv">Opcode</span> <span class="p">=</span> <span class="nv">opcode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nv">ADD</span> <span class="p">:</span> <span class="nv">Inst</span><span class="p">&lt;</span><span class="s">&#34;add&#34;</span><span class="p">,</span> <span class="nv">0xA0</span><span class="p">&gt;;</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nv">SUB</span> <span class="p">:</span> <span class="nv">Inst</span><span class="p">&lt;</span><span class="s">&#34;sub&#34;</span><span class="p">,</span> <span class="nv">0xB0</span><span class="p">&gt;;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>class</code> 后跟类名和参数列表</li>
+<li>参数用于初始化字段</li>
+<li>记录通过 <code>: ClassName&lt;args&gt;</code> 继承类</li>
+</ul>
+<h3 id="33-数据类型">3.3 数据类型
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>类型</th>
+          <th>说明</th>
+          <th>示例</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>string</code></td>
+          <td>字符串</td>
+          <td><code>&quot;add&quot;</code></td>
+      </tr>
+      <tr>
+          <td><code>int</code></td>
+          <td>整数</td>
+          <td><code>0xA0</code></td>
+      </tr>
+      <tr>
+          <td><code>bit</code></td>
+          <td>0 或 1</td>
+          <td><code>1</code></td>
+      </tr>
+      <tr>
+          <td><code>bits&lt;n&gt;</code></td>
+          <td>n 位整数</td>
+          <td><code>bits&lt;5&gt;</code></td>
+      </tr>
+      <tr>
+          <td><code>list&lt;type&gt;</code></td>
+          <td>类型列表</td>
+          <td><code>list&lt;Flag&gt;</code></td>
+      </tr>
+      <tr>
+          <td><code>dag</code></td>
+          <td>有向无环图</td>
+          <td>模式与操作</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="34-默认值与-let">3.4 默认值与 let
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-tablegen" data-lang="tablegen"><span class="line"><span class="cl"><span class="k">class</span> <span class="nv">Inst</span><span class="p">&lt;</span><span class="k">string</span> <span class="nv">mnemonic</span><span class="p">,</span> <span class="k">int</span> <span class="nv">opcode</span><span class="p">,</span> <span class="k">bit</span> <span class="nv">commutable</span> <span class="p">=</span> <span class="m">0</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">string</span> <span class="nv">Mnemonic</span> <span class="p">=</span> <span class="nv">mnemonic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">int</span> <span class="nv">Opcode</span> <span class="p">=</span> <span class="nv">opcode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">bit</span> <span class="nv">Commutable</span> <span class="p">=</span> <span class="nv">commutable</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c">// 方式 1：let 语句
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="k">let</span> <span class="nv">Commutable</span> <span class="p">=</span> <span class="m">1</span> <span class="k">in</span>
+</span></span><span class="line"><span class="cl">  <span class="k">def</span> <span class="nv">ADD</span> <span class="p">:</span> <span class="nv">Inst</span><span class="p">&lt;</span><span class="s">&#34;add&#34;</span><span class="p">,</span> <span class="nv">0xA0</span><span class="p">&gt;;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c">// 方式 2：记录体内覆盖
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="k">def</span> <span class="nv">ADD</span> <span class="p">:</span> <span class="nv">Inst</span><span class="p">&lt;</span><span class="s">&#34;add&#34;</span><span class="p">,</span> <span class="nv">0xA0</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">let</span> <span class="nv">Commutable</span> <span class="p">=</span> <span class="m">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="35-继承">3.5 继承
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-tablegen" data-lang="tablegen"><span class="line"><span class="cl"><span class="k">class</span> <span class="nv">Inst</span><span class="p">&lt;</span><span class="k">string</span> <span class="nv">mnemonic</span><span class="p">,</span> <span class="k">int</span> <span class="nv">opcode</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">string</span> <span class="nv">Mnemonic</span> <span class="p">=</span> <span class="nv">mnemonic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">int</span> <span class="nv">Opcode</span> <span class="p">=</span> <span class="nv">opcode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">bit</span> <span class="nv">Commutable</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nv">CommutableInst</span><span class="p">&lt;</span><span class="k">string</span> <span class="nv">mnemonic</span><span class="p">,</span> <span class="k">int</span> <span class="nv">opcode</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">:</span> <span class="nv">Inst</span><span class="p">&lt;</span><span class="nv">mnemonic</span><span class="p">,</span> <span class="nv">opcode</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">let</span> <span class="nv">Commutable</span> <span class="p">=</span> <span class="m">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nv">SUB</span> <span class="p">:</span> <span class="nv">Inst</span><span class="p">&lt;</span><span class="s">&#34;sub&#34;</span><span class="p">,</span> <span class="nv">0xB0</span><span class="p">&gt;;</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nv">ADD</span> <span class="p">:</span> <span class="nv">CommutableInst</span><span class="p">&lt;</span><span class="s">&#34;add&#34;</span><span class="p">,</span> <span class="nv">0xA0</span><span class="p">&gt;;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="36-multiclass-与-defm">3.6 multiclass 与 defm
+</h3><p>一次定义多条记录：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-tablegen" data-lang="tablegen"><span class="line"><span class="cl"><span class="k">class</span> <span class="nv">Inst</span><span class="p">&lt;</span><span class="k">string</span> <span class="nv">mnemonic</span><span class="p">,</span> <span class="k">int</span> <span class="nv">opcode</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">string</span> <span class="nv">Mnemonic</span> <span class="p">=</span> <span class="nv">mnemonic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">int</span> <span class="nv">Opcode</span> <span class="p">=</span> <span class="nv">opcode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">multiclass</span> <span class="nv">InstWithImm</span><span class="p">&lt;</span><span class="k">string</span> <span class="nv">mnemonic</span><span class="p">,</span> <span class="k">int</span> <span class="nv">opcode</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">def</span> <span class="s">&#34;&#34;</span> <span class="p">:</span> <span class="nv">Inst</span><span class="p">&lt;</span><span class="nv">mnemonic</span><span class="p">,</span> <span class="nv">opcode</span><span class="p">&gt;;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">def</span> <span class="nv">I</span>  <span class="p">:</span> <span class="nv">Inst</span><span class="p">&lt;!</span><span class="nv">strconcat</span><span class="p">(</span><span class="nv">mnemonic</span><span class="p">,</span> <span class="s">&#34;i&#34;</span><span class="p">),</span> <span class="p">!</span><span class="nv">add</span><span class="p">(</span><span class="nv">opcode</span><span class="p">,</span> <span class="m">1</span><span class="p">)&gt;;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">defm</span> <span class="nv">ADD</span> <span class="p">:</span> <span class="nv">InstWithImm</span><span class="p">&lt;</span><span class="s">&#34;add&#34;</span><span class="p">,</span> <span class="nv">0xA0</span><span class="p">&gt;;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>def &quot;&quot;</code> 表示第一条记录名由 defm 后的 <code>ADD</code> 决定，即 <code>ADD</code></li>
+<li><code>def I</code> 生成 <code>ADDI</code></li>
+<li>记录名 = defm 名称 + def 名称（空则仅用 defm 名）</li>
+</ul>
+<h3 id="37-bang-操作符">3.7 Bang 操作符
+</h3><p>以 <code>!</code> 开头的操作符，用于构造记录时的计算：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作符</th>
+          <th>说明</th>
+          <th>示例</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>!add(a, b)</code></td>
+          <td>加法</td>
+          <td><code>!add(opcode, 1)</code></td>
+      </tr>
+      <tr>
+          <td><code>!strconcat(s1, s2)</code></td>
+          <td>字符串连接</td>
+          <td><code>!strconcat(mnemonic, &quot;i&quot;)</code></td>
+      </tr>
+      <tr>
+          <td><code>!cond(c1:v1, c2:v2, ...)</code></td>
+          <td>条件选择</td>
+          <td><code>!cond(!eq(n,0):RegOp, !eq(n,1):ImmOp)</code></td>
+      </tr>
+      <tr>
+          <td><code>!eq(a, b)</code></td>
+          <td>相等</td>
+          <td><code>!eq(n, 0)</code></td>
+      </tr>
+      <tr>
+          <td><code>!or(a, b, ...)</code></td>
+          <td>按位或</td>
+          <td><code>!or(KEYC99.Val, KEYCXX.Val)</code></td>
+      </tr>
+      <tr>
+          <td><code>!and(a, b)</code></td>
+          <td>按位与</td>
+          <td><code>!and(0x1ffffff, ...)</code></td>
+      </tr>
+      <tr>
+          <td><code>!xor(a, b)</code></td>
+          <td>按位异或</td>
+          <td><code>!xor(-1, KEYNOMS18.Val)</code></td>
+      </tr>
+  </tbody>
+</table></div>
+<p>完整列表见 <a class="link" href="https://llvm.org/docs/TableGen/ProgRef.html#appendix-a-bang-operators"  target="_blank" rel="noopener"
+    >Bang Operators</a>。</p>
+<h3 id="38-foreach-与模拟函数调用">3.8 foreach 与“模拟函数调用”
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-tablegen" data-lang="tablegen"><span class="line"><span class="cl"><span class="k">class</span> <span class="nv">InstDesc</span><span class="p">&lt;</span><span class="k">string</span> <span class="nv">name</span><span class="p">,</span> <span class="k">string</span> <span class="nv">suffix</span><span class="p">,</span> <span class="k">int</span> <span class="nv">delta</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">string</span> <span class="nv">Name</span> <span class="p">=</span> <span class="nv">name</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">string</span> <span class="nv">Suffix</span> <span class="p">=</span> <span class="nv">suffix</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">int</span> <span class="nv">Delta</span> <span class="p">=</span> <span class="nv">delta</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nv">RegOp</span> <span class="p">:</span> <span class="nv">InstDesc</span><span class="p">&lt;</span><span class="s">&#34;&#34;</span><span class="p">,</span> <span class="s">&#34;&#34;</span><span class="p">,</span> <span class="m">0</span><span class="p">&gt;;</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nv">ImmOp</span> <span class="p">:</span> <span class="nv">InstDesc</span><span class="p">&lt;</span><span class="s">&#34;I&#34;</span><span class="p">,</span> <span class="s">&#34;i&#34;</span><span class="p">,</span> <span class="m">1</span><span class="p">&gt;;</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nv">MemOp</span> <span class="p">:</span> <span class="nv">InstDesc</span><span class="p">&lt;</span><span class="s">&#34;M&#34;</span><span class="p">,</span> <span class="s">&#34;m&#34;</span><span class="p">,</span> <span class="m">2</span><span class="p">&gt;;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nv">getDesc</span><span class="p">&lt;</span><span class="k">int</span> <span class="nv">n</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nv">InstDesc</span> <span class="nv">ret</span> <span class="p">=</span> <span class="p">!</span><span class="nv">cond</span><span class="p">(!</span><span class="nv">eq</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="m">0</span><span class="p">)</span> <span class="p">:</span> <span class="nv">RegOp</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                       <span class="p">!</span><span class="nv">eq</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="m">1</span><span class="p">)</span> <span class="p">:</span> <span class="nv">ImmOp</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                       <span class="p">!</span><span class="nv">eq</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span> <span class="p">:</span> <span class="nv">MemOp</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">multiclass</span> <span class="nv">InstWithOps</span><span class="p">&lt;</span><span class="k">string</span> <span class="nv">mnemonic</span><span class="p">,</span> <span class="k">int</span> <span class="nv">opcode</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">foreach</span> <span class="nv">I</span> <span class="p">=</span> <span class="m">0-2</span> <span class="k">in</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">defvar</span> <span class="nv">Name</span> <span class="p">=</span> <span class="nv">getDesc</span><span class="p">&lt;</span><span class="nv">I</span><span class="p">&gt;.</span><span class="nv">ret</span><span class="p">.</span><span class="nv">Name</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">defvar</span> <span class="nv">Suffix</span> <span class="p">=</span> <span class="nv">getDesc</span><span class="p">&lt;</span><span class="nv">I</span><span class="p">&gt;.</span><span class="nv">ret</span><span class="p">.</span><span class="nv">Suffix</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">defvar</span> <span class="nv">Delta</span> <span class="p">=</span> <span class="nv">getDesc</span><span class="p">&lt;</span><span class="nv">I</span><span class="p">&gt;.</span><span class="nv">ret</span><span class="p">.</span><span class="nv">Delta</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nv">Name</span> <span class="p">:</span> <span class="nv">Inst</span><span class="p">&lt;</span><span class="nv">mnemonic</span> <span class="err">#</span> <span class="nv">Suffix</span><span class="p">,</span> <span class="p">!</span><span class="nv">add</span><span class="p">(</span><span class="nv">opcode</span><span class="p">,</span> <span class="nv">Delta</span><span class="p">)&gt;;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>foreach I = 0-2</code>：值域语法，也可用 <code>0...3</code></li>
+<li><code>#</code>：字符串连接，类似 <code>!strconcat</code></li>
+<li><code>getDesc&lt;I&gt;</code>：通过类“模拟”函数调用，返回匿名记录，再取 <code>.ret</code></li>
+</ul>
+<p><strong>遍历列表：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-tablegen" data-lang="tablegen"><span class="line"><span class="cl"><span class="k">foreach</span> <span class="nv">I</span> <span class="p">=</span> <span class="p">[</span><span class="nv">RegOp</span><span class="p">,</span> <span class="nv">ImmOp</span><span class="p">,</span> <span class="nv">MemOp</span><span class="p">]</span> <span class="k">in</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nv">defvar</span> <span class="nv">Name</span> <span class="p">=</span> <span class="nv">I</span><span class="p">.</span><span class="nv">Name</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nv">defvar</span> <span class="nv">Suffix</span> <span class="p">=</span> <span class="nv">I</span><span class="p">.</span><span class="nv">Suffix</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nv">defvar</span> <span class="nv">Delta</span> <span class="p">=</span> <span class="nv">I</span><span class="p">.</span><span class="nv">Delta</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">def</span> <span class="nv">Name</span> <span class="p">:</span> <span class="nv">Inst</span><span class="p">&lt;</span><span class="nv">mnemonic</span> <span class="err">#</span> <span class="nv">Suffix</span><span class="p">,</span> <span class="p">!</span><span class="nv">add</span><span class="p">(</span><span class="nv">opcode</span><span class="p">,</span> <span class="nv">Delta</span><span class="p">)&gt;;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="4-chapter08-代码分析">4. Chapter08 代码分析
+</h2><h3 id="41-keywordtd基类定义">4.1 Keyword.td：基类定义
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-1:27:Chapter08/TableGen/Keyword.td" data-lang="1:27:Chapter08/TableGen/Keyword.td"><span class="line"><span class="cl"><span class="c">// Base definition the generator knows about.
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="k">class</span> <span class="nv">Flag</span><span class="p">&lt;</span><span class="k">string</span> <span class="nv">name</span><span class="p">,</span> <span class="k">int</span> <span class="nv">val</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">string</span> <span class="nv">Name</span> <span class="p">=</span> <span class="nv">name</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">int</span> <span class="nv">Val</span> <span class="p">=</span> <span class="nv">val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nv">Token</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">string</span> <span class="nv">Name</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nv">Tok</span><span class="p">&lt;</span><span class="k">string</span> <span class="nv">name</span><span class="p">&gt;</span> <span class="p">:</span> <span class="nv">Token</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">let</span> <span class="nv">Name</span> <span class="p">=</span> <span class="nv">name</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nv">Punctuator</span><span class="p">&lt;</span><span class="k">string</span> <span class="nv">name</span><span class="p">,</span> <span class="k">string</span> <span class="nv">spelling</span><span class="p">&gt;</span> <span class="p">:</span> <span class="nv">Token</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">let</span> <span class="nv">Name</span> <span class="p">=</span> <span class="nv">name</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">string</span> <span class="nv">Spelling</span> <span class="p">=</span> <span class="nv">spelling</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nv">Keyword</span><span class="p">&lt;</span><span class="k">string</span> <span class="nv">name</span><span class="p">,</span> <span class="k">list</span><span class="p">&lt;</span><span class="nv">Flag</span><span class="p">&gt;</span> <span class="nv">flags</span><span class="p">&gt;</span> <span class="p">:</span> <span class="nv">Token</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">let</span> <span class="nv">Name</span> <span class="p">=</span> <span class="nv">name</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">list</span><span class="p">&lt;</span><span class="nv">Flag</span><span class="p">&gt;</span> <span class="nv">Flags</span> <span class="p">=</span> <span class="nv">flags</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nv">TokenFilter</span><span class="p">&lt;</span><span class="k">list</span><span class="p">&lt;</span><span class="nv">Token</span><span class="p">&gt;</span> <span class="nv">tokens</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">string</span> <span class="nv">FunctionName</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">list</span><span class="p">&lt;</span><span class="nv">Token</span><span class="p">&gt;</span> <span class="nv">Tokens</span> <span class="p">=</span> <span class="nv">tokens</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>类</th>
+          <th>用途</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>Flag</code></td>
+          <td>标志名与值，用于生成枚举</td>
+      </tr>
+      <tr>
+          <td><code>Token</code></td>
+          <td>基类，仅含 Name</td>
+      </tr>
+      <tr>
+          <td><code>Tok</code></td>
+          <td>无固定拼写的标记（如 comment、eof）</td>
+      </tr>
+      <tr>
+          <td><code>Punctuator</code></td>
+          <td>标点符，含拼写</td>
+      </tr>
+      <tr>
+          <td><code>Keyword</code></td>
+          <td>关键字，含标志列表</td>
+      </tr>
+      <tr>
+          <td><code>TokenFilter</code></td>
+          <td>关键字过滤器，含 Token 列表</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="42-keywordctdcc-关键字">4.2 KeywordC.td：C/C++ 关键字
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-36:66:Chapter08/TableGen/KeywordC.td" data-lang="36:66:Chapter08/TableGen/KeywordC.td"><span class="line"><span class="cl"><span class="k">def</span> <span class="p">:</span> <span class="nv">Punctuator</span><span class="p">&lt;</span><span class="s">&#34;plus&#34;</span><span class="p">,</span> <span class="s">&#34;+&#34;</span><span class="p">&gt;;</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="p">:</span> <span class="nv">Punctuator</span><span class="p">&lt;</span><span class="s">&#34;minus&#34;</span><span class="p">,</span> <span class="s">&#34;-&#34;</span><span class="p">&gt;;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nv">kw_auto</span><span class="p">:</span> <span class="nv">Keyword</span><span class="p">&lt;</span><span class="s">&#34;auto&#34;</span><span class="p">,</span> <span class="p">[</span><span class="nv">KEYALL</span><span class="p">]&gt;;</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nv">kw_char</span> <span class="p">:</span> <span class="nv">Keyword</span><span class="p">&lt;</span><span class="s">&#34;char&#34;</span><span class="p">,</span> <span class="p">[</span><span class="nv">KEYALL</span><span class="p">]&gt;;</span>
+</span></span><span class="line"><span class="cl"><span class="c">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="k">def</span> <span class="nv">kw_inline</span> <span class="p">:</span> <span class="nv">Keyword</span><span class="p">&lt;</span><span class="s">&#34;inline&#34;</span><span class="p">,</span> <span class="p">[</span><span class="nv">KEYC99</span><span class="p">,</span><span class="nv">KEYCXX</span><span class="p">,</span><span class="nv">KEYGNU</span><span class="p">]&gt;;</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nv">kw_restrict</span> <span class="p">:</span> <span class="nv">Keyword</span><span class="p">&lt;</span><span class="s">&#34;restrict&#34;</span><span class="p">,</span> <span class="p">[</span><span class="nv">KEYC99</span><span class="p">]&gt;;</span>
+</span></span><span class="line"><span class="cl"><span class="c">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="p">:</span> <span class="nv">TokenFilter</span><span class="p">&lt;[</span><span class="nv">kw_auto</span><span class="p">,</span> <span class="nv">kw_char</span><span class="p">,</span> <span class="nv">kw_const</span><span class="p">,</span> <span class="p">...]&gt;;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>匿名记录：<code>def : Tok&lt;&quot;comment&quot;&gt;</code> 无名称</li>
+<li>标志组合：<code>KEYALL = !and(0x1ffffff, !xor(-1, KEYNOMS18.Val), ...)</code></li>
+<li><code>TokenFilter</code> 指定参与关键字过滤的 Token 列表</li>
+</ul>
+<h3 id="43-tokenemittercpp后端实现">4.3 TokenEmitter.cpp：后端实现
+</h3><h4 id="431-整体结构">4.3.1 整体结构
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-10:24:Chapter08/TableGen/TokenEmitter.cpp" data-lang="10:24:Chapter08/TableGen/TokenEmitter.cpp"><span class="line"><span class="cl"><span class="k">namespace</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">TokenAndKeywordFilterEmitter</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">RecordKeeper</span> <span class="o">&amp;</span><span class="n">Records</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">  <span class="k">explicit</span> <span class="n">TokenAndKeywordFilterEmitter</span><span class="p">(</span><span class="n">RecordKeeper</span> <span class="o">&amp;</span><span class="n">R</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="o">:</span> <span class="n">Records</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="nf">run</span><span class="p">(</span><span class="n">raw_ostream</span> <span class="o">&amp;</span><span class="n">OS</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">private</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="n">emitFlagsFragment</span><span class="p">(</span><span class="n">raw_ostream</span> <span class="o">&amp;</span><span class="n">OS</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="nf">emitTokenKind</span><span class="p">(</span><span class="n">raw_ostream</span> <span class="o">&amp;</span><span class="n">OS</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="nf">emitKeywordFilter</span><span class="p">(</span><span class="n">raw_ostream</span> <span class="o">&amp;</span><span class="n">OS</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="c1">// End anonymous namespace
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>RecordKeeper</code>：保存解析 .td 后的所有记录</li>
+<li>三个 emit 方法分别生成不同宏保护的 C++ 片段</li>
+</ul>
+<h4 id="432-emitflagsfragment生成标志枚举">4.3.2 emitFlagsFragment：生成标志枚举
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-42:52:Chapter08/TableGen/TokenEmitter.cpp" data-lang="42:52:Chapter08/TableGen/TokenEmitter.cpp"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">TokenAndKeywordFilterEmitter</span><span class="o">::</span><span class="n">emitFlagsFragment</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">raw_ostream</span> <span class="o">&amp;</span><span class="n">OS</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">OS</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;#ifdef GET_TOKEN_FLAGS</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">OS</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;#undef GET_TOKEN_FLAGS</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="n">Record</span> <span class="o">*</span><span class="nl">CC</span> <span class="p">:</span>
+</span></span><span class="line"><span class="cl">       <span class="n">Records</span><span class="p">.</span><span class="n">getAllDerivedDefinitions</span><span class="p">(</span><span class="s">&#34;Flag&#34;</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">StringRef</span> <span class="n">Name</span> <span class="o">=</span> <span class="n">CC</span><span class="o">-&gt;</span><span class="n">getValueAsString</span><span class="p">(</span><span class="s">&#34;Name&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int64_t</span> <span class="n">Val</span> <span class="o">=</span> <span class="n">CC</span><span class="o">-&gt;</span><span class="n">getValueAsInt</span><span class="p">(</span><span class="s">&#34;Val&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">OS</span> <span class="o">&lt;&lt;</span> <span class="n">Name</span> <span class="o">&lt;&lt;</span> <span class="s">&#34; = &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">format_hex</span><span class="p">(</span><span class="n">Val</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;,</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">OS</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;#endif</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>getAllDerivedDefinitions(&quot;Flag&quot;)</code>：获取所有从 <code>Flag</code> 派生的记录</li>
+<li><code>getValueAsString</code> / <code>getValueAsInt</code>：按字段名取值</li>
+</ul>
+<h4 id="433-emittokenkindtokenkind-与辅助函数">4.3.3 emitTokenKind：TokenKind 与辅助函数
+</h4><p>生成内容：</p>
+<ol>
+<li><strong>GET_TOKEN_KIND_DECLARATION</strong>：<code>enum TokenKind</code>、<code>getTokenName</code>、<code>getPunctuatorSpelling</code>、<code>getKeywordSpelling</code> 声明</li>
+<li><strong>GET_TOKEN_KIND_DEFINITION</strong>：<code>TokNames</code> 数组及上述函数定义</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-61:69:Chapter08/TableGen/TokenEmitter.cpp" data-lang="61:69:Chapter08/TableGen/TokenEmitter.cpp"><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="n">Record</span> <span class="o">*</span><span class="nl">CC</span> <span class="p">:</span>
+</span></span><span class="line"><span class="cl">       <span class="n">Records</span><span class="p">.</span><span class="n">getAllDerivedDefinitions</span><span class="p">(</span><span class="s">&#34;Token&#34;</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">StringRef</span> <span class="n">Name</span> <span class="o">=</span> <span class="n">CC</span><span class="o">-&gt;</span><span class="n">getValueAsString</span><span class="p">(</span><span class="s">&#34;Name&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">OS</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;    &#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">CC</span><span class="o">-&gt;</span><span class="n">isSubClassOf</span><span class="p">(</span><span class="s">&#34;Keyword&#34;</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">      <span class="n">OS</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;kw_&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">OS</span> <span class="o">&lt;&lt;</span> <span class="n">Name</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;,</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>关键字枚举成员加 <code>kw_</code> 前缀</li>
+<li><code>isSubClassOf(&quot;Keyword&quot;)</code> 判断是否为 Keyword 子类</li>
+</ul>
+<h4 id="434-emitkeywordfilterlookupkeyword-实现">4.3.4 emitKeywordFilter：lookupKeyword 实现
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-125:164:Chapter08/TableGen/TokenEmitter.cpp" data-lang="125:164:Chapter08/TableGen/TokenEmitter.cpp"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">TokenAndKeywordFilterEmitter</span><span class="o">::</span><span class="n">emitKeywordFilter</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">raw_ostream</span> <span class="o">&amp;</span><span class="n">OS</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">ListInit</span> <span class="o">*</span><span class="n">TokenFilter</span> <span class="o">=</span> <span class="n">dyn_cast_or_null</span><span class="o">&lt;</span><span class="n">ListInit</span><span class="o">&gt;</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="n">AllTokenFilter</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">          <span class="o">-&gt;</span><span class="n">getValue</span><span class="p">(</span><span class="s">&#34;Tokens&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">          <span class="o">-&gt;</span><span class="n">getValue</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">for</span> <span class="p">(</span><span class="n">size_t</span> <span class="n">I</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">E</span> <span class="o">=</span> <span class="n">TokenFilter</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">();</span> <span class="n">I</span> <span class="o">&lt;</span> <span class="n">E</span><span class="p">;</span> <span class="o">++</span><span class="n">I</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="n">Record</span> <span class="o">*</span><span class="n">CC</span> <span class="o">=</span> <span class="n">TokenFilter</span><span class="o">-&gt;</span><span class="n">getElementAsRecord</span><span class="p">(</span><span class="n">I</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">   <span class="n">StringRef</span> <span class="n">Name</span> <span class="o">=</span> <span class="n">CC</span><span class="o">-&gt;</span><span class="n">getValueAsString</span><span class="p">(</span><span class="s">&#34;Name&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">   <span class="kt">uint64_t</span> <span class="n">Val</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="n">ListInit</span> <span class="o">*</span><span class="n">Flags</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="k">if</span> <span class="p">(</span><span class="n">RecordVal</span> <span class="o">*</span><span class="n">F</span> <span class="o">=</span> <span class="n">CC</span><span class="o">-&gt;</span><span class="n">getValue</span><span class="p">(</span><span class="s">&#34;Flags&#34;</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">      <span class="n">Flags</span> <span class="o">=</span> <span class="n">dyn_cast_or_null</span><span class="o">&lt;</span><span class="n">ListInit</span><span class="o">&gt;</span><span class="p">(</span><span class="n">F</span><span class="o">-&gt;</span><span class="n">getValue</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">   <span class="k">if</span> <span class="p">(</span><span class="n">Flags</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">for</span> <span class="p">(</span><span class="n">size_t</span> <span class="n">I</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">E</span> <span class="o">=</span> <span class="n">Flags</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">();</span> <span class="n">I</span> <span class="o">&lt;</span> <span class="n">E</span><span class="p">;</span> <span class="o">++</span><span class="n">I</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Val</span> <span class="o">|=</span> <span class="n">Flags</span><span class="o">-&gt;</span><span class="n">getElementAsRecord</span><span class="p">(</span><span class="n">I</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">getValueAsInt</span><span class="p">(</span><span class="s">&#34;Val&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   <span class="n">Table</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">sort</span><span class="p">(</span><span class="n">Table</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">Table</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="p">...);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 生成 std::lower_bound 二分查找代码
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>从 <code>TokenFilter</code> 的 <code>Tokens</code> 字段取 <code>ListInit</code></li>
+<li>遍历每个 Keyword，合并其 <code>Flags</code> 的 <code>Val</code> 得到标志值</li>
+<li>按关键字名排序，生成 <code>std::lower_bound</code> 二分查找</li>
+</ul>
+<h3 id="44-tablegencpp驱动">4.4 TableGen.cpp：驱动
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-31:55:Chapter08/TableGen/TableGen.cpp" data-lang="31:55:Chapter08/TableGen/TableGen.cpp"><span class="line"><span class="cl"><span class="kt">bool</span> <span class="nf">Main</span><span class="p">(</span><span class="n">raw_ostream</span> <span class="o">&amp;</span><span class="n">OS</span><span class="p">,</span> <span class="n">RecordKeeper</span> <span class="o">&amp;</span><span class="n">Records</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">switch</span> <span class="p">(</span><span class="n">Action</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">case</span> <span class="nl">PrintRecords</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">OS</span> <span class="o">&lt;&lt;</span> <span class="n">Records</span><span class="p">;</span> <span class="c1">// No argument, dump all contents
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">case</span> <span class="nl">DumpJSON</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">EmitJSON</span><span class="p">(</span><span class="n">Records</span><span class="p">,</span> <span class="n">OS</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">case</span> <span class="nl">GenTokens</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">EmitTokensAndKeywordFilter</span><span class="p">(</span><span class="n">Records</span><span class="p">,</span> <span class="n">OS</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">return</span> <span class="nf">TableGenMain</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">Main</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>TableGenMain</code>：解析 .td、构建 RecordKeeper，再调用 <code>Main</code></li>
+<li>支持 <code>--print-records</code>、<code>--dump-json</code>、<code>--gen-tokens</code></li>
+</ul>
+<h3 id="45-使用方式">4.5 使用方式
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 构建</span>
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> Chapter08/TableGen <span class="o">&amp;&amp;</span> mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
+</span></span><span class="line"><span class="cl">cmake .. -DLLVM_DIR<span class="o">=</span>/path/to/llvm/lib/cmake/llvm
+</span></span><span class="line"><span class="cl">make
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 生成 Token 与关键字过滤器</span>
+</span></span><span class="line"><span class="cl">./tinylang-tblgen --gen-tokens -o TokenFilter.inc ../KeywordC.td
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 打印记录（调试）</span>
+</span></span><span class="line"><span class="cl">./tinylang-tblgen --print-records ../KeywordC.td
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="5-生成代码的预期用法">5. 生成代码的预期用法
+</h2><p>生成的 <code>TokenFilter.inc</code> 由宏分块包含：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// 1. 标志枚举
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">enum</span> <span class="nc">Flags</span> <span class="o">:</span> <span class="kt">unsigned</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define GET_TOKEN_FLAGS
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;TokenFilter.inc&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 2. TokenKind 与函数声明
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define GET_TOKEN_KIND_DECLARATION
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;TokenFilter.inc&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 3. 函数定义
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define GET_TOKEN_KIND_DEFINITION
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;TokenFilter.inc&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 4. 关键字查找
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define GET_KEYWORD_FILTER
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;TokenFilter.inc&#34;</span><span class="cp">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>lookupKeyword(llvm::StringRef Keyword, unsigned &amp;Value)</code>：二分查找，找到则 <code>Value</code> 为标志值并返回 <code>true</code></li>
+</ul>
+<h3 id="51-性能说明">5.1 性能说明
+</h3><ul>
+<li>二分查找不一定比 <code>llvm::StringMap</code> 更快</li>
+<li>更优方案：生成<strong>最小完美哈希</strong>（如 gperf、Czech-Havas-Majewski、PTHash）</li>
+</ul>
+<hr>
+<h2 id="6-tablegen-的缺点">6. TableGen 的缺点
+</h2><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>缺点</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>计算能力有限</td>
+          <td>基于简单概念，无法像通用 DSL 那样编程</td>
+      </tr>
+      <tr>
+          <td>语义隐藏在后端</td>
+          <td>自定义后端可改变语义，他人难以理解 .td</td>
+      </tr>
+      <tr>
+          <td>后端实现复杂</td>
+          <td>复杂任务下后端代码量大，维护成本高</td>
+      </tr>
+  </tbody>
+</table></div>
+<hr>
+<h2 id="7-关键-api-速查">7. 关键 API 速查
+</h2><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>API</th>
+          <th>用途</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>Records.getAllDerivedDefinitions(&quot;ClassName&quot;)</code></td>
+          <td>获取某类所有派生记录</td>
+      </tr>
+      <tr>
+          <td><code>Records.getAllDerivedDefinitionsIfDefined(&quot;ClassName&quot;)</code></td>
+          <td>同上，类未定义时返回空</td>
+      </tr>
+      <tr>
+          <td><code>Record::getValueAsString(&quot;Field&quot;)</code></td>
+          <td>取字符串字段</td>
+      </tr>
+      <tr>
+          <td><code>Record::getValueAsInt(&quot;Field&quot;)</code></td>
+          <td>取整数字段</td>
+      </tr>
+      <tr>
+          <td><code>Record::isSubClassOf(&quot;ClassName&quot;)</code></td>
+          <td>判断是否为某类子类</td>
+      </tr>
+      <tr>
+          <td><code>RecordVal::getValue()</code></td>
+          <td>取 Init（可 cast 为 ListInit 等）</td>
+      </tr>
+      <tr>
+          <td><code>ListInit::getElementAsRecord(I)</code></td>
+          <td>取列表中第 I 个元素为 Record</td>
+      </tr>
+      <tr>
+          <td><code>emitSourceFileHeader(title, OS)</code></td>
+          <td>生成文件头注释</td>
+      </tr>
+      <tr>
+          <td><code>TableGenMain(argv0, &amp;Main)</code></td>
+          <td>解析 .td 并调用 Main</td>
+      </tr>
+  </tbody>
+</table></div>
+<hr>
+<h2 id="8-总结">8. 总结
+</h2><ol>
+<li><strong>TableGen</strong>：LLVM 的 DSL，用于定义记录并生成 C++ 等代码，减少手写量。</li>
+<li><strong>语法</strong>：<code>class</code>、<code>def</code>、<code>defm</code>、<code>multiclass</code>、<code>let</code>、<code>foreach</code>、Bang 操作符。</li>
+<li><strong>Chapter08</strong>：用 TableGen 定义 Token/Keyword/TokenFilter，后端生成 <code>TokenKind</code>、<code>lookupKeyword</code> 等，替代 <code>TokenKinds.def</code> 式数据库。</li>
+<li><strong>后端</strong>：基于 <code>RecordKeeper</code> 遍历记录，按需生成宏保护的 C++ 片段。</li>
+</ol>
+<hr>
+<h2 id="9-参考">9. 参考
+</h2><ul>
+<li>本章代码：<a class="link" href="https://github.com/PacktPublishing/Learn-LLVM-17/tree/main/Chapter08"  target="_blank" rel="noopener"
+    >https://github.com/PacktPublishing/Learn-LLVM-17/tree/main/Chapter08</a></li>
+<li>TableGen 开发者参考：<a class="link" href="https://llvm.org/docs/TableGen/ProgRef.html"  target="_blank" rel="noopener"
+    >https://llvm.org/docs/TableGen/ProgRef.html</a></li>
+<li>TableGen 后端指南：<a class="link" href="https://llvm.org/docs/TableGen/BackGuide.html"  target="_blank" rel="noopener"
+    >https://llvm.org/docs/TableGen/BackGuide.html</a></li>
+<li>Bang 操作符：<a class="link" href="https://llvm.org/docs/TableGen/ProgRef.html#appendix-a-bang-operators"  target="_blank" rel="noopener"
+    >https://llvm.org/docs/TableGen/ProgRef.html#appendix-a-bang-operators</a></li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/compiler/">Compiler</a>
+        
+            <a href="/tags/llvm/">LLVM</a>
+        
+            <a href="/tags/llvm-17/">LLVM-17</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/learn-llvm-17-chapter01%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Learn-LLVM-17 chapter01学习笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/learn-llvm-17-chapter02%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Learn-LLVM-17 chapter02学习笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/learn-llvm-17-chapter03%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Learn-LLVM-17 chapter03学习笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/learn-llvm-17-chapter04%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Learn-LLVM-17 chapter04学习笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/learn-llvm-17-chapter05%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Learn-LLVM-17 chapter05学习笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
