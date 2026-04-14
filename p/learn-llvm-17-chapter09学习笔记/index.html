@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="LLVM 17 learning">
+<title>Learn-LLVM-17 chapter09学习笔记</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/learn-llvm-17-chapter09%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="Learn-LLVM-17 chapter09学习笔记">
+<meta property='og:description' content="LLVM 17 learning">
+<meta property='og:url' content='https://Salmooo.github.io/p/learn-llvm-17-chapter09%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Compiler' /><meta property='article:tag' content='LLVM' /><meta property='article:tag' content='LLVM-17' />
+<meta name="twitter:title" content="Learn-LLVM-17 chapter09学习笔记">
+<meta name="twitter:description" content="LLVM 17 learning">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#1-本章概览">1. 本章概览</a>
+      <ol>
+        <li><a href="#11-学习目标">1.1 学习目标</a></li>
+        <li><a href="#12-代码结构">1.2 代码结构</a></li>
+        <li><a href="#13-环境要求">1.3 环境要求</a></li>
+      </ol>
+    </li>
+    <li><a href="#2-jit-编译概述">2. JIT 编译概述</a>
+      <ol>
+        <li><a href="#21-aot-与-jit">2.1 AOT 与 JIT</a></li>
+        <li><a href="#22-jit-典型用例">2.2 JIT 典型用例</a></li>
+        <li><a href="#23-llvm-jit-核心思想">2.3 LLVM JIT 核心思想</a></li>
+        <li><a href="#24-orc-引擎">2.4 ORC 引擎</a></li>
+      </ol>
+    </li>
+    <li><a href="#3-使用-lli-直接执行-ir">3. 使用 lli 直接执行 IR</a>
+      <ol>
+        <li><a href="#31-基本用法">3.1 基本用法</a></li>
+        <li><a href="#32-加载外部符号">3.2 加载外部符号</a></li>
+      </ol>
+    </li>
+    <li><a href="#4-基于-lljit-的-jit-计算器">4. 基于 LLJIT 的 JIT 计算器</a>
+      <ol>
+        <li><a href="#41-功能设计">4.1 功能设计</a></li>
+        <li><a href="#42-语法与-ast">4.2 语法与 AST</a></li>
+        <li><a href="#43-calccpp主循环与-jit-集成">4.3 Calc.cpp：主循环与 JIT 集成</a></li>
+        <li><a href="#44-codegencppir-生成">4.4 CodeGen.cpp：IR 生成</a></li>
+        <li><a href="#45-semacpp语义检查">4.5 Sema.cpp：语义检查</a></li>
+        <li><a href="#46-构建与运行">4.6 构建与运行</a></li>
+        <li><a href="#47-限制与设计说明">4.7 限制与设计说明</a></li>
+      </ol>
+    </li>
+    <li><a href="#5-从头构建-jit-编译器">5. 从头构建 JIT 编译器</a>
+      <ol>
+        <li><a href="#51-orc-分层架构">5.1 ORC 分层架构</a></li>
+        <li><a href="#52-jith自定义-jit-类">5.2 JIT.h：自定义 JIT 类</a></li>
+        <li><a href="#53-jitcpp使用自定义-jit">5.3 JIT.cpp：使用自定义 JIT</a></li>
+        <li><a href="#54-构建与测试">5.4 构建与测试</a></li>
+      </ol>
+    </li>
+    <li><a href="#6-设计决策与扩展">6. 设计决策与扩展</a>
+      <ol>
+        <li><a href="#61-惰性编译-vs-全量编译">6.1 惰性编译 vs 全量编译</a></li>
+        <li><a href="#62-符号解析">6.2 符号解析</a></li>
+        <li><a href="#63-cmake-配置要点">6.3 CMake 配置要点</a></li>
+      </ol>
+    </li>
+    <li><a href="#7-总结">7. 总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/llvm/" >
+                LLVM
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/learn-llvm-17-chapter09%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">Learn-LLVM-17 chapter09学习笔记</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            LLVM 17 learning
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    9 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="第-9-章-jit-编译---学习笔记">第 9 章 JIT 编译 - 学习笔记
+</h1><blockquote>
+<p>本文为《Learn LLVM 17》第 9 章的学习笔记，主要介绍 LLVM JIT 编译器的实现与用例、lli 工具、基于 LLJIT 的交互式计算器，以及从头构建自定义 JIT 编译器。</p>
+</blockquote>
+<h2 id="1-本章概览">1. 本章概览
+</h2><h3 id="11-学习目标">1.1 学习目标
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>主题</th>
+          <th>内容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>JIT 概述</td>
+          <td>ExecutionEngine、ORC 引擎、与 AOT 的区别</td>
+      </tr>
+      <tr>
+          <td>lli 工具</td>
+          <td>直接执行 LLVM IR、加载动态库/目标文件</td>
+      </tr>
+      <tr>
+          <td>LLJIT</td>
+          <td>预配置 JIT 类、addIRModule、lookup、ResourceTracker</td>
+      </tr>
+      <tr>
+          <td>自定义 JIT</td>
+          <td>ORC 分层架构、ObjectLinking、IRCompile、IRTransform 层</td>
+      </tr>
+      <tr>
+          <td>实战</td>
+          <td>JIT 计算器、IR 文件执行工具</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="12-代码结构">1.2 代码结构
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Chapter09/
+</span></span><span class="line"><span class="cl">├── lljit/                    # 基于 LLJIT 的 JIT 计算器
+</span></span><span class="line"><span class="cl">│   ├── Calc.cpp              # 主入口、REPL 循环
+</span></span><span class="line"><span class="cl">│   ├── CodeGen.cpp/h         # IR 生成（ToIRVisitor）
+</span></span><span class="line"><span class="cl">│   ├── Lexer.cpp/h           # 词法分析
+</span></span><span class="line"><span class="cl">│   ├── Parser.cpp/h          # 语法分析
+</span></span><span class="line"><span class="cl">│   ├── Sema.cpp/h            # 语义分析
+</span></span><span class="line"><span class="cl">│   ├── AST.h                 # AST 节点定义
+</span></span><span class="line"><span class="cl">│   ├── CMakeLists.txt
+</span></span><span class="line"><span class="cl">│   └── examples/
+</span></span><span class="line"><span class="cl">│       ├── hello.ll          # Hello World IR
+</span></span><span class="line"><span class="cl">│       ├── main.ll           # 调用外部符号的 IR
+</span></span><span class="line"><span class="cl">│       └── greetings.c       # 供 lli 链接的 C 源文件
+</span></span><span class="line"><span class="cl">│
+</span></span><span class="line"><span class="cl">└── jit/                      # 自定义 JIT 编译器（ORC 分层）
+</span></span><span class="line"><span class="cl">    ├── JIT.cpp               # 主程序：加载 IR、JIT 执行
+</span></span><span class="line"><span class="cl">    ├── JIT.h                 # 自定义 JIT 类
+</span></span><span class="line"><span class="cl">    ├── main.c                # 示例 C 程序
+</span></span><span class="line"><span class="cl">    └── CMakeLists.txt
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="13-环境要求">1.3 环境要求
+</h3><ul>
+<li>本章代码：<a class="link" href="https://github.com/PacktPublishing/Learn-LLVM-17/tree/main/Chapter09"  target="_blank" rel="noopener"
+    >https://github.com/PacktPublishing/Learn-LLVM-17/tree/main/Chapter09</a></li>
+<li>依赖：LLVM Core、OrcJIT、Support、native 组件</li>
+</ul>
+<hr>
+<h2 id="2-jit-编译概述">2. JIT 编译概述
+</h2><h3 id="21-aot-与-jit">2.1 AOT 与 JIT
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>类型</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>AOT (Ahead-of-Time)</strong></td>
+          <td>提前编译整个应用，编译完成后才能运行</td>
+      </tr>
+      <tr>
+          <td><strong>JIT (Just-in-Time)</strong></td>
+          <td>在应用运行时编译，边编译边执行</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="22-jit-典型用例">2.2 JIT 典型用例
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>场景</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>虚拟机</strong></td>
+          <td>字节码 → JIT 编译为机器码（Java、C#、USCD Pascal 1977）</td>
+      </tr>
+      <tr>
+          <td><strong>表达式求值</strong></td>
+          <td>电子表格、金融模拟、lldb 调试时计算表达式</td>
+      </tr>
+      <tr>
+          <td><strong>数据库查询</strong></td>
+          <td>执行计划 → JIT 转为机器码加速查询</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="23-llvm-jit-核心思想">2.3 LLVM JIT 核心思想
+</h3><p>静态编译器将 IR 编译为机器码并写入磁盘；若将目标文件保存在<strong>内存</strong>中，再在内存中执行<strong>链接</strong>，解析重定位，即可得到 JIT 编译器。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">IR → 内存中的目标文件 → 内存中链接 → 可执行代码
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="24-orc-引擎">2.4 ORC 引擎
+</h3><p><strong>ORC (On-Request Compilation)</strong> 是 LLVM 最新的 JIT API，基于分层设计：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>层次</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>编译层</strong></td>
+          <td>将 IR 编译为对象文件</td>
+      </tr>
+      <tr>
+          <td><strong>链接层</strong></td>
+          <td>在内存中链接对象文件</td>
+      </tr>
+      <tr>
+          <td><strong>惰性编译层</strong></td>
+          <td>按需编译（可选）</td>
+      </tr>
+      <tr>
+          <td><strong>转换层</strong></td>
+          <td>可堆叠，用于优化或事件通知</td>
+      </tr>
+  </tbody>
+</table></div>
+<ul>
+<li><strong>MCJIT</strong>：旧 API，仍可用，但建议新项目使用 ORC。</li>
+<li><strong>LLJIT</strong>：预配置的 ORC 封装，迁移自 MCJIT，开箱即用。</li>
+</ul>
+<hr>
+<h2 id="3-使用-lli-直接执行-ir">3. 使用 lli 直接执行 IR
+</h2><h3 id="31-基本用法">3.1 基本用法
+</h3><p><code>lli</code> 是 LLVM 的动态编译器/解释器，可直接执行 LLVM IR。</p>
+<p><strong>hello.ll 示例：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-1:8:Chapter09/lljit/examples/hello.ll" data-lang="1:8:Chapter09/lljit/examples/hello.ll"><span class="line"><span class="cl"><span class="k">declare</span> <span class="k">i32</span> <span class="vg">@printf</span><span class="p">(</span><span class="err">ptr</span><span class="p">,</span> <span class="p">...)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="vg">@hellostr</span> <span class="p">=</span> <span class="k">private</span> <span class="k">unnamed_addr</span> <span class="k">constant</span> <span class="p">[</span><span class="m">13</span> <span class="k">x</span> <span class="k">i8</span><span class="p">]</span> <span class="k">c</span><span class="s">&#34;Hello world\0A\00&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">define</span> <span class="err">dso_local</span> <span class="k">i32</span> <span class="vg">@main</span><span class="p">(</span><span class="k">i32</span> <span class="nv">%argc</span><span class="p">,</span> <span class="err">ptr</span> <span class="nv">%argv</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nv">%res</span> <span class="p">=</span> <span class="k">call</span> <span class="k">i32</span> <span class="p">(</span><span class="err">ptr</span><span class="p">,</span> <span class="p">...)</span> <span class="vg">@printf</span><span class="p">(</span><span class="err">ptr</span> <span class="vg">@hellostr</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="k">ret</span> <span class="k">i32</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>执行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ lli hello.ll
+</span></span><span class="line"><span class="cl">Hello world
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>printf</code> 符号在 IR 中未定义，lli 会在<strong>当前进程</strong>中查找，并动态链接到 C 库。</p>
+<h3 id="32-加载外部符号">3.2 加载外部符号
+</h3><p><strong>main.ll</strong> 调用外部 <code>greetings()</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-1:6:Chapter09/lljit/examples/main.ll" data-lang="1:6:Chapter09/lljit/examples/main.ll"><span class="line"><span class="cl"><span class="k">declare</span> <span class="kt">void</span> <span class="vg">@greetings</span><span class="p">(...)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">define</span> <span class="err">dso_local</span> <span class="k">i32</span> <span class="vg">@main</span><span class="p">(</span><span class="k">i32</span> <span class="nv">%argc</span><span class="p">,</span> <span class="err">ptr</span> <span class="nv">%argv</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">call</span> <span class="kt">void</span> <span class="p">(...)</span> <span class="vg">@greetings</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">  <span class="k">ret</span> <span class="k">i32</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>greetings.c</strong> 实现：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="kt">void</span> <span class="nf">greetings</span><span class="p">()</span> <span class="p">{</span> <span class="nf">puts</span><span class="p">(</span><span class="s">&#34;Hi!&#34;</span><span class="p">);</span> <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>编译并加载：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ clang greetings.c -fPIC -shared -o greetings.so
+</span></span><span class="line"><span class="cl">$ clang greetings.c -c -o greetings.o
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 使用动态库</span>
+</span></span><span class="line"><span class="cl">$ lli -load ./greetings.so main.ll
+</span></span><span class="line"><span class="cl">Hi!
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 使用目标文件</span>
+</span></span><span class="line"><span class="cl">$ lli -extra-object greetings.o main.ll
+</span></span><span class="line"><span class="cl">Hi!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>lli 加载选项：</strong></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>选项</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>-load &lt;path&gt;</code></td>
+          <td>加载动态库 (.so/.dll)</td>
+      </tr>
+      <tr>
+          <td><code>-extra-object &lt;path&gt;</code></td>
+          <td>加载目标文件 (.o)</td>
+      </tr>
+      <tr>
+          <td><code>-extra-archive &lt;path&gt;</code></td>
+          <td>加载归档 (.a)</td>
+      </tr>
+      <tr>
+          <td><code>-extra-module &lt;path&gt;</code></td>
+          <td>加载位码文件</td>
+      </tr>
+  </tbody>
+</table></div>
+<hr>
+<h2 id="4-基于-lljit-的-jit-计算器">4. 基于 LLJIT 的 JIT 计算器
+</h2><h3 id="41-功能设计">4.1 功能设计
+</h3><ul>
+<li><strong>定义函数</strong>：<code>def f(x) = x*2</code></li>
+<li><strong>调用函数</strong>：<code>f(3)</code> → 输出 <code>6</code></li>
+<li>使用 LLJIT 在内存中编译并执行</li>
+</ul>
+<h3 id="42-语法与-ast">4.2 语法与 AST
+</h3><p><strong>语法：</strong></p>
+<ul>
+<li>定义：<code>def ident ( ident (, ident)* ) = expr</code></li>
+<li>调用：<code>ident ( number (, number)* )</code></li>
+<li>表达式：<code>term ( (+|-) term )*</code></li>
+<li>项：<code>factor ( (*|/) factor )*</code></li>
+<li>因子：<code>number | ident | ( expr )</code></li>
+</ul>
+<p><strong>AST 节点：</strong></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>节点</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>DefDecl</code></td>
+          <td>函数定义，含函数名、参数列表、表达式</td>
+      </tr>
+      <tr>
+          <td><code>FuncCallFromDef</code></td>
+          <td>函数调用，含函数名、实参列表</td>
+      </tr>
+      <tr>
+          <td><code>BinaryOp</code></td>
+          <td>二元运算（+、-、*、/）</td>
+      </tr>
+      <tr>
+          <td><code>Factor</code></td>
+          <td>数字或标识符（参数）</td>
+      </tr>
+  </tbody>
+</table></div>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-77:97:Chapter09/lljit/AST.h" data-lang="77:97:Chapter09/lljit/AST.h"><span class="line"><span class="cl"><span class="n">class</span> <span class="nl">DefDecl</span> <span class="p">:</span> <span class="n">public</span> <span class="n">AST</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">StringRef</span> <span class="n">DefFnName</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">using</span> <span class="n">VarVector</span> <span class="o">=</span> <span class="n">llvm</span><span class="o">::</span><span class="n">SmallVector</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">StringRef</span><span class="p">,</span> <span class="mi">8</span><span class="o">&gt;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">VarVector</span> <span class="n">Vars</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Expr</span> <span class="o">*</span><span class="n">E</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">class</span> <span class="nl">FuncCallFromDef</span> <span class="p">:</span> <span class="n">public</span> <span class="n">AST</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">StringRef</span> <span class="n">DefFnName</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">using</span> <span class="n">ArgVector</span> <span class="o">=</span> <span class="n">llvm</span><span class="o">::</span><span class="n">SmallVector</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">StringRef</span><span class="p">,</span> <span class="mi">8</span><span class="o">&gt;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ArgVector</span> <span class="n">Args</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="43-calccpp主循环与-jit-集成">4.3 Calc.cpp：主循环与 JIT 集成
+</h3><p><strong>初始化：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-14:28:Chapter09/lljit/Calc.cpp" data-lang="14:28:Chapter09/lljit/Calc.cpp"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">InitLLVM</span> <span class="n">X</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">InitializeNativeTarget</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">InitializeNativeTargetAsmPrinter</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">InitializeNativeTargetAsmParser</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// Create a new LLJITBuilder.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">auto</span> <span class="n">JIT</span> <span class="o">=</span> <span class="n">ExitOnErr</span><span class="p">(</span><span class="n">LLJITBuilder</span><span class="p">().</span><span class="n">create</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// A map to keep track of the functions we&#39;ve JIT&#39;ed. The representation is
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// a mapping between the name of the user defined function (as a string), and
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// the name of the arguments (a vector of strings). All of these arguments
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// will automatically be represented as integers.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">StringMap</span><span class="o">&lt;</span><span class="n">size_t</span><span class="o">&gt;</span> <span class="n">JITtedFunctions</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>JITtedFunctions</code>：函数名 → 参数个数，用于语义检查和代码生成。</p>
+<p><strong>REPL 流程：</strong></p>
+<ol>
+<li>读入一行 <code>calcExp</code></li>
+<li>创建新 <code>LLVMContext</code> 和 <code>Module</code>，设置 <code>DataLayout</code></li>
+<li>根据首 token 分支：
+<ul>
+<li><code>KW_def</code>：解析定义 → 语义检查 → 生成 IR → <code>addIRModule</code></li>
+<li><code>ident</code>：解析调用 → 语义检查 → 生成 <code>calc_expr_func</code> → <code>addIRModule</code> → <code>lookup</code> → 调用 → <code>RT-&gt;remove()</code></li>
+<li><code>quit</code>：退出</li>
+</ul>
+</li>
+</ol>
+<p><strong>函数定义分支：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-44:59:Chapter09/lljit/Calc.cpp" data-lang="44:59:Chapter09/lljit/Calc.cpp"><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">CalcTok</span> <span class="o">==</span> <span class="n">Token</span><span class="o">::</span><span class="n">KW_def</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">Parser</span> <span class="nf">Parser</span><span class="p">(</span><span class="n">Lex</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">AST</span> <span class="o">*</span><span class="n">Tree</span> <span class="o">=</span> <span class="n">Parser</span><span class="p">.</span><span class="n">parse</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Tree</span> <span class="o">||</span> <span class="n">Parser</span><span class="p">.</span><span class="n">hasError</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">llvm</span><span class="o">::</span><span class="n">errs</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Syntax errors occured</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="n">Sema</span> <span class="n">Semantic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">Semantic</span><span class="p">.</span><span class="n">semantic</span><span class="p">(</span><span class="n">Tree</span><span class="p">,</span> <span class="n">JITtedFunctions</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">llvm</span><span class="o">::</span><span class="n">errs</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Semantic errors occured</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// Generate the IR.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">CodeGenerator</span><span class="p">.</span><span class="n">compileToIR</span><span class="p">(</span><span class="n">Tree</span><span class="p">,</span> <span class="n">M</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">JITtedFunctions</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">ExitOnErr</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="n">JIT</span><span class="o">-&gt;</span><span class="n">addIRModule</span><span class="p">(</span><span class="n">ThreadSafeModule</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">M</span><span class="p">),</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">Ctx</span><span class="p">))));</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>函数调用分支：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-61:95:Chapter09/lljit/Calc.cpp" data-lang="61:95:Chapter09/lljit/Calc.cpp"><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">CalcTok</span> <span class="o">==</span> <span class="n">Token</span><span class="o">::</span><span class="n">ident</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">outs</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Attempting to evaluate expression:</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// ... parse &amp; semantic ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">CodeGenerator</span><span class="p">.</span><span class="n">prepareCalculationCallFunc</span><span class="p">(</span><span class="n">Tree</span><span class="p">,</span> <span class="n">M</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">FuncCallName</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                                               <span class="n">JITtedFunctions</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// ResourceTracker 跟踪本次添加的模块，便于后续释放
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="k">auto</span> <span class="n">RT</span> <span class="o">=</span> <span class="n">JIT</span><span class="o">-&gt;</span><span class="n">getMainJITDylib</span><span class="p">().</span><span class="n">createResourceTracker</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">      <span class="k">auto</span> <span class="n">TSM</span> <span class="o">=</span> <span class="n">ThreadSafeModule</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">M</span><span class="p">),</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">Ctx</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">      <span class="n">ExitOnErr</span><span class="p">(</span><span class="n">JIT</span><span class="o">-&gt;</span><span class="n">addIRModule</span><span class="p">(</span><span class="n">RT</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">TSM</span><span class="p">)));</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// 查找并调用 calc_expr_func
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="k">auto</span> <span class="n">CalcExprCall</span> <span class="o">=</span> <span class="n">ExitOnErr</span><span class="p">(</span><span class="n">JIT</span><span class="o">-&gt;</span><span class="n">lookup</span><span class="p">(</span><span class="s">&#34;calc_expr_func&#34;</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">      <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">UserFnCall</span><span class="p">)()</span> <span class="o">=</span> <span class="n">CalcExprCall</span><span class="p">.</span><span class="n">toPtr</span><span class="o">&lt;</span><span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="p">)()</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">      <span class="n">outs</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;User defined function evaluated to: &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">UserFnCall</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">ExitOnErr</span><span class="p">(</span><span class="n">RT</span><span class="o">-&gt;</span><span class="n">remove</span><span class="p">());</span>  <span class="c1">// 释放 calc_expr_func 占用的内存
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>要点：</p>
+<ul>
+<li>每次调用生成新的 <code>calc_expr_func</code>，用 <code>ResourceTracker</code> 管理生命周期。</li>
+<li><code>lookup(&quot;calc_expr_func&quot;)</code> 触发编译与链接。</li>
+<li><code>toPtr&lt;int (*)()&gt;()</code> 将符号地址转为函数指针并调用。</li>
+</ul>
+<h3 id="44-codegencppir-生成">4.4 CodeGen.cpp：IR 生成
+</h3><p><strong>ToIRVisitor 核心逻辑：</strong></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>节点</th>
+          <th>处理</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>Factor</code></td>
+          <td>数字 → <code>ConstantInt</code>；标识符 → <code>nameMap</code> 中的参数</td>
+      </tr>
+      <tr>
+          <td><code>BinaryOp</code></td>
+          <td><code>CreateNSWAdd</code> / <code>CreateNSWSub</code> / <code>CreateNSWMul</code> / <code>CreateSDiv</code></td>
+      </tr>
+      <tr>
+          <td><code>DefDecl</code></td>
+          <td>创建函数、基本块、参数映射，生成表达式 IR，最后 <code>CreateRet(V)</code></td>
+      </tr>
+      <tr>
+          <td><code>FuncCallFromDef</code></td>
+          <td>创建 <code>calc_expr_func</code>，调用用户函数并返回</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>DefDecl 处理：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-82:108:Chapter09/lljit/CodeGen.cpp" data-lang="82:108:Chapter09/lljit/CodeGen.cpp"><span class="line"><span class="cl">  <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">visit</span><span class="p">(</span><span class="n">DefDecl</span> <span class="o">&amp;</span><span class="n">Node</span><span class="p">)</span> <span class="k">override</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">llvm</span><span class="o">::</span><span class="n">StringRef</span> <span class="n">FnName</span> <span class="o">=</span> <span class="n">Node</span><span class="p">.</span><span class="n">getFnName</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">llvm</span><span class="o">::</span><span class="n">SmallVector</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">StringRef</span><span class="p">,</span> <span class="mi">8</span><span class="o">&gt;</span> <span class="n">FunctionVars</span> <span class="o">=</span> <span class="n">Node</span><span class="p">.</span><span class="n">getVars</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">(</span><span class="n">JITtedFunctionsMap</span><span class="p">)[</span><span class="n">FnName</span><span class="p">]</span> <span class="o">=</span> <span class="n">FunctionVars</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">Function</span> <span class="o">*</span><span class="n">DefFunc</span> <span class="o">=</span> <span class="n">genUserDefinedFunction</span><span class="p">(</span><span class="n">FnName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">BasicBlock</span> <span class="o">*</span><span class="n">BB</span> <span class="o">=</span> <span class="n">BasicBlock</span><span class="o">::</span><span class="n">Create</span><span class="p">(</span><span class="n">M</span><span class="o">-&gt;</span><span class="n">getContext</span><span class="p">(),</span> <span class="s">&#34;entry&#34;</span><span class="p">,</span> <span class="n">DefFunc</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Builder</span><span class="p">.</span><span class="n">SetInsertPoint</span><span class="p">(</span><span class="n">BB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="n">FIdx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="o">&amp;</span><span class="nl">FArg</span> <span class="p">:</span> <span class="n">DefFunc</span><span class="o">-&gt;</span><span class="n">args</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">nameMap</span><span class="p">[</span><span class="n">FunctionVars</span><span class="p">[</span><span class="n">FIdx</span><span class="p">]]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">FArg</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">FArg</span><span class="p">.</span><span class="n">setName</span><span class="p">(</span><span class="n">FunctionVars</span><span class="p">[</span><span class="n">FIdx</span><span class="o">++</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">Node</span><span class="p">.</span><span class="n">getExpr</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">accept</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>  <span class="c1">// 生成表达式，结果在 V 中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>genUserDefinedFunction</code>：若模块中已有该函数则复用，否则根据 <code>JITtedFunctionsMap</code> 创建 <code>i32 (i32, i32, ...)</code> 类型的函数。</p>
+<p><strong>FuncCallFromDef 处理：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-109:140:Chapter09/lljit/CodeGen.cpp" data-lang="109:140:Chapter09/lljit/CodeGen.cpp"><span class="line"><span class="cl">  <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">visit</span><span class="p">(</span><span class="n">FuncCallFromDef</span> <span class="o">&amp;</span><span class="n">Node</span><span class="p">)</span> <span class="k">override</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">llvm</span><span class="o">::</span><span class="n">StringRef</span> <span class="n">CalcExprFunName</span> <span class="o">=</span> <span class="s">&#34;calc_expr_func&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">FunctionType</span> <span class="o">*</span><span class="n">CalcExprFunTy</span> <span class="o">=</span> <span class="n">FunctionType</span><span class="o">::</span><span class="n">get</span><span class="p">(</span><span class="n">Int32Ty</span><span class="p">,</span> <span class="p">{},</span> <span class="nb">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Function</span> <span class="o">*</span><span class="n">CalcExprFun</span> <span class="o">=</span> <span class="n">Function</span><span class="o">::</span><span class="n">Create</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="n">CalcExprFunTy</span><span class="p">,</span> <span class="n">GlobalValue</span><span class="o">::</span><span class="n">ExternalLinkage</span><span class="p">,</span> <span class="n">CalcExprFunName</span><span class="p">,</span> <span class="n">M</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">BasicBlock</span> <span class="o">*</span><span class="n">BB</span> <span class="o">=</span> <span class="n">BasicBlock</span><span class="o">::</span><span class="n">Create</span><span class="p">(</span><span class="n">M</span><span class="o">-&gt;</span><span class="n">getContext</span><span class="p">(),</span> <span class="s">&#34;entry&#34;</span><span class="p">,</span> <span class="n">CalcExprFun</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Builder</span><span class="p">.</span><span class="n">SetInsertPoint</span><span class="p">(</span><span class="n">BB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">Function</span> <span class="o">*</span><span class="n">CalleeFn</span> <span class="o">=</span> <span class="n">genUserDefinedFunction</span><span class="p">(</span><span class="n">CalleeFnName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">CalleeFnVars</span> <span class="o">=</span> <span class="n">Node</span><span class="p">.</span><span class="n">getArgs</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">llvm</span><span class="o">::</span><span class="n">SmallVector</span><span class="o">&lt;</span><span class="n">Value</span> <span class="o">*&gt;</span> <span class="n">IntParams</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">CalleeFnVars</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">end</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="kt">int</span> <span class="n">ArgsToIntType</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">CalleeFnVars</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">getAsInteger</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">ArgsToIntType</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">IntParams</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">ConstantInt</span><span class="o">::</span><span class="n">get</span><span class="p">(</span><span class="n">Int32Ty</span><span class="p">,</span> <span class="n">ArgsToIntType</span><span class="p">,</span> <span class="nb">true</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">Value</span> <span class="o">*</span><span class="n">Res</span> <span class="o">=</span> <span class="n">Builder</span><span class="p">.</span><span class="n">CreateCall</span><span class="p">(</span><span class="n">CalleeFn</span><span class="p">,</span> <span class="n">IntParams</span><span class="p">,</span> <span class="s">&#34;calc_expr_res&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Builder</span><span class="p">.</span><span class="n">CreateRet</span><span class="p">(</span><span class="n">Res</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>calc_expr_func</code> 为 <code>i32 ()</code>，内部调用用户函数并返回结果。</p>
+<h3 id="45-semacpp语义检查">4.5 Sema.cpp：语义检查
+</h3><ul>
+<li><strong>DefDecl</strong>：参数不能重复声明。</li>
+<li><strong>FuncCallFromDef</strong>：函数必须已定义，参数个数必须匹配。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-56:74:Chapter09/lljit/Sema.cpp" data-lang="56:74:Chapter09/lljit/Sema.cpp"><span class="line"><span class="cl">  <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">visit</span><span class="p">(</span><span class="n">FuncCallFromDef</span> <span class="o">&amp;</span><span class="n">Node</span><span class="p">)</span> <span class="k">override</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">llvm</span><span class="o">::</span><span class="n">StringRef</span> <span class="n">FuncCallName</span> <span class="o">=</span> <span class="n">Node</span><span class="p">.</span><span class="n">getFnName</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="n">NumArgs</span> <span class="o">=</span> <span class="n">Node</span><span class="p">.</span><span class="n">getArgs</span><span class="p">().</span><span class="n">size</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="n">NumOriginallyDefinedArgs</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">LookUpFunctionCall</span> <span class="o">=</span> <span class="n">JITtedFunctionsMap</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">FuncCallName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">LookUpFunctionCall</span> <span class="o">!=</span> <span class="n">JITtedFunctionsMap</span><span class="p">.</span><span class="n">end</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">      <span class="n">NumOriginallyDefinedArgs</span> <span class="o">=</span> <span class="n">LookUpFunctionCall</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">errs</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Specified function definition does not exist!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">HasError</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">NumArgs</span> <span class="o">!=</span> <span class="n">NumOriginallyDefinedArgs</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">errs</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Number of parameters specified to the function does not &#34;</span>
+</span></span><span class="line"><span class="cl">                   <span class="o">&lt;&lt;</span> <span class="s">&#34;match it&#39;s definition!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">HasError</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="46-构建与运行">4.6 构建与运行
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">cd</span> Chapter09/lljit
+</span></span><span class="line"><span class="cl">mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
+</span></span><span class="line"><span class="cl">cmake -G Ninja ..
+</span></span><span class="line"><span class="cl">ninja
+</span></span><span class="line"><span class="cl">./calc
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>示例交互：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">JIT calc &gt; def f(x) = x*2
+</span></span><span class="line"><span class="cl">define i32 @f(i32 %x) {
+</span></span><span class="line"><span class="cl">entry:
+</span></span><span class="line"><span class="cl">  %0 = mul nsw i32 %x, 2
+</span></span><span class="line"><span class="cl">  ret i32 %0
+</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">JIT calc &gt; f(20)
+</span></span><span class="line"><span class="cl">Attempting to evaluate expression:
+</span></span><span class="line"><span class="cl">define i32 @calc_expr_func() {
+</span></span><span class="line"><span class="cl">entry:
+</span></span><span class="line"><span class="cl">  %calc_expr_res = call i32 @f(i32 20)
+</span></span><span class="line"><span class="cl">  ret i32 %calc_expr_res
+</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl">User defined function evaluated to: 40
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="47-限制与设计说明">4.7 限制与设计说明
+</h3><ul>
+<li>不支持负数、小数。</li>
+<li><strong>不允许重定义同名函数</strong>：ORC 符号表不允许重复定义，会报 <code>Duplicate definition of symbol '_f'</code>。</li>
+<li>其他符号来源：<code>StaticLibraryDefinitionGenerator</code>、<code>DynamicLibrarySearchGenerator</code>、<code>addObjectFile()</code> 等。</li>
+</ul>
+<hr>
+<h2 id="5-从头构建-jit-编译器">5. 从头构建 JIT 编译器
+</h2><h3 id="51-orc-分层架构">5.1 ORC 分层架构
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌─────────────────────────────────────┐
+</span></span><span class="line"><span class="cl">│  IRTransformLayer (优化)             │  ← 顶层，接收 IR
+</span></span><span class="line"><span class="cl">├─────────────────────────────────────┤
+</span></span><span class="line"><span class="cl">│  IRCompileLayer (IR → 对象文件)      │
+</span></span><span class="line"><span class="cl">├─────────────────────────────────────┤
+</span></span><span class="line"><span class="cl">│  RTDyldObjectLinkingLayer (链接)     │  ← 底层
+</span></span><span class="line"><span class="cl">└─────────────────────────────────────┘
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>层</th>
+          <th>类</th>
+          <th>职责</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>对象链接层</td>
+          <td><code>RTDyldObjectLinkingLayer</code></td>
+          <td>链接内存中的对象，生成可执行代码</td>
+      </tr>
+      <tr>
+          <td>编译层</td>
+          <td><code>IRCompileLayer</code></td>
+          <td>将 IR 编译为对象文件</td>
+      </tr>
+      <tr>
+          <td>转换层</td>
+          <td><code>IRTransformLayer</code></td>
+          <td>对 IR 做转换（如优化）</td>
+      </tr>
+      <tr>
+          <td>惰性编译</td>
+          <td><code>CompileOnDemandLayer</code></td>
+          <td>按需编译（可选）</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="52-jith自定义-jit-类">5.2 JIT.h：自定义 JIT 类
+</h3><p><strong>私有成员：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-21:34:Chapter09/jit/JIT.h" data-lang="21:34:Chapter09/jit/JIT.h"><span class="line"><span class="cl"><span class="n">class</span> <span class="n">JIT</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="nl">private</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">ExecutorProcessControl</span><span class="o">&gt;</span> <span class="n">EPC</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">ExecutionSession</span><span class="o">&gt;</span> <span class="n">ES</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">DataLayout</span> <span class="n">DL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">MangleAndInterner</span> <span class="n">Mangle</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">RTDyldObjectLinkingLayer</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">ObjectLinkingLayer</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">IRCompileLayer</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">CompileLayer</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">IRTransformLayer</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">OptIRLayer</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">JITDylib</span> <span class="o">&amp;</span><span class="n">MainJITDylib</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>工厂方法 create()：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-64:87:Chapter09/jit/JIT.h" data-lang="64:87:Chapter09/jit/JIT.h"><span class="line"><span class="cl">  <span class="k">static</span> <span class="n">llvm</span><span class="o">::</span><span class="n">Expected</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">JIT</span><span class="o">&gt;&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">create</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">SSP</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">SymbolStringPool</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">EPC</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">        <span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">SelfExecutorProcessControl</span><span class="o">::</span><span class="nf">Create</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="n">SSP</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">EPC</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="n">EPC</span><span class="p">.</span><span class="nf">takeError</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">JITTargetMachineBuilder</span> <span class="nf">JTMB</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="o">*</span><span class="n">EPC</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">getTargetTriple</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">DL</span> <span class="o">=</span> <span class="n">JTMB</span><span class="p">.</span><span class="nf">getDefaultDataLayoutForTarget</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">DL</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="n">DL</span><span class="p">.</span><span class="nf">takeError</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">ES</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">ExecutionSession</span><span class="o">&gt;</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="n">std</span><span class="o">::</span><span class="nf">move</span><span class="p">(</span><span class="o">*</span><span class="n">EPC</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">JIT</span><span class="o">&gt;</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="nf">move</span><span class="p">(</span><span class="o">*</span><span class="n">EPC</span><span class="p">),</span> <span class="n">std</span><span class="o">::</span><span class="nf">move</span><span class="p">(</span><span class="n">ES</span><span class="p">),</span> <span class="n">std</span><span class="o">::</span><span class="nf">move</span><span class="p">(</span><span class="o">*</span><span class="n">DL</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="nf">move</span><span class="p">(</span><span class="n">JTMB</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>SymbolStringPool</code>：符号字符串池，用于内化。</li>
+<li><code>SelfExecutorProcessControl</code>：当前进程控制。</li>
+<li><code>JITTargetMachineBuilder</code>：目标机与 DataLayout。</li>
+<li><code>ExecutionSession</code>：JIT 会话。</li>
+</ul>
+<p><strong>对象链接层：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-89:109:Chapter09/jit/JIT.h" data-lang="89:109:Chapter09/jit/JIT.h"><span class="line"><span class="cl">  <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">RTDyldObjectLinkingLayer</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">createObjectLinkingLayer</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">ExecutionSession</span> <span class="o">&amp;</span><span class="n">ES</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">JITTargetMachineBuilder</span> <span class="o">&amp;</span><span class="n">JTMB</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">GetMemoryManager</span> <span class="o">=</span> <span class="p">[]()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span>
+</span></span><span class="line"><span class="cl">          <span class="n">llvm</span><span class="o">::</span><span class="n">SectionMemoryManager</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">OLLayer</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">RTDyldObjectLinkingLayer</span><span class="o">&gt;</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ES</span><span class="p">,</span> <span class="n">GetMemoryManager</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">JTMB</span><span class="p">.</span><span class="nf">getTargetTriple</span><span class="p">().</span><span class="nf">isOSBinFormatCOFF</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">OLLayer</span>
+</span></span><span class="line"><span class="cl">          <span class="o">-&gt;</span><span class="nf">setOverrideObjectFlagsWithResponsibilityFlags</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">              <span class="nb">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">OLLayer</span>
+</span></span><span class="line"><span class="cl">          <span class="o">-&gt;</span><span class="nf">setAutoClaimResponsibilityForObjectSymbols</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">              <span class="nb">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">OLLayer</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>COFF（Windows）需特殊处理符号标志。</p>
+<p><strong>编译层：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-111:124:Chapter09/jit/JIT.h" data-lang="111:124:Chapter09/jit/JIT.h"><span class="line"><span class="cl">  <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">IRCompileLayer</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">createCompileLayer</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">ExecutionSession</span> <span class="o">&amp;</span><span class="n">ES</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">RTDyldObjectLinkingLayer</span> <span class="o">&amp;</span><span class="n">OLLayer</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">JITTargetMachineBuilder</span> <span class="n">JTMB</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">IRCompiler</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">ConcurrentIRCompiler</span><span class="o">&gt;</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="nf">move</span><span class="p">(</span><span class="n">JTMB</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">IRCLayer</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">IRCompileLayer</span><span class="o">&gt;</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="n">ES</span><span class="p">,</span> <span class="n">OLLayer</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="nf">move</span><span class="p">(</span><span class="n">IRCompiler</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">IRCLayer</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>ConcurrentIRCompiler</code> 为每个模块创建新的 TargetMachine，支持多线程编译。</p>
+<p><strong>优化层：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-126:133:Chapter09/jit/JIT.h" data-lang="126:133:Chapter09/jit/JIT.h"><span class="line"><span class="cl">  <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">IRTransformLayer</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">createOptIRLayer</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">ExecutionSession</span> <span class="o">&amp;</span><span class="n">ES</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">IRCompileLayer</span> <span class="o">&amp;</span><span class="n">CompileLayer</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">auto</span> <span class="n">OptIRLayer</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">IRTransformLayer</span><span class="o">&gt;</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="n">ES</span><span class="p">,</span> <span class="n">CompileLayer</span><span class="p">,</span> <span class="n">optimizeModule</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">OptIRLayer</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>optimizeModule：O2 优化流水线：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-153:178:Chapter09/jit/JIT.h" data-lang="153:178:Chapter09/jit/JIT.h"><span class="line"><span class="cl">  <span class="k">static</span> <span class="n">llvm</span><span class="o">::</span><span class="n">Expected</span><span class="o">&lt;</span><span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">ThreadSafeModule</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">optimizeModule</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">ThreadSafeModule</span> <span class="n">TSM</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="k">const</span> <span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">MaterializationResponsibility</span>
+</span></span><span class="line"><span class="cl">          <span class="o">&amp;</span><span class="n">R</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TSM</span><span class="p">.</span><span class="nf">withModuleDo</span><span class="p">([](</span><span class="n">llvm</span><span class="o">::</span><span class="n">Module</span> <span class="o">&amp;</span><span class="n">M</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">PassBuilder</span> <span class="n">PB</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">LoopAnalysisManager</span> <span class="n">LAM</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">FunctionAnalysisManager</span> <span class="n">FAM</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">CGSCCAnalysisManager</span> <span class="n">CGAM</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">ModuleAnalysisManager</span> <span class="n">MAM</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">FAM</span><span class="p">.</span><span class="nf">registerPass</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="p">[</span><span class="o">&amp;</span><span class="p">]</span> <span class="p">{</span> <span class="k">return</span> <span class="n">PB</span><span class="p">.</span><span class="nf">buildDefaultAAPipeline</span><span class="p">();</span> <span class="p">});</span>
+</span></span><span class="line"><span class="cl">      <span class="n">PB</span><span class="p">.</span><span class="nf">registerModuleAnalyses</span><span class="p">(</span><span class="n">MAM</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">PB</span><span class="p">.</span><span class="nf">registerCGSCCAnalyses</span><span class="p">(</span><span class="n">CGAM</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">PB</span><span class="p">.</span><span class="nf">registerFunctionAnalyses</span><span class="p">(</span><span class="n">FAM</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">PB</span><span class="p">.</span><span class="nf">registerLoopAnalyses</span><span class="p">(</span><span class="n">LAM</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">PB</span><span class="p">.</span><span class="nf">crossRegisterProxies</span><span class="p">(</span><span class="n">LAM</span><span class="p">,</span> <span class="n">FAM</span><span class="p">,</span> <span class="n">CGAM</span><span class="p">,</span> <span class="n">MAM</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">llvm</span><span class="o">::</span><span class="n">ModulePassManager</span> <span class="n">MPM</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">          <span class="n">PB</span><span class="p">.</span><span class="nf">buildPerModuleDefaultPipeline</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">              <span class="n">llvm</span><span class="o">::</span><span class="n">OptimizationLevel</span><span class="o">::</span><span class="n">O2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">MPM</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">MAM</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">TSM</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="53-jitcpp使用自定义-jit">5.3 JIT.cpp：使用自定义 JIT
+</h3><p><strong>loadModule：解析 IR 文件：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-13:25:Chapter09/jit/JIT.cpp" data-lang="13:25:Chapter09/jit/JIT.cpp"><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Module</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">loadModule</span><span class="p">(</span><span class="n">StringRef</span> <span class="n">Filename</span><span class="p">,</span> <span class="n">LLVMContext</span> <span class="o">&amp;</span><span class="n">Ctx</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">           <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">ProgName</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">SMDiagnostic</span> <span class="n">Err</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Module</span><span class="o">&gt;</span> <span class="n">Mod</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">      <span class="n">parseIRFile</span><span class="p">(</span><span class="n">Filename</span><span class="p">,</span> <span class="n">Err</span><span class="p">,</span> <span class="n">Ctx</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">Mod</span><span class="p">.</span><span class="n">get</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Err</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">ProgName</span><span class="p">,</span> <span class="n">errs</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">    <span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">Mod</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>jitmain：JIT 执行流程：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-27:47:Chapter09/jit/JIT.cpp" data-lang="27:47:Chapter09/jit/JIT.cpp"><span class="line"><span class="cl"><span class="n">Error</span> <span class="nf">jitmain</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Module</span><span class="o">&gt;</span> <span class="n">M</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">LLVMContext</span><span class="o">&gt;</span> <span class="n">Ctx</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="n">JIT</span> <span class="o">=</span> <span class="n">JIT</span><span class="o">::</span><span class="n">create</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">JIT</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">JIT</span><span class="p">.</span><span class="n">takeError</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="k">auto</span> <span class="n">Err</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">JIT</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">addIRModule</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="n">orc</span><span class="o">::</span><span class="n">ThreadSafeModule</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">M</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">                                <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">Ctx</span><span class="p">))))</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">Err</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="n">MainSym</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">JIT</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">lookup</span><span class="p">(</span><span class="s">&#34;main&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">MainSym</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">MainSym</span><span class="p">.</span><span class="n">takeError</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">llvm</span><span class="o">::</span><span class="n">orc</span><span class="o">::</span><span class="n">ExecutorAddr</span> <span class="n">MainExecutorAddr</span> <span class="o">=</span> <span class="n">MainSym</span><span class="o">-&gt;</span><span class="n">getAddress</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="o">*</span><span class="n">Main</span> <span class="o">=</span> <span class="n">MainExecutorAddr</span><span class="p">.</span><span class="n">toPtr</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">char</span><span class="o">**</span><span class="p">)</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">Main</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">Error</span><span class="o">::</span><span class="n">success</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>流程：创建 JIT → 添加 IR 模块 → 查找 <code>main</code> → 转为函数指针并调用。</p>
+<h3 id="54-构建与测试">5.4 构建与测试
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">cd</span> Chapter09/jit
+</span></span><span class="line"><span class="cl">mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
+</span></span><span class="line"><span class="cl">cmake -G Ninja ..
+</span></span><span class="line"><span class="cl">ninja
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 生成 IR</span>
+</span></span><span class="line"><span class="cl">clang -S -emit-llvm main.c -o main.ll
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 执行</span>
+</span></span><span class="line"><span class="cl">./JIT main.ll
+</span></span><span class="line"><span class="cl"><span class="c1"># 输出: Hello world!</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="6-设计决策与扩展">6. 设计决策与扩展
+</h2><h3 id="61-惰性编译-vs-全量编译">6.1 惰性编译 vs 全量编译
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>策略</th>
+          <th>优点</th>
+          <th>缺点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>惰性编译</strong></td>
+          <td>启动快、按需编译</td>
+          <td>过程间优化受限（如内联）</td>
+      </tr>
+      <tr>
+          <td><strong>全量编译 + 优化</strong></td>
+          <td>代码质量高</td>
+          <td>启动较慢</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>本章自定义 JIT 选择全量编译 + O2 优化。</p>
+<h3 id="62-符号解析">6.2 符号解析
+</h3><ul>
+<li><code>DynamicLibrarySearchGenerator::GetForCurrentProcess()</code>：解析当前进程（含 C 库）中的符号。</li>
+<li>其他：<code>StaticLibraryDefinitionGenerator</code>、<code>addObjectFile()</code>、自定义 <code>DefinitionGenerator</code>。</li>
+</ul>
+<h3 id="63-cmake-配置要点">6.3 CMake 配置要点
+</h3><p><strong>lljit/CMakeLists.txt：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-24:31:Chapter09/lljit/CMakeLists.txt" data-lang="24:31:Chapter09/lljit/CMakeLists.txt"><span class="line"><span class="cl"><span class="nb">add_executable</span> <span class="p">(</span><span class="s">calc</span>
+</span></span><span class="line"><span class="cl">  <span class="s">Calc.cpp</span>
+</span></span><span class="line"><span class="cl">  <span class="s">CodeGen.cpp</span>
+</span></span><span class="line"><span class="cl">  <span class="s">Lexer.cpp</span>
+</span></span><span class="line"><span class="cl">  <span class="s">Parser.cpp</span>
+</span></span><span class="line"><span class="cl">  <span class="s">Sema.cpp</span>
+</span></span><span class="line"><span class="cl">  <span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">calc</span> <span class="s">PRIVATE</span> <span class="o">${</span><span class="nv">llvm_libs</span><span class="o">}</span><span class="p">)</span><span class="err">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>jit/CMakeLists.txt：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-13:14:Chapter09/jit/CMakeLists.txt" data-lang="13:14:Chapter09/jit/CMakeLists.txt"><span class="line"><span class="cl"><span class="nb">llvm_map_components_to_libnames</span><span class="p">(</span><span class="s">llvm_libs</span> <span class="s">Core</span> <span class="s">OrcJIT</span> <span class="s">Support</span> <span class="s">native</span><span class="p">)</span><span class="err">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>两个项目均依赖：Core、OrcJIT、Support、native。</p>
+<hr>
+<h2 id="7-总结">7. 总结
+</h2><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>主题</th>
+          <th>要点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>lli</strong></td>
+          <td>直接执行 IR，支持 <code>-load</code>、<code>-extra-object</code> 等加载外部符号</td>
+      </tr>
+      <tr>
+          <td><strong>LLJIT</strong></td>
+          <td>预配置 ORC JIT，适合快速集成</td>
+      </tr>
+      <tr>
+          <td><strong>JIT 计算器</strong></td>
+          <td>def/调用语法、JITtedFunctions 映射、calc_expr_func 包装、ResourceTracker 管理</td>
+      </tr>
+      <tr>
+          <td><strong>自定义 JIT</strong></td>
+          <td>ObjectLinking + IRCompile + IRTransform 分层，工厂方法创建，O2 优化</td>
+      </tr>
+      <tr>
+          <td><strong>ORC API</strong></td>
+          <td>ExecutionSession、JITDylib、ThreadSafeModule、lookup、addIRModule</td>
+      </tr>
+  </tbody>
+</table></div>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/compiler/">Compiler</a>
+        
+            <a href="/tags/llvm/">LLVM</a>
+        
+            <a href="/tags/llvm-17/">LLVM-17</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/learn-llvm-17-chapter01%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Learn-LLVM-17 chapter01学习笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/learn-llvm-17-chapter02%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Learn-LLVM-17 chapter02学习笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/learn-llvm-17-chapter03%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Learn-LLVM-17 chapter03学习笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/learn-llvm-17-chapter04%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Learn-LLVM-17 chapter04学习笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/learn-llvm-17-chapter05%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Learn-LLVM-17 chapter05学习笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
