@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>AI on SalmoneX Blog</title>
+        <link>https://Salmooo.github.io/categories/ai/</link>
+        <description>Recent content in AI on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright>
+        <lastBuildDate>Thu, 21 May 2026 17:00:00 +0800</lastBuildDate><atom:link href="https://Salmooo.github.io/categories/ai/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>AI系统：第1章 AI系统概述</title>
+        <link>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/</link>
+        <pubDate>Thu, 21 May 2026 17:00:00 +0800</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/</guid>
+        <description>&lt;h2 id=&#34;本章概览&#34;&gt;本章概览
+&lt;/h2&gt;&lt;p&gt;第 1 章作为全书的开篇，围绕 &lt;strong&gt;AI 系统的全貌&lt;/strong&gt; 展开，从 AI 的历史脉络、发展驱动力，到 AI 系统的架构组成，再到 AI 系统与 AI 算法之间的关系，为读者构建一个完整的 AI 系统知识框架。核心观点是：&lt;strong&gt;系统本身是随着上层应用的发展而不断演化的&lt;/strong&gt;，理解上层 AI 计算负载是做好系统设计的前提。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;11-ai-历史与现状&#34;&gt;1.1 AI 历史与现状
+&lt;/h2&gt;&lt;h3 id=&#34;111-ai-的应用领域&#34;&gt;1.1.1 AI 的应用领域
+&lt;/h3&gt;&lt;p&gt;深度学习是当前 AI 最活跃的分支，在三大方向取得了显著成果：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;领域&lt;/th&gt;
+          &lt;th&gt;核心任务&lt;/th&gt;
+          &lt;th&gt;典型应用&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;计算机视觉 (CV)&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;图像识别、物体检测与跟踪、人脸识别&lt;/td&gt;
+          &lt;td&gt;自动驾驶、内容审核、安防门禁&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;自然语言处理 (NLP)&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;文本分类、情感分析、机器翻译&lt;/td&gt;
+          &lt;td&gt;人机对话 (LLM)、摘要生成、信息检索&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;音频处理&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;音频信号分析、语音识别、音频生成&lt;/td&gt;
+          &lt;td&gt;语音助手、语音翻译、音乐创作&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;关键趋势&lt;/strong&gt;：从单纯的图像分类走向图像生成与三维重建；NLP 领域大语言模型（如 KIMI 等）风起云涌；音频处理走向端到端和跨模态融合。&lt;/p&gt;
+&lt;h3 id=&#34;112-ai-场景与行业应用&#34;&gt;1.1.2 AI 场景与行业应用
+&lt;/h3&gt;&lt;p&gt;AI 在以下行业深度落地：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;金融&lt;/strong&gt;：信用评估、风险管理、反欺诈&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;医疗&lt;/strong&gt;：疾病诊断、药物研发、病历管理&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;教育&lt;/strong&gt;：个性化教育、智能辅导、智能评估&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;互联网&lt;/strong&gt;：搜索排序、推荐系统、广告点击率预测&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;自动驾驶&lt;/strong&gt;：物体检测、路标识别、驾驶决策&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;启示&lt;/strong&gt;：成功部署 AI 的公司都持续投入 AI 基础设施和系统研发，形成&amp;quot;业务反哺数据 → 数据驱动模型 → 模型赋能业务&amp;quot;的良性循环。&lt;/p&gt;
+&lt;h3 id=&#34;113-ai-基本理论奠定&#34;&gt;1.1.3 AI 基本理论奠定
+&lt;/h3&gt;&lt;p&gt;神经网络经历四个发展阶段：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;萌芽兴奋期（1950s-1970s）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;1943 年：McCulloch-Pitts 首个神经网络计算模型&lt;/li&gt;
+&lt;li&gt;1957 年：Rosenblatt 发明感知机（Perceptron）——线性模型，二分类&lt;/li&gt;
+&lt;li&gt;1960 年：Widrow-Hoff 发明 Adaline/Madaline，首次尝试多层网络&lt;/li&gt;
+&lt;li&gt;1969 年：Minsky 证明单层感知机无法解决异或问题，研究陷入低谷&lt;/li&gt;
+&lt;li&gt;1974 年：Werbos 提出&lt;strong&gt;误差反向传播&lt;/strong&gt;，使多层神经网络训练成为可能&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;蓬勃发展期（1980s-2000s）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;1986 年：Dechter 将&amp;quot;深度学习&amp;quot;一词引入机器学习社区&lt;/li&gt;
+&lt;li&gt;1989 年：LeCun 提出 LeNet（卷积神经网络），使用反向传播训练&lt;/li&gt;
+&lt;li&gt;1990s 中期：SVM 成为主流，神经网络再次陷入低谷&lt;/li&gt;
+&lt;li&gt;2006 年：Hinton 提出深度信念网络（DBN）的预训练方法&lt;/li&gt;
+&lt;li&gt;2009 年：李飞飞团队发布 ImageNet 数据库&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;突破驱动繁荣期（2010s）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;2011 年：微软研究院的深度神经网络在语音识别上取得突破（错误率降低 32%），得益于高效的&lt;strong&gt;分布式训练系统&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;2012 年：Google 用 16000 个 CPU 训练神经网络识别猫&lt;/li&gt;
+&lt;li&gt;2012 年 9 月：AlexNet 赢得 ImageNet 竞赛，引入 ReLU、Dropout，使用 &lt;strong&gt;2 块 GTX 580 GPU&lt;/strong&gt; 训练 5-6 天&lt;/li&gt;
+&lt;li&gt;AlexNet 基于 CUDA API 编写 cuda-convnet，&lt;strong&gt;AI 系统与工具&amp;quot;呼之欲出&amp;quot;&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;大模型带来新机遇（2020s）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;2021 年：李飞飞等 100+ 学者发表 200 页报告 &lt;em&gt;On the Opportunities and Risk of Foundation Models&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;基础模型包括 BERT、GPT、CLIP、DALL·E 等&lt;/li&gt;
+&lt;li&gt;涉及技术子领域：模型训练/微调/评估、模型加速、数据处理、安全性、对齐（Alignment）等&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;12-ai-发展驱动力&#34;&gt;1.2 AI 发展驱动力
+&lt;/h2&gt;&lt;h3 id=&#34;关系梳理&#34;&gt;关系梳理
+&lt;/h3&gt;&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;AI&lt;/strong&gt; ⊃ &lt;strong&gt;机器学习&lt;/strong&gt; ⊃ &lt;strong&gt;深度学习&lt;/strong&gt; ≅ &lt;strong&gt;神经网络&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;书中后续以&amp;quot;AI&amp;quot;代指神经网络这一具体实现形态。&lt;/p&gt;
+&lt;h3 id=&#34;121-ai-学习方法&#34;&gt;1.2.1 AI 学习方法
+&lt;/h3&gt;&lt;p&gt;深度神经网络的开发工作模式：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;确定模型输入输出 → 设计与开发模型 → 训练(Training) → 推理(Inference)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;训练三步骤循环&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;前向传播 (Forward Propagation)&lt;/strong&gt;：输入 → 各层矩阵计算 → 输出 → 损失函数计算&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;反向传播 (Back Propagation)&lt;/strong&gt;：输出 → 输入，逐层求解损失函数对权重和偏差的梯度&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;梯度更新 (Weight Update)&lt;/strong&gt;：使用梯度下降算法，沿梯度方向更新权重参数&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;训练的本质：通过不断迭代，使用梯度下降优化算法，使 Loss 值越来越小，逼近数学意义上的最优。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;推理&lt;/strong&gt;：仅执行前向传播，输入待预测数据 → 模型计算 → 输出分类概率向量。&lt;/p&gt;
+&lt;h3 id=&#34;122-ai-模型现状&#34;&gt;1.2.2 AI 模型现状
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;模型类型&lt;/th&gt;
+          &lt;th&gt;特点&lt;/th&gt;
+          &lt;th&gt;典型应用&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;CNN&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;卷积层 + 池化层 + 全连接层&lt;/td&gt;
+          &lt;td&gt;计算机视觉&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;RNN/LSTM&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;适合时序数据预测&lt;/td&gt;
+          &lt;td&gt;NLP、语音识别、时序监控&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;GNN&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;学习图结构数据特征&lt;/td&gt;
+          &lt;td&gt;聚类、分类、预测&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Diffusion Model&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;马尔可夫链，学习数据潜结构&lt;/td&gt;
+          &lt;td&gt;图像去噪、图像生成&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;GAN&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;生成器与判别器对抗训练&lt;/td&gt;
+          &lt;td&gt;图像/音乐生成&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;新趋势&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;更大的模型&lt;/strong&gt;：Transformer 家族（BERT、GPT、LLAMA），层数和参数量持续增长，对内存管理和分布式训练提出挑战&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;更灵活的结构&lt;/strong&gt;：GNN、深度搜索树等，衍生出新算子和计算框架&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;更稀疏的模型&lt;/strong&gt;：MoE（混合专家）、Pathways，运行时更动态，驱动 JIT 编译和运行时优化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;更多样的训练方式&lt;/strong&gt;：扩散模型、深度强化学习，训练/推理/数据处理混合部署&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;123-ai-系统的出现&#34;&gt;1.2.3 AI 系统的出现
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;三大驱动力&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;大规模数据驱动&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;互联网公司通过用户积累海量数据（图像检索 ImageNet、移动应用推荐系统等）&lt;/li&gt;
+&lt;li&gt;数据量从 MNIST（6万样本）→ ImageNet（1600万样本）→ 互联网级（数亿）&lt;/li&gt;
+&lt;li&gt;影响：促使分布式训练和 AI 集群发展；要求 AI 框架具备更灵活的表达能力&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;AI 算法的进步&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;MNIST 上 CNN 错误率从接近 SVM → 0.23%（接近人类水平 0.2%）&lt;/li&gt;
+&lt;li&gt;ImageNet 上从 LeNet → AlexNet → Inception → ResNet → MobileNet NAS，错误率持续降低&lt;/li&gt;
+&lt;li&gt;演化的驱动力：更好的激活函数 + 更深更大的结构 + 更好的训练技巧&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;算力与体系结构进步&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;GPU 从图像专用 → GPGPU（通用 GPU 计算），对 SIMD/SIMT 并行算法加速显著&lt;/li&gt;
+&lt;li&gt;Google TPU：脉动阵列（Systolic Array），减少访存需求，提升计算密度&lt;/li&gt;
+&lt;li&gt;华为昇腾 NPU：达芬奇架构，3D Cube 设计，每时钟周期 4096 次 MAC 运算&lt;/li&gt;
+&lt;li&gt;NVIDIA Transformer Engine：在专用计算领域协同优化&lt;/li&gt;
+&lt;li&gt;性能提升路径：&lt;strong&gt;Scale Up&lt;/strong&gt;（单芯片迭代） + &lt;strong&gt;Scale Out&lt;/strong&gt;（AI 集群） + &lt;strong&gt;算法-硬件协同设计&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;13-ai-系统架构介绍&#34;&gt;1.3 AI 系统架构介绍
+&lt;/h2&gt;&lt;h3 id=&#34;131-ai-系统基础&#34;&gt;1.3.1 AI 系统基础
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;定义&lt;/strong&gt;：&lt;strong&gt;AI 系统&lt;/strong&gt; 是 AI 时代连接硬件和上层应用的中间层软硬件基础设施。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;类比传统三大基础软件（数据库、操作系统、中间件）在传统 IT 中的角色，AI 系统在 AI 时代承担类似功能。在某些语境中也被称为 &lt;strong&gt;AI Infra&lt;/strong&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;AI 全栈架构&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;┌──────────────────────────────────────┐
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│        AI 算法应用（CV/NLP/音频）       │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├──────────────────────────────────────┤
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│  AI 训练与推理框架（PyTorch/TF/MindSpore） │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├──────────────────────────────────────┤
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│  AI 编译与计算架构（TVM/XLA/LLVM）       │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├──────────────────────────────────────┤
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│  AI 硬件与体系结构（GPU/TPU/NPU/FPGA）   │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└──────────────────────────────────────┘
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;设计目标&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;高效的编程语言与工具链&lt;/strong&gt;：更具表达力的计算原语、端到端调试/实验工具、全生命周期管理&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;AI 任务系统级支持&lt;/strong&gt;：支持强化学习/自动化 ML 等新范式、可扩展计算能力、自动编译优化、云原生自动分布式化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;探索并解决新挑战&lt;/strong&gt;：动态图支持、稀疏计算加速、混合精度训练、多租户集群管理、跨平台推理部署&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;132-ai-系统组成&#34;&gt;1.3.2 AI 系统组成
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;概念层&lt;/th&gt;
+          &lt;th&gt;内容&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;AI 训练与推理框架&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;前端 API、中间表示 (IR)、自动微分、计算图构建、工具链、生命周期管理&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;AI 编译与计算架构&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;编译优化（算子融合/循环优化）、IR 多层次设计、算子调度执行、硬件接口抽象&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;AI 硬件与体系结构&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;AI 芯片（CPU/GPU/ASIC/FPGA/TPU/NPU）、资源池化调度、可扩展网络栈（RDMA/NVLink）&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;AI 编译器的四大特征&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;主前端语言：基于 Python AST 解析为计算图 IR，保留 Shape/Layout 特征&lt;/li&gt;
+&lt;li&gt;多层 IR 设计：兼顾易用性（上层抽象）与高性能（底层循环调度）&lt;/li&gt;
+&lt;li&gt;面向神经网络优化：以张量为基本数据类型，支持自动微分&lt;/li&gt;
+&lt;li&gt;DSA 芯片架构支持：面向专用 AI 加速芯片（区别于通用编译器如 LLVM）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;14-ai-系统与-ai-算法关系&#34;&gt;1.4 AI 系统与 AI 算法关系
+&lt;/h2&gt;&lt;h3 id=&#34;141-神经网络样例lenet5&#34;&gt;1.4.1 神经网络样例：LeNet5
+&lt;/h3&gt;&lt;p&gt;以 PyTorch 实现 LeNet5 为例，演示了完整的训练与测试流程：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;网络结构&lt;/strong&gt;：Conv2d → MaxPool2d → Conv2d → MaxPool2d → 三个 Linear 层&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;训练流程&lt;/strong&gt;：加载 MNIST 数据 → 前向传播 → 计算 Loss → 反向传播 → 梯度更新&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;推理流程&lt;/strong&gt;：加载模型 → 前向传播 → 输出预测&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;142-算子实现的系统问题&#34;&gt;1.4.2 算子实现的系统问题
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;算子 (Operator)&lt;/strong&gt;：AI 框架中对张量计算的基本单元，底层具体实现称为 &lt;strong&gt;Kernel&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;卷积计算可展开为 &lt;strong&gt;7 层嵌套循环&lt;/strong&gt;（batch × output_channel × input_channel × height × width × filter_height × filter_width）。&lt;/p&gt;
+&lt;p&gt;底层 Kernel 计算涉及的系统问题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;硬件加速&lt;/strong&gt;：矩阵乘是否为 NPU/GPU/TPU 的底层基本计算单元？&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;片上内存&lt;/strong&gt;：张量能否放入 L1/L2 Cache？不能则需要 Loop Tile 编译优化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;局部性利用&lt;/strong&gt;：空间局部性和时间局部性 → 编译调度循环执行&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;内存管理&lt;/strong&gt;：预估各层张量大小，设计内存分配与换入换出策略&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;运行时调度&lt;/strong&gt;：算子执行次序的调度管理&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;算法变换&lt;/strong&gt;：多层循环 → 更高效的矩阵计算（如 GEMM）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;143-ai-系统执行具体计算&#34;&gt;1.4.3 AI 系统执行具体计算
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;对比：有无 AI 框架的差距&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;实现方式&lt;/th&gt;
+          &lt;th&gt;LeNet5 代码量&lt;/th&gt;
+          &lt;th&gt;特点&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;cuDNN + CUDA API&lt;/td&gt;
+          &lt;td&gt;~1000 行&lt;/td&gt;
+          &lt;td&gt;手动管理内存、手动实现前向/反向/梯度更新&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;PyTorch&lt;/td&gt;
+          &lt;td&gt;~10+ 行&lt;/td&gt;
+          &lt;td&gt;声明式构建模型，框架自动处理一切&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;AI 框架提供的核心功能&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Python API 构建网络模型计算图&lt;/li&gt;
+&lt;li&gt;调用基本算子实现，大幅减少代码量&lt;/li&gt;
+&lt;li&gt;自动化内存管理，不暴露指针给用户&lt;/li&gt;
+&lt;li&gt;自动微分，自动构建反向传播计算图&lt;/li&gt;
+&lt;li&gt;调用/生成运行时优化代码&lt;/li&gt;
+&lt;li&gt;运行时并行优化，提升 NPU/GPU 利用率&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;小结&#34;&gt;小结
+&lt;/h2&gt;&lt;p&gt;第 1 章从宏观到微观，构建了 AI 系统的全景图：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;历史维度&lt;/strong&gt;：从感知机到大模型，AI 的发展由硬件算力和算法创新双轮驱动&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;驱动力维度&lt;/strong&gt;：大数据 + 算法突破 + 算力进步三要素催生了当前 AI 热潮&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;架构维度&lt;/strong&gt;：AI 系统 = 框架层 + 编译层 + 硬件层，层层抽象，协同优化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;实践维度&lt;/strong&gt;：AI 框架让算法工程师从上千行代码减少到十几行，生产力飞跃&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;核心启示&lt;/strong&gt;：看到 AI 算法飞速发展的同时，也要认识到底层系统对提升整个算法研发生产力的不可或缺作用。&lt;/p&gt;
+&lt;/blockquote&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
