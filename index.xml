@@ -7,333 +7,7 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en</language>
         <copyright>salmone</copyright>
-        <lastBuildDate>Thu, 21 May 2026 17:00:00 +0800</lastBuildDate><atom:link href="https://Salmooo.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>AI系统：第1章 AI系统概述</title>
-        <link>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/</link>
-        <pubDate>Thu, 21 May 2026 17:00:00 +0800</pubDate>
-        
-        <guid>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/</guid>
-        <description>&lt;h2 id=&#34;本章概览&#34;&gt;本章概览
-&lt;/h2&gt;&lt;p&gt;第 1 章作为全书的开篇，围绕 &lt;strong&gt;AI 系统的全貌&lt;/strong&gt; 展开，从 AI 的历史脉络、发展驱动力，到 AI 系统的架构组成，再到 AI 系统与 AI 算法之间的关系，为读者构建一个完整的 AI 系统知识框架。核心观点是：&lt;strong&gt;系统本身是随着上层应用的发展而不断演化的&lt;/strong&gt;，理解上层 AI 计算负载是做好系统设计的前提。&lt;/p&gt;
-&lt;hr&gt;
-&lt;h2 id=&#34;11-ai-历史与现状&#34;&gt;1.1 AI 历史与现状
-&lt;/h2&gt;&lt;h3 id=&#34;111-ai-的应用领域&#34;&gt;1.1.1 AI 的应用领域
-&lt;/h3&gt;&lt;p&gt;深度学习是当前 AI 最活跃的分支，在三大方向取得了显著成果：&lt;/p&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;领域&lt;/th&gt;
-          &lt;th&gt;核心任务&lt;/th&gt;
-          &lt;th&gt;典型应用&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;计算机视觉 (CV)&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;图像识别、物体检测与跟踪、人脸识别&lt;/td&gt;
-          &lt;td&gt;自动驾驶、内容审核、安防门禁&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;自然语言处理 (NLP)&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;文本分类、情感分析、机器翻译&lt;/td&gt;
-          &lt;td&gt;人机对话 (LLM)、摘要生成、信息检索&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;音频处理&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;音频信号分析、语音识别、音频生成&lt;/td&gt;
-          &lt;td&gt;语音助手、语音翻译、音乐创作&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;&lt;strong&gt;关键趋势&lt;/strong&gt;：从单纯的图像分类走向图像生成与三维重建；NLP 领域大语言模型（如 KIMI 等）风起云涌；音频处理走向端到端和跨模态融合。&lt;/p&gt;
-&lt;h3 id=&#34;112-ai-场景与行业应用&#34;&gt;1.1.2 AI 场景与行业应用
-&lt;/h3&gt;&lt;p&gt;AI 在以下行业深度落地：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;金融&lt;/strong&gt;：信用评估、风险管理、反欺诈&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;医疗&lt;/strong&gt;：疾病诊断、药物研发、病历管理&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;教育&lt;/strong&gt;：个性化教育、智能辅导、智能评估&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;互联网&lt;/strong&gt;：搜索排序、推荐系统、广告点击率预测&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;自动驾驶&lt;/strong&gt;：物体检测、路标识别、驾驶决策&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;strong&gt;启示&lt;/strong&gt;：成功部署 AI 的公司都持续投入 AI 基础设施和系统研发，形成&amp;quot;业务反哺数据 → 数据驱动模型 → 模型赋能业务&amp;quot;的良性循环。&lt;/p&gt;
-&lt;h3 id=&#34;113-ai-基本理论奠定&#34;&gt;1.1.3 AI 基本理论奠定
-&lt;/h3&gt;&lt;p&gt;神经网络经历四个发展阶段：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;萌芽兴奋期（1950s-1970s）&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;1943 年：McCulloch-Pitts 首个神经网络计算模型&lt;/li&gt;
-&lt;li&gt;1957 年：Rosenblatt 发明感知机（Perceptron）——线性模型，二分类&lt;/li&gt;
-&lt;li&gt;1960 年：Widrow-Hoff 发明 Adaline/Madaline，首次尝试多层网络&lt;/li&gt;
-&lt;li&gt;1969 年：Minsky 证明单层感知机无法解决异或问题，研究陷入低谷&lt;/li&gt;
-&lt;li&gt;1974 年：Werbos 提出&lt;strong&gt;误差反向传播&lt;/strong&gt;，使多层神经网络训练成为可能&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;蓬勃发展期（1980s-2000s）&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;1986 年：Dechter 将&amp;quot;深度学习&amp;quot;一词引入机器学习社区&lt;/li&gt;
-&lt;li&gt;1989 年：LeCun 提出 LeNet（卷积神经网络），使用反向传播训练&lt;/li&gt;
-&lt;li&gt;1990s 中期：SVM 成为主流，神经网络再次陷入低谷&lt;/li&gt;
-&lt;li&gt;2006 年：Hinton 提出深度信念网络（DBN）的预训练方法&lt;/li&gt;
-&lt;li&gt;2009 年：李飞飞团队发布 ImageNet 数据库&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;突破驱动繁荣期（2010s）&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;2011 年：微软研究院的深度神经网络在语音识别上取得突破（错误率降低 32%），得益于高效的&lt;strong&gt;分布式训练系统&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;2012 年：Google 用 16000 个 CPU 训练神经网络识别猫&lt;/li&gt;
-&lt;li&gt;2012 年 9 月：AlexNet 赢得 ImageNet 竞赛，引入 ReLU、Dropout，使用 &lt;strong&gt;2 块 GTX 580 GPU&lt;/strong&gt; 训练 5-6 天&lt;/li&gt;
-&lt;li&gt;AlexNet 基于 CUDA API 编写 cuda-convnet，&lt;strong&gt;AI 系统与工具&amp;quot;呼之欲出&amp;quot;&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;大模型带来新机遇（2020s）&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;2021 年：李飞飞等 100+ 学者发表 200 页报告 &lt;em&gt;On the Opportunities and Risk of Foundation Models&lt;/em&gt;&lt;/li&gt;
-&lt;li&gt;基础模型包括 BERT、GPT、CLIP、DALL·E 等&lt;/li&gt;
-&lt;li&gt;涉及技术子领域：模型训练/微调/评估、模型加速、数据处理、安全性、对齐（Alignment）等&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;hr&gt;
-&lt;h2 id=&#34;12-ai-发展驱动力&#34;&gt;1.2 AI 发展驱动力
-&lt;/h2&gt;&lt;h3 id=&#34;关系梳理&#34;&gt;关系梳理
-&lt;/h3&gt;&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;AI&lt;/strong&gt; ⊃ &lt;strong&gt;机器学习&lt;/strong&gt; ⊃ &lt;strong&gt;深度学习&lt;/strong&gt; ≅ &lt;strong&gt;神经网络&lt;/strong&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;书中后续以&amp;quot;AI&amp;quot;代指神经网络这一具体实现形态。&lt;/p&gt;
-&lt;h3 id=&#34;121-ai-学习方法&#34;&gt;1.2.1 AI 学习方法
-&lt;/h3&gt;&lt;p&gt;深度神经网络的开发工作模式：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;确定模型输入输出 → 设计与开发模型 → 训练(Training) → 推理(Inference)
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;&lt;strong&gt;训练三步骤循环&lt;/strong&gt;：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;&lt;strong&gt;前向传播 (Forward Propagation)&lt;/strong&gt;：输入 → 各层矩阵计算 → 输出 → 损失函数计算&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;反向传播 (Back Propagation)&lt;/strong&gt;：输出 → 输入，逐层求解损失函数对权重和偏差的梯度&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;梯度更新 (Weight Update)&lt;/strong&gt;：使用梯度下降算法，沿梯度方向更新权重参数&lt;/li&gt;
-&lt;/ol&gt;
-&lt;blockquote&gt;
-&lt;p&gt;训练的本质：通过不断迭代，使用梯度下降优化算法，使 Loss 值越来越小，逼近数学意义上的最优。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;&lt;strong&gt;推理&lt;/strong&gt;：仅执行前向传播，输入待预测数据 → 模型计算 → 输出分类概率向量。&lt;/p&gt;
-&lt;h3 id=&#34;122-ai-模型现状&#34;&gt;1.2.2 AI 模型现状
-&lt;/h3&gt;&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;模型类型&lt;/th&gt;
-          &lt;th&gt;特点&lt;/th&gt;
-          &lt;th&gt;典型应用&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;CNN&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;卷积层 + 池化层 + 全连接层&lt;/td&gt;
-          &lt;td&gt;计算机视觉&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;RNN/LSTM&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;适合时序数据预测&lt;/td&gt;
-          &lt;td&gt;NLP、语音识别、时序监控&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;GNN&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;学习图结构数据特征&lt;/td&gt;
-          &lt;td&gt;聚类、分类、预测&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;Diffusion Model&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;马尔可夫链，学习数据潜结构&lt;/td&gt;
-          &lt;td&gt;图像去噪、图像生成&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;GAN&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;生成器与判别器对抗训练&lt;/td&gt;
-          &lt;td&gt;图像/音乐生成&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;&lt;strong&gt;新趋势&lt;/strong&gt;：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;更大的模型&lt;/strong&gt;：Transformer 家族（BERT、GPT、LLAMA），层数和参数量持续增长，对内存管理和分布式训练提出挑战&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;更灵活的结构&lt;/strong&gt;：GNN、深度搜索树等，衍生出新算子和计算框架&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;更稀疏的模型&lt;/strong&gt;：MoE（混合专家）、Pathways，运行时更动态，驱动 JIT 编译和运行时优化&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;更多样的训练方式&lt;/strong&gt;：扩散模型、深度强化学习，训练/推理/数据处理混合部署&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;123-ai-系统的出现&#34;&gt;1.2.3 AI 系统的出现
-&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;三大驱动力&lt;/strong&gt;：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;大规模数据驱动&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;互联网公司通过用户积累海量数据（图像检索 ImageNet、移动应用推荐系统等）&lt;/li&gt;
-&lt;li&gt;数据量从 MNIST（6万样本）→ ImageNet（1600万样本）→ 互联网级（数亿）&lt;/li&gt;
-&lt;li&gt;影响：促使分布式训练和 AI 集群发展；要求 AI 框架具备更灵活的表达能力&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;AI 算法的进步&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;MNIST 上 CNN 错误率从接近 SVM → 0.23%（接近人类水平 0.2%）&lt;/li&gt;
-&lt;li&gt;ImageNet 上从 LeNet → AlexNet → Inception → ResNet → MobileNet NAS，错误率持续降低&lt;/li&gt;
-&lt;li&gt;演化的驱动力：更好的激活函数 + 更深更大的结构 + 更好的训练技巧&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;算力与体系结构进步&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;GPU 从图像专用 → GPGPU（通用 GPU 计算），对 SIMD/SIMT 并行算法加速显著&lt;/li&gt;
-&lt;li&gt;Google TPU：脉动阵列（Systolic Array），减少访存需求，提升计算密度&lt;/li&gt;
-&lt;li&gt;华为昇腾 NPU：达芬奇架构，3D Cube 设计，每时钟周期 4096 次 MAC 运算&lt;/li&gt;
-&lt;li&gt;NVIDIA Transformer Engine：在专用计算领域协同优化&lt;/li&gt;
-&lt;li&gt;性能提升路径：&lt;strong&gt;Scale Up&lt;/strong&gt;（单芯片迭代） + &lt;strong&gt;Scale Out&lt;/strong&gt;（AI 集群） + &lt;strong&gt;算法-硬件协同设计&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;hr&gt;
-&lt;h2 id=&#34;13-ai-系统架构介绍&#34;&gt;1.3 AI 系统架构介绍
-&lt;/h2&gt;&lt;h3 id=&#34;131-ai-系统基础&#34;&gt;1.3.1 AI 系统基础
-&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;定义&lt;/strong&gt;：&lt;strong&gt;AI 系统&lt;/strong&gt; 是 AI 时代连接硬件和上层应用的中间层软硬件基础设施。&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;类比传统三大基础软件（数据库、操作系统、中间件）在传统 IT 中的角色，AI 系统在 AI 时代承担类似功能。在某些语境中也被称为 &lt;strong&gt;AI Infra&lt;/strong&gt;。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;&lt;strong&gt;AI 全栈架构&lt;/strong&gt;：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;9
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;┌──────────────────────────────────────┐
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│        AI 算法应用（CV/NLP/音频）       │
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├──────────────────────────────────────┤
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│  AI 训练与推理框架（PyTorch/TF/MindSpore） │
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├──────────────────────────────────────┤
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│  AI 编译与计算架构（TVM/XLA/LLVM）       │
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├──────────────────────────────────────┤
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│  AI 硬件与体系结构（GPU/TPU/NPU/FPGA）   │
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└──────────────────────────────────────┘
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;&lt;strong&gt;设计目标&lt;/strong&gt;：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;&lt;strong&gt;高效的编程语言与工具链&lt;/strong&gt;：更具表达力的计算原语、端到端调试/实验工具、全生命周期管理&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;AI 任务系统级支持&lt;/strong&gt;：支持强化学习/自动化 ML 等新范式、可扩展计算能力、自动编译优化、云原生自动分布式化&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;探索并解决新挑战&lt;/strong&gt;：动态图支持、稀疏计算加速、混合精度训练、多租户集群管理、跨平台推理部署&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h3 id=&#34;132-ai-系统组成&#34;&gt;1.3.2 AI 系统组成
-&lt;/h3&gt;&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;概念层&lt;/th&gt;
-          &lt;th&gt;内容&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;AI 训练与推理框架&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;前端 API、中间表示 (IR)、自动微分、计算图构建、工具链、生命周期管理&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;AI 编译与计算架构&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;编译优化（算子融合/循环优化）、IR 多层次设计、算子调度执行、硬件接口抽象&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;strong&gt;AI 硬件与体系结构&lt;/strong&gt;&lt;/td&gt;
-          &lt;td&gt;AI 芯片（CPU/GPU/ASIC/FPGA/TPU/NPU）、资源池化调度、可扩展网络栈（RDMA/NVLink）&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;&lt;strong&gt;AI 编译器的四大特征&lt;/strong&gt;：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;主前端语言：基于 Python AST 解析为计算图 IR，保留 Shape/Layout 特征&lt;/li&gt;
-&lt;li&gt;多层 IR 设计：兼顾易用性（上层抽象）与高性能（底层循环调度）&lt;/li&gt;
-&lt;li&gt;面向神经网络优化：以张量为基本数据类型，支持自动微分&lt;/li&gt;
-&lt;li&gt;DSA 芯片架构支持：面向专用 AI 加速芯片（区别于通用编译器如 LLVM）&lt;/li&gt;
-&lt;/ol&gt;
-&lt;hr&gt;
-&lt;h2 id=&#34;14-ai-系统与-ai-算法关系&#34;&gt;1.4 AI 系统与 AI 算法关系
-&lt;/h2&gt;&lt;h3 id=&#34;141-神经网络样例lenet5&#34;&gt;1.4.1 神经网络样例：LeNet5
-&lt;/h3&gt;&lt;p&gt;以 PyTorch 实现 LeNet5 为例，演示了完整的训练与测试流程：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;网络结构&lt;/strong&gt;：Conv2d → MaxPool2d → Conv2d → MaxPool2d → 三个 Linear 层&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;训练流程&lt;/strong&gt;：加载 MNIST 数据 → 前向传播 → 计算 Loss → 反向传播 → 梯度更新&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;推理流程&lt;/strong&gt;：加载模型 → 前向传播 → 输出预测&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;142-算子实现的系统问题&#34;&gt;1.4.2 算子实现的系统问题
-&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;算子 (Operator)&lt;/strong&gt;：AI 框架中对张量计算的基本单元，底层具体实现称为 &lt;strong&gt;Kernel&lt;/strong&gt;。&lt;/p&gt;
-&lt;p&gt;卷积计算可展开为 &lt;strong&gt;7 层嵌套循环&lt;/strong&gt;（batch × output_channel × input_channel × height × width × filter_height × filter_width）。&lt;/p&gt;
-&lt;p&gt;底层 Kernel 计算涉及的系统问题：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;硬件加速&lt;/strong&gt;：矩阵乘是否为 NPU/GPU/TPU 的底层基本计算单元？&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;片上内存&lt;/strong&gt;：张量能否放入 L1/L2 Cache？不能则需要 Loop Tile 编译优化&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;局部性利用&lt;/strong&gt;：空间局部性和时间局部性 → 编译调度循环执行&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;内存管理&lt;/strong&gt;：预估各层张量大小，设计内存分配与换入换出策略&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;运行时调度&lt;/strong&gt;：算子执行次序的调度管理&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;算法变换&lt;/strong&gt;：多层循环 → 更高效的矩阵计算（如 GEMM）&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;143-ai-系统执行具体计算&#34;&gt;1.4.3 AI 系统执行具体计算
-&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;对比：有无 AI 框架的差距&lt;/strong&gt;&lt;/p&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;实现方式&lt;/th&gt;
-          &lt;th&gt;LeNet5 代码量&lt;/th&gt;
-          &lt;th&gt;特点&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;cuDNN + CUDA API&lt;/td&gt;
-          &lt;td&gt;~1000 行&lt;/td&gt;
-          &lt;td&gt;手动管理内存、手动实现前向/反向/梯度更新&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;PyTorch&lt;/td&gt;
-          &lt;td&gt;~10+ 行&lt;/td&gt;
-          &lt;td&gt;声明式构建模型，框架自动处理一切&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;&lt;strong&gt;AI 框架提供的核心功能&lt;/strong&gt;：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Python API 构建网络模型计算图&lt;/li&gt;
-&lt;li&gt;调用基本算子实现，大幅减少代码量&lt;/li&gt;
-&lt;li&gt;自动化内存管理，不暴露指针给用户&lt;/li&gt;
-&lt;li&gt;自动微分，自动构建反向传播计算图&lt;/li&gt;
-&lt;li&gt;调用/生成运行时优化代码&lt;/li&gt;
-&lt;li&gt;运行时并行优化，提升 NPU/GPU 利用率&lt;/li&gt;
-&lt;/ol&gt;
-&lt;hr&gt;
-&lt;h2 id=&#34;小结&#34;&gt;小结
-&lt;/h2&gt;&lt;p&gt;第 1 章从宏观到微观，构建了 AI 系统的全景图：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;历史维度&lt;/strong&gt;：从感知机到大模型，AI 的发展由硬件算力和算法创新双轮驱动&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;驱动力维度&lt;/strong&gt;：大数据 + 算法突破 + 算力进步三要素催生了当前 AI 热潮&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;架构维度&lt;/strong&gt;：AI 系统 = 框架层 + 编译层 + 硬件层，层层抽象，协同优化&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;实践维度&lt;/strong&gt;：AI 框架让算法工程师从上千行代码减少到十几行，生产力飞跃&lt;/li&gt;
-&lt;/ul&gt;
-&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;核心启示&lt;/strong&gt;：看到 AI 算法飞速发展的同时，也要认识到底层系统对提升整个算法研发生产力的不可或缺作用。&lt;/p&gt;
-&lt;/blockquote&gt;
-</description>
-        </item>
-        <item>
+        <lastBuildDate>Tue, 27 Feb 2024 17:29:29 +0800</lastBuildDate><atom:link href="https://Salmooo.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>MLIR Toy 教程学习笔记 - Chapter 1: Toy Language and AST</title>
         <link>https://Salmooo.github.io/p/mlir-toy-%E6%95%99%E7%A8%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-chapter-1-toy-language-and-ast/</link>
         <pubDate>Tue, 27 Feb 2024 17:29:29 +0800</pubDate>
@@ -19824,6 +19498,894 @@ equal：确定两个序列是否保存相同的值。&lt;/p&gt;
 &lt;li&gt;可信度：在证明系统的可信度方面，ACL2由于其严格的逻辑推理过程，可以提供非常高的可信度，它可以确保所证明的性质在所有可能的情况下都是正确的。而SAT证明只能证明当前给定模型的满足性，对模型的完整性和准确性有一定的依赖，如果模型存在错误或者不完整，得出的结果可能会出现问题。&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;总的来说，ACL2证明和SAT证明都是形式验证的重要工具，它们各有优点，适用于不同的场景。在实际应用中，可能需要根据问题的具体情况选择合适的方法。&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>AI系统：第1章 AI系统概述</title>
+        <link>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/</guid>
+        <description>&lt;h2 id=&#34;本章概览&#34;&gt;本章概览
+&lt;/h2&gt;&lt;p&gt;第 1 章作为全书的开篇，围绕 &lt;strong&gt;AI 系统的全貌&lt;/strong&gt; 展开，从 AI 的历史脉络、发展驱动力，到 AI 系统的架构组成，再到 AI 系统与 AI 算法之间的关系，为读者构建一个完整的 AI 系统知识框架。核心观点是：&lt;strong&gt;系统本身是随着上层应用的发展而不断演化的&lt;/strong&gt;，理解上层 AI 计算负载是做好系统设计的前提。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;11-ai-历史与现状&#34;&gt;1.1 AI 历史与现状
+&lt;/h2&gt;&lt;h3 id=&#34;111-ai-的应用领域&#34;&gt;1.1.1 AI 的应用领域
+&lt;/h3&gt;&lt;p&gt;深度学习是当前 AI 最活跃的分支，在三大方向取得了显著成果：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;领域&lt;/th&gt;
+          &lt;th&gt;核心任务&lt;/th&gt;
+          &lt;th&gt;典型应用&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;计算机视觉 (CV)&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;图像识别、物体检测与跟踪、人脸识别&lt;/td&gt;
+          &lt;td&gt;自动驾驶、内容审核、安防门禁&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;自然语言处理 (NLP)&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;文本分类、情感分析、机器翻译&lt;/td&gt;
+          &lt;td&gt;人机对话 (LLM)、摘要生成、信息检索&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;音频处理&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;音频信号分析、语音识别、音频生成&lt;/td&gt;
+          &lt;td&gt;语音助手、语音翻译、音乐创作&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;关键趋势&lt;/strong&gt;：从单纯的图像分类走向图像生成与三维重建；NLP 领域大语言模型（如 KIMI 等）风起云涌；音频处理走向端到端和跨模态融合。&lt;/p&gt;
+&lt;h3 id=&#34;112-ai-场景与行业应用&#34;&gt;1.1.2 AI 场景与行业应用
+&lt;/h3&gt;&lt;p&gt;AI 在以下行业深度落地：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;金融&lt;/strong&gt;：信用评估、风险管理、反欺诈&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;医疗&lt;/strong&gt;：疾病诊断、药物研发、病历管理&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;教育&lt;/strong&gt;：个性化教育、智能辅导、智能评估&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;互联网&lt;/strong&gt;：搜索排序、推荐系统、广告点击率预测&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;自动驾驶&lt;/strong&gt;：物体检测、路标识别、驾驶决策&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;启示&lt;/strong&gt;：成功部署 AI 的公司都持续投入 AI 基础设施和系统研发，形成&amp;quot;业务反哺数据 → 数据驱动模型 → 模型赋能业务&amp;quot;的良性循环。&lt;/p&gt;
+&lt;h3 id=&#34;113-ai-基本理论奠定&#34;&gt;1.1.3 AI 基本理论奠定
+&lt;/h3&gt;&lt;p&gt;神经网络经历四个发展阶段：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;萌芽兴奋期（1950s-1970s）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;1943 年：McCulloch-Pitts 首个神经网络计算模型&lt;/li&gt;
+&lt;li&gt;1957 年：Rosenblatt 发明感知机（Perceptron）——线性模型，二分类&lt;/li&gt;
+&lt;li&gt;1960 年：Widrow-Hoff 发明 Adaline/Madaline，首次尝试多层网络&lt;/li&gt;
+&lt;li&gt;1969 年：Minsky 证明单层感知机无法解决异或问题，研究陷入低谷&lt;/li&gt;
+&lt;li&gt;1974 年：Werbos 提出&lt;strong&gt;误差反向传播&lt;/strong&gt;，使多层神经网络训练成为可能&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;蓬勃发展期（1980s-2000s）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;1986 年：Dechter 将&amp;quot;深度学习&amp;quot;一词引入机器学习社区&lt;/li&gt;
+&lt;li&gt;1989 年：LeCun 提出 LeNet（卷积神经网络），使用反向传播训练&lt;/li&gt;
+&lt;li&gt;1990s 中期：SVM 成为主流，神经网络再次陷入低谷&lt;/li&gt;
+&lt;li&gt;2006 年：Hinton 提出深度信念网络（DBN）的预训练方法&lt;/li&gt;
+&lt;li&gt;2009 年：李飞飞团队发布 ImageNet 数据库&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;突破驱动繁荣期（2010s）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;2011 年：微软研究院的深度神经网络在语音识别上取得突破（错误率降低 32%），得益于高效的&lt;strong&gt;分布式训练系统&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;2012 年：Google 用 16000 个 CPU 训练神经网络识别猫&lt;/li&gt;
+&lt;li&gt;2012 年 9 月：AlexNet 赢得 ImageNet 竞赛，引入 ReLU、Dropout，使用 &lt;strong&gt;2 块 GTX 580 GPU&lt;/strong&gt; 训练 5-6 天&lt;/li&gt;
+&lt;li&gt;AlexNet 基于 CUDA API 编写 cuda-convnet，&lt;strong&gt;AI 系统与工具&amp;quot;呼之欲出&amp;quot;&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;大模型带来新机遇（2020s）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;2021 年：李飞飞等 100+ 学者发表 200 页报告 &lt;em&gt;On the Opportunities and Risk of Foundation Models&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;基础模型包括 BERT、GPT、CLIP、DALL·E 等&lt;/li&gt;
+&lt;li&gt;涉及技术子领域：模型训练/微调/评估、模型加速、数据处理、安全性、对齐（Alignment）等&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;12-ai-发展驱动力&#34;&gt;1.2 AI 发展驱动力
+&lt;/h2&gt;&lt;h3 id=&#34;关系梳理&#34;&gt;关系梳理
+&lt;/h3&gt;&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;AI&lt;/strong&gt; ⊃ &lt;strong&gt;机器学习&lt;/strong&gt; ⊃ &lt;strong&gt;深度学习&lt;/strong&gt; ≅ &lt;strong&gt;神经网络&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;书中后续以&amp;quot;AI&amp;quot;代指神经网络这一具体实现形态。&lt;/p&gt;
+&lt;h3 id=&#34;121-ai-学习方法&#34;&gt;1.2.1 AI 学习方法
+&lt;/h3&gt;&lt;p&gt;深度神经网络的开发工作模式：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;确定模型输入输出 → 设计与开发模型 → 训练(Training) → 推理(Inference)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;训练三步骤循环&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;前向传播 (Forward Propagation)&lt;/strong&gt;：输入 → 各层矩阵计算 → 输出 → 损失函数计算&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;反向传播 (Back Propagation)&lt;/strong&gt;：输出 → 输入，逐层求解损失函数对权重和偏差的梯度&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;梯度更新 (Weight Update)&lt;/strong&gt;：使用梯度下降算法，沿梯度方向更新权重参数&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;训练的本质：通过不断迭代，使用梯度下降优化算法，使 Loss 值越来越小，逼近数学意义上的最优。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;推理&lt;/strong&gt;：仅执行前向传播，输入待预测数据 → 模型计算 → 输出分类概率向量。&lt;/p&gt;
+&lt;h3 id=&#34;122-ai-模型现状&#34;&gt;1.2.2 AI 模型现状
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;模型类型&lt;/th&gt;
+          &lt;th&gt;特点&lt;/th&gt;
+          &lt;th&gt;典型应用&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;CNN&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;卷积层 + 池化层 + 全连接层&lt;/td&gt;
+          &lt;td&gt;计算机视觉&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;RNN/LSTM&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;适合时序数据预测&lt;/td&gt;
+          &lt;td&gt;NLP、语音识别、时序监控&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;GNN&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;学习图结构数据特征&lt;/td&gt;
+          &lt;td&gt;聚类、分类、预测&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Diffusion Model&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;马尔可夫链，学习数据潜结构&lt;/td&gt;
+          &lt;td&gt;图像去噪、图像生成&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;GAN&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;生成器与判别器对抗训练&lt;/td&gt;
+          &lt;td&gt;图像/音乐生成&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;新趋势&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;更大的模型&lt;/strong&gt;：Transformer 家族（BERT、GPT、LLAMA），层数和参数量持续增长，对内存管理和分布式训练提出挑战&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;更灵活的结构&lt;/strong&gt;：GNN、深度搜索树等，衍生出新算子和计算框架&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;更稀疏的模型&lt;/strong&gt;：MoE（混合专家）、Pathways，运行时更动态，驱动 JIT 编译和运行时优化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;更多样的训练方式&lt;/strong&gt;：扩散模型、深度强化学习，训练/推理/数据处理混合部署&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;123-ai-系统的出现&#34;&gt;1.2.3 AI 系统的出现
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;三大驱动力&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;大规模数据驱动&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;互联网公司通过用户积累海量数据（图像检索 ImageNet、移动应用推荐系统等）&lt;/li&gt;
+&lt;li&gt;数据量从 MNIST（6万样本）→ ImageNet（1600万样本）→ 互联网级（数亿）&lt;/li&gt;
+&lt;li&gt;影响：促使分布式训练和 AI 集群发展；要求 AI 框架具备更灵活的表达能力&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;AI 算法的进步&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;MNIST 上 CNN 错误率从接近 SVM → 0.23%（接近人类水平 0.2%）&lt;/li&gt;
+&lt;li&gt;ImageNet 上从 LeNet → AlexNet → Inception → ResNet → MobileNet NAS，错误率持续降低&lt;/li&gt;
+&lt;li&gt;演化的驱动力：更好的激活函数 + 更深更大的结构 + 更好的训练技巧&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;算力与体系结构进步&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;GPU 从图像专用 → GPGPU（通用 GPU 计算），对 SIMD/SIMT 并行算法加速显著&lt;/li&gt;
+&lt;li&gt;Google TPU：脉动阵列（Systolic Array），减少访存需求，提升计算密度&lt;/li&gt;
+&lt;li&gt;华为昇腾 NPU：达芬奇架构，3D Cube 设计，每时钟周期 4096 次 MAC 运算&lt;/li&gt;
+&lt;li&gt;NVIDIA Transformer Engine：在专用计算领域协同优化&lt;/li&gt;
+&lt;li&gt;性能提升路径：&lt;strong&gt;Scale Up&lt;/strong&gt;（单芯片迭代） + &lt;strong&gt;Scale Out&lt;/strong&gt;（AI 集群） + &lt;strong&gt;算法-硬件协同设计&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;13-ai-系统架构介绍&#34;&gt;1.3 AI 系统架构介绍
+&lt;/h2&gt;&lt;h3 id=&#34;131-ai-系统基础&#34;&gt;1.3.1 AI 系统基础
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;定义&lt;/strong&gt;：&lt;strong&gt;AI 系统&lt;/strong&gt; 是 AI 时代连接硬件和上层应用的中间层软硬件基础设施。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;类比传统三大基础软件（数据库、操作系统、中间件）在传统 IT 中的角色，AI 系统在 AI 时代承担类似功能。在某些语境中也被称为 &lt;strong&gt;AI Infra&lt;/strong&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;AI 全栈架构&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;┌──────────────────────────────────────┐
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│        AI 算法应用（CV/NLP/音频）       │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├──────────────────────────────────────┤
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│  AI 训练与推理框架（PyTorch/TF/MindSpore） │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├──────────────────────────────────────┤
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│  AI 编译与计算架构（TVM/XLA/LLVM）       │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├──────────────────────────────────────┤
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│  AI 硬件与体系结构（GPU/TPU/NPU/FPGA）   │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└──────────────────────────────────────┘
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;设计目标&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;高效的编程语言与工具链&lt;/strong&gt;：更具表达力的计算原语、端到端调试/实验工具、全生命周期管理&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;AI 任务系统级支持&lt;/strong&gt;：支持强化学习/自动化 ML 等新范式、可扩展计算能力、自动编译优化、云原生自动分布式化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;探索并解决新挑战&lt;/strong&gt;：动态图支持、稀疏计算加速、混合精度训练、多租户集群管理、跨平台推理部署&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;132-ai-系统组成&#34;&gt;1.3.2 AI 系统组成
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;概念层&lt;/th&gt;
+          &lt;th&gt;内容&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;AI 训练与推理框架&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;前端 API、中间表示 (IR)、自动微分、计算图构建、工具链、生命周期管理&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;AI 编译与计算架构&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;编译优化（算子融合/循环优化）、IR 多层次设计、算子调度执行、硬件接口抽象&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;AI 硬件与体系结构&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;AI 芯片（CPU/GPU/ASIC/FPGA/TPU/NPU）、资源池化调度、可扩展网络栈（RDMA/NVLink）&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;AI 编译器的四大特征&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;主前端语言：基于 Python AST 解析为计算图 IR，保留 Shape/Layout 特征&lt;/li&gt;
+&lt;li&gt;多层 IR 设计：兼顾易用性（上层抽象）与高性能（底层循环调度）&lt;/li&gt;
+&lt;li&gt;面向神经网络优化：以张量为基本数据类型，支持自动微分&lt;/li&gt;
+&lt;li&gt;DSA 芯片架构支持：面向专用 AI 加速芯片（区别于通用编译器如 LLVM）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;14-ai-系统与-ai-算法关系&#34;&gt;1.4 AI 系统与 AI 算法关系
+&lt;/h2&gt;&lt;h3 id=&#34;141-神经网络样例lenet5&#34;&gt;1.4.1 神经网络样例：LeNet5
+&lt;/h3&gt;&lt;p&gt;以 PyTorch 实现 LeNet5 为例，演示了完整的训练与测试流程：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;网络结构&lt;/strong&gt;：Conv2d → MaxPool2d → Conv2d → MaxPool2d → 三个 Linear 层&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;训练流程&lt;/strong&gt;：加载 MNIST 数据 → 前向传播 → 计算 Loss → 反向传播 → 梯度更新&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;推理流程&lt;/strong&gt;：加载模型 → 前向传播 → 输出预测&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;142-算子实现的系统问题&#34;&gt;1.4.2 算子实现的系统问题
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;算子 (Operator)&lt;/strong&gt;：AI 框架中对张量计算的基本单元，底层具体实现称为 &lt;strong&gt;Kernel&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;卷积计算可展开为 &lt;strong&gt;7 层嵌套循环&lt;/strong&gt;（batch × output_channel × input_channel × height × width × filter_height × filter_width）。&lt;/p&gt;
+&lt;p&gt;底层 Kernel 计算涉及的系统问题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;硬件加速&lt;/strong&gt;：矩阵乘是否为 NPU/GPU/TPU 的底层基本计算单元？&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;片上内存&lt;/strong&gt;：张量能否放入 L1/L2 Cache？不能则需要 Loop Tile 编译优化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;局部性利用&lt;/strong&gt;：空间局部性和时间局部性 → 编译调度循环执行&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;内存管理&lt;/strong&gt;：预估各层张量大小，设计内存分配与换入换出策略&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;运行时调度&lt;/strong&gt;：算子执行次序的调度管理&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;算法变换&lt;/strong&gt;：多层循环 → 更高效的矩阵计算（如 GEMM）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;143-ai-系统执行具体计算&#34;&gt;1.4.3 AI 系统执行具体计算
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;对比：有无 AI 框架的差距&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;实现方式&lt;/th&gt;
+          &lt;th&gt;LeNet5 代码量&lt;/th&gt;
+          &lt;th&gt;特点&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;cuDNN + CUDA API&lt;/td&gt;
+          &lt;td&gt;~1000 行&lt;/td&gt;
+          &lt;td&gt;手动管理内存、手动实现前向/反向/梯度更新&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;PyTorch&lt;/td&gt;
+          &lt;td&gt;~10+ 行&lt;/td&gt;
+          &lt;td&gt;声明式构建模型，框架自动处理一切&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;AI 框架提供的核心功能&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Python API 构建网络模型计算图&lt;/li&gt;
+&lt;li&gt;调用基本算子实现，大幅减少代码量&lt;/li&gt;
+&lt;li&gt;自动化内存管理，不暴露指针给用户&lt;/li&gt;
+&lt;li&gt;自动微分，自动构建反向传播计算图&lt;/li&gt;
+&lt;li&gt;调用/生成运行时优化代码&lt;/li&gt;
+&lt;li&gt;运行时并行优化，提升 NPU/GPU 利用率&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;小结&#34;&gt;小结
+&lt;/h2&gt;&lt;p&gt;第 1 章从宏观到微观，构建了 AI 系统的全景图：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;历史维度&lt;/strong&gt;：从感知机到大模型，AI 的发展由硬件算力和算法创新双轮驱动&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;驱动力维度&lt;/strong&gt;：大数据 + 算法突破 + 算力进步三要素催生了当前 AI 热潮&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;架构维度&lt;/strong&gt;：AI 系统 = 框架层 + 编译层 + 硬件层，层层抽象，协同优化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;实践维度&lt;/strong&gt;：AI 框架让算法工程师从上千行代码减少到十几行，生产力飞跃&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;核心启示&lt;/strong&gt;：看到 AI 算法飞速发展的同时，也要认识到底层系统对提升整个算法研发生产力的不可或缺作用。&lt;/p&gt;
+&lt;/blockquote&gt;
+</description>
+        </item>
+        <item>
+        <title>AI系统：第2章 AI计算体系</title>
+        <link>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC2%E7%AB%A0-ai%E8%AE%A1%E7%AE%97%E4%BD%93%E7%B3%BB/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC2%E7%AB%A0-ai%E8%AE%A1%E7%AE%97%E4%BD%93%E7%B3%BB/</guid>
+        <description>&lt;h2 id=&#34;本章概览&#34;&gt;本章概览
+&lt;/h2&gt;&lt;p&gt;如果说第1章是站在山顶俯瞰AI系统的全景地图，那第2章就是拿上放大镜，一头扎进AI计算的&amp;quot;地基&amp;quot;——&lt;strong&gt;芯片和计算体系&lt;/strong&gt;。这一章会带你搞清楚几个&amp;quot;硬核&amp;quot;问题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;AI芯片到底是什么？CPU、GPU、FPGA、ASIC 它们各自在AI这场大戏里扮演什么角色？&lt;/li&gt;
+&lt;li&gt;摩尔定律是不是真的&amp;quot;凉了&amp;quot;？后摩尔时代芯片架构该怎么玩？&lt;/li&gt;
+&lt;li&gt;神经网络里那些矩阵乘、卷积，到了芯片底层到底是怎么算的？&lt;/li&gt;
+&lt;li&gt;为什么模型要量化、要剪枝、要轻量化？这对芯片设计意味着什么？&lt;/li&gt;
+&lt;li&gt;如何用一张 Roofline 图，一眼看穿你的模型在特定芯片上是&amp;quot;算不动&amp;quot;还是&amp;quot;喂不饱&amp;quot;？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;别被这些术语吓到，咱们慢慢聊，你会发现硬件其实也没那么&amp;quot;硬&amp;quot;。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;21-引言ai芯片的前世今生&#34;&gt;2.1 引言：AI芯片的前世今生
+&lt;/h2&gt;&lt;h3 id=&#34;211-芯片--ai--&#34;&gt;2.1.1 芯片 + AI = ？
+&lt;/h3&gt;&lt;p&gt;先来一个灵魂拷问：&lt;strong&gt;什么是芯片？&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;说白了，芯片就是在半导体衬底上&amp;quot;雕刻&amp;quot;出的一堆电路，能让它实现特定功能。在半导体被发明之前，人类只能&amp;quot;用机械控制电&amp;quot;——笨重、低效；而半导体出现后，我们可以直接&amp;quot;用电来控制电&amp;quot;。芯片，这个小小的物理接口，一手托着物质世界，一手牵着数字世界，说它是两个世界之间的&amp;quot;唯一翻译官&amp;quot;也不为过。&lt;/p&gt;
+&lt;p&gt;那把&amp;quot;AI&amp;quot;和&amp;quot;芯片&amp;quot;放在一起呢？&lt;/p&gt;
+&lt;p&gt;AI的发展轨迹很有意思：早期因为算力不够、数据不够、算法也不够，AI一直处于&amp;quot;叫好不叫座&amp;quot;的状态。那时候大家图省事，拿现成的通用CPU跑AI任务——虽然性能不咋地，但胜在不用额外砸钱研发专用芯片。可随着深度学习越来越成熟、ChatGPT这种&amp;quot;核弹级&amp;quot;应用横空出世，通用芯片的性能瓶颈一下子就暴露了。于是，&lt;strong&gt;专为AI设计的ASIC芯片&lt;/strong&gt;就成了兵家必争之地。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;简单来说：AI越火，算力缺口越大 → 算力缺口越大，专用芯片需求越猛 → 芯片越猛，AI又能跑得更远。这是一个正向飞轮。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch2/ai_system.pdf-0048-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图2.1.1 AI芯片按技术架构分类&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;212-四类芯片四种打法&#34;&gt;2.1.2 四类芯片，四种打法
+&lt;/h3&gt;&lt;p&gt;按技术架构，AI芯片圈主要有四大流派，各有各的绝活：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;芯片类型&lt;/th&gt;
+          &lt;th&gt;一句话描述&lt;/th&gt;
+          &lt;th&gt;优势&lt;/th&gt;
+          &lt;th&gt;劣势&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;CPU&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;计算机的&amp;quot;瑞士军刀&amp;quot;&lt;/td&gt;
+          &lt;td&gt;逻辑控制强，什么AI模型都能跑&lt;/td&gt;
+          &lt;td&gt;并行计算弱，效率不高&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;GPU&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;&amp;ldquo;暴力计算&amp;quot;专家&lt;/td&gt;
+          &lt;td&gt;几千个核心并行干活，矩阵乘算得飞快&lt;/td&gt;
+          &lt;td&gt;功耗高，得CPU&amp;quot;伺候&amp;quot;着才能工作&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;FPGA&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;硬件界的&amp;quot;变形金刚&amp;rdquo;&lt;/td&gt;
+          &lt;td&gt;可重配置，灵活性极高，整数运算强&lt;/td&gt;
+          &lt;td&gt;编程门槛高，内存带宽不如GPU&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;ASIC&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;为AI&amp;quot;量身定制&amp;quot;&lt;/td&gt;
+          &lt;td&gt;性能最强、功耗最低&lt;/td&gt;
+          &lt;td&gt;研发周期长，烧钱，改不了&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;CPU&lt;/strong&gt; 走的是冯·诺依曼架构的老路子——取指、解码、执行、访存、写回，一步步来。它有大把缓存和复杂的控制逻辑，适合搞逻辑控制、串行计算，但面对AI这种&amp;quot;暴力并行&amp;quot;的需求就有点力不从心了。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;GPU&lt;/strong&gt; 则是另一个极端。它砍掉了大量数据预取和决策模块，把宝贵的芯片面积都给了计算单元（ALU），所以并行计算效率甩CPU好几条街。但GPU有个&amp;quot;公主病&amp;quot;——必须由CPU调度才能工作，而且功耗不小。后来人们把GPU的能力扩展到通用计算领域，就有了&lt;strong&gt;GPGPU&lt;/strong&gt;（通用GPU）。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;FPGA&lt;/strong&gt; 的思路最&amp;quot;野&amp;quot;：芯片里集成了海量基本门电路和存储器，用户通过更新配置文件来定义它们怎么连接。这意味着你可以针对不同算法做不同硬件设计！常用于深度学习推理阶段。国外的Xilinx、Altera是老大，国内复旦微电子、紫光同创也在追赶。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;ASIC&lt;/strong&gt; 是终极方案——需求定制、专门设计、特定强化。NPU（神经网络处理器）、TPU（张量处理器）都属于这一类。因为是为AI量身打造的，性能往往碾压GPU和CPU。现在国内外大多数AI芯片创业公司都在走这条路。&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch2/ai_system.pdf-0049-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图2.1.2 摩尔定律趋势&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;213-摩尔定律一个持续了半个世纪的预言&#34;&gt;2.1.3 摩尔定律：一个持续了半个世纪的&amp;quot;预言&amp;quot;
+&lt;/h3&gt;&lt;p&gt;1965年，英特尔创始人戈登·摩尔放了个&amp;quot;预言&amp;quot;：&lt;strong&gt;集成电路上的元器件数量，每隔18到24个月就会翻一倍，性能也跟着翻倍。&lt;/strong&gt; 换句话说，你花同样的钱，每两年就能买到性能翻倍的电脑。&lt;/p&gt;
+&lt;p&gt;这个&amp;quot;预言&amp;quot;居然奇迹般地兑现了半个多世纪，成了半导体行业的&amp;quot;黄金准则&amp;quot;。&lt;/p&gt;
+&lt;p&gt;但到了2017年，图灵奖得主 David Patterson 公开宣告：&amp;quot;&lt;strong&gt;摩尔定律真的结束了&lt;/strong&gt;，但计算机体系结构将迎来下一个黄金时代。&amp;quot; 现在我们已经进入&lt;strong&gt;后摩尔时代&lt;/strong&gt;——虽然制程工艺还在往前拱，但翻倍的节奏已经越来越慢了。&lt;/p&gt;
+&lt;p&gt;从芯片架构的演进来看（图2.1.3），这条路走得相当精彩：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;单核CPU → 多核CPU → 多核GPU/NPU → 超异构集群体系
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch2/ai_system.pdf-0050-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图2.1.3 芯片架构演进历程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;超异构集群&lt;/strong&gt;是目前的终极形态——把CPU、GPU、NPU等各种处理器通过高速网络捏在一起，根据任务需求动态调配资源。这就像一支乐团，不同乐器各司其职，指挥（调度系统）负责让它们和谐演奏。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;正如书中所说：&amp;ldquo;加油吧，下一个黄金时代的从业者们！&amp;rdquo;  这句话送给所有在AI芯片领域摸爬滚打的人。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;22-ai-计算模式算法怎样塑造芯片&#34;&gt;2.2 AI 计算模式：算法怎样&amp;quot;塑造&amp;quot;芯片
+&lt;/h2&gt;&lt;p&gt;搞清楚了芯片有哪些类型，接下来我们看看AI算法对芯片设计提出了哪些&amp;quot;奇葩&amp;quot;需求。毕竟，&lt;strong&gt;不理解上层计算负载，就没法做好底层硬件设计&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;221-经典模型结构神经网络长什么样&#34;&gt;2.2.1 经典模型结构：神经网络长什么样
+&lt;/h3&gt;&lt;p&gt;神经网络这个东西，说白了就是模仿人脑搞出来的一堆&amp;quot;人工神经元&amp;quot;。它们分层排列，每个神经元和下一层的所有神经元都连着，每条连线上有个可调节的&lt;strong&gt;权重&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;一个神经网络模型由这些基本组件构成：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;神经元（Neuron）&lt;/strong&gt;：基本计算单元，说白了就是模型里的权重参数&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;激活函数（Activation）&lt;/strong&gt;：给输出加&amp;quot;非线性&amp;quot;调料——没有它，无论堆多少层，本质上还是个线性变换。常见的有 Sigmoid、ReLU、Tanh&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;前向传播&lt;/strong&gt;：数据从输入层一路&amp;quot;流&amp;quot;到输出层&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;反向传播&lt;/strong&gt;：从输出端往回算梯度，告诉每个权重&amp;quot;你该往哪个方向调整&amp;quot;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;损失函数（Loss）&lt;/strong&gt;：衡量&amp;quot;你预测的&amp;quot;和&amp;quot;真实的&amp;quot;差多远&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;优化算法&lt;/strong&gt;：梯度下降那一套，决定权重怎么更新&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;一个有趣的数字：神经网络中 &lt;strong&gt;90% 以上的计算量都是乘加操作（MACs）&lt;/strong&gt;，也就是&amp;quot;权重求和&amp;quot;。所以芯片设计的核心命题之一就是：&lt;strong&gt;如何高效做乘加。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch2/ai_system.pdf-0052-11.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图2.2.2 经典CNN结构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;神经网络的诞生分为两个阶段：&lt;strong&gt;训练&lt;/strong&gt;和&lt;strong&gt;推理&lt;/strong&gt;。训练阶段算力消耗大、耗时长，通常在云端服务器进行；推理阶段则要求响应快、资源省，可能在手机、摄像头等边缘设备上跑。所以很多芯片公司打的第一仗往往是&amp;quot;推理芯片&amp;quot;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;主流网络结构&lt;/strong&gt;有以下几种：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;全连接层（FC）&lt;/strong&gt;：每个神经元和上一层所有神经元相连，密集得像个&amp;quot;交际花&amp;quot;。通常放网络最后几层做分类。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;卷积层（Conv）&lt;/strong&gt;：用可学习的卷积核在输入上&amp;quot;滑动扫描&amp;quot;，提取局部特征。参数共享是它的精髓——同一个卷积核扫遍整张图，参数量大减。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;循环神经网络（RNN/LSTM/GRU）&lt;/strong&gt;：专门处理序列数据，有&amp;quot;记忆&amp;quot;能力。但传统RNN有梯度消失的问题，LSTM用&amp;quot;门控机制&amp;quot;解决了这个痛点。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;注意力机制（Attention）&lt;/strong&gt;：2017年 Transformer 架构的核心组件。让模型学会&amp;quot;该看哪里&amp;quot;，彻底改变了NLP和CV的格局。现在的大模型（GPT、LLAMA）底层都是它。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;从芯片设计的角度看：你得同时支持卷积/全连接这种&lt;strong&gt;计算密集型&lt;/strong&gt;算子，也要支持 Softmax、LayerNorm 这种&lt;strong&gt;访存密集型&lt;/strong&gt;算子。这就是为什么AI芯片的设计如此复杂——它不能偏科。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;222-模型量化与剪枝给模型减肥&#34;&gt;2.2.2 模型量化与剪枝：给模型&amp;quot;减肥&amp;quot;
+&lt;/h3&gt;&lt;p&gt;训练完的大模型动不动就几百GB，要把它塞进手机或者嵌入式设备里，怎么办？两条路：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;量化（Quantization）&lt;/strong&gt;：把高精度数据（比如FP32）转成低精度（比如INT8）。就像把高清照片压成缩略图——画质差了点，但文件小了几十倍。&lt;/p&gt;
+&lt;p&gt;好处很实在：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;省内存&lt;/strong&gt;：数据位宽降了，存储需求自然降了&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;省算力&lt;/strong&gt;：两个INT8相乘比两个FP32相乘，硬件开销小得多&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;省电&lt;/strong&gt;：数据搬移少了，功耗就降了——对于电池供电的设备，这就是命&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;部署灵活&lt;/strong&gt;：更容易在资源受限的设备上跑&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;剪枝（Pruning）&lt;/strong&gt;：找出模型中&amp;quot;不重要&amp;quot;的权重，咔嚓一刀剪掉。就像修剪一棵树，去掉多余的枝叶，树形更紧凑。剪完后模型体积变小、计算量减少，精度却不会降太多。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch2/ai_system.pdf-0059-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图2.2.8 模型量化与剪枝对比&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;从芯片设计角度思考&lt;/strong&gt;：既然量化和剪枝是趋势，芯片就该：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;支持多种位宽的计算单元（FP8、INT8、INT4 都来一套）&lt;/li&gt;
+&lt;li&gt;提供多种存储格式（FP16、BF16 按需选择）&lt;/li&gt;
+&lt;li&gt;内置稀疏计算加速逻辑（英伟达A100就干了这事）&lt;/li&gt;
+&lt;li&gt;加入数据压缩模块，减轻内存带宽压力&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;223-轻量化网络用小模型撬动大世界&#34;&gt;2.2.3 轻量化网络：用小模型撬动大世界
+&lt;/h3&gt;&lt;p&gt;把神经网络跑在手机上，不能光靠量化和剪枝——网络本身的设计也得&amp;quot;瘦身&amp;quot;。这就催生了&lt;strong&gt;轻量化网络&lt;/strong&gt;的设计方向。&lt;/p&gt;
+&lt;p&gt;两个关键指标：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;参数量（Params）&lt;/strong&gt;：模型里有多少个可学习的权重&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;计算量（FLOPs）&lt;/strong&gt;：需要多少次浮点运算&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;轻量化的三大设计思路：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;减少内存空间&lt;/strong&gt;：用两个 3×3 卷积核替代一个 5×5 卷积核，参数量直接降到原来的 18/25，还能保持相同的感受野。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;减少通道数&lt;/strong&gt;：MobileNet 搞出了&lt;strong&gt;深度可分离卷积&lt;/strong&gt;（Depthwise + Pointwise），一个 3×3×16×32 的标准卷积（4608个参数）可以被替换成 3×3×16 + 1×1×16×32（656个参数），少了整整7倍！&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;复用特征图&lt;/strong&gt;：DenseNet 和 GhostNet 的思路——前面层算出来的特征图，后面层接着用，别浪费。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这些设计花样繁多，对芯片来说意味着：你得支持各种奇形怪状的卷积核尺寸、不同的卷积方式（Depthwise、分组卷积、通道混洗……），以及跳跃连接、密集连接这些花式连接方式。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;224-分布式并行大模型的分而治之&#34;&gt;2.2.4 分布式并行：大模型的&amp;quot;分而治之&amp;quot;
+&lt;/h3&gt;&lt;p&gt;大模型动辄几千亿参数，单张卡根本装不下。于是有了&lt;strong&gt;分布式并行&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;先了解几个通信&amp;quot;暗号&amp;quot;（集合通信原语）：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;All-Reduce&lt;/strong&gt;：所有人把数据汇总，算完再广播回去。训练时同步梯度就用它。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;All-Gather&lt;/strong&gt;：每个人的数据都广播给所有人。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Broadcast&lt;/strong&gt;：一个人广播，其他人接收。常用于分发模型参数。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Reduce / Scatter / Gather&lt;/strong&gt;：各种收集和分发花样。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;并行策略分两大类：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;数据并行&lt;/strong&gt;：同一个模型复制到多张卡上，每张卡吃不同的数据，各自算梯度，然后同步。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;DP（最简单）→ DDP（分布式版本）→ FSDP（连优化器状态都分片，极致省内存）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;模型并行&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;张量并行&lt;/strong&gt;：把一层的大矩阵拆成几块，分到不同卡上同时算&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;流水并行&lt;/strong&gt;：不同层分给不同卡，像流水线一样接力处理&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;从芯片设计角度看：需要高带宽低延时通信、灵活的计算资源调度、以及端到端的优化（比如英伟达的 Transformer Engine 就是专为大模型定制的）。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;23-关键设计指标如何打分一款ai芯片&#34;&gt;2.3 关键设计指标：如何&amp;quot;打分&amp;quot;一款AI芯片
+&lt;/h2&gt;&lt;h3 id=&#34;231-先把行话学会&#34;&gt;2.3.1 先把&amp;quot;行话&amp;quot;学会
+&lt;/h3&gt;&lt;p&gt;看AI芯片发布会，总会遇到这些单位：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;缩写&lt;/th&gt;
+          &lt;th&gt;全称&lt;/th&gt;
+          &lt;th&gt;含义&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;OPS&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Operations Per Second&lt;/td&gt;
+          &lt;td&gt;每秒操作数，1 TOPS = 每秒一万亿次&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;FLOPS&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Floating Point Ops/Sec&lt;/td&gt;
+          &lt;td&gt;每秒浮点操作数&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;MACs&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Multiply-Accumulate&lt;/td&gt;
+          &lt;td&gt;乘加操作，1 MAC ≈ 2 FLOPs&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;FLOPs&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Floating Point Operations&lt;/td&gt;
+          &lt;td&gt;浮点运算次数（衡量模型复杂度）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;MAC&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Memory Access Cost&lt;/td&gt;
+          &lt;td&gt;内存占用量（衡量模型内存开销）&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;232-六大关键指标&#34;&gt;2.3.2 六大关键指标
+&lt;/h3&gt;&lt;p&gt;评价一款AI芯片，不能只看算力——得全方位考量：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;精度（Accuracy）&lt;/strong&gt;：包括&amp;quot;计算精度&amp;quot;（支持FP32还是FP16？）和&amp;quot;模型效果精度&amp;quot;（跑ImageNet准确率多少？）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;吞吐量（Throughput）&lt;/strong&gt;：单位时间处理多少数据，和核心数强相关&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;时延（Latency）&lt;/strong&gt;：从输入到输出的等待时间——自动驾驶场景里，多1ms可能就是生死之差&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;能耗（Energy）&lt;/strong&gt;：高性能通常意味着高功耗，移动设备和IoT场景必须精打细算&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;价格（Cost）&lt;/strong&gt;：硬件自身成本 + 系统集成成本 + 软件生态成本，一笔都不能少算&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;易用性（Flexibility）&lt;/strong&gt;：文档齐不齐？SDK好不好用？调试工具方不方便？这些&amp;quot;软实力&amp;quot;往往决定芯片能不能落地&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;233-两个核心优化方向&#34;&gt;2.3.3 两个核心优化方向
+&lt;/h3&gt;&lt;p&gt;芯片设计的核心矛盾可以归结为两个字：&lt;strong&gt;MACs&lt;/strong&gt; 和 &lt;strong&gt;PE&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;优化 MACs&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;减少没用的 MACs → 增加稀疏计算硬件结构&lt;/li&gt;
+&lt;li&gt;降低单次 MACs 执行时间 → 提频、减指令开销&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;优化 PE（处理单元）&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;增加 PE 数量 → 更先进的制程工艺，同样面积塞更多计算单元&lt;/li&gt;
+&lt;li&gt;提高 PE 利用率 → 软硬件协同，让每个PE都&amp;quot;忙起来&amp;quot;，别闲着&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;234-roofline-model一张图看透性能瓶颈&#34;&gt;2.3.4 Roofline Model：一张图看透性能瓶颈
+&lt;/h3&gt;&lt;p&gt;有了芯片参数和模型参数，怎么快速判断瓶颈在哪？&lt;strong&gt;Roofline Model&lt;/strong&gt; 是绝佳工具。&lt;/p&gt;
+&lt;p&gt;核心概念——&lt;strong&gt;算术强度（Arithmetic Intensity）&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;\[
+\text{算术强度} = \frac{\text{模型运算量 (ops)}}{\text{模型内存占用量 (bytes)}}
+\]&lt;/p&gt;
+&lt;p&gt;把这个值和芯片的&lt;strong&gt;操作字节比&lt;/strong&gt;（算力÷带宽）对比：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果算术强度 &lt;strong&gt;低&lt;/strong&gt; → &lt;strong&gt;带宽受限&lt;/strong&gt;（数据搬得太慢，计算单元在&amp;quot;等米下锅&amp;quot;）&lt;/li&gt;
+&lt;li&gt;如果算术强度 &lt;strong&gt;高&lt;/strong&gt; → &lt;strong&gt;算力受限&lt;/strong&gt;（计算单元忙不过来）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch2/ai_system.pdf-0071-12.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图2.3.1 Roofline Model&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;举个例子：V100 GPU 的 FP16 峰值算力 125 TFLOPS，片外带宽 900 GB/s。对于一个 (8192, 128, 8192) 的矩阵乘，算术强度 ≈ 124.1，低于操作字节比 138.9 → &lt;strong&gt;带宽受限&lt;/strong&gt;。但如果矩阵变成 (8192, 8192, 8192)，算术强度飙到 2730 → &lt;strong&gt;算力受限&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch2/ai_system.pdf-0072-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图2.3.2 Roofline性能仿真七步法&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;Roofline 图上的每一步&amp;quot;爬升&amp;quot;都对应着一种优化手段——调软件策略、加PE数量、扩内存容量、提带宽……这张图就是芯片性能优化的&amp;quot;藏宝图&amp;quot;。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;24-核心计算之矩阵乘ai芯片的心跳&#34;&gt;2.4 核心计算之矩阵乘：AI芯片的&amp;quot;心跳&amp;quot;
+&lt;/h2&gt;&lt;h3 id=&#34;241-卷积--矩阵乘&#34;&gt;2.4.1 卷积 ≈ 矩阵乘
+&lt;/h3&gt;&lt;p&gt;说出来你可能不信：卷积操作本质上就是一个矩阵乘法。&lt;/p&gt;
+&lt;p&gt;通过一个叫 &lt;strong&gt;Im2Col&lt;/strong&gt;（图像转列）的操作，把输入特征图按照卷积窗口重新排列，卷积核也排成矩阵，然后——噔噔，卷积就变成了矩阵乘！&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch2/ai_system.pdf-0073-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图2.4.1 卷积到矩阵乘的转换&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;为什么要费劲做这个转换？因为矩阵乘是计算机科学里被研究得最透彻、优化得最极致的运算之一。把卷积变成矩阵乘，就能继承几十年的优化成果。&lt;/p&gt;
+&lt;h3 id=&#34;242-分块tiling大矩阵的化整为零&#34;&gt;2.4.2 分块（Tiling）：大矩阵的&amp;quot;化整为零&amp;quot;
+&lt;/h3&gt;&lt;p&gt;转换后的矩阵往往大得离谱，芯片里的内存根本放不下。怎么办？&lt;strong&gt;分块&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;原理很简单：把大矩阵切成一个个小块，每次只加载一小块到片上缓存，算完一部分结果再加载下一块。这就像吃披萨——谁也不会整张往嘴里塞，都是一片一片来。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch2/ai_system.pdf-0075-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图2.4.3 矩阵乘分块示意&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;分块的妙处在于&lt;strong&gt;数据复用&lt;/strong&gt;：一块数据加载到离计算单元最近的缓存后，可以被反复使用多次，极大减少了对外部内存的访问。这就是&amp;quot;用空间换时间&amp;quot;的经典玩法。&lt;/p&gt;
+&lt;h3 id=&#34;243-矩阵乘库与优化&#34;&gt;2.4.3 矩阵乘库与优化
+&lt;/h3&gt;&lt;p&gt;CPU上有 OpenBLAS、Intel MKL，GPU上有 cuBLAS、cuDNN——这些都是专门为矩阵乘做了极致优化的库。它们的核心逻辑分两步：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;识别输入矩阵的形状&lt;/li&gt;
+&lt;li&gt;从&amp;quot;武器库&amp;quot;里选最优的 Kernel 来执行&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch2/ai_system.pdf-0076-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图2.4.4 矩阵乘多级缓存优化&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;矩阵乘优化的招数总结：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;优化方向&lt;/th&gt;
+          &lt;th&gt;具体手段&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;循环优化&lt;/td&gt;
+          &lt;td&gt;调循环顺序、改善缓存命中率&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;分块矩阵乘&lt;/td&gt;
+          &lt;td&gt;大矩阵切小块，降低复杂度、利用缓存&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;SIMD指令&lt;/td&gt;
+          &lt;td&gt;SSE/AVX，一条指令同时处理多个数据&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;SIMT多线程&lt;/td&gt;
+          &lt;td&gt;多核并行，任务拆分&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;算法改进&lt;/td&gt;
+          &lt;td&gt;Strassen算法、FFT变换等&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;硬件层面的终极目标就两条：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;让每条指令执行更多的 MACs（SIMD/Tensor Core）&lt;/li&gt;
+&lt;li&gt;在同样带宽下，每个时钟周期执行更多 MACs（低比特计算，比如8bit MACs 比 32bit 多4倍）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;25-计算之比特位宽位宽越小世界越大&#34;&gt;2.5 计算之比特位宽：位宽越小，世界越大
+&lt;/h2&gt;&lt;h3 id=&#34;251-数据在计算机里长什么样&#34;&gt;2.5.1 数据在计算机里长什么样
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;整数&lt;/strong&gt;用二进制补码表示，最高位是符号位（0正1负）。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;浮点数&lt;/strong&gt;遵循 IEEE 754 标准，由三部分组成：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;符号位（S）&lt;/strong&gt;：1 bit，管正负&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;指数位（E）&lt;/strong&gt;：决定数值范围有多大&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;尾数位（M）&lt;/strong&gt;：决定小数点后有多精确&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch2/ai_system.pdf-0078-16.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图2.5.1 单精度浮点数表示&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;一个单精度浮点数（FP32）= 1位符号 + 8位指数 + 23位尾数 = 32位。而双精度（FP64）则扩展到 1+11+52=64位，精度更高，范围更大。&lt;/p&gt;
+&lt;h3 id=&#34;252-ai模型里的数据类型全家桶&#34;&gt;2.5.2 AI模型里的&amp;quot;数据类型全家桶&amp;quot;
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch2/ai_system.pdf-0079-12.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图2.5.2 AI数据类型全景&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;来看看AI领域常用的数据类型：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;类型&lt;/th&gt;
+          &lt;th&gt;位宽&lt;/th&gt;
+          &lt;th&gt;特点&lt;/th&gt;
+          &lt;th&gt;适用场景&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;FP32&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;32bit&lt;/td&gt;
+          &lt;td&gt;单精度，范围大&lt;/td&gt;
+          &lt;td&gt;训练标配，精度有保障&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;TF32&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;19bit&lt;/td&gt;
+          &lt;td&gt;英伟达搞的&amp;quot;缩水版FP32&amp;quot;，砍了13位尾数&lt;/td&gt;
+          &lt;td&gt;A100开始支持，训练加速&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;FP16&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;16bit&lt;/td&gt;
+          &lt;td&gt;半精度，范围较窄&lt;/td&gt;
+          &lt;td&gt;混合精度训练，省显存&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;BF16&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;16bit&lt;/td&gt;
+          &lt;td&gt;指数位和FP32一样宽（8位），动态范围大&lt;/td&gt;
+          &lt;td&gt;大模型训练首选，Transformer友好&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;FP8&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;8bit&lt;/td&gt;
+          &lt;td&gt;H100新品，E4M3和E5M2两种口味&lt;/td&gt;
+          &lt;td&gt;LLM领域探索中，极致的省&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;INT8&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;8bit&lt;/td&gt;
+          &lt;td&gt;整数，简单粗暴&lt;/td&gt;
+          &lt;td&gt;推理量化，嵌入式部署&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;BF16 是个有趣的设计：直接把 FP32 的前16位截下来用。指数位宽和 FP32 一样（都是8位），所以动态范围不变，但精度低了一点。这个&amp;quot;简单粗暴&amp;quot;的设计在 Transformer 大模型上表现意外地好。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;253-为什么要降低位宽一个数字就懂了&#34;&gt;2.5.3 为什么要降低位宽？一个数字就懂了
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;操作&lt;/th&gt;
+          &lt;th&gt;能耗 (pJ)&lt;/th&gt;
+          &lt;th&gt;面积 (μm²)&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;8bit 加法&lt;/td&gt;
+          &lt;td&gt;0.03&lt;/td&gt;
+          &lt;td&gt;36&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;32bit 加法&lt;/td&gt;
+          &lt;td&gt;0.1&lt;/td&gt;
+          &lt;td&gt;127&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;16bit FP 加法&lt;/td&gt;
+          &lt;td&gt;0.4&lt;/td&gt;
+          &lt;td&gt;1360&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;32bit FP 加法&lt;/td&gt;
+          &lt;td&gt;0.9&lt;/td&gt;
+          &lt;td&gt;4184&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;8bit 乘法&lt;/td&gt;
+          &lt;td&gt;0.2&lt;/td&gt;
+          &lt;td&gt;282&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;32bit 乘法&lt;/td&gt;
+          &lt;td&gt;3.1&lt;/td&gt;
+          &lt;td&gt;3495&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;32bit SRAM 读取&lt;/td&gt;
+          &lt;td&gt;5&lt;/td&gt;
+          &lt;td&gt;N/A&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;32bit DRAM 读取&lt;/td&gt;
+          &lt;td&gt;640&lt;/td&gt;
+          &lt;td&gt;N/A&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;看到没？32bit 乘法的能耗是 8bit 乘法的 15 倍，面积是 12 倍！而从 DRAM 读一次数据的能耗（640 pJ）更是比算一次 8bit 加法（0.03 pJ）高了 2 万倍。&lt;/p&gt;
+&lt;p&gt;这就是为什么&amp;quot;降低比特位宽&amp;quot;是AI芯片的永恒主题——&lt;strong&gt;数据搬移比计算贵得多&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch2/ai_system.pdf-0081-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图2.5.3 华为昇腾910与英伟达A100&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;小结&#34;&gt;小结
+&lt;/h2&gt;&lt;p&gt;第2章从硬件底层出发，帮我们建立了一个完整的AI计算体系认知：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;芯片格局&lt;/strong&gt;：CPU/GPU/FPGA/ASIC 各有各的主场，ASIC是未来AI芯片的主赛道。摩尔定律虽已放缓，但体系结构创新才刚刚开始。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;算法驱动硬件&lt;/strong&gt;：神经网络的计算模式（卷积、Attention、量化、剪枝、分布式并行）直接决定了芯片该怎么设计。不理解上层负载，就做不好底层硬件。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;性能评估&lt;/strong&gt;：用算术强度和 Roofline Model 可以快速判断模型在特定芯片上是&amp;quot;带宽受限&amp;quot;还是&amp;quot;算力受限&amp;quot;——这是性能优化的起点。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;矩阵乘&lt;/strong&gt;：AI计算的灵魂操作。从卷积到矩阵乘的转换（Im2Col）、分块策略（Tiling）、多级缓存优化，这些构成了AI芯片性能的基石。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;比特位宽&lt;/strong&gt;：越低越好（在精度允许的前提下）。从FP32到FP8，从训练到推理，位宽的每一次&amp;quot;瘦身&amp;quot;都意味着能耗和面积的巨大节省。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;核心启示&lt;/strong&gt;：AI 系统是一个&amp;quot;软硬件协同&amp;quot;的游戏——上层算法定义计算模式，底层芯片提供算力支撑，中间编译和框架层负责把两者高效地&amp;quot;翻译&amp;quot;到一起。理解这个链条的每一环，才能真正做好AI系统。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;em&gt;下一篇预告：第3章将深入 AI 芯片体系结构，从 CPU 基础到 GPU 架构，再到华为昇腾和英伟达的芯片设计哲学。敬请期待！&lt;/em&gt;&lt;/p&gt;
 </description>
         </item>
         <item>

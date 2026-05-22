@@ -2,20 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://Salmooo.github.io/categories/ai/</loc>
-    <lastmod>2026-05-21T17:00:00+08:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/tags/ai-infra/</loc>
-    <lastmod>2026-05-21T17:00:00+08:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/tags/ai-system/</loc>
-    <lastmod>2026-05-21T17:00:00+08:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/</loc>
-    <lastmod>2026-05-21T17:00:00+08:00</lastmod>
+    <loc>https://Salmooo.github.io/tags/ast/</loc>
+    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/categories/</loc>
-    <lastmod>2026-05-21T17:00:00+08:00</lastmod>
+    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
@@ -32,11 +23,23 @@
                 href="https://Salmooo.github.io/categories/"
                 />
   </url><url>
-    <loc>https://Salmooo.github.io/tags/deep-learning/</loc>
-    <lastmod>2026-05-21T17:00:00+08:00</lastmod>
+    <loc>https://Salmooo.github.io/tags/compiler/</loc>
+    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/llvm/</loc>
+    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/categories/llvm/</loc>
+    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/mlir/</loc>
+    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/p/mlir-toy-%E6%95%99%E7%A8%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-chapter-1-toy-language-and-ast/</loc>
+    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/</loc>
-    <lastmod>2026-05-21T17:00:00+08:00</lastmod>
+    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
@@ -54,7 +57,7 @@
                 />
   </url><url>
     <loc>https://Salmooo.github.io/tags/</loc>
-    <lastmod>2026-05-21T17:00:00+08:00</lastmod>
+    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
@@ -72,24 +75,6 @@
                 />
   </url><url>
     <loc>https://Salmooo.github.io/post/</loc>
-    <lastmod>2026-05-21T17:00:00+08:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/tags/ast/</loc>
-    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/tags/compiler/</loc>
-    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/tags/llvm/</loc>
-    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/categories/llvm/</loc>
-    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/tags/mlir/</loc>
-    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/p/mlir-toy-%E6%95%99%E7%A8%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-chapter-1-toy-language-and-ast/</loc>
     <lastmod>2024-02-27T17:29:29+08:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/tags/toy-tutorial/</loc>
@@ -245,9 +230,23 @@
   </url><url>
     <loc>https://Salmooo.github.io/p/acl2%E8%AF%81%E6%98%8E/</loc>
   </url><url>
+    <loc>https://Salmooo.github.io/categories/ai/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/ai-chip/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/ai-infra/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/ai-system/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC2%E7%AB%A0-ai%E8%AE%A1%E7%AE%97%E4%BD%93%E7%B3%BB/</loc>
+  </url><url>
     <loc>https://Salmooo.github.io/tags/algorithm/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/categories/algorithm/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/deep-learning/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/categories/formal/</loc>
   </url><url>
@@ -280,6 +279,8 @@
     <loc>https://Salmooo.github.io/tags/leetcode/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/llvm-17/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/matrix-multiplication/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/p/smt%E5%8F%AF%E6%BB%A1%E8%B6%B3%E6%80%A7%E6%A8%A1%E7%90%86%E8%AE%BA/</loc>
   </url><url>
