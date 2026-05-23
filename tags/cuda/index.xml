@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>CUDA on SalmoneX Blog</title>
+        <link>https://Salmooo.github.io/tags/cuda/</link>
+        <description>Recent content in CUDA on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright><atom:link href="https://Salmooo.github.io/tags/cuda/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>AI系统：第4章 GPU——以英伟达为例</title>
+        <link>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC4%E7%AB%A0-gpu%E4%BB%A5%E8%8B%B1%E4%BC%9F%E8%BE%BE%E4%B8%BA%E4%BE%8B/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC4%E7%AB%A0-gpu%E4%BB%A5%E8%8B%B1%E4%BC%9F%E8%BE%BE%E4%B8%BA%E4%BE%8B/</guid>
+        <description>&lt;h2 id=&#34;本章概览&#34;&gt;本章概览
+&lt;/h2&gt;&lt;p&gt;如果说前几章帮我们搭好了 AI 系统的&amp;quot;骨架&amp;quot;，那第 4 章就是直接带你钻进 GPU 的&amp;quot;心脏&amp;quot;，看看这颗推动深度学习的引擎到底是怎么转起来的。&lt;/p&gt;
+&lt;p&gt;这一章信息量非常大，一口气从 2010 年的 Fermi 架构讲到 2024 年的 Blackwell，横跨整整 15 年、9 代 GPU 架构。你会看到英伟达是如何一步步把一块&amp;quot;画图卡&amp;quot;变成 AI 训练的&amp;quot;超级算力怪兽&amp;quot;的。核心脉络其实就三条线：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;计算核心&lt;/strong&gt;：从 CUDA Core 到 Tensor Core，从 FP32 通用计算到 FP4 超低精度推理&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;互联技术&lt;/strong&gt;：从 PCIe 到 NVLink 再到 NVSwitch，单卡到集群的通信带宽翻了上百倍&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;编程模型&lt;/strong&gt;：从手动管理显存的 CUDA C 到 Warp-Level 的 WMMA API，软件栈越来越&amp;quot;傻瓜化&amp;quot;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;一句话总结&lt;/strong&gt;：理解 GPU 架构的演进 = 理解为什么今天的大模型能跑起来。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;41-从图形到计算gpu-架构的十年演进&#34;&gt;4.1 从图形到计算：GPU 架构的十年演进
+&lt;/h2&gt;&lt;p&gt;这一节按时间线铺开了英伟达 9 代 GPU 架构，每一代都以一位科学巨匠命名——这个命名传统本身就很有意思，仿佛是英伟达在用每一代芯片向历史上的&amp;quot;计算先驱&amp;quot;致敬。&lt;/p&gt;
+&lt;h3 id=&#34;fermi-架构2010-梦开始的地方&#34;&gt;Fermi 架构（2010）—— 梦开始的地方
+&lt;/h3&gt;&lt;p&gt;Fermi 是英伟达第一代&amp;quot;真正可编程&amp;quot;的 GPU 架构。它引入了第三代流处理器（SM），每个 SM 有 16 个加载/存储单元、4 个特殊功能单元（SFU），并且首次支持了&lt;strong&gt;双精度浮点&lt;/strong&gt;（FP64）——这对后来的科学计算和高性能计算（HPC）意义重大。&lt;/p&gt;
+&lt;p&gt;这个架构的命名者 &lt;strong&gt;恩里科·费米&lt;/strong&gt; 是&amp;quot;原子能时代之父&amp;quot;，1938 年诺贝尔物理学奖得主。用他的名字命名第一代可编程 GPU 架构，寓意不言自明：计算领域的一次&amp;quot;核爆&amp;quot;。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch4/ai_system.pdf-0143-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Fermi 架构 SM 单元&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;kepler-架构2012-晶体管数量爆炸&#34;&gt;Kepler 架构（2012）—— 晶体管数量爆炸
+&lt;/h3&gt;&lt;p&gt;Kepler 架构把晶体管堆到了 71 亿个（Fermi 是 30 亿），SM 从 32 核暴涨到 192 核，最大线程数从 1536 拉到 2048。更重要的是，它引入了 &lt;strong&gt;动态并行（Dynamic Parallel）&lt;/strong&gt; 和 &lt;strong&gt;Hyper-Q&lt;/strong&gt;，让 GPU 可以在不依赖 CPU 的情况下自己调度任务，多个 CPU 核心可以同时向同一个 GPU 发活儿干。&lt;/p&gt;
+&lt;p&gt;命名者&lt;strong&gt;约翰内斯·开普勒&lt;/strong&gt;是提出行星运动三大定律的天文学家。这代架构也确实让 GPU 的计算能力按&amp;quot;定律&amp;quot;般稳步上升。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch4/ai_system.pdf-0146-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Kepler SMX 架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;maxwell-架构2014-能效比之王&#34;&gt;Maxwell 架构（2014）—— 能效比之王
+&lt;/h3&gt;&lt;p&gt;Maxwell 走了一条&amp;quot;少即是多&amp;quot;的路。核心数从 192 降到 128，但单核性能是 Kepler 的 1.35 倍，能效比直接翻倍。它把共享内存和 L1 Cache 拆开，每个 SM 独占 64KB（后来 GM204 提到 96KB），L2 Cache 是 Kepler 的 4 倍。&lt;/p&gt;
+&lt;p&gt;命名者&lt;strong&gt;麦克斯韦&lt;/strong&gt;统一了电磁学，Maxwell 架构的统一设计也让 GPU 在&amp;quot;性能&amp;quot;和&amp;quot;功耗&amp;quot;之间找到了漂亮的平衡点。&lt;/p&gt;
+&lt;h3 id=&#34;pascal-架构2016-nvlink-首次登场&#34;&gt;Pascal 架构（2016）—— NVLink 首次登场！
+&lt;/h3&gt;&lt;p&gt;这是我个人觉得最有&amp;quot;里程碑感&amp;quot;的一代。Pascal 做了三件大事：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;用 HBM2 换掉 GDDR5&lt;/strong&gt;：内存带宽大幅提升，能处理更大的工作集&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;16nm FinFET 工艺&lt;/strong&gt;：153 亿晶体管，同等功耗下算力提升一个数量级&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;第一代 NVLink&lt;/strong&gt;：单机内 GPU 点对点通信带宽达 160 GB/s，是 PCIe 3.0×16 的 &lt;strong&gt;5 倍&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;为什么 NVLink 这么重要？因为大模型分布式训练最大的瓶颈就是卡间通信。Pascal 在这件事上开了先河，后面每一代都在疯狂堆 NVLink 的带宽。&lt;/p&gt;
+&lt;p&gt;命名者&lt;strong&gt;帕斯卡&lt;/strong&gt;是概率论奠基人——NVLink 的出现，本身也是在&amp;quot;赌&amp;quot;分布式训练会成为未来的主流。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch4/ai_system.pdf-0149-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Pascal GP100 架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;volta-架构2017-tensor-core-横空出世&#34;&gt;Volta 架构（2017）—— Tensor Core 横空出世！
+&lt;/h3&gt;&lt;p&gt;这一代是真正的分水岭。Volta 做了几个&amp;quot;第一次&amp;quot;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;第一次提出 Tensor Core&lt;/strong&gt;：专门为深度学习矩阵运算设计的硬件单元，这是英伟达 AI 霸权的硬件根基&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;第一次拆分 CUDA Core&lt;/strong&gt;：FPU 和 ALU 分离，一条指令可以同时跑 FP32 和 INT32 计算&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;第一次提出独立线程调度&lt;/strong&gt;：每个线程有自己的 PC 和 Stack，SIMT 模型更灵活&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;第二代 NVLink&lt;/strong&gt;：一个 GPU 连 6 个 NVLink（Pascal 是 4 个）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;MPS（多进程服务）&lt;/strong&gt;：允许多个应用同时共享 GPU，云厂商终于可以愉快地做 GPU 虚拟化了&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;一张 Volta V100 的 Tensor Core 可以跑到 125 Tensor TFLOPS。从此，&amp;ldquo;有没有 Tensor Core&amp;quot;成了判断一张 GPU 适不适合做深度学习的硬指标。&lt;/p&gt;
+&lt;p&gt;命名者&lt;strong&gt;伏特&lt;/strong&gt;发明了电池，而 Volta 架构的 Tensor Core 给 AI 装上了&amp;quot;电池&amp;rdquo;，让深度学习计算有了持续、高效的驱动力。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch4/ai_system.pdf-0151-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Volta GV100 SM 架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;turing-架构2018-tensor-core-支持整数了&#34;&gt;Turing 架构（2018）—— Tensor Core 支持整数了
+&lt;/h3&gt;&lt;p&gt;Turing 在 Volta 的基础上做了精细化升级：Tensor Core 新增了对 &lt;strong&gt;INT8、INT4、Binary（INT1）&lt;/strong&gt; 的支持。这意味着神经网络推理可以用更低精度、更快速度跑了。&lt;/p&gt;
+&lt;p&gt;同时还引入了 &lt;strong&gt;RT Core（光线追踪核心）&lt;/strong&gt;，不过这条路显然是奔着游戏和图形渲染去的，AI 领域关注的反而是 Tensor Core 的精度下探。&lt;/p&gt;
+&lt;p&gt;命名者&lt;strong&gt;图灵&lt;/strong&gt;是计算机科学之父。这一代用他的名字，也在暗示 GPU 从&amp;quot;图形处理器&amp;quot;到&amp;quot;通用计算平台&amp;quot;的身份转变。&lt;/p&gt;
+&lt;h3 id=&#34;ampere-架构2020-tf32-和稀疏计算的到来&#34;&gt;Ampere 架构（2020）—— TF32 和稀疏计算的到来
+&lt;/h3&gt;&lt;p&gt;Ampere 是数据中心 GPU 的&amp;quot;完全体&amp;quot;。关键升级：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Tensor Core 3.0&lt;/strong&gt;：新增 &lt;strong&gt;TF32&lt;/strong&gt;（TensorFloat 32），在保持 FP32 精度的同时把 AI 性能提高 20 倍；支持 &lt;strong&gt;BF16&lt;/strong&gt;，解决了 FP16 动态范围不够的问题&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;结构化稀疏&lt;/strong&gt;：支持 2:4 稀疏矩阵直接相乘，推理阶段性能翻倍&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;MIG（多实例 GPU）&lt;/strong&gt;：一张 A100 可以切成 7 个独立 GPU 实例，云计算场景的神器&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;第三代 NVLink + NVSwitch&lt;/strong&gt;：GPU 间互联速度 600 GB/s&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;A100 的 SM 有 192KB 共享内存（V100 的 1.5 倍），8192 个 FP32 CUDA Core，512 个 Tensor Core。可以说，从这一代开始，&amp;ldquo;AI 训练用 A100&amp;quot;成了行业共识。&lt;/p&gt;
+&lt;p&gt;命名者&lt;strong&gt;安培&lt;/strong&gt;是电磁学之父，Ampere 架构也把&amp;quot;电磁互联&amp;quot;这件事做到了新高度。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch4/ai_system.pdf-0156-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Ampere A100 架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;hopper-架构2022-为-transformer-而生&#34;&gt;Hopper 架构（2022）—— 为 Transformer 而生
+&lt;/h3&gt;&lt;p&gt;Hopper 是第一个真正&amp;quot;为 AI 而生&amp;quot;的异构加速平台。Grace CPU + Hopper GPU 通过 NVLink-C2C 绑在一起，CPU 和 GPU 之间带宽高达 900 GB/s！&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;H100 的硬核参数&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;16896 个 CUDA Core、528 个 Tensor Core 4.0&lt;/li&gt;
+&lt;li&gt;80 GB HBM3 显存，带宽 3 TB/s&lt;/li&gt;
+&lt;li&gt;50 MB L2 Cache&lt;/li&gt;
+&lt;li&gt;新增 &lt;strong&gt;FP8&lt;/strong&gt; 精度支持，Transformer 引擎让大模型训练提速 9 倍&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;TMA（张量内存加速器）&lt;/strong&gt;：专门做张量数据传输的硬件单元&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;分布式共享内存&lt;/strong&gt;：SM 之间可以直接访问彼此的共享内存，不用绕道全局内存&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;命名者&lt;strong&gt;格蕾丝·赫柏&lt;/strong&gt;是&amp;quot;软件工程之母&amp;rdquo;，发明了第一个编译器。Hopper 架构也引入了大量&amp;quot;编译期优化&amp;quot;式的硬件设计，让大模型跑得更聪明。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch4/ai_system.pdf-0159-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Hopper H100 SM 架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;blackwell-架构2024-能效比再翻-25-倍&#34;&gt;Blackwell 架构（2024）—— 能效比再翻 25 倍
+&lt;/h3&gt;&lt;p&gt;Blackwell 是英伟达最新发布的架构，2080 亿晶体管。核心亮点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;第二代 Transformer 引擎&lt;/strong&gt;：支持 &lt;strong&gt;FP4&lt;/strong&gt; 精度，大模型推理功耗大幅下降&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;第五代 NVLink&lt;/strong&gt;：每 GPU 双向带宽 1.8 TB/s，支持最多 576 个 GPU 互联&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;RAS 引擎&lt;/strong&gt;：硬件级的可靠性、可用性、可服务性&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;GB200 超级芯片&lt;/strong&gt;：2 个 B200 GPU + 1 个 Grace CPU，通过 900 GB/s 片间互联连接&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;一个震撼的数据：训练一个 1.8 万亿参数的 MoE 模型，用 Hopper 需要 8000 个 GPU、15MW 功率；用 Blackwell 只需要 2000 个 GPU、1/4 的能耗。&lt;/p&gt;
+&lt;p&gt;命名者&lt;strong&gt;戴维·布莱克韦尔&lt;/strong&gt;是第一位非裔美国国家科学院院士。英伟达用 8 年时间，从 Pascal 到 Blackwell，把 AI 计算性能提升了 &lt;strong&gt;1000 倍&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;-核心模块回顾&#34;&gt;🔑 核心模块回顾
+&lt;/h3&gt;&lt;p&gt;经过 15 年的迭代，英伟达围绕三条主线构建起了坚固的&amp;quot;技术护城河&amp;quot;：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;维度&lt;/th&gt;
+          &lt;th&gt;代表技术&lt;/th&gt;
+          &lt;th&gt;演进方向&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;计算核心&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;CUDA Core → Tensor Core&lt;/td&gt;
+          &lt;td&gt;通用计算 → 专用矩阵加速，精度从 FP64 一路下探到 FP4&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;卡间互联&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;PCIe → NVLink → NVSwitch&lt;/td&gt;
+          &lt;td&gt;从 32 GB/s 到 1800 GB/s，从 4 卡互联到 576 卡全互联&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;编程模型&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;CUDA C → WMMA API → Transformer Engine&lt;/td&gt;
+          &lt;td&gt;越来越&amp;quot;傻瓜&amp;quot;，让算法工程师不必关心底层硬件细节&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;42-tensor-core-基本原理&#34;&gt;4.2 Tensor Core 基本原理
+&lt;/h2&gt;&lt;p&gt;这一节开始深入 Tensor Core 的内部。如果你之前只知道&amp;quot;Tensor Core 很快&amp;quot;，那读完这节你会明白它为什么快。&lt;/p&gt;
+&lt;h3 id=&#34;卷积计算与-gemm&#34;&gt;卷积计算与 GEMM
+&lt;/h3&gt;&lt;p&gt;卷积神经网络（CNN）里的卷积计算，在底层其实是通过 &lt;strong&gt;Im2Col&lt;/strong&gt; 操作把输入&amp;quot;展开&amp;quot;成一个大矩阵，然后把卷积核也转成矩阵，最后变成 &lt;strong&gt;矩阵乘法（GEMM）&lt;/strong&gt; 来算的。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;说白了，卷积在 GPU 上跑的其实是矩阵乘法。而 Tensor Core 就是专门为矩阵乘法设计的硬件。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;混合精度训练到底是什么意思&#34;&gt;混合精度训练到底是什么意思？
+&lt;/h3&gt;&lt;p&gt;很多人以为&amp;quot;混合精度&amp;quot;就是在模型里同时用 FP16 和 FP32，这个理解其实不够精确。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;真正的混合精度训练&lt;/strong&gt;是两个操作：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;计算用低精度（FP16）&lt;/strong&gt;：前向和反向传播用 FP16，速度快、省内存&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;更新用高精度（FP32）&lt;/strong&gt;：参数更新时用 FP32 累加，保证训练稳定&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;而这一切能在硬件层面实现，靠的就是 Tensor Core——输入用 FP16 算矩阵乘，中间结果用 FP32 累加，最后输出 FP16 或 FP32。&lt;/p&gt;
+&lt;h3 id=&#34;tensor-core-的工作原理&#34;&gt;Tensor Core 的工作原理
+&lt;/h3&gt;&lt;p&gt;Tensor Core 的核心操作就一个公式：&lt;/p&gt;
+\[ D = A \times B + C \]&lt;p&gt;其中 A、B 是 FP16 的 4×4 矩阵，C 和 D 可以是 FP16 或 FP32。&lt;/p&gt;
+&lt;p&gt;在 Volta 架构中，每个 Tensor Core 每个时钟周期可以完成 &lt;strong&gt;64 次 FMA（融合乘加）&lt;/strong&gt; 操作。一个 SM 有 8 个 Tensor Core，所以每个时钟周期一个 SM 可以做 512 次 FP16 FMA。相比于纯用 CUDA Core，AI 吞吐量直接提升 &lt;strong&gt;8 倍&lt;/strong&gt;，算上 SM 数量和核心设计的优化，总体提升 &lt;strong&gt;12 倍&lt;/strong&gt;！&lt;/p&gt;
+&lt;h3 id=&#34;tensor-core-与-cuda-编程&#34;&gt;Tensor Core 与 CUDA 编程
+&lt;/h3&gt;&lt;p&gt;CUDA 编程里并不是直接操控单个线程的，而是通过 &lt;strong&gt;Warp（32 个线程为一组）&lt;/strong&gt; 来调度。Tensor Core 对外暴露的是 Warp-Level 的 API：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// WMMA API 的核心接口
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;load_matrix_sync&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;fragment&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;...&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;const&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;T&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;mptr&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;unsigned&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ldm&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;mma_sync&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;fragment&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;...&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;d&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;const&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;fragment&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;...&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;              &lt;span class=&#34;k&#34;&gt;const&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;fragment&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;...&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;const&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;fragment&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;...&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;c&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;bool&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;satf&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;false&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;store_matrix_sync&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;T&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;mptr&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;const&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;fragment&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;...&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;unsigned&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ldm&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;layout_t&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;layout&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;一个 Tensor Core 物理上是 4×4×4 的 GEMM 单元，但 CUDA 层面暴露的是 16×16×16 ——这是因为多个 Tensor Core 被打包在一起，通过 Warp 统一调度。就像你不能直接操控发动机的每个活塞，但你可以踩油门——WMMA API 就是那个&amp;quot;油门踏板&amp;quot;。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch4/ai_system.pdf-0168-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Tensor Core MMA 运算：D = A×B &amp;#43; C&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch4/ai_system.pdf-0170-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Tensor Core Fragment 到大矩阵的映射&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;43-tensor-core-架构演进&#34;&gt;4.3 Tensor Core 架构演进
+&lt;/h2&gt;&lt;p&gt;Tensor Core 从 2017 年诞生至今，已经迭代了五代。这一节逐一拆解每一代的核心变化。&lt;/p&gt;
+&lt;h3 id=&#34;第一代volta从零到一&#34;&gt;第一代（Volta）：从零到一
+&lt;/h3&gt;&lt;p&gt;Volta 的 SM 被分成 4 个 &lt;strong&gt;Sub Core&lt;/strong&gt;，每个 Sub Core 里有 2 个 4×4×4 的 Tensor Core。Warp Scheduler 直接向 Tensor Core 发指令，不需要经过 Math Dispatch Unit——这意味着 Tensor Core 是&amp;quot;一等公民&amp;quot;，不是 CUDA Core 的附庸。&lt;/p&gt;
+&lt;p&gt;另外，Volta 把 L1 Cache 和共享内存合并成一块 96KB 的空间，这个设计一直延续到现在。&lt;/p&gt;
+&lt;h3 id=&#34;第二代turingint8-来了&#34;&gt;第二代（Turing）：INT8 来了
+&lt;/h3&gt;&lt;p&gt;Turing 的 Tensor Core 新增了对 INT8、INT4 甚至 Binary（INT1）的支持。同时引入了 FP16 的 FastPath，每个时钟周期可以执行 32 次计算操作（Volta 要 4~8 个周期才能完成一次 GEMM）。&lt;/p&gt;
+&lt;p&gt;一个容易被忽略但很重要的改进：Turing 允许线程之间&lt;strong&gt;共享寄存器&lt;/strong&gt;。这让 Tensor Core 可以更充分地利用片上存储资源。&lt;/p&gt;
+&lt;h3 id=&#34;第三代ampere更快更聪明&#34;&gt;第三代（Ampere）：更快、更聪明
+&lt;/h3&gt;&lt;p&gt;Ampere 的 Tensor Core 做了几个非常&amp;quot;工程化&amp;quot;的优化：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;异步内存拷贝&lt;/strong&gt;：新增 LDGSTS 指令，数据可以从全局内存直接加载到共享内存，不用经过寄存器中转——&amp;ldquo;少搬一次家，省不少力气&amp;rdquo;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;更大的矩阵块&lt;/strong&gt;：每个 Tensor Core 每个时钟周期可以做 8×4×8 的混合精度矩阵乘（Volta 是 4×4×4）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Warp 内 32 线程共享数据&lt;/strong&gt;：Volta 只有 8 个线程可以共享，Ampere 扩展到 32 个，寄存器文件访问次数减少到原来的 1/2.9&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;再加上 TF32 和 BF16 的支持，A100 在 AI 训练上的表现直接碾压 V100。&lt;/p&gt;
+&lt;h3 id=&#34;第四代hoppertma-和分布式共享内存&#34;&gt;第四代（Hopper）：TMA 和分布式共享内存
+&lt;/h3&gt;&lt;p&gt;这是变化最大的一代。前三代都是 Warp-Level 编程，所有线程都要参与数据搬运和计算。Hopper 引入 &lt;strong&gt;TMA（张量内存加速器）&lt;/strong&gt;，把数据搬运硬件化了——数据从全局内存异步加载到共享内存，Tensor Core 只管计算，不用操心搬数据的事。&lt;/p&gt;
+&lt;p&gt;更革命性的是&lt;strong&gt;分布式共享内存&lt;/strong&gt;：以前 SM 之间通信必须通过全局内存（慢），Hopper 让 GPC 内的 SM 可以直接访问彼此的共享内存。软件层面也随之引入了 Warp Group 和 Thread Block Cluster 的编程模式。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;一句话：Hopper 把&amp;quot;数据搬运&amp;quot;和&amp;quot;计算&amp;quot;解耦了，Tensor Core 终于可以专心做自己最擅长的事——算矩阵。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;第五代blackwellfp4-和微缩放格式&#34;&gt;第五代（Blackwell）：FP4 和微缩放格式
+&lt;/h3&gt;&lt;p&gt;第五代 Tensor Core 把精度下探到了 FP4，同时支持 FP6。对于大模型推理来说，内存容量是主要瓶颈，用更低精度存储参数意味着更大的模型能在更少的显存里跑起来。&lt;/p&gt;
+&lt;p&gt;此外还支持了社区定义的 &lt;strong&gt;MX Format（微缩放格式）&lt;/strong&gt;——多个元素共享一个 scale，比传统的 per-tensor 量化粒度更细，精度损失更小。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;44-tensor-core-深度剖析&#34;&gt;4.4 Tensor Core 深度剖析
+&lt;/h2&gt;&lt;p&gt;这一节是全章最&amp;quot;硬核&amp;quot;的部分，从电路层面讲 Tensor Core 到底是怎么算的。&lt;/p&gt;
+&lt;h3 id=&#34;计算原理&#34;&gt;计算原理
+&lt;/h3&gt;&lt;p&gt;Tensor Core 的计算本质是 &lt;strong&gt;FMA（融合乘加）&lt;/strong&gt;。在电路上，就是一个乘号（×）加一个加号（+），输入是 16 bit 的数据，中间结果存在 32 bit 的寄存器里。&lt;/p&gt;
+&lt;p&gt;关键点：Tensor Core 是&lt;strong&gt;整个矩阵一起算&lt;/strong&gt;的，不是一行一列地算。Pascal 架构没有 Tensor Core，只能一个元素一个元素地乘加。Volta 有了 Tensor Core 后，4×4 的矩阵一次性完成，效率天差地别。&lt;/p&gt;
+&lt;h3 id=&#34;指令流水&#34;&gt;指令流水
+&lt;/h3&gt;&lt;p&gt;Tensor Core 的指令流水线设计非常精巧。一条 FMA 指令被拆成多个步骤在流水线上并行执行。当需要计算矩阵的一行乘以一列（4 次乘加）时，就需要 4 条流水线同时工作。整个 4×4 矩阵的计算就是大量流水线的拼接。&lt;/p&gt;
+&lt;p&gt;在流水线的某个时刻，同时涉及 4 个数据的搬运：2 个从寄存器读到计算单元，2 个从计算结果写回寄存器。这种&amp;quot;读写交替&amp;quot;的设计充分利用了硬件带宽。&lt;/p&gt;
+&lt;h3 id=&#34;线程执行从小块到大矩阵&#34;&gt;线程执行：从小块到大矩阵
+&lt;/h3&gt;&lt;p&gt;Tensor Core 一次只能算一个小矩阵块，那 224×224 的图像卷积或者 2048×2048 的 Embedding 矩阵怎么处理呢？&lt;/p&gt;
+&lt;p&gt;答案是&lt;strong&gt;分块 + 分层并行&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Block-Level&lt;/strong&gt;：把大矩阵沿各维度切分成小块（Tile），每个 Thread Block 负责一块&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Warp-Level&lt;/strong&gt;：Thread Block 内部，每个 Warp 负责结果矩阵的一部分，数据通过共享内存（SMEM）中转&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Thread-Level&lt;/strong&gt;：Warp 内的线程协同工作，通过 WMMA API 调用 Tensor Core 完成最小的矩阵乘&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;累积&lt;/strong&gt;：所有小块的计算结果在共享内存中累积，最后写回全局内存&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这个过程就像用乐高积木拼一座城堡——Tensor Core 只能拼 4×4 的小方块，但通过&amp;quot;分块→计算→累积&amp;quot;的循环，理论上可以拼出任意大的矩阵。&lt;/p&gt;
+&lt;h3 id=&#34;整体计算流程&#34;&gt;整体计算流程
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;全局内存（HBM）→ 共享内存（SMEM）→ 寄存器（RF）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;→ Tensor Core 计算 → 共享内存累积 → 写回全局内存
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;数据从慢到快（HBM → SMEM → RF），计算完之后再从快到慢写回去。每一层都在做&amp;quot;数据复用&amp;quot;，尽量减少对慢速存储的访问——这就是 GPU 高效计算的本质。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;45-分布式通信&#34;&gt;4.5 分布式通信
+&lt;/h2&gt;&lt;p&gt;大模型时代，单卡根本塞不下模型参数，必须多卡协同。分布式通信就是让多张 GPU 能够&amp;quot;对话&amp;quot;的技术。&lt;/p&gt;
+&lt;h3 id=&#34;分布式并行策略&#34;&gt;分布式并行策略
+&lt;/h3&gt;&lt;p&gt;两种基本策略：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;数据并行（DP）&lt;/strong&gt;：每张卡存完整模型副本，各吃不同的数据，梯度算完同步一下。简单好用，但 GPU 多了通信开销会变大&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;模型并行（MP）&lt;/strong&gt;：模型切成几块分到不同卡上，每张卡只算自己那块。进一步细分还有流水并行（PP）和张量并行（TP）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;现代 AI 框架（PyTorch、MindSpore 等）通常采用&lt;strong&gt;混合并行&lt;/strong&gt;——数据并行 + 模型并行一起上。&lt;/p&gt;
+&lt;h3 id=&#34;通信硬件&#34;&gt;通信硬件
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;层级&lt;/th&gt;
+          &lt;th&gt;技术&lt;/th&gt;
+          &lt;th&gt;带宽量级&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;卡内&lt;/td&gt;
+          &lt;td&gt;共享内存&lt;/td&gt;
+          &lt;td&gt;TB/s 级&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;卡间（同一节点）&lt;/td&gt;
+          &lt;td&gt;NVLink / NVSwitch&lt;/td&gt;
+          &lt;td&gt;数百 GB/s ~ TB/s&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;节点间&lt;/td&gt;
+          &lt;td&gt;InfiniBand / RDMA / 以太网&lt;/td&gt;
+          &lt;td&gt;100~400 GB/s&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;NCCL（NVIDIA Collective Communications Library）是英伟达 GPU 上最常用的集合通信库，它底层利用 NVLink 和 NVSwitch，对上提供 broadcast、reduce、all-gather 等通信原语。&lt;/p&gt;
+&lt;h3 id=&#34;集合通信原语&#34;&gt;集合通信原语
+&lt;/h3&gt;&lt;p&gt;这些通信原语是大规模分布式训练的基础&amp;quot;词汇表&amp;quot;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Broadcast&lt;/strong&gt;：一对多，一个节点把数据广播给所有人&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Gather&lt;/strong&gt;：多对一，把所有人的数据汇总到一个节点&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Scatter&lt;/strong&gt;：一对多，把数据分片分发&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;All-Reduce&lt;/strong&gt;：多对多，所有人数据做规约（比如求和），结果发回每个人&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;All-Gather&lt;/strong&gt;：多对多，把所有人的数据收集起来再分发给所有人&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在大模型训练中，&lt;strong&gt;All-Reduce&lt;/strong&gt; 是最核心的操作——梯度同步全靠它。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch4/ai_system.pdf-0194-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;集合通信原语一览&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;46-nvlink-原理剖析&#34;&gt;4.6 NVLink 原理剖析
+&lt;/h2&gt;&lt;h3 id=&#34;为什么需要-nvlink&#34;&gt;为什么需要 NVLink？
+&lt;/h3&gt;&lt;p&gt;传统 GPU 之间通信走 PCIe 总线。PCIe 3.0×16 的双向带宽约 32 GB/s，当 GPU 算力越来越强的时候，这点带宽就成了&amp;quot;肠梗阻&amp;quot;——GPU 算完数据要等 PCIe 慢慢传，大部分时间在&amp;quot;摸鱼&amp;quot;。&lt;/p&gt;
+&lt;p&gt;NVLink 就是为了打破这个瓶颈。第一代 NVLink（Pascal P100）每个链路 40 GB/s，4 路捆在一起能到 160 GB/s，是 PCIe 3.0 的 5 倍。&lt;/p&gt;
+&lt;h3 id=&#34;nvlink-技术细节&#34;&gt;NVLink 技术细节
+&lt;/h3&gt;&lt;p&gt;NVLink 的物理层设计很有意思：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;每条链路 = 8 个差分对 = 32 条线&lt;/li&gt;
+&lt;li&gt;采用 &lt;strong&gt;flit（流控制数）&lt;/strong&gt; 的数据包结构，每个 flit 128 位&lt;/li&gt;
+&lt;li&gt;25 位 CRC 做错误检测，最多能容忍 25 个连续位错误&lt;/li&gt;
+&lt;li&gt;支持&lt;strong&gt;通道反转&lt;/strong&gt;和&lt;strong&gt;通道极性&lt;/strong&gt;调整，简化物理布线&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;NVLink 使用&lt;strong&gt;物理地址&lt;/strong&gt;而非虚拟地址进行数据传输，减少了目标 GPU 上的地址转换开销。&lt;/p&gt;
+&lt;h3 id=&#34;nvlink-的演进&#34;&gt;NVLink 的演进
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;代数&lt;/th&gt;
+          &lt;th&gt;架构&lt;/th&gt;
+          &lt;th&gt;每 GPU 带宽&lt;/th&gt;
+          &lt;th&gt;最大链路数&lt;/th&gt;
+          &lt;th&gt;年份&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;1.0&lt;/td&gt;
+          &lt;td&gt;Pascal&lt;/td&gt;
+          &lt;td&gt;160 GB/s&lt;/td&gt;
+          &lt;td&gt;4&lt;/td&gt;
+          &lt;td&gt;2016&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;2.0&lt;/td&gt;
+          &lt;td&gt;Volta&lt;/td&gt;
+          &lt;td&gt;300 GB/s&lt;/td&gt;
+          &lt;td&gt;6&lt;/td&gt;
+          &lt;td&gt;2017&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;3.0&lt;/td&gt;
+          &lt;td&gt;Ampere&lt;/td&gt;
+          &lt;td&gt;600 GB/s&lt;/td&gt;
+          &lt;td&gt;12&lt;/td&gt;
+          &lt;td&gt;2020&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;4.0&lt;/td&gt;
+          &lt;td&gt;Hopper&lt;/td&gt;
+          &lt;td&gt;900 GB/s&lt;/td&gt;
+          &lt;td&gt;18&lt;/td&gt;
+          &lt;td&gt;2022&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;5.0&lt;/td&gt;
+          &lt;td&gt;Blackwell&lt;/td&gt;
+          &lt;td&gt;1800 GB/s&lt;/td&gt;
+          &lt;td&gt;18&lt;/td&gt;
+          &lt;td&gt;2024&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;8 年时间，带宽涨了 11 倍。NVLink 5.0 的信号传输速率达到每差分对 200 GB/s，靠的是更快的 PAM4 信号技术（而不是单纯堆更多线）。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;47-nvswitch-深度解析&#34;&gt;4.7 NVSwitch 深度解析
+&lt;/h2&gt;&lt;h3 id=&#34;nvswitch-是什么&#34;&gt;NVSwitch 是什么？
+&lt;/h3&gt;&lt;p&gt;NVLink 解决了&amp;quot;两点之间&amp;quot;的通信，但如果服务器里有 8 张 GPU，每两张之间都要拉一条 NVLink 线，那布线复杂度会爆炸。NVSwitch 就是来解决这个问题的——它像一个&amp;quot;网络交换机&amp;quot;，所有 GPU 都连到 NVSwitch 上，任意两张 GPU 之间都能高速通信。&lt;/p&gt;
+&lt;h3 id=&#34;历代-nvswitch&#34;&gt;历代 NVSwitch
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;代数&lt;/th&gt;
+          &lt;th&gt;架构&lt;/th&gt;
+          &lt;th&gt;GPU 间带宽&lt;/th&gt;
+          &lt;th&gt;直连 GPU 数&lt;/th&gt;
+          &lt;th&gt;总聚合带宽&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;1.0&lt;/td&gt;
+          &lt;td&gt;Volta&lt;/td&gt;
+          &lt;td&gt;300 GB/s&lt;/td&gt;
+          &lt;td&gt;≤8&lt;/td&gt;
+          &lt;td&gt;2.4 TB/s&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;2.0&lt;/td&gt;
+          &lt;td&gt;Ampere&lt;/td&gt;
+          &lt;td&gt;600 GB/s&lt;/td&gt;
+          &lt;td&gt;≤8&lt;/td&gt;
+          &lt;td&gt;4.8 TB/s&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;3.0&lt;/td&gt;
+          &lt;td&gt;Hopper&lt;/td&gt;
+          &lt;td&gt;900 GB/s&lt;/td&gt;
+          &lt;td&gt;≤8&lt;/td&gt;
+          &lt;td&gt;7.2 TB/s&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;NVLink Switch&lt;/td&gt;
+          &lt;td&gt;Blackwell&lt;/td&gt;
+          &lt;td&gt;1800 GB/s&lt;/td&gt;
+          &lt;td&gt;≤576&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;1 PB/s&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Blackwell 时代的 NVLink Switch 能连接 576 个 GPU，总带宽达到 &lt;strong&gt;1 PB/s&lt;/strong&gt;——这个数字放到几年前简直不敢想象。&lt;/p&gt;
+&lt;h3 id=&#34;nvswitch-的核心优势&#34;&gt;NVSwitch 的核心优势
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;全互联&lt;/strong&gt;：任意两个 GPU 之间都能直接通信，无需中间跳转&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;无阻塞&lt;/strong&gt;：XBAR 交换矩阵保证每对 GPU 都有独立的数据通路&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;硬件加速集合通信&lt;/strong&gt;：第三代 NVSwitch 集成了 SHARP 模块，支持 All-Gather、Reduce-Scatter 等操作的硬件加速，支持 FP16/BF16&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;安全隔离&lt;/strong&gt;：端口分区功能可以把不同端口隔离到独立的 NVLink 网络中&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;如果你把 NVLink 比作 GPU 之间的&amp;quot;高速公路&amp;quot;，那 NVSwitch 就是&amp;quot;立交桥枢纽&amp;quot;——不只是路宽了，而是整个交通系统被重新设计了。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch4/ai_system.pdf-0209-11.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;第三代 NVSwitch 架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;-学完这章我的几点感悟&#34;&gt;🤔 学完这章，我的几点感悟
+&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Tensor Core 是英伟达最深的护城河&lt;/strong&gt;。CUDA Core 别人可以模仿，但 Tensor Core 从硬件设计到软件生态（cuDNN、cuBLAS、TensorRT）已经形成了闭环，竞争对手很难在短期内追上。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;互联带宽是分布式训练的隐形天花板&lt;/strong&gt;。大模型时代，算力不是唯一瓶颈，通信效率同样关键。NVLink 和 NVSwitch 的迭代速度丝毫不亚于计算核心，这说明英伟达很清楚：单卡强不算强，集群强才是真的强。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;精度下探是大势所趋&lt;/strong&gt;。从 FP32 到 FP16 到 FP8 再到 FP4，每一代都在&amp;quot;牺牲一点精度换巨大加速比&amp;quot;。这说明在 AI 场景下，算力需求远远超过了精度需求，模型对低精度的容忍度比我们想象的高。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;软硬件协同设计是最高效的路径&lt;/strong&gt;。Hopper 的 TMA、Transformer Engine，Blackwell 的 FP4 支持——这些都不是纯粹的硬件堆料，而是&amp;quot;上层负载需要什么，下层硬件就设计什么&amp;quot;的思路。这也是为什么英伟达能从一家&amp;quot;显卡公司&amp;quot;变成&amp;quot;AI 基础设施公司&amp;quot;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;小结&#34;&gt;小结
+&lt;/h2&gt;&lt;p&gt;第 4 章是一趟穿越 15 年 GPU 历史的旅程。从 Fermi 的 30 亿晶体管到 Blackwell 的 2080 亿，从 CUDA Core 到第五代 Tensor Core，从 PCIe 到 NVLink Switch——每一项技术的演进都在回答同一个问题：&lt;strong&gt;如何让计算更快、让通信更畅通、让开发者更省心&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;理解这些，才能真正理解为什么今天的大模型能&amp;quot;跑&amp;quot;起来。下一章我们将转向另一个 AI 芯片巨头——谷歌的 TPU，看看它又是怎么另辟蹊径的。&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

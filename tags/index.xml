@@ -144,6 +144,14 @@
         <description></description>
         </item>
         <item>
+        <title>CUDA</title>
+        <link>https://Salmooo.github.io/tags/cuda/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/cuda/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>Deep Learning</title>
         <link>https://Salmooo.github.io/tags/deep-learning/</link>
         <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -157,6 +165,14 @@
         <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
         
         <guid>https://Salmooo.github.io/tags/formal-verification/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>GPU</title>
+        <link>https://Salmooo.github.io/tags/gpu/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/gpu/</guid>
         <description></description>
         </item>
         <item>
@@ -189,6 +205,30 @@
         <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
         
         <guid>https://Salmooo.github.io/tags/matrix-multiplication/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>NVIDIA</title>
+        <link>https://Salmooo.github.io/tags/nvidia/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/nvidia/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>NVLink</title>
+        <link>https://Salmooo.github.io/tags/nvlink/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/nvlink/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Tensor Core</title>
+        <link>https://Salmooo.github.io/tags/tensor-core/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/tensor-core/</guid>
         <description></description>
         </item>
         

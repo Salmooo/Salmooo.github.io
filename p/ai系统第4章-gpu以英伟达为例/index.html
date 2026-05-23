@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="《AI系统：原理与架构》学习笔记 - 深入英伟达GPU架构的15年演进史">
+<title>AI系统：第4章 GPU——以英伟达为例</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC4%E7%AB%A0-gpu%E4%BB%A5%E8%8B%B1%E4%BC%9F%E8%BE%BE%E4%B8%BA%E4%BE%8B/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="AI系统：第4章 GPU——以英伟达为例">
+<meta property='og:description' content="《AI系统：原理与架构》学习笔记 - 深入英伟达GPU架构的15年演进史">
+<meta property='og:url' content='https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC4%E7%AB%A0-gpu%E4%BB%A5%E8%8B%B1%E4%BC%9F%E8%BE%BE%E4%B8%BA%E4%BE%8B/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='AI System' /><meta property='article:tag' content='GPU' /><meta property='article:tag' content='CUDA' /><meta property='article:tag' content='Tensor Core' /><meta property='article:tag' content='NVLink' /><meta property='article:tag' content='Deep Learning' /><meta property='article:tag' content='NVIDIA' />
+<meta name="twitter:title" content="AI系统：第4章 GPU——以英伟达为例">
+<meta name="twitter:description" content="《AI系统：原理与架构》学习笔记 - 深入英伟达GPU架构的15年演进史">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#本章概览">本章概览</a></li>
+    <li><a href="#41-从图形到计算gpu-架构的十年演进">4.1 从图形到计算：GPU 架构的十年演进</a>
+      <ol>
+        <li><a href="#fermi-架构2010-梦开始的地方">Fermi 架构（2010）—— 梦开始的地方</a></li>
+        <li><a href="#kepler-架构2012-晶体管数量爆炸">Kepler 架构（2012）—— 晶体管数量爆炸</a></li>
+        <li><a href="#maxwell-架构2014-能效比之王">Maxwell 架构（2014）—— 能效比之王</a></li>
+        <li><a href="#pascal-架构2016-nvlink-首次登场">Pascal 架构（2016）—— NVLink 首次登场！</a></li>
+        <li><a href="#volta-架构2017-tensor-core-横空出世">Volta 架构（2017）—— Tensor Core 横空出世！</a></li>
+        <li><a href="#turing-架构2018-tensor-core-支持整数了">Turing 架构（2018）—— Tensor Core 支持整数了</a></li>
+        <li><a href="#ampere-架构2020-tf32-和稀疏计算的到来">Ampere 架构（2020）—— TF32 和稀疏计算的到来</a></li>
+        <li><a href="#hopper-架构2022-为-transformer-而生">Hopper 架构（2022）—— 为 Transformer 而生</a></li>
+        <li><a href="#blackwell-架构2024-能效比再翻-25-倍">Blackwell 架构（2024）—— 能效比再翻 25 倍</a></li>
+        <li><a href="#-核心模块回顾">🔑 核心模块回顾</a></li>
+      </ol>
+    </li>
+    <li><a href="#42-tensor-core-基本原理">4.2 Tensor Core 基本原理</a>
+      <ol>
+        <li><a href="#卷积计算与-gemm">卷积计算与 GEMM</a></li>
+        <li><a href="#混合精度训练到底是什么意思">混合精度训练到底是什么意思？</a></li>
+        <li><a href="#tensor-core-的工作原理">Tensor Core 的工作原理</a></li>
+        <li><a href="#tensor-core-与-cuda-编程">Tensor Core 与 CUDA 编程</a></li>
+      </ol>
+    </li>
+    <li><a href="#43-tensor-core-架构演进">4.3 Tensor Core 架构演进</a>
+      <ol>
+        <li><a href="#第一代volta从零到一">第一代（Volta）：从零到一</a></li>
+        <li><a href="#第二代turingint8-来了">第二代（Turing）：INT8 来了</a></li>
+        <li><a href="#第三代ampere更快更聪明">第三代（Ampere）：更快、更聪明</a></li>
+        <li><a href="#第四代hoppertma-和分布式共享内存">第四代（Hopper）：TMA 和分布式共享内存</a></li>
+        <li><a href="#第五代blackwellfp4-和微缩放格式">第五代（Blackwell）：FP4 和微缩放格式</a></li>
+      </ol>
+    </li>
+    <li><a href="#44-tensor-core-深度剖析">4.4 Tensor Core 深度剖析</a>
+      <ol>
+        <li><a href="#计算原理">计算原理</a></li>
+        <li><a href="#指令流水">指令流水</a></li>
+        <li><a href="#线程执行从小块到大矩阵">线程执行：从小块到大矩阵</a></li>
+        <li><a href="#整体计算流程">整体计算流程</a></li>
+      </ol>
+    </li>
+    <li><a href="#45-分布式通信">4.5 分布式通信</a>
+      <ol>
+        <li><a href="#分布式并行策略">分布式并行策略</a></li>
+        <li><a href="#通信硬件">通信硬件</a></li>
+        <li><a href="#集合通信原语">集合通信原语</a></li>
+      </ol>
+    </li>
+    <li><a href="#46-nvlink-原理剖析">4.6 NVLink 原理剖析</a>
+      <ol>
+        <li><a href="#为什么需要-nvlink">为什么需要 NVLink？</a></li>
+        <li><a href="#nvlink-技术细节">NVLink 技术细节</a></li>
+        <li><a href="#nvlink-的演进">NVLink 的演进</a></li>
+      </ol>
+    </li>
+    <li><a href="#47-nvswitch-深度解析">4.7 NVSwitch 深度解析</a>
+      <ol>
+        <li><a href="#nvswitch-是什么">NVSwitch 是什么？</a></li>
+        <li><a href="#历代-nvswitch">历代 NVSwitch</a></li>
+        <li><a href="#nvswitch-的核心优势">NVSwitch 的核心优势</a></li>
+      </ol>
+    </li>
+    <li><a href="#-学完这章我的几点感悟">🤔 学完这章，我的几点感悟</a></li>
+    <li><a href="#小结">小结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/ai/" >
+                AI
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC4%E7%AB%A0-gpu%E4%BB%A5%E8%8B%B1%E4%BC%9F%E8%BE%BE%E4%B8%BA%E4%BE%8B/">AI系统：第4章 GPU——以英伟达为例</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            《AI系统：原理与架构》学习笔记 - 深入英伟达GPU架构的15年演进史
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    6 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="本章概览">本章概览
+</h2><p>如果说前几章帮我们搭好了 AI 系统的&quot;骨架&quot;，那第 4 章就是直接带你钻进 GPU 的&quot;心脏&quot;，看看这颗推动深度学习的引擎到底是怎么转起来的。</p>
+<p>这一章信息量非常大，一口气从 2010 年的 Fermi 架构讲到 2024 年的 Blackwell，横跨整整 15 年、9 代 GPU 架构。你会看到英伟达是如何一步步把一块&quot;画图卡&quot;变成 AI 训练的&quot;超级算力怪兽&quot;的。核心脉络其实就三条线：</p>
+<ul>
+<li><strong>计算核心</strong>：从 CUDA Core 到 Tensor Core，从 FP32 通用计算到 FP4 超低精度推理</li>
+<li><strong>互联技术</strong>：从 PCIe 到 NVLink 再到 NVSwitch，单卡到集群的通信带宽翻了上百倍</li>
+<li><strong>编程模型</strong>：从手动管理显存的 CUDA C 到 Warp-Level 的 WMMA API，软件栈越来越&quot;傻瓜化&quot;</li>
+</ul>
+<blockquote>
+<p><strong>一句话总结</strong>：理解 GPU 架构的演进 = 理解为什么今天的大模型能跑起来。</p>
+</blockquote>
+<hr>
+<h2 id="41-从图形到计算gpu-架构的十年演进">4.1 从图形到计算：GPU 架构的十年演进
+</h2><p>这一节按时间线铺开了英伟达 9 代 GPU 架构，每一代都以一位科学巨匠命名——这个命名传统本身就很有意思，仿佛是英伟达在用每一代芯片向历史上的&quot;计算先驱&quot;致敬。</p>
+<h3 id="fermi-架构2010-梦开始的地方">Fermi 架构（2010）—— 梦开始的地方
+</h3><p>Fermi 是英伟达第一代&quot;真正可编程&quot;的 GPU 架构。它引入了第三代流处理器（SM），每个 SM 有 16 个加载/存储单元、4 个特殊功能单元（SFU），并且首次支持了<strong>双精度浮点</strong>（FP64）——这对后来的科学计算和高性能计算（HPC）意义重大。</p>
+<p>这个架构的命名者 <strong>恩里科·费米</strong> 是&quot;原子能时代之父&quot;，1938 年诺贝尔物理学奖得主。用他的名字命名第一代可编程 GPU 架构，寓意不言自明：计算领域的一次&quot;核爆&quot;。</p>
+<p><img src="/images/ai_system/ch4/ai_system.pdf-0143-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Fermi 架构 SM 单元"
+	
+	
+></p>
+<h3 id="kepler-架构2012-晶体管数量爆炸">Kepler 架构（2012）—— 晶体管数量爆炸
+</h3><p>Kepler 架构把晶体管堆到了 71 亿个（Fermi 是 30 亿），SM 从 32 核暴涨到 192 核，最大线程数从 1536 拉到 2048。更重要的是，它引入了 <strong>动态并行（Dynamic Parallel）</strong> 和 <strong>Hyper-Q</strong>，让 GPU 可以在不依赖 CPU 的情况下自己调度任务，多个 CPU 核心可以同时向同一个 GPU 发活儿干。</p>
+<p>命名者<strong>约翰内斯·开普勒</strong>是提出行星运动三大定律的天文学家。这代架构也确实让 GPU 的计算能力按&quot;定律&quot;般稳步上升。</p>
+<p><img src="/images/ai_system/ch4/ai_system.pdf-0146-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Kepler SMX 架构"
+	
+	
+></p>
+<h3 id="maxwell-架构2014-能效比之王">Maxwell 架构（2014）—— 能效比之王
+</h3><p>Maxwell 走了一条&quot;少即是多&quot;的路。核心数从 192 降到 128，但单核性能是 Kepler 的 1.35 倍，能效比直接翻倍。它把共享内存和 L1 Cache 拆开，每个 SM 独占 64KB（后来 GM204 提到 96KB），L2 Cache 是 Kepler 的 4 倍。</p>
+<p>命名者<strong>麦克斯韦</strong>统一了电磁学，Maxwell 架构的统一设计也让 GPU 在&quot;性能&quot;和&quot;功耗&quot;之间找到了漂亮的平衡点。</p>
+<h3 id="pascal-架构2016-nvlink-首次登场">Pascal 架构（2016）—— NVLink 首次登场！
+</h3><p>这是我个人觉得最有&quot;里程碑感&quot;的一代。Pascal 做了三件大事：</p>
+<ol>
+<li><strong>用 HBM2 换掉 GDDR5</strong>：内存带宽大幅提升，能处理更大的工作集</li>
+<li><strong>16nm FinFET 工艺</strong>：153 亿晶体管，同等功耗下算力提升一个数量级</li>
+<li><strong>第一代 NVLink</strong>：单机内 GPU 点对点通信带宽达 160 GB/s，是 PCIe 3.0×16 的 <strong>5 倍</strong></li>
+</ol>
+<p>为什么 NVLink 这么重要？因为大模型分布式训练最大的瓶颈就是卡间通信。Pascal 在这件事上开了先河，后面每一代都在疯狂堆 NVLink 的带宽。</p>
+<p>命名者<strong>帕斯卡</strong>是概率论奠基人——NVLink 的出现，本身也是在&quot;赌&quot;分布式训练会成为未来的主流。</p>
+<p><img src="/images/ai_system/ch4/ai_system.pdf-0149-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Pascal GP100 架构"
+	
+	
+></p>
+<h3 id="volta-架构2017-tensor-core-横空出世">Volta 架构（2017）—— Tensor Core 横空出世！
+</h3><p>这一代是真正的分水岭。Volta 做了几个&quot;第一次&quot;：</p>
+<ul>
+<li><strong>第一次提出 Tensor Core</strong>：专门为深度学习矩阵运算设计的硬件单元，这是英伟达 AI 霸权的硬件根基</li>
+<li><strong>第一次拆分 CUDA Core</strong>：FPU 和 ALU 分离，一条指令可以同时跑 FP32 和 INT32 计算</li>
+<li><strong>第一次提出独立线程调度</strong>：每个线程有自己的 PC 和 Stack，SIMT 模型更灵活</li>
+<li><strong>第二代 NVLink</strong>：一个 GPU 连 6 个 NVLink（Pascal 是 4 个）</li>
+<li><strong>MPS（多进程服务）</strong>：允许多个应用同时共享 GPU，云厂商终于可以愉快地做 GPU 虚拟化了</li>
+</ul>
+<p>一张 Volta V100 的 Tensor Core 可以跑到 125 Tensor TFLOPS。从此，&ldquo;有没有 Tensor Core&quot;成了判断一张 GPU 适不适合做深度学习的硬指标。</p>
+<p>命名者<strong>伏特</strong>发明了电池，而 Volta 架构的 Tensor Core 给 AI 装上了&quot;电池&rdquo;，让深度学习计算有了持续、高效的驱动力。</p>
+<p><img src="/images/ai_system/ch4/ai_system.pdf-0151-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Volta GV100 SM 架构"
+	
+	
+></p>
+<h3 id="turing-架构2018-tensor-core-支持整数了">Turing 架构（2018）—— Tensor Core 支持整数了
+</h3><p>Turing 在 Volta 的基础上做了精细化升级：Tensor Core 新增了对 <strong>INT8、INT4、Binary（INT1）</strong> 的支持。这意味着神经网络推理可以用更低精度、更快速度跑了。</p>
+<p>同时还引入了 <strong>RT Core（光线追踪核心）</strong>，不过这条路显然是奔着游戏和图形渲染去的，AI 领域关注的反而是 Tensor Core 的精度下探。</p>
+<p>命名者<strong>图灵</strong>是计算机科学之父。这一代用他的名字，也在暗示 GPU 从&quot;图形处理器&quot;到&quot;通用计算平台&quot;的身份转变。</p>
+<h3 id="ampere-架构2020-tf32-和稀疏计算的到来">Ampere 架构（2020）—— TF32 和稀疏计算的到来
+</h3><p>Ampere 是数据中心 GPU 的&quot;完全体&quot;。关键升级：</p>
+<ul>
+<li><strong>Tensor Core 3.0</strong>：新增 <strong>TF32</strong>（TensorFloat 32），在保持 FP32 精度的同时把 AI 性能提高 20 倍；支持 <strong>BF16</strong>，解决了 FP16 动态范围不够的问题</li>
+<li><strong>结构化稀疏</strong>：支持 2:4 稀疏矩阵直接相乘，推理阶段性能翻倍</li>
+<li><strong>MIG（多实例 GPU）</strong>：一张 A100 可以切成 7 个独立 GPU 实例，云计算场景的神器</li>
+<li><strong>第三代 NVLink + NVSwitch</strong>：GPU 间互联速度 600 GB/s</li>
+</ul>
+<p>A100 的 SM 有 192KB 共享内存（V100 的 1.5 倍），8192 个 FP32 CUDA Core，512 个 Tensor Core。可以说，从这一代开始，&ldquo;AI 训练用 A100&quot;成了行业共识。</p>
+<p>命名者<strong>安培</strong>是电磁学之父，Ampere 架构也把&quot;电磁互联&quot;这件事做到了新高度。</p>
+<p><img src="/images/ai_system/ch4/ai_system.pdf-0156-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Ampere A100 架构"
+	
+	
+></p>
+<h3 id="hopper-架构2022-为-transformer-而生">Hopper 架构（2022）—— 为 Transformer 而生
+</h3><p>Hopper 是第一个真正&quot;为 AI 而生&quot;的异构加速平台。Grace CPU + Hopper GPU 通过 NVLink-C2C 绑在一起，CPU 和 GPU 之间带宽高达 900 GB/s！</p>
+<p><strong>H100 的硬核参数</strong>：</p>
+<ul>
+<li>16896 个 CUDA Core、528 个 Tensor Core 4.0</li>
+<li>80 GB HBM3 显存，带宽 3 TB/s</li>
+<li>50 MB L2 Cache</li>
+<li>新增 <strong>FP8</strong> 精度支持，Transformer 引擎让大模型训练提速 9 倍</li>
+<li><strong>TMA（张量内存加速器）</strong>：专门做张量数据传输的硬件单元</li>
+<li><strong>分布式共享内存</strong>：SM 之间可以直接访问彼此的共享内存，不用绕道全局内存</li>
+</ul>
+<p>命名者<strong>格蕾丝·赫柏</strong>是&quot;软件工程之母&rdquo;，发明了第一个编译器。Hopper 架构也引入了大量&quot;编译期优化&quot;式的硬件设计，让大模型跑得更聪明。</p>
+<p><img src="/images/ai_system/ch4/ai_system.pdf-0159-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Hopper H100 SM 架构"
+	
+	
+></p>
+<h3 id="blackwell-架构2024-能效比再翻-25-倍">Blackwell 架构（2024）—— 能效比再翻 25 倍
+</h3><p>Blackwell 是英伟达最新发布的架构，2080 亿晶体管。核心亮点：</p>
+<ul>
+<li><strong>第二代 Transformer 引擎</strong>：支持 <strong>FP4</strong> 精度，大模型推理功耗大幅下降</li>
+<li><strong>第五代 NVLink</strong>：每 GPU 双向带宽 1.8 TB/s，支持最多 576 个 GPU 互联</li>
+<li><strong>RAS 引擎</strong>：硬件级的可靠性、可用性、可服务性</li>
+<li><strong>GB200 超级芯片</strong>：2 个 B200 GPU + 1 个 Grace CPU，通过 900 GB/s 片间互联连接</li>
+</ul>
+<p>一个震撼的数据：训练一个 1.8 万亿参数的 MoE 模型，用 Hopper 需要 8000 个 GPU、15MW 功率；用 Blackwell 只需要 2000 个 GPU、1/4 的能耗。</p>
+<p>命名者<strong>戴维·布莱克韦尔</strong>是第一位非裔美国国家科学院院士。英伟达用 8 年时间，从 Pascal 到 Blackwell，把 AI 计算性能提升了 <strong>1000 倍</strong>。</p>
+<h3 id="-核心模块回顾">🔑 核心模块回顾
+</h3><p>经过 15 年的迭代，英伟达围绕三条主线构建起了坚固的&quot;技术护城河&quot;：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>维度</th>
+          <th>代表技术</th>
+          <th>演进方向</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>计算核心</strong></td>
+          <td>CUDA Core → Tensor Core</td>
+          <td>通用计算 → 专用矩阵加速，精度从 FP64 一路下探到 FP4</td>
+      </tr>
+      <tr>
+          <td><strong>卡间互联</strong></td>
+          <td>PCIe → NVLink → NVSwitch</td>
+          <td>从 32 GB/s 到 1800 GB/s，从 4 卡互联到 576 卡全互联</td>
+      </tr>
+      <tr>
+          <td><strong>编程模型</strong></td>
+          <td>CUDA C → WMMA API → Transformer Engine</td>
+          <td>越来越&quot;傻瓜&quot;，让算法工程师不必关心底层硬件细节</td>
+      </tr>
+  </tbody>
+</table></div>
+<hr>
+<h2 id="42-tensor-core-基本原理">4.2 Tensor Core 基本原理
+</h2><p>这一节开始深入 Tensor Core 的内部。如果你之前只知道&quot;Tensor Core 很快&quot;，那读完这节你会明白它为什么快。</p>
+<h3 id="卷积计算与-gemm">卷积计算与 GEMM
+</h3><p>卷积神经网络（CNN）里的卷积计算，在底层其实是通过 <strong>Im2Col</strong> 操作把输入&quot;展开&quot;成一个大矩阵，然后把卷积核也转成矩阵，最后变成 <strong>矩阵乘法（GEMM）</strong> 来算的。</p>
+<blockquote>
+<p>说白了，卷积在 GPU 上跑的其实是矩阵乘法。而 Tensor Core 就是专门为矩阵乘法设计的硬件。</p>
+</blockquote>
+<h3 id="混合精度训练到底是什么意思">混合精度训练到底是什么意思？
+</h3><p>很多人以为&quot;混合精度&quot;就是在模型里同时用 FP16 和 FP32，这个理解其实不够精确。</p>
+<p><strong>真正的混合精度训练</strong>是两个操作：</p>
+<ol>
+<li><strong>计算用低精度（FP16）</strong>：前向和反向传播用 FP16，速度快、省内存</li>
+<li><strong>更新用高精度（FP32）</strong>：参数更新时用 FP32 累加，保证训练稳定</li>
+</ol>
+<p>而这一切能在硬件层面实现，靠的就是 Tensor Core——输入用 FP16 算矩阵乘，中间结果用 FP32 累加，最后输出 FP16 或 FP32。</p>
+<h3 id="tensor-core-的工作原理">Tensor Core 的工作原理
+</h3><p>Tensor Core 的核心操作就一个公式：</p>
+\[ D = A \times B + C \]<p>其中 A、B 是 FP16 的 4×4 矩阵，C 和 D 可以是 FP16 或 FP32。</p>
+<p>在 Volta 架构中，每个 Tensor Core 每个时钟周期可以完成 <strong>64 次 FMA（融合乘加）</strong> 操作。一个 SM 有 8 个 Tensor Core，所以每个时钟周期一个 SM 可以做 512 次 FP16 FMA。相比于纯用 CUDA Core，AI 吞吐量直接提升 <strong>8 倍</strong>，算上 SM 数量和核心设计的优化，总体提升 <strong>12 倍</strong>！</p>
+<h3 id="tensor-core-与-cuda-编程">Tensor Core 与 CUDA 编程
+</h3><p>CUDA 编程里并不是直接操控单个线程的，而是通过 <strong>Warp（32 个线程为一组）</strong> 来调度。Tensor Core 对外暴露的是 Warp-Level 的 API：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// WMMA API 的核心接口
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span> <span class="nf">load_matrix_sync</span><span class="p">(</span><span class="n">fragment</span><span class="o">&lt;</span><span class="p">...</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">T</span><span class="o">*</span> <span class="n">mptr</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="n">ldm</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">mma_sync</span><span class="p">(</span><span class="n">fragment</span><span class="o">&lt;</span><span class="p">...</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">d</span><span class="p">,</span> <span class="k">const</span> <span class="n">fragment</span><span class="o">&lt;</span><span class="p">...</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="k">const</span> <span class="n">fragment</span><span class="o">&lt;</span><span class="p">...</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">,</span> <span class="k">const</span> <span class="n">fragment</span><span class="o">&lt;</span><span class="p">...</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">c</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">satf</span><span class="o">=</span><span class="nb">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">store_matrix_sync</span><span class="p">(</span><span class="n">T</span><span class="o">*</span> <span class="n">mptr</span><span class="p">,</span> <span class="k">const</span> <span class="n">fragment</span><span class="o">&lt;</span><span class="p">...</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="n">ldm</span><span class="p">,</span> <span class="n">layout_t</span> <span class="n">layout</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>一个 Tensor Core 物理上是 4×4×4 的 GEMM 单元，但 CUDA 层面暴露的是 16×16×16 ——这是因为多个 Tensor Core 被打包在一起，通过 Warp 统一调度。就像你不能直接操控发动机的每个活塞，但你可以踩油门——WMMA API 就是那个&quot;油门踏板&quot;。</p>
+<p><img src="/images/ai_system/ch4/ai_system.pdf-0168-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Tensor Core MMA 运算：D = A×B &#43; C"
+	
+	
+></p>
+<p><img src="/images/ai_system/ch4/ai_system.pdf-0170-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Tensor Core Fragment 到大矩阵的映射"
+	
+	
+></p>
+<hr>
+<h2 id="43-tensor-core-架构演进">4.3 Tensor Core 架构演进
+</h2><p>Tensor Core 从 2017 年诞生至今，已经迭代了五代。这一节逐一拆解每一代的核心变化。</p>
+<h3 id="第一代volta从零到一">第一代（Volta）：从零到一
+</h3><p>Volta 的 SM 被分成 4 个 <strong>Sub Core</strong>，每个 Sub Core 里有 2 个 4×4×4 的 Tensor Core。Warp Scheduler 直接向 Tensor Core 发指令，不需要经过 Math Dispatch Unit——这意味着 Tensor Core 是&quot;一等公民&quot;，不是 CUDA Core 的附庸。</p>
+<p>另外，Volta 把 L1 Cache 和共享内存合并成一块 96KB 的空间，这个设计一直延续到现在。</p>
+<h3 id="第二代turingint8-来了">第二代（Turing）：INT8 来了
+</h3><p>Turing 的 Tensor Core 新增了对 INT8、INT4 甚至 Binary（INT1）的支持。同时引入了 FP16 的 FastPath，每个时钟周期可以执行 32 次计算操作（Volta 要 4~8 个周期才能完成一次 GEMM）。</p>
+<p>一个容易被忽略但很重要的改进：Turing 允许线程之间<strong>共享寄存器</strong>。这让 Tensor Core 可以更充分地利用片上存储资源。</p>
+<h3 id="第三代ampere更快更聪明">第三代（Ampere）：更快、更聪明
+</h3><p>Ampere 的 Tensor Core 做了几个非常&quot;工程化&quot;的优化：</p>
+<ul>
+<li><strong>异步内存拷贝</strong>：新增 LDGSTS 指令，数据可以从全局内存直接加载到共享内存，不用经过寄存器中转——&ldquo;少搬一次家，省不少力气&rdquo;</li>
+<li><strong>更大的矩阵块</strong>：每个 Tensor Core 每个时钟周期可以做 8×4×8 的混合精度矩阵乘（Volta 是 4×4×4）</li>
+<li><strong>Warp 内 32 线程共享数据</strong>：Volta 只有 8 个线程可以共享，Ampere 扩展到 32 个，寄存器文件访问次数减少到原来的 1/2.9</li>
+</ul>
+<p>再加上 TF32 和 BF16 的支持，A100 在 AI 训练上的表现直接碾压 V100。</p>
+<h3 id="第四代hoppertma-和分布式共享内存">第四代（Hopper）：TMA 和分布式共享内存
+</h3><p>这是变化最大的一代。前三代都是 Warp-Level 编程，所有线程都要参与数据搬运和计算。Hopper 引入 <strong>TMA（张量内存加速器）</strong>，把数据搬运硬件化了——数据从全局内存异步加载到共享内存，Tensor Core 只管计算，不用操心搬数据的事。</p>
+<p>更革命性的是<strong>分布式共享内存</strong>：以前 SM 之间通信必须通过全局内存（慢），Hopper 让 GPC 内的 SM 可以直接访问彼此的共享内存。软件层面也随之引入了 Warp Group 和 Thread Block Cluster 的编程模式。</p>
+<blockquote>
+<p>一句话：Hopper 把&quot;数据搬运&quot;和&quot;计算&quot;解耦了，Tensor Core 终于可以专心做自己最擅长的事——算矩阵。</p>
+</blockquote>
+<h3 id="第五代blackwellfp4-和微缩放格式">第五代（Blackwell）：FP4 和微缩放格式
+</h3><p>第五代 Tensor Core 把精度下探到了 FP4，同时支持 FP6。对于大模型推理来说，内存容量是主要瓶颈，用更低精度存储参数意味着更大的模型能在更少的显存里跑起来。</p>
+<p>此外还支持了社区定义的 <strong>MX Format（微缩放格式）</strong>——多个元素共享一个 scale，比传统的 per-tensor 量化粒度更细，精度损失更小。</p>
+<hr>
+<h2 id="44-tensor-core-深度剖析">4.4 Tensor Core 深度剖析
+</h2><p>这一节是全章最&quot;硬核&quot;的部分，从电路层面讲 Tensor Core 到底是怎么算的。</p>
+<h3 id="计算原理">计算原理
+</h3><p>Tensor Core 的计算本质是 <strong>FMA（融合乘加）</strong>。在电路上，就是一个乘号（×）加一个加号（+），输入是 16 bit 的数据，中间结果存在 32 bit 的寄存器里。</p>
+<p>关键点：Tensor Core 是<strong>整个矩阵一起算</strong>的，不是一行一列地算。Pascal 架构没有 Tensor Core，只能一个元素一个元素地乘加。Volta 有了 Tensor Core 后，4×4 的矩阵一次性完成，效率天差地别。</p>
+<h3 id="指令流水">指令流水
+</h3><p>Tensor Core 的指令流水线设计非常精巧。一条 FMA 指令被拆成多个步骤在流水线上并行执行。当需要计算矩阵的一行乘以一列（4 次乘加）时，就需要 4 条流水线同时工作。整个 4×4 矩阵的计算就是大量流水线的拼接。</p>
+<p>在流水线的某个时刻，同时涉及 4 个数据的搬运：2 个从寄存器读到计算单元，2 个从计算结果写回寄存器。这种&quot;读写交替&quot;的设计充分利用了硬件带宽。</p>
+<h3 id="线程执行从小块到大矩阵">线程执行：从小块到大矩阵
+</h3><p>Tensor Core 一次只能算一个小矩阵块，那 224×224 的图像卷积或者 2048×2048 的 Embedding 矩阵怎么处理呢？</p>
+<p>答案是<strong>分块 + 分层并行</strong>：</p>
+<ol>
+<li><strong>Block-Level</strong>：把大矩阵沿各维度切分成小块（Tile），每个 Thread Block 负责一块</li>
+<li><strong>Warp-Level</strong>：Thread Block 内部，每个 Warp 负责结果矩阵的一部分，数据通过共享内存（SMEM）中转</li>
+<li><strong>Thread-Level</strong>：Warp 内的线程协同工作，通过 WMMA API 调用 Tensor Core 完成最小的矩阵乘</li>
+<li><strong>累积</strong>：所有小块的计算结果在共享内存中累积，最后写回全局内存</li>
+</ol>
+<p>这个过程就像用乐高积木拼一座城堡——Tensor Core 只能拼 4×4 的小方块，但通过&quot;分块→计算→累积&quot;的循环，理论上可以拼出任意大的矩阵。</p>
+<h3 id="整体计算流程">整体计算流程
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">全局内存（HBM）→ 共享内存（SMEM）→ 寄存器（RF）
+</span></span><span class="line"><span class="cl">→ Tensor Core 计算 → 共享内存累积 → 写回全局内存
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>数据从慢到快（HBM → SMEM → RF），计算完之后再从快到慢写回去。每一层都在做&quot;数据复用&quot;，尽量减少对慢速存储的访问——这就是 GPU 高效计算的本质。</p>
+<hr>
+<h2 id="45-分布式通信">4.5 分布式通信
+</h2><p>大模型时代，单卡根本塞不下模型参数，必须多卡协同。分布式通信就是让多张 GPU 能够&quot;对话&quot;的技术。</p>
+<h3 id="分布式并行策略">分布式并行策略
+</h3><p>两种基本策略：</p>
+<ul>
+<li><strong>数据并行（DP）</strong>：每张卡存完整模型副本，各吃不同的数据，梯度算完同步一下。简单好用，但 GPU 多了通信开销会变大</li>
+<li><strong>模型并行（MP）</strong>：模型切成几块分到不同卡上，每张卡只算自己那块。进一步细分还有流水并行（PP）和张量并行（TP）</li>
+</ul>
+<p>现代 AI 框架（PyTorch、MindSpore 等）通常采用<strong>混合并行</strong>——数据并行 + 模型并行一起上。</p>
+<h3 id="通信硬件">通信硬件
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>层级</th>
+          <th>技术</th>
+          <th>带宽量级</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>卡内</td>
+          <td>共享内存</td>
+          <td>TB/s 级</td>
+      </tr>
+      <tr>
+          <td>卡间（同一节点）</td>
+          <td>NVLink / NVSwitch</td>
+          <td>数百 GB/s ~ TB/s</td>
+      </tr>
+      <tr>
+          <td>节点间</td>
+          <td>InfiniBand / RDMA / 以太网</td>
+          <td>100~400 GB/s</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>NCCL（NVIDIA Collective Communications Library）是英伟达 GPU 上最常用的集合通信库，它底层利用 NVLink 和 NVSwitch，对上提供 broadcast、reduce、all-gather 等通信原语。</p>
+<h3 id="集合通信原语">集合通信原语
+</h3><p>这些通信原语是大规模分布式训练的基础&quot;词汇表&quot;：</p>
+<ul>
+<li><strong>Broadcast</strong>：一对多，一个节点把数据广播给所有人</li>
+<li><strong>Gather</strong>：多对一，把所有人的数据汇总到一个节点</li>
+<li><strong>Scatter</strong>：一对多，把数据分片分发</li>
+<li><strong>All-Reduce</strong>：多对多，所有人数据做规约（比如求和），结果发回每个人</li>
+<li><strong>All-Gather</strong>：多对多，把所有人的数据收集起来再分发给所有人</li>
+</ul>
+<p>在大模型训练中，<strong>All-Reduce</strong> 是最核心的操作——梯度同步全靠它。</p>
+<p><img src="/images/ai_system/ch4/ai_system.pdf-0194-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="集合通信原语一览"
+	
+	
+></p>
+<hr>
+<h2 id="46-nvlink-原理剖析">4.6 NVLink 原理剖析
+</h2><h3 id="为什么需要-nvlink">为什么需要 NVLink？
+</h3><p>传统 GPU 之间通信走 PCIe 总线。PCIe 3.0×16 的双向带宽约 32 GB/s，当 GPU 算力越来越强的时候，这点带宽就成了&quot;肠梗阻&quot;——GPU 算完数据要等 PCIe 慢慢传，大部分时间在&quot;摸鱼&quot;。</p>
+<p>NVLink 就是为了打破这个瓶颈。第一代 NVLink（Pascal P100）每个链路 40 GB/s，4 路捆在一起能到 160 GB/s，是 PCIe 3.0 的 5 倍。</p>
+<h3 id="nvlink-技术细节">NVLink 技术细节
+</h3><p>NVLink 的物理层设计很有意思：</p>
+<ul>
+<li>每条链路 = 8 个差分对 = 32 条线</li>
+<li>采用 <strong>flit（流控制数）</strong> 的数据包结构，每个 flit 128 位</li>
+<li>25 位 CRC 做错误检测，最多能容忍 25 个连续位错误</li>
+<li>支持<strong>通道反转</strong>和<strong>通道极性</strong>调整，简化物理布线</li>
+</ul>
+<p>NVLink 使用<strong>物理地址</strong>而非虚拟地址进行数据传输，减少了目标 GPU 上的地址转换开销。</p>
+<h3 id="nvlink-的演进">NVLink 的演进
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>代数</th>
+          <th>架构</th>
+          <th>每 GPU 带宽</th>
+          <th>最大链路数</th>
+          <th>年份</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>1.0</td>
+          <td>Pascal</td>
+          <td>160 GB/s</td>
+          <td>4</td>
+          <td>2016</td>
+      </tr>
+      <tr>
+          <td>2.0</td>
+          <td>Volta</td>
+          <td>300 GB/s</td>
+          <td>6</td>
+          <td>2017</td>
+      </tr>
+      <tr>
+          <td>3.0</td>
+          <td>Ampere</td>
+          <td>600 GB/s</td>
+          <td>12</td>
+          <td>2020</td>
+      </tr>
+      <tr>
+          <td>4.0</td>
+          <td>Hopper</td>
+          <td>900 GB/s</td>
+          <td>18</td>
+          <td>2022</td>
+      </tr>
+      <tr>
+          <td>5.0</td>
+          <td>Blackwell</td>
+          <td>1800 GB/s</td>
+          <td>18</td>
+          <td>2024</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>8 年时间，带宽涨了 11 倍。NVLink 5.0 的信号传输速率达到每差分对 200 GB/s，靠的是更快的 PAM4 信号技术（而不是单纯堆更多线）。</p>
+<hr>
+<h2 id="47-nvswitch-深度解析">4.7 NVSwitch 深度解析
+</h2><h3 id="nvswitch-是什么">NVSwitch 是什么？
+</h3><p>NVLink 解决了&quot;两点之间&quot;的通信，但如果服务器里有 8 张 GPU，每两张之间都要拉一条 NVLink 线，那布线复杂度会爆炸。NVSwitch 就是来解决这个问题的——它像一个&quot;网络交换机&quot;，所有 GPU 都连到 NVSwitch 上，任意两张 GPU 之间都能高速通信。</p>
+<h3 id="历代-nvswitch">历代 NVSwitch
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>代数</th>
+          <th>架构</th>
+          <th>GPU 间带宽</th>
+          <th>直连 GPU 数</th>
+          <th>总聚合带宽</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>1.0</td>
+          <td>Volta</td>
+          <td>300 GB/s</td>
+          <td>≤8</td>
+          <td>2.4 TB/s</td>
+      </tr>
+      <tr>
+          <td>2.0</td>
+          <td>Ampere</td>
+          <td>600 GB/s</td>
+          <td>≤8</td>
+          <td>4.8 TB/s</td>
+      </tr>
+      <tr>
+          <td>3.0</td>
+          <td>Hopper</td>
+          <td>900 GB/s</td>
+          <td>≤8</td>
+          <td>7.2 TB/s</td>
+      </tr>
+      <tr>
+          <td>NVLink Switch</td>
+          <td>Blackwell</td>
+          <td>1800 GB/s</td>
+          <td>≤576</td>
+          <td><strong>1 PB/s</strong></td>
+      </tr>
+  </tbody>
+</table></div>
+<p>Blackwell 时代的 NVLink Switch 能连接 576 个 GPU，总带宽达到 <strong>1 PB/s</strong>——这个数字放到几年前简直不敢想象。</p>
+<h3 id="nvswitch-的核心优势">NVSwitch 的核心优势
+</h3><ul>
+<li><strong>全互联</strong>：任意两个 GPU 之间都能直接通信，无需中间跳转</li>
+<li><strong>无阻塞</strong>：XBAR 交换矩阵保证每对 GPU 都有独立的数据通路</li>
+<li><strong>硬件加速集合通信</strong>：第三代 NVSwitch 集成了 SHARP 模块，支持 All-Gather、Reduce-Scatter 等操作的硬件加速，支持 FP16/BF16</li>
+<li><strong>安全隔离</strong>：端口分区功能可以把不同端口隔离到独立的 NVLink 网络中</li>
+</ul>
+<blockquote>
+<p>如果你把 NVLink 比作 GPU 之间的&quot;高速公路&quot;，那 NVSwitch 就是&quot;立交桥枢纽&quot;——不只是路宽了，而是整个交通系统被重新设计了。</p>
+</blockquote>
+<p><img src="/images/ai_system/ch4/ai_system.pdf-0209-11.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="第三代 NVSwitch 架构"
+	
+	
+></p>
+<hr>
+<h2 id="-学完这章我的几点感悟">🤔 学完这章，我的几点感悟
+</h2><ol>
+<li>
+<p><strong>Tensor Core 是英伟达最深的护城河</strong>。CUDA Core 别人可以模仿，但 Tensor Core 从硬件设计到软件生态（cuDNN、cuBLAS、TensorRT）已经形成了闭环，竞争对手很难在短期内追上。</p>
+</li>
+<li>
+<p><strong>互联带宽是分布式训练的隐形天花板</strong>。大模型时代，算力不是唯一瓶颈，通信效率同样关键。NVLink 和 NVSwitch 的迭代速度丝毫不亚于计算核心，这说明英伟达很清楚：单卡强不算强，集群强才是真的强。</p>
+</li>
+<li>
+<p><strong>精度下探是大势所趋</strong>。从 FP32 到 FP16 到 FP8 再到 FP4，每一代都在&quot;牺牲一点精度换巨大加速比&quot;。这说明在 AI 场景下，算力需求远远超过了精度需求，模型对低精度的容忍度比我们想象的高。</p>
+</li>
+<li>
+<p><strong>软硬件协同设计是最高效的路径</strong>。Hopper 的 TMA、Transformer Engine，Blackwell 的 FP4 支持——这些都不是纯粹的硬件堆料，而是&quot;上层负载需要什么，下层硬件就设计什么&quot;的思路。这也是为什么英伟达能从一家&quot;显卡公司&quot;变成&quot;AI 基础设施公司&quot;。</p>
+</li>
+</ol>
+<hr>
+<h2 id="小结">小结
+</h2><p>第 4 章是一趟穿越 15 年 GPU 历史的旅程。从 Fermi 的 30 亿晶体管到 Blackwell 的 2080 亿，从 CUDA Core 到第五代 Tensor Core，从 PCIe 到 NVLink Switch——每一项技术的演进都在回答同一个问题：<strong>如何让计算更快、让通信更畅通、让开发者更省心</strong>。</p>
+<p>理解这些，才能真正理解为什么今天的大模型能&quot;跑&quot;起来。下一章我们将转向另一个 AI 芯片巨头——谷歌的 TPU，看看它又是怎么另辟蹊径的。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ai-system/">AI System</a>
+        
+            <a href="/tags/gpu/">GPU</a>
+        
+            <a href="/tags/cuda/">CUDA</a>
+        
+            <a href="/tags/tensor-core/">Tensor Core</a>
+        
+            <a href="/tags/nvlink/">NVLink</a>
+        
+            <a href="/tags/deep-learning/">Deep Learning</a>
+        
+            <a href="/tags/nvidia/">NVIDIA</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第1章 AI系统概述</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC2%E7%AB%A0-ai%E8%AE%A1%E7%AE%97%E4%BD%93%E7%B3%BB/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第2章 AI计算体系</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

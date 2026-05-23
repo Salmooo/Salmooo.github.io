@@ -242,15 +242,21 @@
   </url><url>
     <loc>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC2%E7%AB%A0-ai%E8%AE%A1%E7%AE%97%E4%BD%93%E7%B3%BB/</loc>
   </url><url>
+    <loc>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC4%E7%AB%A0-gpu%E4%BB%A5%E8%8B%B1%E4%BC%9F%E8%BE%BE%E4%B8%BA%E4%BE%8B/</loc>
+  </url><url>
     <loc>https://Salmooo.github.io/tags/algorithm/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/categories/algorithm/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/cuda/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/deep-learning/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/categories/formal/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/formal-verification/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/gpu/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/p/hugo%E9%83%A8%E7%BD%B2%E6%95%99%E7%A8%8B/</loc>
   </url><url>
@@ -282,9 +288,15 @@
   </url><url>
     <loc>https://Salmooo.github.io/tags/matrix-multiplication/</loc>
   </url><url>
+    <loc>https://Salmooo.github.io/tags/nvidia/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/nvlink/</loc>
+  </url><url>
     <loc>https://Salmooo.github.io/p/smt%E5%8F%AF%E6%BB%A1%E8%B6%B3%E6%80%A7%E6%A8%A1%E7%90%86%E8%AE%BA/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/p/stpsat%E6%B1%82%E8%A7%A3%E6%AD%A5%E9%AA%A4%E5%92%8C%E4%BC%98%E5%8C%96/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/tensor-core/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/p/%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E5%8F%91%E5%B1%95%E7%AE%80%E5%8F%B2/</loc>
   </url><url>
