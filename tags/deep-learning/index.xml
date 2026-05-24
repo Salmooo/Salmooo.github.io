@@ -1394,6 +1394,597 @@
 &lt;p&gt;理解这些，才能真正理解为什么今天的大模型能&amp;quot;跑&amp;quot;起来。下一章我们将转向另一个 AI 芯片巨头——谷歌的 TPU，看看它又是怎么另辟蹊径的。&lt;/p&gt;
 </description>
         </item>
+        <item>
+        <title>AI系统：第5章 TPU——以谷歌为例</title>
+        <link>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC5%E7%AB%A0-tpu%E4%BB%A5%E8%B0%B7%E6%AD%8C%E4%B8%BA%E4%BE%8B/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC5%E7%AB%A0-tpu%E4%BB%A5%E8%B0%B7%E6%AD%8C%E4%B8%BA%E4%BE%8B/</guid>
+        <description>&lt;h2 id=&#34;本章概览&#34;&gt;本章概览
+&lt;/h2&gt;&lt;p&gt;前面几章我们讨论了 CPU 和 GPU，这两种通用计算芯片在 AI 时代扮演了重要角色。但谷歌的思路更&amp;quot;激进&amp;quot;——既然现有的通用芯片跑 AI 不够高效，那为什么不从零开始，为 AI 量身打造一款芯片呢？&lt;/p&gt;
+&lt;p&gt;于是，&lt;strong&gt;TPU（Tensor Processing Unit）&lt;/strong&gt; 诞生了。从 2016 年第一代 TPU v1 专为推理而生，到 2021 年 TPU v4 能够驱动 4096 颗芯片组成的 exaFLOPS 级别超级计算机，谷歌只用了短短几年时间就把&amp;quot;专用芯片&amp;quot;这条路走到了极致。&lt;/p&gt;
+&lt;p&gt;本章将带你深入谷歌 TPU 的&amp;quot;心脏&amp;quot;——理解脉动阵列的优雅设计，对比各代 TPU 的架构演进，并最终站在 Pod 超级计算机的视角，俯瞰谷歌如何用&amp;quot;光&amp;quot;连接 4096 颗芯片。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;51-谷歌-tpu-概述&#34;&gt;5.1 谷歌 TPU 概述
+&lt;/h2&gt;&lt;h3 id=&#34;511-什么是-tpu&#34;&gt;5.1.1 什么是 TPU？
+&lt;/h3&gt;&lt;p&gt;TPU 是谷歌专为深度学习和 AI 任务设计的&lt;strong&gt;专用集成电路（ASIC）&lt;/strong&gt;。和 CPU、GPU 这些&amp;quot;多面手&amp;quot;不同，TPU 从第一天起就只有一个使命：高效执行神经网络计算。&lt;/p&gt;
+&lt;p&gt;下表展示了历代 TPU 芯片的参数演进：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;参数规格&lt;/th&gt;
+          &lt;th&gt;TPU v1&lt;/th&gt;
+          &lt;th&gt;TPU v2&lt;/th&gt;
+          &lt;th&gt;TPU v3&lt;/th&gt;
+          &lt;th&gt;TPU v4i&lt;/th&gt;
+          &lt;th&gt;TPU v4&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;推出年份&lt;/td&gt;
+          &lt;td&gt;2016&lt;/td&gt;
+          &lt;td&gt;2017&lt;/td&gt;
+          &lt;td&gt;2018&lt;/td&gt;
+          &lt;td&gt;2020&lt;/td&gt;
+          &lt;td&gt;2021&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;制程工艺&lt;/td&gt;
+          &lt;td&gt;28 nm&lt;/td&gt;
+          &lt;td&gt;16 nm&lt;/td&gt;
+          &lt;td&gt;16 nm&lt;/td&gt;
+          &lt;td&gt;7 nm&lt;/td&gt;
+          &lt;td&gt;7 nm&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;芯片大小(mm²)&lt;/td&gt;
+          &lt;td&gt;330&lt;/td&gt;
+          &lt;td&gt;625&lt;/td&gt;
+          &lt;td&gt;700&lt;/td&gt;
+          &lt;td&gt;400&lt;/td&gt;
+          &lt;td&gt;780&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;芯片内存(MB)&lt;/td&gt;
+          &lt;td&gt;28&lt;/td&gt;
+          &lt;td&gt;32&lt;/td&gt;
+          &lt;td&gt;32&lt;/td&gt;
+          &lt;td&gt;144&lt;/td&gt;
+          &lt;td&gt;288&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;内存带宽(GB/s)&lt;/td&gt;
+          &lt;td&gt;300&lt;/td&gt;
+          &lt;td&gt;700&lt;/td&gt;
+          &lt;td&gt;900&lt;/td&gt;
+          &lt;td&gt;300&lt;/td&gt;
+          &lt;td&gt;1200&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;热设计功耗(W)&lt;/td&gt;
+          &lt;td&gt;75&lt;/td&gt;
+          &lt;td&gt;280&lt;/td&gt;
+          &lt;td&gt;450&lt;/td&gt;
+          &lt;td&gt;175&lt;/td&gt;
+          &lt;td&gt;300&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;TOPS&lt;/td&gt;
+          &lt;td&gt;92&lt;/td&gt;
+          &lt;td&gt;45&lt;/td&gt;
+          &lt;td&gt;123&lt;/td&gt;
+          &lt;td&gt;-&lt;/td&gt;
+          &lt;td&gt;275&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;从 28nm 到 7nm，从 75W 到 300W，从 92 TOPS 到 275 TOPS——每一代都在性能和能效上实现了质的飞跃。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0213-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.1.1 历代TPU俯视图&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;512-历代-tpu-产品&#34;&gt;5.1.2 历代 TPU 产品
+&lt;/h3&gt;&lt;p&gt;除了单芯片的迭代，从 TPU v2 开始，谷歌还推出了&lt;strong&gt;TPU Pod&lt;/strong&gt;——由众多 TPU 单元构成的超大规模计算系统，专为处理大量并行计算任务而设计。&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;名称&lt;/th&gt;
+          &lt;th&gt;推出年份&lt;/th&gt;
+          &lt;th&gt;性能&lt;/th&gt;
+          &lt;th&gt;应用&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;TPU v1&lt;/td&gt;
+          &lt;td&gt;2016&lt;/td&gt;
+          &lt;td&gt;92 TOPS + 8 GB DDR3&lt;/td&gt;
+          &lt;td&gt;数据中心推理&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;TPU v2&lt;/td&gt;
+          &lt;td&gt;2017&lt;/td&gt;
+          &lt;td&gt;180 TFLOPS + 64 GB HBM&lt;/td&gt;
+          &lt;td&gt;数据中心训练和推理&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;TPU v3&lt;/td&gt;
+          &lt;td&gt;2018&lt;/td&gt;
+          &lt;td&gt;420 TFLOPS + 128 GB HBM&lt;/td&gt;
+          &lt;td&gt;数据中心训练和推理&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;TPU v2 Pod&lt;/td&gt;
+          &lt;td&gt;2019&lt;/td&gt;
+          &lt;td&gt;11.5 PFLOPS，4 TB HBM&lt;/td&gt;
+          &lt;td&gt;数据中心训练和推理&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;TPU v3 Pod&lt;/td&gt;
+          &lt;td&gt;2019&lt;/td&gt;
+          &lt;td&gt;&amp;gt;100 PFLOPS，32 TB HBM&lt;/td&gt;
+          &lt;td&gt;数据中心训练和推理&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;TPU v4 Pod&lt;/td&gt;
+          &lt;td&gt;2022&lt;/td&gt;
+          &lt;td&gt;1.126 exaFLOPS (BF16)&lt;/td&gt;
+          &lt;td&gt;数据中心训练和推理&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;有意思的是，谷歌还把这些技术&amp;quot;下放&amp;quot;到了消费电子领域：2017 年的 Pixel 2/3 搭载了 Pixel Visual Core，之后的 Pixel 4 搭载了基于 Edge TPU 架构的 Pixel Neural Core。到了 2023 年的 Tensor G3，谷歌更是把生成式 AI 塞进了手机芯片。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;513-tpu-架构演进的核心思路&#34;&gt;5.1.3 TPU 架构演进的核心思路
+&lt;/h3&gt;&lt;p&gt;每一代 TPU 都有鲜明的设计主题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;TPU v1&lt;/strong&gt;：专为推理而生，INT8 量化 + 脉动阵列，用最少的功耗做最多的矩阵乘法&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;TPU v2&lt;/strong&gt;：进军训练，引入 BF16 精度、HBM 高带宽内存、芯片间互联&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;TPU v3&lt;/strong&gt;：液冷加持，MXU 翻倍，Pod 规模从 256 芯片扩到 1024 芯片&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;TPU v4&lt;/strong&gt;：7nm 工艺，Sparse Core 加速 Embedding，3D Torus + 光路交换机打造 exaFLOPS 集群&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;贯穿始终的设计哲学：&lt;strong&gt;简单、专用、高效&lt;/strong&gt;。TPU 的控制逻辑仅占芯片面积的 2%（远低于 CPU 和 GPU），把宝贵的面积全留给了计算。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;52-谷歌-tpu-v1-脉动阵列&#34;&gt;5.2 谷歌 TPU v1 脉动阵列
+&lt;/h2&gt;&lt;p&gt;如果说前几代 TPU 中有什么设计最让人拍案叫绝，那一定是&lt;strong&gt;脉动阵列（Systolic Array）&lt;/strong&gt;。它是 TPU 的&amp;quot;心脏&amp;quot;，也是理解专用 AI 芯片为何高效的关键。&lt;/p&gt;
+&lt;h3 id=&#34;521-tpu-v1-芯片架构&#34;&gt;5.2.1 TPU v1 芯片架构
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0222-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.2.1 TPU v1 电路板&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;TPU v1 的几个关键元素：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;DDR3 DRAM / Weight FIFO&lt;/strong&gt;：模型权重通过 PCIe 从主机&amp;quot;预加载&amp;quot;到芯片的 DDR3 内存中，再传输到 Weight FIFO 供 MXU 使用。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;MXU（矩阵乘法单元）&lt;/strong&gt;：256×256×8 bit 的脉动阵列，每个时钟周期输出 256 个 16 bit 计算结果。这是&amp;quot;TPU 的心脏&amp;quot;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;累加器（Accumulator）&lt;/strong&gt;：4 MB 的 32 bit 累加单元，存储 MXU 的计算结果。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;控制指令（Control）&lt;/strong&gt;：四级流水线，12 条 CISC 指令，包括 Read_Host_Memory、Read_Weight、Matrix_Multiply/Convolve、Activate、Write_Host_Memory 等。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0223-11.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.2.2 TPU v1 芯片布局图&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;注意芯片布局图中那两大块：&lt;strong&gt;本地统一缓冲器（Local Unified Buffer）&lt;/strong&gt; 和 &lt;strong&gt;矩阵乘法单元（MXU）&lt;/strong&gt;，它们占据了芯片绝大部分面积。而控制器只占 2%——这就是&amp;quot;专用&amp;quot;的力量。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;522-tpu-v1-的三大优化特性&#34;&gt;5.2.2 TPU v1 的三大优化特性
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;特性一：低精度（INT8 量化）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;神经网络在推理时并不需要 FP32 那样的高精度。TPU 通过**量化（Quantization）**技术，将权重和激活值从 FP32/FP16 转换为 INT8，在保持模型精度的同时，大幅优化了存储和计算效率。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0215-14.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.1.2 FP32量化到INT8的过程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;量化后的 INT8 虽然无法维持单个数据点的超高精度，但得益于神经网络的泛化能力，整体数据分布保持大致准确，推理速度却大幅提升。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;特性二：脉动阵列 &amp;amp; MXU&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;这是 TPU 最核心的设计。传统的 CPU 计算流程是&amp;quot;读寄存器 → ALU 计算 → 写回寄存器&amp;quot;，数据每次计算都要经过寄存器。而在脉动阵列中，数据在 ALU 之间&amp;quot;流动&amp;quot;，一次读取就可以被多次复用。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0216-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.1.3 CPU vs TPU 数据流对比&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;左图是 CPU：数据 ALU 计算前后都要经过寄存器。右图是 TPU：数据在 ALU 之间更快地流动且复用，就像心脏泵血一样有节奏——这就是&amp;quot;Systolic&amp;quot;（心脏收缩）名字的由来。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;TPU v1 的 MXU 本质上是一个 &lt;strong&gt;256×256 = 65536 个 ALU&lt;/strong&gt; 的超大脉动阵列，一个时钟周期就能处理 65536 个 INT8 乘加运算。乘以 700 MHz 的频率，每秒可处理约 &lt;strong&gt;92 TOPS&lt;/strong&gt; 的计算量。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;特性三：专用硬件&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;CPU 和 GPU 为了当好&amp;quot;多面手&amp;quot;，设计极其复杂，导致行为难以预测、时延不稳定。TPU 则不同——所有设计只为一个任务：&lt;strong&gt;神经网络推理&lt;/strong&gt;。简单、可控、高效。&lt;/p&gt;
+&lt;h3 id=&#34;523-脉动阵列原理详解&#34;&gt;5.2.3 脉动阵列原理详解
+&lt;/h3&gt;&lt;p&gt;与其说&amp;quot;脉动阵列的原理是什么&amp;quot;，不如问：&lt;strong&gt;为什么这种架构比传统方式有这么大的优势？&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0225-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.2.4 传统计算 vs 脉动阵列&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;在传统计算方式（左图）中，数据每计算一次就要存储一次，下一次调取时又要从存储器中重新获得——反复的&amp;quot;存取存&amp;quot;带来了巨大开销。而在脉动阵列（右图）中，数据是&lt;strong&gt;在通过所有 PE（处理单元）计算之后才被存储&lt;/strong&gt;，大大减少了数据被访问的次数。&lt;/p&gt;
+&lt;p&gt;下面以两个 3×3 矩阵为例，图解脉动阵列的计算过程：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0225-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.2.5 矩阵A和矩阵B的阶梯状输入&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;注意数据以&lt;strong&gt;阶梯状&lt;/strong&gt;输入阵列——矩阵 A 和矩阵 B 在不同的行列维度上被分开，因为矩阵乘法需要 A 的每一行去点乘 B 的每一列。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0224-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.2.3 脉动阵列数据流动示意&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;数据一波一波流入 MXU，计算结果被存放在寄存器中累加和输出。整个过程就像心脏泵血，每个时钟周期进行一次庞大的计算，并流入下一个需要这个结果的地方。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;核心洞察：&lt;strong&gt;因为每个时钟周期可以进行 256×256 次计算，且计算结果被串联复用，TPU 能够在更少的内存访问次数下完成更高的计算量&lt;/strong&gt;——这就是 TPU 能效比领先的根本原因。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;524-竞品对比&#34;&gt;5.2.4 竞品对比
+&lt;/h3&gt;&lt;p&gt;谷歌研究员用 Roofline 性能模型在 CPU（Haswell E5-2699 v3）、GPU（NVIDIA K80）和 TPU v1 上做了对比实验，基于 MLP、LSTM、CNN 三类共 6 个模型：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;指标&lt;/th&gt;
+          &lt;th&gt;Haswell CPU&lt;/th&gt;
+          &lt;th&gt;NVIDIA K80 GPU&lt;/th&gt;
+          &lt;th&gt;TPU v1&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Die 面积 (mm²)&lt;/td&gt;
+          &lt;td&gt;662&lt;/td&gt;
+          &lt;td&gt;561&lt;/td&gt;
+          &lt;td&gt;更小&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;制程 (nm)&lt;/td&gt;
+          &lt;td&gt;22&lt;/td&gt;
+          &lt;td&gt;28&lt;/td&gt;
+          &lt;td&gt;28&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;TDP (W)&lt;/td&gt;
+          &lt;td&gt;145&lt;/td&gt;
+          &lt;td&gt;150&lt;/td&gt;
+          &lt;td&gt;75&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;TOPS (INT8)&lt;/td&gt;
+          &lt;td&gt;2.6&lt;/td&gt;
+          &lt;td&gt;-&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;92&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;片上缓存&lt;/td&gt;
+          &lt;td&gt;51 MB&lt;/td&gt;
+          &lt;td&gt;8 MB&lt;/td&gt;
+          &lt;td&gt;28 MB&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;整机功耗 (W)&lt;/td&gt;
+          &lt;td&gt;504&lt;/td&gt;
+          &lt;td&gt;1838&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;861&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;TPU v1 的压倒性优势&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;计算性能&lt;/strong&gt;：92 TOPS，远超同时期的 CPU 和 GPU&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;片上缓存&lt;/strong&gt;：大缓存减少片外访问，对抗当时内存访问速度慢的瓶颈&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;量化&lt;/strong&gt;：首次在推理场景引入 INT8，利用神经网络鲁棒性，支持更大 batch&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;GPU 的目标是降低时延，TPU 的目标是提高吞吐——目标不同，设计思路自然不同。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;53-谷歌-tpu-v2-训练芯片&#34;&gt;5.3 谷歌 TPU v2 训练芯片
+&lt;/h2&gt;&lt;p&gt;2017 年，谷歌发布了 TPU v2，官方的描述是&amp;quot;&lt;strong&gt;用于训练神经网络的特定领域超级计算机&lt;/strong&gt;&amp;quot;。同一年，谷歌还发表了那篇改变 NLP 格局的论文 &lt;em&gt;Attention is All You Need&lt;/em&gt;——而 TPU v2，就是站在 Attention 背后的超级计算机。&lt;/p&gt;
+&lt;h3 id=&#34;531-训练-vs-推理为什么需要-tpu-v2&#34;&gt;5.3.1 训练 vs 推理：为什么需要 TPU v2？
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0230-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.3.1 模型训练与推理的流程对比&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;推理只需要&lt;strong&gt;一次前向传播&lt;/strong&gt;，对精度要求相对较低（INT8 即可）。但训练完全不同：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;更复杂的数据并行&lt;/strong&gt;：一个模型需要迭代百万次，所有参数在每个迭代中都要调整，需要协调跨集群并行计算&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;更高的计算复杂度&lt;/strong&gt;：反向传播需要对每个权重参数和输入计算偏导数&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;更大的内存需求&lt;/strong&gt;：临时变量（激活值、优化器状态）会将模型大小膨胀至原始大小的 8~9 倍&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;更高的精度要求&lt;/strong&gt;：INT8 在训练中会导致不稳定和极大随机性，必须使用 FP16/BF16/FP32&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;532-tpu-v1--tpu-v2-的四大改动&#34;&gt;5.3.2 TPU v1 → TPU v2 的四大改动
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;改动一：存储位置合并&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0231-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.3.2 v1→v2 存储位置改动&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;TPU v1 有 Accumulator（存矩阵乘积）和 Activation Storage（存激活输出）两个独立缓冲区。TPU v2 将它们合并为 &lt;strong&gt;Vector Memory&lt;/strong&gt;，更像传统架构中的 L1 Cache，提升了可编程性。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;改动二：向量单元替代激活管线&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;TPU v1 的 Activation Pipeline 是针对特定激活函数场景的专用 ALU，无法满足训练需求。TPU v2 将其替换为通用的 &lt;strong&gt;Vector Unit&lt;/strong&gt;，能处理各种向量激活函数。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;改动三：MXU 连接方式调整&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;TPU v1 中 MXU 与向量内存直接相连，TPU v2 中 MXU 改为与向量单元连接——所有数据传输和计算都由向量单元分发。这样 MXU 成为向量单元的协处理器，对编译器和编程人员更友好。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;改动四：DDR3 → HBM&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0232-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.3.5 DDR3→HBM 存储升级&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;训练过程中产生的中间变量和权重远多于推理，DDR3 的回写速度根本无法满足。TPU v2 将 DDR3 替换为 &lt;strong&gt;HBM（高带宽内存）&lt;/strong&gt;，读写速度提升了 &lt;strong&gt;20 倍&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;533-tpu-v2-计算核心&#34;&gt;5.3.3 TPU v2 计算核心
+&lt;/h3&gt;&lt;p&gt;TPU v2 的核心由三部分组成：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;标量单元（Scalar Unit）&lt;/strong&gt;：处理计算的起点，从指令存储器取出 322 bit 宽的 &lt;strong&gt;VLIW（超长指令字）&lt;/strong&gt;，执行标量操作，并将向量指令和矩阵指令分发给对应单元。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;向量单元（Vector Unit）&lt;/strong&gt;：128 个向量通道，每个通道配备双发射 32 bit ALU。每个通道还有 8 路子通道，特别适用于批量归一化操作。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0234-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.3.8 向量单元结构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;MXU&lt;/strong&gt;：TPU v2 选择 4 个 &lt;strong&gt;128×128&lt;/strong&gt; 的 MXU 而非 1 个 256×256 的 MXU。谷歌的模拟器显示，4 个 128×128 的 MXU 卷积模型利用率达 37%~48%，明显高于单个 256×256 的 22%~30%。这是基于利用率和面积效率的综合考量。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0235-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.3.9 不同尺寸MXU利用率对比&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;TPU v2 的 MXU 使用 &lt;strong&gt;BF16&lt;/strong&gt; 格式进行乘法运算——BF16 保留与 FP32 相同的指数范围（8 位指数），但尾数仅 7 位，在 FP32 的臃肿和 FP16 的低范围之间找到了完美平衡。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;534-芯片互联pod-的基石&#34;&gt;5.3.4 芯片互联：Pod 的基石
+&lt;/h3&gt;&lt;p&gt;TPU v1 是单芯片推理协处理器，没有互联能力。TPU v2 则不同——它内置了&lt;strong&gt;互联路由模块（Interconnect Router）&lt;/strong&gt;，实现了 &lt;strong&gt;2D Torus（二维环面）&lt;/strong&gt; 连接。&lt;/p&gt;
+&lt;p&gt;每个芯片有 4 个自定义的**核间互联（ICI）**链接，每个方向带宽 496 Gb/s。这使得芯片之间可以直接连接，256 个 TPU v2 芯片组成一个 16×16 的二维环网，双向带宽高达 &lt;strong&gt;15.9 Tb/s&lt;/strong&gt;——是传统 InfiniBand 集群交换机的 2.5 倍，同时还省去了网卡、交换机和通过 CPU 主机通信的时延成本。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0238-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.3.14 TPU v2 芯片平面布局图&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;看这张平面布局图：2 个 TPU Core 一上一下，互联路由模块位于正中央，2 个 MXU 分别在顶部和底部中心——大部分面积都给了计算核心和互联。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;54-谷歌-tpu-v3-pod-服务器&#34;&gt;5.4 谷歌 TPU v3 Pod 服务器
+&lt;/h2&gt;&lt;h3 id=&#34;541-tpu-v3tpu-v2-的增强版&#34;&gt;5.4.1 TPU v3：TPU v2 的&amp;quot;增强版&amp;quot;
+&lt;/h3&gt;&lt;p&gt;TPU v3 本质上就是 TPU v2 的增强版。相比 v2：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;时钟频率提升约 &lt;strong&gt;1.35 倍&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;ICI 带宽和内存带宽提升 &lt;strong&gt;30%&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;MXU 数量从 2 个&lt;strong&gt;翻倍到 4 个&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;峰值性能提高 &lt;strong&gt;2.7 倍&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;但最关键的改进其实是&lt;strong&gt;散热&lt;/strong&gt;——TPU v3 用&lt;strong&gt;液冷&lt;/strong&gt;代替了风冷：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0239-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.4.1 TPU v2 vs TPU v3 散热对比&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;TPU v2 板卡上 4 个芯片全靠风冷，而 TPU v3 使用液冷系统管理 4 个芯片的温度。正是这个液冷系统为 TPU v3 提供了 &lt;strong&gt;1.6 倍&lt;/strong&gt;的功率余量，让它能在仅增大 10% 体积的情况下塞进 4 个 MXU 和更大的 HBM。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;542-pod从芯片到超级计算机&#34;&gt;5.4.2 Pod：从&amp;quot;芯片&amp;quot;到&amp;quot;超级计算机&amp;quot;
+&lt;/h3&gt;&lt;p&gt;谷歌官方对 Pod 的定义很简单：&amp;quot;&lt;strong&gt;TPU Pod 是一组通过专用网络连接在一起的连续 TPU 单元&lt;/strong&gt;。&amp;ldquo;但它的意义远不止于此。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;TPU v2 Pod&lt;/strong&gt;：每个机柜含 64 个 CPU 板和 64 个 TPU 板，共 128 个 CPU 芯片和 256 个 TPU v2 芯片。CPU 集群在两侧，TPU 集群在中间——这种紧凑排列是为了避免信号衰减（BlueLink 或 OPA 的铜缆和光纤长度不能太长）。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0241-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.4.2 TPU v2 基板组成&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;TPU v3 Pod&lt;/strong&gt;：规模比 v2 Pod 大了整整 4 倍——&lt;strong&gt;1024 块&lt;/strong&gt; TPU v3 芯片，算力超过 &lt;strong&gt;100 PFLOPS&lt;/strong&gt;。更多的铜管、更多的电缆、更大的规模。&lt;/p&gt;
+&lt;h3 id=&#34;543-pod-通信方式&#34;&gt;5.4.3 Pod 通信方式
+&lt;/h3&gt;&lt;p&gt;在分布式训练中，&lt;strong&gt;同步训练&lt;/strong&gt;是主流——所有节点完成本轮通信后再进行下一轮计算。系统的性能受限于最慢的计算节点和最慢的网络消息。&lt;/p&gt;
+&lt;p&gt;谷歌在 TPU v2/v3 Pod 中采用 &lt;strong&gt;2D Torus&lt;/strong&gt; 网络结构：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0244-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.4.7 2D Torus 网络结构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;每个 TPU 芯片与相邻的 TPU 芯片直接连接，形成一个二维平面网络。这种设计减少数据在芯片间传输时的通信时延和带宽瓶颈。基于此，谷歌优化了同步训练中的 &lt;strong&gt;All-Reduce&lt;/strong&gt; 操作，在同等资源条件下性能超越了异步 SGD。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;TPU v2 Pod（256 芯片）算力 11.5 PFLOPS，TPU v3 Pod（1024 芯片）算力 100 PFLOPS。两者的核心架构没有本质区别，主要提升的是&lt;strong&gt;规模化能力&lt;/strong&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;55-谷歌-tpu-v4-与光路交换&#34;&gt;5.5 谷歌 TPU v4 与光路交换
+&lt;/h2&gt;&lt;p&gt;TPU v4 和 TPU v3 之间隔了整整 4 年。这 4 年间，英伟达迭代了三代架构（Volta → Ampere → Hopper），PyTorch 取代 TensorFlow 成为首选框架，业界对大算力的饥渴只增不减。TPU v4 正是在这样的背景下诞生的。&lt;/p&gt;
+&lt;h3 id=&#34;551-tpu-v4-的重大升级&#34;&gt;5.5.1 TPU v4 的重大升级
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0246-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.5.1 TPU v4 架构图&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;每个 TPU v4 包含 2 个 &lt;strong&gt;Tensor Core&lt;/strong&gt;，每个 Tensor Core 由 6 个单元组成：&lt;strong&gt;4 个 MXU&lt;/strong&gt; + 1 个标量单元 + 1 个向量单元。2 个 HBM 内存模块分别置于 Tensor Core 左右两侧以降低电缆时延。&lt;/p&gt;
+&lt;p&gt;关键升级点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;制程工艺&lt;/strong&gt;：16nm → &lt;strong&gt;7nm&lt;/strong&gt;，晶体管数量是 TPU v3 的 4 倍&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;MXU 数量&lt;/strong&gt;：再次翻倍&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;内存&lt;/strong&gt;：片上内存增加 9 倍达 244 MB，HBM 带宽 1.2 TB/s（提升 33%）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Sparse Core&lt;/strong&gt;：全新引入，专为稀疏计算优化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;3D Torus&lt;/strong&gt;：首次引入，支持多达 4096 个 TPU v4 核心互联&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;552-sparse-coreembedding-加速利器&#34;&gt;5.5.2 Sparse Core：Embedding 加速利器
+&lt;/h3&gt;&lt;p&gt;在 NLP 和推荐系统中，Embedding 层处理的是极度稀疏的离散特征——输入矩阵中存在大量 0，传统矩阵乘法会白白浪费计算资源。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0247-09.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.5.3 Sparse Core 架构示意图&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;Sparse Core 包含 &lt;strong&gt;16 个计算瓦片（Tiles）&lt;/strong&gt;，每个瓦片有关联的 HBM 通道。每个瓦片包含：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Fetch Unit&lt;/strong&gt;：从 HBM 读取激活函数和参数&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;scVPU&lt;/strong&gt;：可编程的 8 路 SIMD 向量处理单元&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Flush Unit&lt;/strong&gt;：反向传播时将更新的参数写回 HBM&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;2.5 MB Spmem&lt;/strong&gt;：稀疏向量内存&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;此外还有 5 个跨通道单元执行嵌入操作。Sparse Core 可将依赖 Embedding 的模型加速 &lt;strong&gt;5~7 倍&lt;/strong&gt;，而面积和功耗仅占 5%。&lt;/p&gt;
+&lt;h3 id=&#34;553-tpu-v4-pod3d-torus--光互联&#34;&gt;5.5.3 TPU v4 Pod：3D Torus + 光互联
+&lt;/h3&gt;&lt;p&gt;TPU v4 Pod 将 64（4×4×4）个 TPU v4 芯片组成一个&lt;strong&gt;立方体（Cube）&lt;/strong&gt;，再将 64 个 Cube 通过**光互联（OCS）**连接在一起，形成共有 &lt;strong&gt;4096 个 TPU v4 芯片&lt;/strong&gt;的超级计算机，总计提供 &lt;strong&gt;1.126 exaFLOPS&lt;/strong&gt;（BF16）的峰值算力。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0249-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.5.4 3D Torus Cube 示意图&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;在 3D Torus 网络中，每个节点通过 3 个维度（X-Y-Z）与相邻节点相连，形成三维网格结构。每个节点都与上下、左右、前后的 6 个节点互联。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;对比一下：英伟达 DGX SuperPod 最多连接 256 个 H100 芯片，且需要约 568 个 InfiniBand 交换机。而 TPU v4 Pod 用 4096 个芯片 + 48 个 OCS 光交换器就搞定了——OCS 的成本不到系统成本的 5%，功耗不到系统功率的 3%。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;554-光路交换机ocs&#34;&gt;5.5.4 光路交换机（OCS）
+&lt;/h3&gt;&lt;p&gt;OCS 是 TPU v4 Pod 的&amp;quot;秘密武器&amp;rdquo;。传统交换机的流程是&amp;quot;光→电→光&amp;quot;，两次转换造成大量性能损耗。而 OCS 提供&lt;strong&gt;光到光&lt;/strong&gt;的直接转换，节省了大量电能，更重要的是解决了时延问题。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch5/ai_system.pdf-0251-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图5.5.8 Palomar OCS 工作原理&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;Palomar OCS 的核心是 &lt;strong&gt;2D MEMS 反射镜阵列&lt;/strong&gt;——通过控制微反射镜的位置来调整光路，实现光路切换。它具有低损耗、低切换时延（毫秒级别）、低功耗、低成本等优点。&lt;/p&gt;
+&lt;h3 id=&#34;555-tpu-v4-的优缺点&#34;&gt;5.5.5 TPU v4 的优缺点
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;优点&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;低时延&lt;/strong&gt;：3D Torus 相邻节点间距离短且可直接连线&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;低网络成本&lt;/strong&gt;：3D Torus 拓扑的交换机、线材、连接器保有量低于 Clos 拓扑&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;路由可重配&lt;/strong&gt;：OCS 支持动态可重配路由，更易隔离/下线故障节点&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;更好的集群布局&lt;/strong&gt;：物理相邻=逻辑相邻，密集 I/O 落在局部域&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;缺点&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;系统成熟度低&lt;/strong&gt;：Clos 拓扑具备非阻塞特性，而 3D Torus 无法保证&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;拓扑僵硬&lt;/strong&gt;：扩容 Clos 只需增加叶交换机，扩缩 3D Torus 则需重新配置整个拓扑&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;负载均衡挑战&lt;/strong&gt;：Clos 的替代路径数量更多&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;小结与思考&#34;&gt;小结与思考
+&lt;/h2&gt;&lt;p&gt;这一章从 TPU v1 的脉动阵列一路讲到 TPU v4 的光路交换，信息量确实不小。让我们用几个问题来收尾：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;TPU 和 GPU 的本质区别是什么？&lt;/strong&gt; GPU 追求通用性，TPU 追求专用性。GPU 用多级缓存和计算核心降低时延，TPU 用脉动阵列和流水线提高吞吐——目标不同，设计哲学自然不同。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;脉动阵列为什么高效？&lt;/strong&gt; 数据在 PE 之间&amp;quot;流动&amp;quot;复用，而不是每次计算都要&amp;quot;存-取-算&amp;quot;。对于矩阵乘法这种需要大量数据复用的场景，这大幅减少了内存访问次数。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;从 v1 到 v4，不变的&amp;quot;道&amp;quot;是什么？&lt;/strong&gt; 控制逻辑只占 2% 的芯片面积，其余全部给计算和内存——&lt;strong&gt;简单就是高效&lt;/strong&gt;。同时，每一代都在强化芯片间的互联能力，因为单芯片的算力终究有限。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;为什么光互联是未来？&lt;/strong&gt; 当芯片数量达到 4096 级别，电互联的时延和功耗已经成为瓶颈。光互联的&amp;quot;光到光&amp;quot;转换，省去了光电转换的损耗，是通往 exaFLOPS 时代的必经之路。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;正如书中所言：TPU 的设计强调算法与芯片之间的紧密协同，以及对新数据格式和稀疏计算的支持——这预示着 AI 计算集群的重要性日益增加。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;em&gt;下一篇预告：第6章将进入 GPU 的领地，详解英伟达 GPU 的架构演进与 CUDA 编程模型。&lt;/em&gt;&lt;/p&gt;
+</description>
+        </item>
         
     </channel>
 </rss>

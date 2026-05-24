@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="《AI系统：原理与架构》学习笔记 — 深入谷歌TPU系列，从脉动阵列到3D Torus，从推理专用到训练超级计算机">
+<title>AI系统：第5章 TPU——以谷歌为例</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC5%E7%AB%A0-tpu%E4%BB%A5%E8%B0%B7%E6%AD%8C%E4%B8%BA%E4%BE%8B/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="AI系统：第5章 TPU——以谷歌为例">
+<meta property='og:description' content="《AI系统：原理与架构》学习笔记 — 深入谷歌TPU系列，从脉动阵列到3D Torus，从推理专用到训练超级计算机">
+<meta property='og:url' content='https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC5%E7%AB%A0-tpu%E4%BB%A5%E8%B0%B7%E6%AD%8C%E4%B8%BA%E4%BE%8B/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='AI System' /><meta property='article:tag' content='Deep Learning' /><meta property='article:tag' content='AI Infra' /><meta property='article:tag' content='TPU' /><meta property='article:tag' content='Google' /><meta property='article:tag' content='Systolic Array' /><meta property='article:tag' content='ASIC' />
+<meta name="twitter:title" content="AI系统：第5章 TPU——以谷歌为例">
+<meta name="twitter:description" content="《AI系统：原理与架构》学习笔记 — 深入谷歌TPU系列，从脉动阵列到3D Torus，从推理专用到训练超级计算机">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#本章概览">本章概览</a></li>
+    <li><a href="#51-谷歌-tpu-概述">5.1 谷歌 TPU 概述</a>
+      <ol>
+        <li><a href="#511-什么是-tpu">5.1.1 什么是 TPU？</a></li>
+        <li><a href="#512-历代-tpu-产品">5.1.2 历代 TPU 产品</a></li>
+        <li><a href="#513-tpu-架构演进的核心思路">5.1.3 TPU 架构演进的核心思路</a></li>
+      </ol>
+    </li>
+    <li><a href="#52-谷歌-tpu-v1-脉动阵列">5.2 谷歌 TPU v1 脉动阵列</a>
+      <ol>
+        <li><a href="#521-tpu-v1-芯片架构">5.2.1 TPU v1 芯片架构</a></li>
+        <li><a href="#522-tpu-v1-的三大优化特性">5.2.2 TPU v1 的三大优化特性</a></li>
+        <li><a href="#523-脉动阵列原理详解">5.2.3 脉动阵列原理详解</a></li>
+        <li><a href="#524-竞品对比">5.2.4 竞品对比</a></li>
+      </ol>
+    </li>
+    <li><a href="#53-谷歌-tpu-v2-训练芯片">5.3 谷歌 TPU v2 训练芯片</a>
+      <ol>
+        <li><a href="#531-训练-vs-推理为什么需要-tpu-v2">5.3.1 训练 vs 推理：为什么需要 TPU v2？</a></li>
+        <li><a href="#532-tpu-v1--tpu-v2-的四大改动">5.3.2 TPU v1 → TPU v2 的四大改动</a></li>
+        <li><a href="#533-tpu-v2-计算核心">5.3.3 TPU v2 计算核心</a></li>
+        <li><a href="#534-芯片互联pod-的基石">5.3.4 芯片互联：Pod 的基石</a></li>
+      </ol>
+    </li>
+    <li><a href="#54-谷歌-tpu-v3-pod-服务器">5.4 谷歌 TPU v3 Pod 服务器</a>
+      <ol>
+        <li><a href="#541-tpu-v3tpu-v2-的增强版">5.4.1 TPU v3：TPU v2 的&quot;增强版&quot;</a></li>
+        <li><a href="#542-pod从芯片到超级计算机">5.4.2 Pod：从&quot;芯片&quot;到&quot;超级计算机&quot;</a></li>
+        <li><a href="#543-pod-通信方式">5.4.3 Pod 通信方式</a></li>
+      </ol>
+    </li>
+    <li><a href="#55-谷歌-tpu-v4-与光路交换">5.5 谷歌 TPU v4 与光路交换</a>
+      <ol>
+        <li><a href="#551-tpu-v4-的重大升级">5.5.1 TPU v4 的重大升级</a></li>
+        <li><a href="#552-sparse-coreembedding-加速利器">5.5.2 Sparse Core：Embedding 加速利器</a></li>
+        <li><a href="#553-tpu-v4-pod3d-torus--光互联">5.5.3 TPU v4 Pod：3D Torus + 光互联</a></li>
+        <li><a href="#554-光路交换机ocs">5.5.4 光路交换机（OCS）</a></li>
+        <li><a href="#555-tpu-v4-的优缺点">5.5.5 TPU v4 的优缺点</a></li>
+      </ol>
+    </li>
+    <li><a href="#小结与思考">小结与思考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/ai/" >
+                AI
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC5%E7%AB%A0-tpu%E4%BB%A5%E8%B0%B7%E6%AD%8C%E4%B8%BA%E4%BE%8B/">AI系统：第5章 TPU——以谷歌为例</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            《AI系统：原理与架构》学习笔记 — 深入谷歌TPU系列，从脉动阵列到3D Torus，从推理专用到训练超级计算机
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    6 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="本章概览">本章概览
+</h2><p>前面几章我们讨论了 CPU 和 GPU，这两种通用计算芯片在 AI 时代扮演了重要角色。但谷歌的思路更&quot;激进&quot;——既然现有的通用芯片跑 AI 不够高效，那为什么不从零开始，为 AI 量身打造一款芯片呢？</p>
+<p>于是，<strong>TPU（Tensor Processing Unit）</strong> 诞生了。从 2016 年第一代 TPU v1 专为推理而生，到 2021 年 TPU v4 能够驱动 4096 颗芯片组成的 exaFLOPS 级别超级计算机，谷歌只用了短短几年时间就把&quot;专用芯片&quot;这条路走到了极致。</p>
+<p>本章将带你深入谷歌 TPU 的&quot;心脏&quot;——理解脉动阵列的优雅设计，对比各代 TPU 的架构演进，并最终站在 Pod 超级计算机的视角，俯瞰谷歌如何用&quot;光&quot;连接 4096 颗芯片。</p>
+<hr>
+<h2 id="51-谷歌-tpu-概述">5.1 谷歌 TPU 概述
+</h2><h3 id="511-什么是-tpu">5.1.1 什么是 TPU？
+</h3><p>TPU 是谷歌专为深度学习和 AI 任务设计的<strong>专用集成电路（ASIC）</strong>。和 CPU、GPU 这些&quot;多面手&quot;不同，TPU 从第一天起就只有一个使命：高效执行神经网络计算。</p>
+<p>下表展示了历代 TPU 芯片的参数演进：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>参数规格</th>
+          <th>TPU v1</th>
+          <th>TPU v2</th>
+          <th>TPU v3</th>
+          <th>TPU v4i</th>
+          <th>TPU v4</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>推出年份</td>
+          <td>2016</td>
+          <td>2017</td>
+          <td>2018</td>
+          <td>2020</td>
+          <td>2021</td>
+      </tr>
+      <tr>
+          <td>制程工艺</td>
+          <td>28 nm</td>
+          <td>16 nm</td>
+          <td>16 nm</td>
+          <td>7 nm</td>
+          <td>7 nm</td>
+      </tr>
+      <tr>
+          <td>芯片大小(mm²)</td>
+          <td>330</td>
+          <td>625</td>
+          <td>700</td>
+          <td>400</td>
+          <td>780</td>
+      </tr>
+      <tr>
+          <td>芯片内存(MB)</td>
+          <td>28</td>
+          <td>32</td>
+          <td>32</td>
+          <td>144</td>
+          <td>288</td>
+      </tr>
+      <tr>
+          <td>内存带宽(GB/s)</td>
+          <td>300</td>
+          <td>700</td>
+          <td>900</td>
+          <td>300</td>
+          <td>1200</td>
+      </tr>
+      <tr>
+          <td>热设计功耗(W)</td>
+          <td>75</td>
+          <td>280</td>
+          <td>450</td>
+          <td>175</td>
+          <td>300</td>
+      </tr>
+      <tr>
+          <td>TOPS</td>
+          <td>92</td>
+          <td>45</td>
+          <td>123</td>
+          <td>-</td>
+          <td>275</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>从 28nm 到 7nm，从 75W 到 300W，从 92 TOPS 到 275 TOPS——每一代都在性能和能效上实现了质的飞跃。</p>
+</blockquote>
+<p><img src="/images/ai_system/ch5/ai_system.pdf-0213-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.1.1 历代TPU俯视图"
+	
+	
+></p>
+<h3 id="512-历代-tpu-产品">5.1.2 历代 TPU 产品
+</h3><p>除了单芯片的迭代，从 TPU v2 开始，谷歌还推出了<strong>TPU Pod</strong>——由众多 TPU 单元构成的超大规模计算系统，专为处理大量并行计算任务而设计。</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>名称</th>
+          <th>推出年份</th>
+          <th>性能</th>
+          <th>应用</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>TPU v1</td>
+          <td>2016</td>
+          <td>92 TOPS + 8 GB DDR3</td>
+          <td>数据中心推理</td>
+      </tr>
+      <tr>
+          <td>TPU v2</td>
+          <td>2017</td>
+          <td>180 TFLOPS + 64 GB HBM</td>
+          <td>数据中心训练和推理</td>
+      </tr>
+      <tr>
+          <td>TPU v3</td>
+          <td>2018</td>
+          <td>420 TFLOPS + 128 GB HBM</td>
+          <td>数据中心训练和推理</td>
+      </tr>
+      <tr>
+          <td>TPU v2 Pod</td>
+          <td>2019</td>
+          <td>11.5 PFLOPS，4 TB HBM</td>
+          <td>数据中心训练和推理</td>
+      </tr>
+      <tr>
+          <td>TPU v3 Pod</td>
+          <td>2019</td>
+          <td>&gt;100 PFLOPS，32 TB HBM</td>
+          <td>数据中心训练和推理</td>
+      </tr>
+      <tr>
+          <td>TPU v4 Pod</td>
+          <td>2022</td>
+          <td>1.126 exaFLOPS (BF16)</td>
+          <td>数据中心训练和推理</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>有意思的是，谷歌还把这些技术&quot;下放&quot;到了消费电子领域：2017 年的 Pixel 2/3 搭载了 Pixel Visual Core，之后的 Pixel 4 搭载了基于 Edge TPU 架构的 Pixel Neural Core。到了 2023 年的 Tensor G3，谷歌更是把生成式 AI 塞进了手机芯片。</p>
+</blockquote>
+<h3 id="513-tpu-架构演进的核心思路">5.1.3 TPU 架构演进的核心思路
+</h3><p>每一代 TPU 都有鲜明的设计主题：</p>
+<ul>
+<li><strong>TPU v1</strong>：专为推理而生，INT8 量化 + 脉动阵列，用最少的功耗做最多的矩阵乘法</li>
+<li><strong>TPU v2</strong>：进军训练，引入 BF16 精度、HBM 高带宽内存、芯片间互联</li>
+<li><strong>TPU v3</strong>：液冷加持，MXU 翻倍，Pod 规模从 256 芯片扩到 1024 芯片</li>
+<li><strong>TPU v4</strong>：7nm 工艺，Sparse Core 加速 Embedding，3D Torus + 光路交换机打造 exaFLOPS 集群</li>
+</ul>
+<blockquote>
+<p>贯穿始终的设计哲学：<strong>简单、专用、高效</strong>。TPU 的控制逻辑仅占芯片面积的 2%（远低于 CPU 和 GPU），把宝贵的面积全留给了计算。</p>
+</blockquote>
+<hr>
+<h2 id="52-谷歌-tpu-v1-脉动阵列">5.2 谷歌 TPU v1 脉动阵列
+</h2><p>如果说前几代 TPU 中有什么设计最让人拍案叫绝，那一定是<strong>脉动阵列（Systolic Array）</strong>。它是 TPU 的&quot;心脏&quot;，也是理解专用 AI 芯片为何高效的关键。</p>
+<h3 id="521-tpu-v1-芯片架构">5.2.1 TPU v1 芯片架构
+</h3><p><img src="/images/ai_system/ch5/ai_system.pdf-0222-07.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.2.1 TPU v1 电路板"
+	
+	
+></p>
+<p>TPU v1 的几个关键元素：</p>
+<ul>
+<li><strong>DDR3 DRAM / Weight FIFO</strong>：模型权重通过 PCIe 从主机&quot;预加载&quot;到芯片的 DDR3 内存中，再传输到 Weight FIFO 供 MXU 使用。</li>
+<li><strong>MXU（矩阵乘法单元）</strong>：256×256×8 bit 的脉动阵列，每个时钟周期输出 256 个 16 bit 计算结果。这是&quot;TPU 的心脏&quot;。</li>
+<li><strong>累加器（Accumulator）</strong>：4 MB 的 32 bit 累加单元，存储 MXU 的计算结果。</li>
+<li><strong>控制指令（Control）</strong>：四级流水线，12 条 CISC 指令，包括 Read_Host_Memory、Read_Weight、Matrix_Multiply/Convolve、Activate、Write_Host_Memory 等。</li>
+</ul>
+<p><img src="/images/ai_system/ch5/ai_system.pdf-0223-11.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.2.2 TPU v1 芯片布局图"
+	
+	
+></p>
+<blockquote>
+<p>注意芯片布局图中那两大块：<strong>本地统一缓冲器（Local Unified Buffer）</strong> 和 <strong>矩阵乘法单元（MXU）</strong>，它们占据了芯片绝大部分面积。而控制器只占 2%——这就是&quot;专用&quot;的力量。</p>
+</blockquote>
+<h3 id="522-tpu-v1-的三大优化特性">5.2.2 TPU v1 的三大优化特性
+</h3><p><strong>特性一：低精度（INT8 量化）</strong></p>
+<p>神经网络在推理时并不需要 FP32 那样的高精度。TPU 通过**量化（Quantization）**技术，将权重和激活值从 FP32/FP16 转换为 INT8，在保持模型精度的同时，大幅优化了存储和计算效率。</p>
+<p><img src="/images/ai_system/ch5/ai_system.pdf-0215-14.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.1.2 FP32量化到INT8的过程"
+	
+	
+></p>
+<blockquote>
+<p>量化后的 INT8 虽然无法维持单个数据点的超高精度，但得益于神经网络的泛化能力，整体数据分布保持大致准确，推理速度却大幅提升。</p>
+</blockquote>
+<p><strong>特性二：脉动阵列 &amp; MXU</strong></p>
+<p>这是 TPU 最核心的设计。传统的 CPU 计算流程是&quot;读寄存器 → ALU 计算 → 写回寄存器&quot;，数据每次计算都要经过寄存器。而在脉动阵列中，数据在 ALU 之间&quot;流动&quot;，一次读取就可以被多次复用。</p>
+<p><img src="/images/ai_system/ch5/ai_system.pdf-0216-07.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.1.3 CPU vs TPU 数据流对比"
+	
+	
+></p>
+<blockquote>
+<p>左图是 CPU：数据 ALU 计算前后都要经过寄存器。右图是 TPU：数据在 ALU 之间更快地流动且复用，就像心脏泵血一样有节奏——这就是&quot;Systolic&quot;（心脏收缩）名字的由来。</p>
+</blockquote>
+<p>TPU v1 的 MXU 本质上是一个 <strong>256×256 = 65536 个 ALU</strong> 的超大脉动阵列，一个时钟周期就能处理 65536 个 INT8 乘加运算。乘以 700 MHz 的频率，每秒可处理约 <strong>92 TOPS</strong> 的计算量。</p>
+<p><strong>特性三：专用硬件</strong></p>
+<p>CPU 和 GPU 为了当好&quot;多面手&quot;，设计极其复杂，导致行为难以预测、时延不稳定。TPU 则不同——所有设计只为一个任务：<strong>神经网络推理</strong>。简单、可控、高效。</p>
+<h3 id="523-脉动阵列原理详解">5.2.3 脉动阵列原理详解
+</h3><p>与其说&quot;脉动阵列的原理是什么&quot;，不如问：<strong>为什么这种架构比传统方式有这么大的优势？</strong></p>
+<p><img src="/images/ai_system/ch5/ai_system.pdf-0225-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.2.4 传统计算 vs 脉动阵列"
+	
+	
+></p>
+<p>在传统计算方式（左图）中，数据每计算一次就要存储一次，下一次调取时又要从存储器中重新获得——反复的&quot;存取存&quot;带来了巨大开销。而在脉动阵列（右图）中，数据是<strong>在通过所有 PE（处理单元）计算之后才被存储</strong>，大大减少了数据被访问的次数。</p>
+<p>下面以两个 3×3 矩阵为例，图解脉动阵列的计算过程：</p>
+<p><img src="/images/ai_system/ch5/ai_system.pdf-0225-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.2.5 矩阵A和矩阵B的阶梯状输入"
+	
+	
+></p>
+<p>注意数据以<strong>阶梯状</strong>输入阵列——矩阵 A 和矩阵 B 在不同的行列维度上被分开，因为矩阵乘法需要 A 的每一行去点乘 B 的每一列。</p>
+<p><img src="/images/ai_system/ch5/ai_system.pdf-0224-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.2.3 脉动阵列数据流动示意"
+	
+	
+></p>
+<p>数据一波一波流入 MXU，计算结果被存放在寄存器中累加和输出。整个过程就像心脏泵血，每个时钟周期进行一次庞大的计算，并流入下一个需要这个结果的地方。</p>
+<blockquote>
+<p>核心洞察：<strong>因为每个时钟周期可以进行 256×256 次计算，且计算结果被串联复用，TPU 能够在更少的内存访问次数下完成更高的计算量</strong>——这就是 TPU 能效比领先的根本原因。</p>
+</blockquote>
+<h3 id="524-竞品对比">5.2.4 竞品对比
+</h3><p>谷歌研究员用 Roofline 性能模型在 CPU（Haswell E5-2699 v3）、GPU（NVIDIA K80）和 TPU v1 上做了对比实验，基于 MLP、LSTM、CNN 三类共 6 个模型：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>指标</th>
+          <th>Haswell CPU</th>
+          <th>NVIDIA K80 GPU</th>
+          <th>TPU v1</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Die 面积 (mm²)</td>
+          <td>662</td>
+          <td>561</td>
+          <td>更小</td>
+      </tr>
+      <tr>
+          <td>制程 (nm)</td>
+          <td>22</td>
+          <td>28</td>
+          <td>28</td>
+      </tr>
+      <tr>
+          <td>TDP (W)</td>
+          <td>145</td>
+          <td>150</td>
+          <td>75</td>
+      </tr>
+      <tr>
+          <td>TOPS (INT8)</td>
+          <td>2.6</td>
+          <td>-</td>
+          <td><strong>92</strong></td>
+      </tr>
+      <tr>
+          <td>片上缓存</td>
+          <td>51 MB</td>
+          <td>8 MB</td>
+          <td>28 MB</td>
+      </tr>
+      <tr>
+          <td>整机功耗 (W)</td>
+          <td>504</td>
+          <td>1838</td>
+          <td><strong>861</strong></td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>TPU v1 的压倒性优势</strong>：</p>
+<ul>
+<li><strong>计算性能</strong>：92 TOPS，远超同时期的 CPU 和 GPU</li>
+<li><strong>片上缓存</strong>：大缓存减少片外访问，对抗当时内存访问速度慢的瓶颈</li>
+<li><strong>量化</strong>：首次在推理场景引入 INT8，利用神经网络鲁棒性，支持更大 batch</li>
+</ul>
+<blockquote>
+<p>GPU 的目标是降低时延，TPU 的目标是提高吞吐——目标不同，设计思路自然不同。</p>
+</blockquote>
+<hr>
+<h2 id="53-谷歌-tpu-v2-训练芯片">5.3 谷歌 TPU v2 训练芯片
+</h2><p>2017 年，谷歌发布了 TPU v2，官方的描述是&quot;<strong>用于训练神经网络的特定领域超级计算机</strong>&quot;。同一年，谷歌还发表了那篇改变 NLP 格局的论文 <em>Attention is All You Need</em>——而 TPU v2，就是站在 Attention 背后的超级计算机。</p>
+<h3 id="531-训练-vs-推理为什么需要-tpu-v2">5.3.1 训练 vs 推理：为什么需要 TPU v2？
+</h3><p><img src="/images/ai_system/ch5/ai_system.pdf-0230-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.3.1 模型训练与推理的流程对比"
+	
+	
+></p>
+<p>推理只需要<strong>一次前向传播</strong>，对精度要求相对较低（INT8 即可）。但训练完全不同：</p>
+<ul>
+<li><strong>更复杂的数据并行</strong>：一个模型需要迭代百万次，所有参数在每个迭代中都要调整，需要协调跨集群并行计算</li>
+<li><strong>更高的计算复杂度</strong>：反向传播需要对每个权重参数和输入计算偏导数</li>
+<li><strong>更大的内存需求</strong>：临时变量（激活值、优化器状态）会将模型大小膨胀至原始大小的 8~9 倍</li>
+<li><strong>更高的精度要求</strong>：INT8 在训练中会导致不稳定和极大随机性，必须使用 FP16/BF16/FP32</li>
+</ul>
+<h3 id="532-tpu-v1--tpu-v2-的四大改动">5.3.2 TPU v1 → TPU v2 的四大改动
+</h3><p><strong>改动一：存储位置合并</strong></p>
+<p><img src="/images/ai_system/ch5/ai_system.pdf-0231-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.3.2 v1→v2 存储位置改动"
+	
+	
+></p>
+<p>TPU v1 有 Accumulator（存矩阵乘积）和 Activation Storage（存激活输出）两个独立缓冲区。TPU v2 将它们合并为 <strong>Vector Memory</strong>，更像传统架构中的 L1 Cache，提升了可编程性。</p>
+<p><strong>改动二：向量单元替代激活管线</strong></p>
+<p>TPU v1 的 Activation Pipeline 是针对特定激活函数场景的专用 ALU，无法满足训练需求。TPU v2 将其替换为通用的 <strong>Vector Unit</strong>，能处理各种向量激活函数。</p>
+<p><strong>改动三：MXU 连接方式调整</strong></p>
+<p>TPU v1 中 MXU 与向量内存直接相连，TPU v2 中 MXU 改为与向量单元连接——所有数据传输和计算都由向量单元分发。这样 MXU 成为向量单元的协处理器，对编译器和编程人员更友好。</p>
+<p><strong>改动四：DDR3 → HBM</strong></p>
+<p><img src="/images/ai_system/ch5/ai_system.pdf-0232-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.3.5 DDR3→HBM 存储升级"
+	
+	
+></p>
+<p>训练过程中产生的中间变量和权重远多于推理，DDR3 的回写速度根本无法满足。TPU v2 将 DDR3 替换为 <strong>HBM（高带宽内存）</strong>，读写速度提升了 <strong>20 倍</strong>。</p>
+<h3 id="533-tpu-v2-计算核心">5.3.3 TPU v2 计算核心
+</h3><p>TPU v2 的核心由三部分组成：</p>
+<ul>
+<li><strong>标量单元（Scalar Unit）</strong>：处理计算的起点，从指令存储器取出 322 bit 宽的 <strong>VLIW（超长指令字）</strong>，执行标量操作，并将向量指令和矩阵指令分发给对应单元。</li>
+<li><strong>向量单元（Vector Unit）</strong>：128 个向量通道，每个通道配备双发射 32 bit ALU。每个通道还有 8 路子通道，特别适用于批量归一化操作。</li>
+</ul>
+<p><img src="/images/ai_system/ch5/ai_system.pdf-0234-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.3.8 向量单元结构"
+	
+	
+></p>
+<ul>
+<li><strong>MXU</strong>：TPU v2 选择 4 个 <strong>128×128</strong> 的 MXU 而非 1 个 256×256 的 MXU。谷歌的模拟器显示，4 个 128×128 的 MXU 卷积模型利用率达 37%~48%，明显高于单个 256×256 的 22%~30%。这是基于利用率和面积效率的综合考量。</li>
+</ul>
+<p><img src="/images/ai_system/ch5/ai_system.pdf-0235-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.3.9 不同尺寸MXU利用率对比"
+	
+	
+></p>
+<blockquote>
+<p>TPU v2 的 MXU 使用 <strong>BF16</strong> 格式进行乘法运算——BF16 保留与 FP32 相同的指数范围（8 位指数），但尾数仅 7 位，在 FP32 的臃肿和 FP16 的低范围之间找到了完美平衡。</p>
+</blockquote>
+<h3 id="534-芯片互联pod-的基石">5.3.4 芯片互联：Pod 的基石
+</h3><p>TPU v1 是单芯片推理协处理器，没有互联能力。TPU v2 则不同——它内置了<strong>互联路由模块（Interconnect Router）</strong>，实现了 <strong>2D Torus（二维环面）</strong> 连接。</p>
+<p>每个芯片有 4 个自定义的**核间互联（ICI）**链接，每个方向带宽 496 Gb/s。这使得芯片之间可以直接连接，256 个 TPU v2 芯片组成一个 16×16 的二维环网，双向带宽高达 <strong>15.9 Tb/s</strong>——是传统 InfiniBand 集群交换机的 2.5 倍，同时还省去了网卡、交换机和通过 CPU 主机通信的时延成本。</p>
+<p><img src="/images/ai_system/ch5/ai_system.pdf-0238-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.3.14 TPU v2 芯片平面布局图"
+	
+	
+></p>
+<blockquote>
+<p>看这张平面布局图：2 个 TPU Core 一上一下，互联路由模块位于正中央，2 个 MXU 分别在顶部和底部中心——大部分面积都给了计算核心和互联。</p>
+</blockquote>
+<hr>
+<h2 id="54-谷歌-tpu-v3-pod-服务器">5.4 谷歌 TPU v3 Pod 服务器
+</h2><h3 id="541-tpu-v3tpu-v2-的增强版">5.4.1 TPU v3：TPU v2 的&quot;增强版&quot;
+</h3><p>TPU v3 本质上就是 TPU v2 的增强版。相比 v2：</p>
+<ul>
+<li>时钟频率提升约 <strong>1.35 倍</strong></li>
+<li>ICI 带宽和内存带宽提升 <strong>30%</strong></li>
+<li>MXU 数量从 2 个<strong>翻倍到 4 个</strong></li>
+<li>峰值性能提高 <strong>2.7 倍</strong></li>
+</ul>
+<p>但最关键的改进其实是<strong>散热</strong>——TPU v3 用<strong>液冷</strong>代替了风冷：</p>
+<p><img src="/images/ai_system/ch5/ai_system.pdf-0239-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.4.1 TPU v2 vs TPU v3 散热对比"
+	
+	
+></p>
+<blockquote>
+<p>TPU v2 板卡上 4 个芯片全靠风冷，而 TPU v3 使用液冷系统管理 4 个芯片的温度。正是这个液冷系统为 TPU v3 提供了 <strong>1.6 倍</strong>的功率余量，让它能在仅增大 10% 体积的情况下塞进 4 个 MXU 和更大的 HBM。</p>
+</blockquote>
+<h3 id="542-pod从芯片到超级计算机">5.4.2 Pod：从&quot;芯片&quot;到&quot;超级计算机&quot;
+</h3><p>谷歌官方对 Pod 的定义很简单：&quot;<strong>TPU Pod 是一组通过专用网络连接在一起的连续 TPU 单元</strong>。&ldquo;但它的意义远不止于此。</p>
+<p><strong>TPU v2 Pod</strong>：每个机柜含 64 个 CPU 板和 64 个 TPU 板，共 128 个 CPU 芯片和 256 个 TPU v2 芯片。CPU 集群在两侧，TPU 集群在中间——这种紧凑排列是为了避免信号衰减（BlueLink 或 OPA 的铜缆和光纤长度不能太长）。</p>
+<p><img src="/images/ai_system/ch5/ai_system.pdf-0241-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.4.2 TPU v2 基板组成"
+	
+	
+></p>
+<p><strong>TPU v3 Pod</strong>：规模比 v2 Pod 大了整整 4 倍——<strong>1024 块</strong> TPU v3 芯片，算力超过 <strong>100 PFLOPS</strong>。更多的铜管、更多的电缆、更大的规模。</p>
+<h3 id="543-pod-通信方式">5.4.3 Pod 通信方式
+</h3><p>在分布式训练中，<strong>同步训练</strong>是主流——所有节点完成本轮通信后再进行下一轮计算。系统的性能受限于最慢的计算节点和最慢的网络消息。</p>
+<p>谷歌在 TPU v2/v3 Pod 中采用 <strong>2D Torus</strong> 网络结构：</p>
+<p><img src="/images/ai_system/ch5/ai_system.pdf-0244-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.4.7 2D Torus 网络结构"
+	
+	
+></p>
+<p>每个 TPU 芯片与相邻的 TPU 芯片直接连接，形成一个二维平面网络。这种设计减少数据在芯片间传输时的通信时延和带宽瓶颈。基于此，谷歌优化了同步训练中的 <strong>All-Reduce</strong> 操作，在同等资源条件下性能超越了异步 SGD。</p>
+<blockquote>
+<p>TPU v2 Pod（256 芯片）算力 11.5 PFLOPS，TPU v3 Pod（1024 芯片）算力 100 PFLOPS。两者的核心架构没有本质区别，主要提升的是<strong>规模化能力</strong>。</p>
+</blockquote>
+<hr>
+<h2 id="55-谷歌-tpu-v4-与光路交换">5.5 谷歌 TPU v4 与光路交换
+</h2><p>TPU v4 和 TPU v3 之间隔了整整 4 年。这 4 年间，英伟达迭代了三代架构（Volta → Ampere → Hopper），PyTorch 取代 TensorFlow 成为首选框架，业界对大算力的饥渴只增不减。TPU v4 正是在这样的背景下诞生的。</p>
+<h3 id="551-tpu-v4-的重大升级">5.5.1 TPU v4 的重大升级
+</h3><p><img src="/images/ai_system/ch5/ai_system.pdf-0246-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.5.1 TPU v4 架构图"
+	
+	
+></p>
+<p>每个 TPU v4 包含 2 个 <strong>Tensor Core</strong>，每个 Tensor Core 由 6 个单元组成：<strong>4 个 MXU</strong> + 1 个标量单元 + 1 个向量单元。2 个 HBM 内存模块分别置于 Tensor Core 左右两侧以降低电缆时延。</p>
+<p>关键升级点：</p>
+<ul>
+<li><strong>制程工艺</strong>：16nm → <strong>7nm</strong>，晶体管数量是 TPU v3 的 4 倍</li>
+<li><strong>MXU 数量</strong>：再次翻倍</li>
+<li><strong>内存</strong>：片上内存增加 9 倍达 244 MB，HBM 带宽 1.2 TB/s（提升 33%）</li>
+<li><strong>Sparse Core</strong>：全新引入，专为稀疏计算优化</li>
+<li><strong>3D Torus</strong>：首次引入，支持多达 4096 个 TPU v4 核心互联</li>
+</ul>
+<h3 id="552-sparse-coreembedding-加速利器">5.5.2 Sparse Core：Embedding 加速利器
+</h3><p>在 NLP 和推荐系统中，Embedding 层处理的是极度稀疏的离散特征——输入矩阵中存在大量 0，传统矩阵乘法会白白浪费计算资源。</p>
+<p><img src="/images/ai_system/ch5/ai_system.pdf-0247-09.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.5.3 Sparse Core 架构示意图"
+	
+	
+></p>
+<p>Sparse Core 包含 <strong>16 个计算瓦片（Tiles）</strong>，每个瓦片有关联的 HBM 通道。每个瓦片包含：</p>
+<ul>
+<li><strong>Fetch Unit</strong>：从 HBM 读取激活函数和参数</li>
+<li><strong>scVPU</strong>：可编程的 8 路 SIMD 向量处理单元</li>
+<li><strong>Flush Unit</strong>：反向传播时将更新的参数写回 HBM</li>
+<li><strong>2.5 MB Spmem</strong>：稀疏向量内存</li>
+</ul>
+<p>此外还有 5 个跨通道单元执行嵌入操作。Sparse Core 可将依赖 Embedding 的模型加速 <strong>5~7 倍</strong>，而面积和功耗仅占 5%。</p>
+<h3 id="553-tpu-v4-pod3d-torus--光互联">5.5.3 TPU v4 Pod：3D Torus + 光互联
+</h3><p>TPU v4 Pod 将 64（4×4×4）个 TPU v4 芯片组成一个<strong>立方体（Cube）</strong>，再将 64 个 Cube 通过**光互联（OCS）**连接在一起，形成共有 <strong>4096 个 TPU v4 芯片</strong>的超级计算机，总计提供 <strong>1.126 exaFLOPS</strong>（BF16）的峰值算力。</p>
+<p><img src="/images/ai_system/ch5/ai_system.pdf-0249-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.5.4 3D Torus Cube 示意图"
+	
+	
+></p>
+<p>在 3D Torus 网络中，每个节点通过 3 个维度（X-Y-Z）与相邻节点相连，形成三维网格结构。每个节点都与上下、左右、前后的 6 个节点互联。</p>
+<blockquote>
+<p>对比一下：英伟达 DGX SuperPod 最多连接 256 个 H100 芯片，且需要约 568 个 InfiniBand 交换机。而 TPU v4 Pod 用 4096 个芯片 + 48 个 OCS 光交换器就搞定了——OCS 的成本不到系统成本的 5%，功耗不到系统功率的 3%。</p>
+</blockquote>
+<h3 id="554-光路交换机ocs">5.5.4 光路交换机（OCS）
+</h3><p>OCS 是 TPU v4 Pod 的&quot;秘密武器&rdquo;。传统交换机的流程是&quot;光→电→光&quot;，两次转换造成大量性能损耗。而 OCS 提供<strong>光到光</strong>的直接转换，节省了大量电能，更重要的是解决了时延问题。</p>
+<p><img src="/images/ai_system/ch5/ai_system.pdf-0251-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图5.5.8 Palomar OCS 工作原理"
+	
+	
+></p>
+<p>Palomar OCS 的核心是 <strong>2D MEMS 反射镜阵列</strong>——通过控制微反射镜的位置来调整光路，实现光路切换。它具有低损耗、低切换时延（毫秒级别）、低功耗、低成本等优点。</p>
+<h3 id="555-tpu-v4-的优缺点">5.5.5 TPU v4 的优缺点
+</h3><p><strong>优点</strong>：</p>
+<ul>
+<li><strong>低时延</strong>：3D Torus 相邻节点间距离短且可直接连线</li>
+<li><strong>低网络成本</strong>：3D Torus 拓扑的交换机、线材、连接器保有量低于 Clos 拓扑</li>
+<li><strong>路由可重配</strong>：OCS 支持动态可重配路由，更易隔离/下线故障节点</li>
+<li><strong>更好的集群布局</strong>：物理相邻=逻辑相邻，密集 I/O 落在局部域</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li><strong>系统成熟度低</strong>：Clos 拓扑具备非阻塞特性，而 3D Torus 无法保证</li>
+<li><strong>拓扑僵硬</strong>：扩容 Clos 只需增加叶交换机，扩缩 3D Torus 则需重新配置整个拓扑</li>
+<li><strong>负载均衡挑战</strong>：Clos 的替代路径数量更多</li>
+</ul>
+<hr>
+<h2 id="小结与思考">小结与思考
+</h2><p>这一章从 TPU v1 的脉动阵列一路讲到 TPU v4 的光路交换，信息量确实不小。让我们用几个问题来收尾：</p>
+<ul>
+<li>
+<p><strong>TPU 和 GPU 的本质区别是什么？</strong> GPU 追求通用性，TPU 追求专用性。GPU 用多级缓存和计算核心降低时延，TPU 用脉动阵列和流水线提高吞吐——目标不同，设计哲学自然不同。</p>
+</li>
+<li>
+<p><strong>脉动阵列为什么高效？</strong> 数据在 PE 之间&quot;流动&quot;复用，而不是每次计算都要&quot;存-取-算&quot;。对于矩阵乘法这种需要大量数据复用的场景，这大幅减少了内存访问次数。</p>
+</li>
+<li>
+<p><strong>从 v1 到 v4，不变的&quot;道&quot;是什么？</strong> 控制逻辑只占 2% 的芯片面积，其余全部给计算和内存——<strong>简单就是高效</strong>。同时，每一代都在强化芯片间的互联能力，因为单芯片的算力终究有限。</p>
+</li>
+<li>
+<p><strong>为什么光互联是未来？</strong> 当芯片数量达到 4096 级别，电互联的时延和功耗已经成为瓶颈。光互联的&quot;光到光&quot;转换，省去了光电转换的损耗，是通往 exaFLOPS 时代的必经之路。</p>
+</li>
+</ul>
+<blockquote>
+<p>正如书中所言：TPU 的设计强调算法与芯片之间的紧密协同，以及对新数据格式和稀疏计算的支持——这预示着 AI 计算集群的重要性日益增加。</p>
+</blockquote>
+<hr>
+<p><em>下一篇预告：第6章将进入 GPU 的领地，详解英伟达 GPU 的架构演进与 CUDA 编程模型。</em></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ai-system/">AI System</a>
+        
+            <a href="/tags/deep-learning/">Deep Learning</a>
+        
+            <a href="/tags/ai-infra/">AI Infra</a>
+        
+            <a href="/tags/tpu/">TPU</a>
+        
+            <a href="/tags/google/">Google</a>
+        
+            <a href="/tags/systolic-array/">Systolic Array</a>
+        
+            <a href="/tags/asic/">ASIC</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第1章 AI系统概述</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC2%E7%AB%A0-ai%E8%AE%A1%E7%AE%97%E4%BD%93%E7%B3%BB/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第2章 AI计算体系</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC4%E7%AB%A0-gpu%E4%BB%A5%E8%8B%B1%E4%BC%9F%E8%BE%BE%E4%B8%BA%E4%BE%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第4章 GPU——以英伟达为例</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
