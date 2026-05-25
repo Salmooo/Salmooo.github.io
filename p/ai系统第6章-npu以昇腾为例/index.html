@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="《AI系统：原理与架构》学习笔记 — 深入华为昇腾NPU，从达芬奇架构到AI Core核心单元，从数据布局到编译器优化">
+<title>AI系统：第6章 NPU——以昇腾为例</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC6%E7%AB%A0-npu%E4%BB%A5%E6%98%87%E8%85%BE%E4%B8%BA%E4%BE%8B/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="AI系统：第6章 NPU——以昇腾为例">
+<meta property='og:description' content="《AI系统：原理与架构》学习笔记 — 深入华为昇腾NPU，从达芬奇架构到AI Core核心单元，从数据布局到编译器优化">
+<meta property='og:url' content='https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC6%E7%AB%A0-npu%E4%BB%A5%E6%98%87%E8%85%BE%E4%B8%BA%E4%BE%8B/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='AI System' /><meta property='article:tag' content='Deep Learning' /><meta property='article:tag' content='AI Infra' /><meta property='article:tag' content='NPU' /><meta property='article:tag' content='Ascend' /><meta property='article:tag' content='Huawei' /><meta property='article:tag' content='Da Vinci' /><meta property='article:tag' content='AI Core' />
+<meta name="twitter:title" content="AI系统：第6章 NPU——以昇腾为例">
+<meta name="twitter:description" content="《AI系统：原理与架构》学习笔记 — 深入华为昇腾NPU，从达芬奇架构到AI Core核心单元，从数据布局到编译器优化">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#本章概览">本章概览</a></li>
+    <li><a href="#61-昇腾-ai-系统概述">6.1 昇腾 AI 系统概述</a>
+      <ol>
+        <li><a href="#611-昇腾-ai-产业生态">6.1.1 昇腾 AI 产业生态</a></li>
+        <li><a href="#612-昇腾-ai-系统架构">6.1.2 昇腾 AI 系统架构</a></li>
+        <li><a href="#613-昇腾未来展望">6.1.3 昇腾未来展望</a></li>
+      </ol>
+    </li>
+    <li><a href="#62-昇腾-ai-处理器">6.2 昇腾 AI 处理器</a>
+      <ol>
+        <li><a href="#621-昇腾-ai-处理器概述">6.2.1 昇腾 AI 处理器概述</a></li>
+        <li><a href="#622-ai-处理器架构">6.2.2 AI 处理器架构</a></li>
+        <li><a href="#623-计算加速原理">6.2.3 计算加速原理</a></li>
+      </ol>
+    </li>
+    <li><a href="#63-昇腾-ai-核心单元">6.3 昇腾 AI 核心单元</a>
+      <ol>
+        <li><a href="#631-达芬奇架构">6.3.1 达芬奇架构</a></li>
+        <li><a href="#632-计算单元">6.3.2 计算单元</a></li>
+        <li><a href="#633-存储系统">6.3.3 存储系统</a></li>
+        <li><a href="#634-控制单元">6.3.4 控制单元</a></li>
+      </ol>
+    </li>
+    <li><a href="#64-昇腾数据布局转换">6.4 昇腾数据布局转换</a>
+      <ol>
+        <li><a href="#641-昇腾数据排布">6.4.1 昇腾数据排布</a></li>
+        <li><a href="#642-ai-编译器布局转换算法">6.4.2 AI 编译器布局转换算法</a></li>
+      </ol>
+    </li>
+    <li><a href="#小结与思考">小结与思考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/ai/" >
+                AI
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC6%E7%AB%A0-npu%E4%BB%A5%E6%98%87%E8%85%BE%E4%B8%BA%E4%BE%8B/">AI系统：第6章 NPU——以昇腾为例</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            《AI系统：原理与架构》学习笔记 — 深入华为昇腾NPU，从达芬奇架构到AI Core核心单元，从数据布局到编译器优化
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    4 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="本章概览">本章概览
+</h2><p>前面几章我们聊了 CPU、GPU、TPU 这些&quot;舶来&quot;的 AI 芯片，这一章终于轮到中国力量登场了——<strong>华为昇腾（Ascend）</strong>。</p>
+<p>如果说 GPU 的思路是&quot;把通用计算做到极致再拿去跑 AI&quot;，TPU 的思路是&quot;只做 AI 计算，别的啥也不管&quot;，那昇腾走的是第三条路：<strong>全栈自研 + 开放生态</strong>。从底层的达芬奇架构、到中间的 CANN 异构计算框架、再到上层的 MindSpore 和 MindX，昇腾试图打通从芯片到应用的完整链路。</p>
+<p>这一章是整个 AI 硬件篇的&quot;终局之战&quot;——你会看到不同于英伟达 CUDA Core 和谷歌脉动阵列的第三种 AI 计算范式：</p>
+<ul>
+<li><strong>达芬奇架构</strong>：同时拥有矩阵、向量、标量三种计算单元，既有 ASIC 的效率，又有通用芯片的灵活性</li>
+<li><strong>AI Core 设计哲学</strong>：存储转换单元（MTU）硬件化 Im2Col、&ldquo;多进单出&quot;的数据通路、&ldquo;大Z小z&quot;的分形排布</li>
+<li><strong>数据布局转换</strong>：从 NCHW/NHWC 到 NC1HWC0 五维格式，再到 NZ 分形格式——这一切都是为了喂饱那个 16×16 的 Cube</li>
+</ul>
+<blockquote>
+<p><strong>一句话总结</strong>：昇腾的核心竞争力不在于单卡算力多大，而在于&quot;端边云全场景&quot;的统一架构——同样的代码可以跑在毫瓦级的嵌入式设备上，也可以跑在几百瓦的数据中心集群里。</p>
+</blockquote>
+<hr>
+<h2 id="61-昇腾-ai-系统概述">6.1 昇腾 AI 系统概述
+</h2><h3 id="611-昇腾-ai-产业生态">6.1.1 昇腾 AI 产业生态
+</h3><p>华为的昇腾生态包含了从底层硬件到上层应用的全栈体系：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>层级</th>
+          <th>内容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>硬件系统</strong></td>
+          <td>基于达芬奇内核的昇腾处理器、模组、板卡、小站、服务器、集群</td>
+      </tr>
+      <tr>
+          <td><strong>基础软件</strong></td>
+          <td>CANN 异构计算架构、驱动、运行时、加速库、编译器</td>
+      </tr>
+      <tr>
+          <td><strong>AI 框架</strong></td>
+          <td>MindSpore（开源），同时支持 PyTorch、TensorFlow、PaddlePaddle</td>
+      </tr>
+      <tr>
+          <td><strong>应用使能</strong></td>
+          <td>MindX（含 MindX DL、MindX Edge）、ModelArts、HiAI</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>昇腾 AI 产品覆盖了<strong>边缘侧、云侧推理、云侧训练</strong>三大场景：</p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0255-10.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.1.1 昇腾系列产品覆盖三大场景"
+	
+	
+></p>
+<p>昇腾处理器按 <strong>PCIe 工作模式</strong>分为 RC（Root Complex）模式和 EP（Endpoint）模式：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>PCIe 模式</th>
+          <th>说明</th>
+          <th>典型产品</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>RC 模式</strong></td>
+          <td>CPU 直接运行 AI 业务软件，接入外挂设备</td>
+          <td>Atlas 200 AI 加速模块、Atlas 200 DK</td>
+      </tr>
+      <tr>
+          <td><strong>EP 模式</strong></td>
+          <td>Host 侧运行 AI 业务，Device 侧通过 PCIe 接入</td>
+          <td>Atlas 300 系列推理卡、训练卡</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0257-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.1.3 RC与EP两种PCIe工作模式"
+	
+	
+></p>
+<blockquote>
+<p>EP 模式下，Host 系统和 Device 系统通过 PCIe 通道交互，将 AI 任务加载到 Device 侧的昇腾处理器中运行。这种&quot;主从架构&quot;在 AI 加速卡中非常普遍。</p>
+</blockquote>
+<h3 id="612-昇腾-ai-系统架构">6.1.2 昇腾 AI 系统架构
+</h3><p>昇腾 AI 全栈架构的层次与本书介绍的整体 AI 系统架构高度吻合：</p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0258-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.1.4 昇腾AI全栈架构"
+	
+	
+></p>
+<p>昇腾架构的设计理念非常清晰：</p>
+<ul>
+<li><strong>模块化</strong>：支持端边云场景下的独立部署</li>
+<li><strong>协同性</strong>：模块之间具备相互协同能力</li>
+<li><strong>独立演进</strong>：各层之间支持独立升级，互不绑定</li>
+</ul>
+<p>基于这套架构，昇腾提供了四大核心优势：</p>
+<p><strong>1. 超强算力</strong></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>场景</th>
+          <th>产品</th>
+          <th>算力</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>数据中心训练</td>
+          <td>Atlas 训练卡</td>
+          <td>320 TFLOPS FP16</td>
+      </tr>
+      <tr>
+          <td>数据中心集群</td>
+          <td>Atlas 集群</td>
+          <td>256 ~ 1024 PFLOPS FP16</td>
+      </tr>
+      <tr>
+          <td>边缘推理</td>
+          <td>Atlas 推理卡</td>
+          <td>88 TOPS INT8</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>更惊艳的是能效比——Atlas 集群采用<strong>全液冷</strong>设计，PUE &lt; 1.1，E 级算力集群 5 年可节省电费超 1 亿元。</p>
+<p><strong>2. 全栈开放</strong></p>
+<p>按能力分层开放，面向不同开发者提供不同工具：</p>
+<ul>
+<li><strong>业务应用开发者</strong>：MindX SDK，极少代码即可实现 AI 功能</li>
+<li><strong>AI 模型开发者</strong>：MindSpore + 主流框架适配 + 模型转换工具</li>
+<li><strong>算子开发者</strong>：CANN + MindStudio + Ascend C 统一编程接口</li>
+</ul>
+<p><strong>3. 使能应用</strong>：MindX DL / MindX Edge 将设备资源和算力统一抽象，让应用开发者无需关心底层硬件细节。</p>
+<p><strong>4. 端边云协同</strong>：硬件层面统一采用达芬奇架构，CANN 使能各类形态硬件；软件层面一次开发、全场景部署；端侧增量数据回传云侧训练优化，优化模型直接下发端侧。</p>
+<h3 id="613-昇腾未来展望">6.1.3 昇腾未来展望
+</h3><p>昇腾的未来方向可以归纳为几个关键词：</p>
+<ul>
+<li><strong>多样化异构算力</strong>：由应用驱动的计算架构，SoC 成为主要形态</li>
+<li><strong>智能化编译系统</strong>：用 AI 来开发 AI，基础软件的智能化程度将极大提升</li>
+<li><strong>生态持续丰富</strong>：更多算法、加速库、SDK、开发者、合作伙伴</li>
+<li><strong>安全可信</strong>：将安全和可信作为基本功，确保 AI 可靠地服务于人类</li>
+</ul>
+<hr>
+<h2 id="62-昇腾-ai-处理器">6.2 昇腾 AI 处理器
+</h2><h3 id="621-昇腾-ai-处理器概述">6.2.1 昇腾 AI 处理器概述
+</h3><p>2018 年，华为推出了基于<strong>达芬奇架构</strong>的昇腾 AI 处理器。这不是一个&quot;追赶式&quot;的设计，而是从零开始，专为 AI 计算量身打造的架构。</p>
+<p>达芬奇架构的核心武器是 <strong>3D Cube 矩阵计算单元</strong>——一条指令即可完成 4096 次乘加运算：</p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0262-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.2.1 达芬奇架构3D Cube矩阵计算"
+	
+	
+></p>
+<blockquote>
+<p>一条指令 = 16×16×16 = 4096 次乘加。GPU 需要用 256 个线程、16 个时钟周期才能完成的事，昇腾一条指令就搞定了。</p>
+</blockquote>
+<p>达芬奇架构的几个关键设计特点：</p>
+<ul>
+<li><strong>CISC 指令集</strong>：高度灵活的专用指令，能应对日新月异的新算法和新模型</li>
+<li><strong>多维计算模式</strong>：标量、矢量、矩阵三种计算模式，打破了 ASIC 的局限性</li>
+<li><strong>混合精度支持</strong>：推理用 INT8/INT4，训练用 FP16/FP32</li>
+<li><strong>全场景适配</strong>：从几十毫瓦到几百瓦的芯片，统一架构、一次开发多场景部署</li>
+</ul>
+<h3 id="622-ai-处理器架构">6.2.2 AI 处理器架构
+</h3><p>昇腾 AI 处理器本质上是一个 <strong>SoC（片上系统）</strong>，主要包含：</p>
+<ul>
+<li><strong>AI 计算引擎</strong>：AI Core（达芬奇架构）+ AI CPU</li>
+<li><strong>多层级缓存/缓冲区</strong>：L1/L2/L3 Cache + 片上 Buffer</li>
+<li><strong>DVPP（数字视觉预处理模块）</strong>：视频编解码、JPEG/PNG 编解码、图像预处理</li>
+<li><strong>任务调度器（TS）</strong>：专门服务于 AI Core 和 AI CPU 的调度</li>
+<li><strong>总线接口</strong>：PCIe 接口与 Host 系统交互</li>
+</ul>
+<p>早期的昇腾处理器逻辑架构：</p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0263-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.2.2 早期昇腾处理器逻辑架构"
+	
+	
+></p>
+<p>当前基于达芬奇架构的昇腾 AI 处理器架构更加成熟：</p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0264-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.2.3 当前昇腾AI处理器架构"
+	
+	
+></p>
+<p>所有模块通过基于 <strong>CHI 协议</strong>的片上环形总线相连，确保数据共享和一致性。处理器集成了多个 ARM CPU 核心，按功能分为<strong>主控 CPU</strong>（控制芯片整体运行）和 <strong>AI CPU</strong>（承担非矩阵类复杂计算），两者的核数可由软件动态分配。</p>
+<p><strong>昇腾 910 —— 云侧训练利器</strong></p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0265-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.2.4 昇腾910处理器架构"
+	
+	
+></p>
+<p>昇腾 910 采用了先进的 <strong>Chiplet（芯粒）技术</strong>，包含 6 个 Die：</p>
+<ul>
+<li>1 个计算芯粒：32 个 DaVinci Core + 16 个 CPU Core + 4 个 DVPP</li>
+<li>1 个 IO 芯粒</li>
+<li>4 个 HBM 芯粒（总计 1.2 TB/s 带宽）</li>
+</ul>
+<p>云侧训练场景的针对性优化：</p>
+<ul>
+<li><strong>最高规格 Ascend-Max</strong>：每个 Core 每周期完成 4096 次 FP16 乘累加</li>
+<li><strong>HBM + DDR</strong>：高 Load/Store 带宽应对反向 SGD 的大量缓存访问</li>
+<li><strong>100G NIC（RoCE v2）</strong>：支持万卡集群互联</li>
+<li><strong>高吞吐率 DVPP</strong>：最高支持 128 路 1080P 视频解码</li>
+</ul>
+<p><strong>昇腾 310 —— 边缘推理专家</strong></p>
+<p>相比 910，昇腾 310 的定制化 IP 更少，但提供了更多外设接口。由于边缘推理场景 Batch Size 通常只有 1，昇腾 310 选择了**较小的矩阵计算维度（4×16×16）**以快速实现矩阵乘——不追求峰值吞吐，而是追求低延迟。</p>
+<h3 id="623-计算加速原理">6.2.3 计算加速原理
+</h3><p>在神经网络中，卷积计算的计算量往往是决定性的。昇腾 AI 处理器从软硬件架构上都对卷积计算进行了深度优化。</p>
+<p><strong>卷积 → 矩阵乘法的转换</strong></p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0267-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.2.6 卷积层计算过程：Im2Col &#43; GEMM"
+	
+	
+></p>
+<p>卷积计算在底层被拆解为几步：</p>
+<ol>
+<li><strong>Im2Col</strong>：将输入特征矩阵 X 和权重矩阵 W 展开为 X_I2C 和 W_I2C</li>
+<li><strong>GEMM</strong>：矩阵相乘得到中间输出 Y₀</li>
+<li><strong>加偏置</strong>：累加偏置项 b，得到最终输出 Y</li>
+</ol>
+<p><strong>AI Core 卷积计算数据通路</strong></p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0268-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.2.7 AI Core卷积计算数据流"
+	
+	
+></p>
+<p>整个数据流的核心路径：</p>
+<ol>
+<li><strong>数据搬运</strong>：矩阵 X 和 W 从 DDR/HBM → 输入缓冲区 → 存储转换单元（MTU）</li>
+<li><strong>格式转换</strong>：MTU 对 X 和 W 进行补零和 Im2Col 重组，得到 X_I2C 和 W_I2C</li>
+<li><strong>矩阵计算</strong>：X_I2C 和 W_I2C 送入矩阵计算单元，分块为 16×16 矩阵进行乘法</li>
+<li><strong>偏置累加</strong>：累加器将偏置项与中间结果 Y₀ 累加得到 Y</li>
+<li><strong>激活/池化</strong>：向量计算单元对 Y 进行激活和池化处理</li>
+</ol>
+<blockquote>
+<p>关键优化：如果权重 W_I2C 需要重复使用，可以将其<strong>固定在输入缓冲区</strong>中反复使用，避免重复从 DDR/HBM 读取——这就是&quot;数据复用&quot;在硬件层面的体现。</p>
+</blockquote>
+<hr>
+<h2 id="63-昇腾-ai-核心单元">6.3 昇腾 AI 核心单元
+</h2><h3 id="631-达芬奇架构">6.3.1 达芬奇架构
+</h3><p>达芬奇架构的本质是<strong>特定域架构（DSA）</strong>——既不像 CPU/GPU 那样追求通用，也不像 ASIC 那样只做一件事。它专门针对深度学习领域的常见计算模式进行了优化。</p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0270-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.3.1 AI Core的达芬奇架构"
+	
+	
+></p>
+<p>AI Core 包含三种基础计算资源，对应三种常见的计算模式：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>计算单元</th>
+          <th>对应模式</th>
+          <th>支持的精度</th>
+          <th>功能定位</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>矩阵计算单元（Cube Unit）</strong></td>
+          <td>张量计算</td>
+          <td>INT8、INT4、FP16</td>
+          <td>&ldquo;主力军&rdquo;，负责矩阵乘法</td>
+      </tr>
+      <tr>
+          <td><strong>向量计算单元（Vector Unit）</strong></td>
+          <td>向量计算</td>
+          <td>FP16、FP32</td>
+          <td>&ldquo;辅助军&rdquo;，负责激活、池化等</td>
+      </tr>
+      <tr>
+          <td><strong>标量计算单元（Scalar Unit）</strong></td>
+          <td>标量计算</td>
+          <td>-</td>
+          <td>&ldquo;指挥部&rdquo;，负责控制和地址计算</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>这三种计算单元形成了三条<strong>独立的执行流水线</strong>，在系统软件的统一调度下互相配合。</p>
+<p>特别值得注意的是<strong>存储转换单元（MTU）</strong>——这是达芬奇架构的一大特色。在 GPU 中，Im2Col 这样的格式转换是通过软件实现的，效率低下。达芬奇架构直接把这一步<strong>固化在硬件电路中</strong>，能够在极短时间内完成整个转置过程，实现不间断的卷积计算。</p>
+<h3 id="632-计算单元">6.3.2 计算单元
+</h3><p><strong>矩阵计算单元 —— 一指令定乾坤</strong></p>
+<p>矩阵计算单元是 AI Core 的算力核心。它能用<strong>一条指令完成两个 16×16 矩阵的相乘</strong>（这也是&quot;Cube&quot;名称的来历——16³ = 4096）：</p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0274-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.3.6 矩阵计算单元的工作方式"
+	
+	
+></p>
+<p>矩阵计算单元内部有 256 个矩阵计算子电路，可以并行完成结果矩阵的 256 个元素计算。处理大型矩阵时，采用**分块平铺（Tiling）**策略——将大矩阵切成多个 16×16 子矩阵，分批计算、累加结果。</p>
+<p><strong>&ldquo;大Z小z&quot;数据排列</strong></p>
+<p>为了匹配矩阵计算单元的工作方式，数据需要按照特定的分形格式排列：</p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0275-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.3.7 大Z小z与大Z小n排列方式"
+	
+	
+></p>
+<ul>
+<li><strong>&ldquo;大Z小z&rdquo;</strong>（图左）：分块之间按行排序，块内按行排序 → 常用于<strong>特征图</strong></li>
+<li><strong>&ldquo;大Z小n&rdquo;</strong>（图中）：分块之间按行排序，块内按列排序 → 常用于<strong>权重</strong></li>
+<li><strong>&ldquo;大N小z&rdquo;</strong>（图右）：分块之间按列排序，块内按行排序 → 常用于<strong>卷积输出</strong></li>
+</ul>
+<p><strong>分步计算大型矩阵</strong></p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0276-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.3.8 大型矩阵的分块分步计算"
+	
+	
+></p>
+<p>计算 C₁ 结果子矩阵需要两步：先用 A₁×B₁ 算中间结果，再用 A₂×B₂ 计算并累加——这种&quot;分步累加&quot;的策略充分利用了片上缓存的容量和数据局部性。</p>
+<p><strong>向量计算单元</strong></p>
+<p>向量单元是矩阵计算单元和输出缓冲区之间的&quot;桥梁&rdquo;。矩阵运算完成后，向量单元可以顺便完成 ReLU 激活、池化等操作，支持连续寻址和固定间隔寻址等多种模式。</p>
+<h3 id="633-存储系统">6.3.3 存储系统
+</h3><p>达芬奇架构通过精心设计的<strong>分布式缓冲区</strong>保证数据的及时供应，消除数据流传输瓶颈。</p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0278-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.3.10 AI Core存储单元"
+	
+	
+></p>
+<p>存储系统的关键组件：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>组件</th>
+          <th>功能</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>总线接口单元（BIU）</strong></td>
+          <td>AI Core 与外部交互的&quot;大门&rdquo;，负责读写请求转换</td>
+      </tr>
+      <tr>
+          <td><strong>存储转换单元（MTU）</strong></td>
+          <td>数据格式转换（补零、Im2Col、转置、解压缩）</td>
+      </tr>
+      <tr>
+          <td><strong>输入缓冲区</strong></td>
+          <td>暂存需要频繁重复使用的数据，减少外部读取</td>
+      </tr>
+      <tr>
+          <td><strong>输出缓冲区</strong></td>
+          <td>暂存中间结果和输出数据，必须经过它才能写回核外</td>
+      </tr>
+      <tr>
+          <td><strong>寄存器</strong></td>
+          <td>矩阵计算单元的 16×16 输入/结果寄存器</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>数据通路——多进单出</strong></p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0280-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.3.11 AI Core完整数据通路"
+	
+	
+></p>
+<p>达芬奇架构的数据通路设计非常独特——<strong>多进单出</strong>：</p>
+<ul>
+<li><strong>数据流入</strong>：可以通过多条通路，从外部直接流入矩阵计算单元、输入缓冲区和输出缓冲区中的任何一个</li>
+<li><strong>数据流出</strong>：必须通过输出缓冲区，最终才能写回核外存储系统</li>
+</ul>
+<p>这样设计的逻辑是：神经网络的输入数据种类繁多（多通道特征图、多个卷积核的权重和偏置），但输出只生成特征矩阵——<strong>用并行输入提高供给效率，用统一输出简化控制</strong>。</p>
+<blockquote>
+<p>与谷歌 TPU 的统一缓冲区理念相似，AI Core 也采用了大容量片上缓冲区设计，通过增大片上缓存来减少片外访问频次，从而降低数据搬运功耗。</p>
+</blockquote>
+<h3 id="634-控制单元">6.3.4 控制单元
+</h3><p>控制单元相当于 AI Core 的&quot;司令部&rdquo;，负责整个计算过程的指令调度。</p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0282-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.3.12 AI Core控制单元"
+	
+	
+></p>
+<p>指令执行的核心流程：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">指令缓存 → 标量指令处理队列（解码） → 指令发射模块 → 分发到对应队列
+</span></span><span class="line"><span class="cl">                                                      ├── 矩阵运算队列 → 矩阵计算单元
+</span></span><span class="line"><span class="cl">                                                      ├── 向量运算队列 → 向量计算单元
+</span></span><span class="line"><span class="cl">                                                      └── 存储转换队列 → 存储转换单元
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>关键设计要点：</p>
+<ul>
+<li><strong>多流水并行执行</strong>：矩阵、向量、存储转换三条流水线可以同时运行，提升整体执行效率</li>
+<li><strong>事件同步模块</strong>：通过软件插入同步符来控制流水线之间的依赖关系——当矩阵运算需要等待向量计算的结果时，事件同步模块会暂停矩阵流水线直到数据就绪</li>
+<li><strong>系统控制模块</strong>：负责任务块的配置、启动、状态报告和中断处理</li>
+</ul>
+<blockquote>
+<p>在达芬奇架构中，无论是流水线内部还是流水线之间的同步，都是通过<strong>事件同步模块 + 软件控制</strong>来实现的——这给了程序员极大的灵活性，同时也对编程能力提出了更高要求。</p>
+</blockquote>
+<hr>
+<h2 id="64-昇腾数据布局转换">6.4 昇腾数据布局转换
+</h2><h3 id="641-昇腾数据排布">6.4.1 昇腾数据排布
+</h3><p>数据排布格式的选择直接影响矩阵乘法和访存的效率。昇腾既不选择 NHWC，也不选择 NCHW，而是采用了一种<strong>自有的五维数据格式</strong>。</p>
+<p><strong>NC1HWC0 格式</strong></p>
+<p>昇腾将特征图的 C 维度进行分割，统一采用 <strong>NC1HWC0</strong> 的五维格式存储：</p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0284-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.4.1 NC1HWC0数据排布格式"
+	
+	
+></p>
+<ul>
+<li>将 C 维度分割为 C₁ 份 C₀（C₁ = C / C₀，向上取整）</li>
+<li>对于 FP16 类型，C₀ = 16；对于 INT8 类型，C₀ = 32</li>
+<li>这恰好对齐了矩阵计算单元&quot;一条指令处理 16×16 矩阵&quot;的能力</li>
+</ul>
+<p>转换代码一目了然：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># NHWC → NC1HWC0</span>
+</span></span><span class="line"><span class="cl"><span class="n">Tensor</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">N</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">C1</span><span class="p">,</span> <span class="n">C0</span><span class="p">])</span><span class="o">.</span><span class="n">transpose</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># NCHW → NC1HWC0</span>
+</span></span><span class="line"><span class="cl"><span class="n">Tensor</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">N</span><span class="p">,</span> <span class="n">C1</span><span class="p">,</span> <span class="n">C0</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span><span class="p">])</span><span class="o">.</span><span class="n">transpose</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>Fractal Z 与 NZ 格式</strong></p>
+<p>为了更高效地搬运和进行矩阵计算，昇腾引入了<strong>分形数据格式</strong>：</p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0285-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.4.2 NZ格式：矩阵分形排布"
+	
+	
+></p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0285-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.4.3 NZ分形操作：大N小z"
+	
+	
+></p>
+<p>NZ 格式的核心规律：</p>
+<ul>
+<li><strong>分形之间按列主序排布</strong>（大 N）</li>
+<li><strong>分形内部按行主序排布</strong>（小 z）</li>
+<li>存储优先级：W₀ 方向 → H₀ 方向 → H₁ 方向 → W₁ 方向 → N 方向</li>
+</ul>
+<p>将 ND 格式转换为 NZ 格式的过程：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">(N, H, W) → pad → (N, H₁×H₀, W₁×W₀) → reshape → (N, H₁, H₀, W₁, W₀) → transpose → (N, W₁, H₁, H₀, W₀)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="642-ai-编译器布局转换算法">6.4.2 AI 编译器布局转换算法
+</h3><p>数据布局转换的目的是将内部数据布局转化为后端硬件友好的形式。但这需要权衡——<strong>布局转换本身也有开销</strong>。</p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0286-11.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.4.4 数据格式转换算子CASTDATA"
+	
+	
+></p>
+<p>AI 编译器通过插入 <strong>CASTDATA 算子</strong>来实现数据格式转换。但编译器还要做优化——<strong>消除多余的转换</strong>：</p>
+<p><img src="/images/ai_system/ch6/ai_system.pdf-0287-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图6.4.5 编译器插入与消除CASTDATA算子"
+	
+	
+></p>
+<p>三种典型场景：</p>
+<ul>
+<li><strong>场景一（左）</strong>：OP1 和 OP2 都使用 NCHW，无需插入转换</li>
+<li><strong>场景二（中）</strong>：OP1 需要 NHWC 但输入是 NCHW，插入两次转换（输入 NCHW→NHWC、输出 NHWC→NCHW）</li>
+<li><strong>场景三（右）</strong>：OP1 用 NHWC、OP2 用 NCHW，中间需要一次转换</li>
+</ul>
+<blockquote>
+<p>如果三个连续的 1×1 卷积算子都是 NHWC 格式，编译器会自动消除它们之间多余的转换算子——这就是&quot;上下文感知&quot;的优化能力。</p>
+</blockquote>
+<p>训练场景与推理场景的一个关键区别是：推理时需要额外处理<strong>权重数据布局的转换</strong>，因为训练通常用 GPU（偏 NCHW），而推理可能在手机 CPU 上执行。</p>
+<hr>
+<h2 id="小结与思考">小结与思考
+</h2><p>这一章从昇腾的产业生态讲到 AI Core 的微观架构，信息密度非常大。让我用几个问题来收尾：</p>
+<ul>
+<li>
+<p><strong>达芬奇架构和 CUDA Core / TPU 脉动阵列的本质区别是什么？</strong> 达芬奇有三条独立流水线（矩阵+向量+标量），既有 TPU 的专用效率（硬件化 Im2Col），又有 GPU 的灵活性（可编程标量单元控制）。这是一种&quot;DSA + 可编程&quot;的折衷设计。</p>
+</li>
+<li>
+<p><strong>存储转换单元（MTU）为什么如此重要？</strong> 在 GPU 中，Im2Col 用软件做、效率低；在 TPU 中，数据靠脉动阵列在 PE 之间&quot;流动&quot;。达芬奇用一个<strong>硬件模块</strong>来专门完成数据格式转换——这是对&quot;频繁操作硬件化&quot;这一理念的极致贯彻。</p>
+</li>
+<li>
+<p><strong>&ldquo;多进单出&quot;数据通路的设计智慧</strong>：神经网络输入&quot;多&rdquo;（多通道特征图、多权重矩阵），输出&quot;一&quot;（最终特征图）。用多条路径同时拉数据进来，用一条路径统一管输出——以最小的硬件成本适配算法特征。</p>
+</li>
+<li>
+<p><strong>NC1HWC0 五维格式的巧妙之处</strong>：C₀ 取 16（FP16）正好匹配矩阵计算单元的 16×16——这不是巧合，是软硬件协同设计的&quot;对齐&quot;。从芯片设计到数据格式到编译器，昇腾的全栈自研优势在这里体现得淋漓尽致。</p>
+</li>
+</ul>
+<blockquote>
+<p>如果说英伟达的护城河是 CUDA 生态 + Tensor Core，谷歌的护城河是脉动阵列 + TPU Pod，那华为昇腾的护城河就是<strong>全栈自研 + 端边云统一架构 + 中国市场深度绑定</strong>。从达芬奇架构的硬件设计，到 CANN 的软件生态，再到 MindSpore 的框架层——昇腾正在构建一个完整的、不受制于人的 AI 计算体系。</p>
+</blockquote>
+<hr>
+<p><em>下一篇预告：AI 硬件的旅程到这里暂告一段落。从 CPU → GPU → TPU → NPU，我们看到了四种截然不同的设计哲学。接下来，让我们进入 AI 编译与计算架构的世界，看看编译器是如何在&quot;上层算法&quot;和&quot;底层硬件&quot;之间架起桥梁的。</em></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ai-system/">AI System</a>
+        
+            <a href="/tags/deep-learning/">Deep Learning</a>
+        
+            <a href="/tags/ai-infra/">AI Infra</a>
+        
+            <a href="/tags/npu/">NPU</a>
+        
+            <a href="/tags/ascend/">Ascend</a>
+        
+            <a href="/tags/huawei/">Huawei</a>
+        
+            <a href="/tags/da-vinci/">Da Vinci</a>
+        
+            <a href="/tags/ai-core/">AI Core</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第1章 AI系统概述</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC2%E7%AB%A0-ai%E8%AE%A1%E7%AE%97%E4%BD%93%E7%B3%BB/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第2章 AI计算体系</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC5%E7%AB%A0-tpu%E4%BB%A5%E8%B0%B7%E6%AD%8C%E4%B8%BA%E4%BE%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第5章 TPU——以谷歌为例</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC4%E7%AB%A0-gpu%E4%BB%A5%E8%8B%B1%E4%BC%9F%E8%BE%BE%E4%B8%BA%E4%BE%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第4章 GPU——以英伟达为例</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

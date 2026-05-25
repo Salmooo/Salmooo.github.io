@@ -1,0 +1,616 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>AI Core on SalmoneX Blog</title>
+        <link>https://Salmooo.github.io/tags/ai-core/</link>
+        <description>Recent content in AI Core on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright><atom:link href="https://Salmooo.github.io/tags/ai-core/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>AI系统：第6章 NPU——以昇腾为例</title>
+        <link>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC6%E7%AB%A0-npu%E4%BB%A5%E6%98%87%E8%85%BE%E4%B8%BA%E4%BE%8B/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC6%E7%AB%A0-npu%E4%BB%A5%E6%98%87%E8%85%BE%E4%B8%BA%E4%BE%8B/</guid>
+        <description>&lt;h2 id=&#34;本章概览&#34;&gt;本章概览
+&lt;/h2&gt;&lt;p&gt;前面几章我们聊了 CPU、GPU、TPU 这些&amp;quot;舶来&amp;quot;的 AI 芯片，这一章终于轮到中国力量登场了——&lt;strong&gt;华为昇腾（Ascend）&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;如果说 GPU 的思路是&amp;quot;把通用计算做到极致再拿去跑 AI&amp;quot;，TPU 的思路是&amp;quot;只做 AI 计算，别的啥也不管&amp;quot;，那昇腾走的是第三条路：&lt;strong&gt;全栈自研 + 开放生态&lt;/strong&gt;。从底层的达芬奇架构、到中间的 CANN 异构计算框架、再到上层的 MindSpore 和 MindX，昇腾试图打通从芯片到应用的完整链路。&lt;/p&gt;
+&lt;p&gt;这一章是整个 AI 硬件篇的&amp;quot;终局之战&amp;quot;——你会看到不同于英伟达 CUDA Core 和谷歌脉动阵列的第三种 AI 计算范式：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;达芬奇架构&lt;/strong&gt;：同时拥有矩阵、向量、标量三种计算单元，既有 ASIC 的效率，又有通用芯片的灵活性&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;AI Core 设计哲学&lt;/strong&gt;：存储转换单元（MTU）硬件化 Im2Col、&amp;ldquo;多进单出&amp;quot;的数据通路、&amp;ldquo;大Z小z&amp;quot;的分形排布&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;数据布局转换&lt;/strong&gt;：从 NCHW/NHWC 到 NC1HWC0 五维格式，再到 NZ 分形格式——这一切都是为了喂饱那个 16×16 的 Cube&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;一句话总结&lt;/strong&gt;：昇腾的核心竞争力不在于单卡算力多大，而在于&amp;quot;端边云全场景&amp;quot;的统一架构——同样的代码可以跑在毫瓦级的嵌入式设备上，也可以跑在几百瓦的数据中心集群里。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;61-昇腾-ai-系统概述&#34;&gt;6.1 昇腾 AI 系统概述
+&lt;/h2&gt;&lt;h3 id=&#34;611-昇腾-ai-产业生态&#34;&gt;6.1.1 昇腾 AI 产业生态
+&lt;/h3&gt;&lt;p&gt;华为的昇腾生态包含了从底层硬件到上层应用的全栈体系：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;层级&lt;/th&gt;
+          &lt;th&gt;内容&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;硬件系统&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;基于达芬奇内核的昇腾处理器、模组、板卡、小站、服务器、集群&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;基础软件&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;CANN 异构计算架构、驱动、运行时、加速库、编译器&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;AI 框架&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;MindSpore（开源），同时支持 PyTorch、TensorFlow、PaddlePaddle&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;应用使能&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;MindX（含 MindX DL、MindX Edge）、ModelArts、HiAI&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;昇腾 AI 产品覆盖了&lt;strong&gt;边缘侧、云侧推理、云侧训练&lt;/strong&gt;三大场景：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0255-10.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.1.1 昇腾系列产品覆盖三大场景&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;昇腾处理器按 &lt;strong&gt;PCIe 工作模式&lt;/strong&gt;分为 RC（Root Complex）模式和 EP（Endpoint）模式：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;PCIe 模式&lt;/th&gt;
+          &lt;th&gt;说明&lt;/th&gt;
+          &lt;th&gt;典型产品&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;RC 模式&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;CPU 直接运行 AI 业务软件，接入外挂设备&lt;/td&gt;
+          &lt;td&gt;Atlas 200 AI 加速模块、Atlas 200 DK&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;EP 模式&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Host 侧运行 AI 业务，Device 侧通过 PCIe 接入&lt;/td&gt;
+          &lt;td&gt;Atlas 300 系列推理卡、训练卡&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0257-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.1.3 RC与EP两种PCIe工作模式&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;EP 模式下，Host 系统和 Device 系统通过 PCIe 通道交互，将 AI 任务加载到 Device 侧的昇腾处理器中运行。这种&amp;quot;主从架构&amp;quot;在 AI 加速卡中非常普遍。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;612-昇腾-ai-系统架构&#34;&gt;6.1.2 昇腾 AI 系统架构
+&lt;/h3&gt;&lt;p&gt;昇腾 AI 全栈架构的层次与本书介绍的整体 AI 系统架构高度吻合：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0258-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.1.4 昇腾AI全栈架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;昇腾架构的设计理念非常清晰：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;模块化&lt;/strong&gt;：支持端边云场景下的独立部署&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;协同性&lt;/strong&gt;：模块之间具备相互协同能力&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;独立演进&lt;/strong&gt;：各层之间支持独立升级，互不绑定&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;基于这套架构，昇腾提供了四大核心优势：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1. 超强算力&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;场景&lt;/th&gt;
+          &lt;th&gt;产品&lt;/th&gt;
+          &lt;th&gt;算力&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;数据中心训练&lt;/td&gt;
+          &lt;td&gt;Atlas 训练卡&lt;/td&gt;
+          &lt;td&gt;320 TFLOPS FP16&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;数据中心集群&lt;/td&gt;
+          &lt;td&gt;Atlas 集群&lt;/td&gt;
+          &lt;td&gt;256 ~ 1024 PFLOPS FP16&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;边缘推理&lt;/td&gt;
+          &lt;td&gt;Atlas 推理卡&lt;/td&gt;
+          &lt;td&gt;88 TOPS INT8&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;更惊艳的是能效比——Atlas 集群采用&lt;strong&gt;全液冷&lt;/strong&gt;设计，PUE &amp;lt; 1.1，E 级算力集群 5 年可节省电费超 1 亿元。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2. 全栈开放&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;按能力分层开放，面向不同开发者提供不同工具：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;业务应用开发者&lt;/strong&gt;：MindX SDK，极少代码即可实现 AI 功能&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;AI 模型开发者&lt;/strong&gt;：MindSpore + 主流框架适配 + 模型转换工具&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;算子开发者&lt;/strong&gt;：CANN + MindStudio + Ascend C 统一编程接口&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;3. 使能应用&lt;/strong&gt;：MindX DL / MindX Edge 将设备资源和算力统一抽象，让应用开发者无需关心底层硬件细节。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;4. 端边云协同&lt;/strong&gt;：硬件层面统一采用达芬奇架构，CANN 使能各类形态硬件；软件层面一次开发、全场景部署；端侧增量数据回传云侧训练优化，优化模型直接下发端侧。&lt;/p&gt;
+&lt;h3 id=&#34;613-昇腾未来展望&#34;&gt;6.1.3 昇腾未来展望
+&lt;/h3&gt;&lt;p&gt;昇腾的未来方向可以归纳为几个关键词：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;多样化异构算力&lt;/strong&gt;：由应用驱动的计算架构，SoC 成为主要形态&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;智能化编译系统&lt;/strong&gt;：用 AI 来开发 AI，基础软件的智能化程度将极大提升&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;生态持续丰富&lt;/strong&gt;：更多算法、加速库、SDK、开发者、合作伙伴&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;安全可信&lt;/strong&gt;：将安全和可信作为基本功，确保 AI 可靠地服务于人类&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;62-昇腾-ai-处理器&#34;&gt;6.2 昇腾 AI 处理器
+&lt;/h2&gt;&lt;h3 id=&#34;621-昇腾-ai-处理器概述&#34;&gt;6.2.1 昇腾 AI 处理器概述
+&lt;/h3&gt;&lt;p&gt;2018 年，华为推出了基于&lt;strong&gt;达芬奇架构&lt;/strong&gt;的昇腾 AI 处理器。这不是一个&amp;quot;追赶式&amp;quot;的设计，而是从零开始，专为 AI 计算量身打造的架构。&lt;/p&gt;
+&lt;p&gt;达芬奇架构的核心武器是 &lt;strong&gt;3D Cube 矩阵计算单元&lt;/strong&gt;——一条指令即可完成 4096 次乘加运算：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0262-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.2.1 达芬奇架构3D Cube矩阵计算&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;一条指令 = 16×16×16 = 4096 次乘加。GPU 需要用 256 个线程、16 个时钟周期才能完成的事，昇腾一条指令就搞定了。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;达芬奇架构的几个关键设计特点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;CISC 指令集&lt;/strong&gt;：高度灵活的专用指令，能应对日新月异的新算法和新模型&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;多维计算模式&lt;/strong&gt;：标量、矢量、矩阵三种计算模式，打破了 ASIC 的局限性&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;混合精度支持&lt;/strong&gt;：推理用 INT8/INT4，训练用 FP16/FP32&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;全场景适配&lt;/strong&gt;：从几十毫瓦到几百瓦的芯片，统一架构、一次开发多场景部署&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;622-ai-处理器架构&#34;&gt;6.2.2 AI 处理器架构
+&lt;/h3&gt;&lt;p&gt;昇腾 AI 处理器本质上是一个 &lt;strong&gt;SoC（片上系统）&lt;/strong&gt;，主要包含：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;AI 计算引擎&lt;/strong&gt;：AI Core（达芬奇架构）+ AI CPU&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;多层级缓存/缓冲区&lt;/strong&gt;：L1/L2/L3 Cache + 片上 Buffer&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;DVPP（数字视觉预处理模块）&lt;/strong&gt;：视频编解码、JPEG/PNG 编解码、图像预处理&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;任务调度器（TS）&lt;/strong&gt;：专门服务于 AI Core 和 AI CPU 的调度&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;总线接口&lt;/strong&gt;：PCIe 接口与 Host 系统交互&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;早期的昇腾处理器逻辑架构：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0263-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.2.2 早期昇腾处理器逻辑架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;当前基于达芬奇架构的昇腾 AI 处理器架构更加成熟：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0264-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.2.3 当前昇腾AI处理器架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;所有模块通过基于 &lt;strong&gt;CHI 协议&lt;/strong&gt;的片上环形总线相连，确保数据共享和一致性。处理器集成了多个 ARM CPU 核心，按功能分为&lt;strong&gt;主控 CPU&lt;/strong&gt;（控制芯片整体运行）和 &lt;strong&gt;AI CPU&lt;/strong&gt;（承担非矩阵类复杂计算），两者的核数可由软件动态分配。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;昇腾 910 —— 云侧训练利器&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0265-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.2.4 昇腾910处理器架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;昇腾 910 采用了先进的 &lt;strong&gt;Chiplet（芯粒）技术&lt;/strong&gt;，包含 6 个 Die：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;1 个计算芯粒：32 个 DaVinci Core + 16 个 CPU Core + 4 个 DVPP&lt;/li&gt;
+&lt;li&gt;1 个 IO 芯粒&lt;/li&gt;
+&lt;li&gt;4 个 HBM 芯粒（总计 1.2 TB/s 带宽）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;云侧训练场景的针对性优化：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;最高规格 Ascend-Max&lt;/strong&gt;：每个 Core 每周期完成 4096 次 FP16 乘累加&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;HBM + DDR&lt;/strong&gt;：高 Load/Store 带宽应对反向 SGD 的大量缓存访问&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;100G NIC（RoCE v2）&lt;/strong&gt;：支持万卡集群互联&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;高吞吐率 DVPP&lt;/strong&gt;：最高支持 128 路 1080P 视频解码&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;昇腾 310 —— 边缘推理专家&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;相比 910，昇腾 310 的定制化 IP 更少，但提供了更多外设接口。由于边缘推理场景 Batch Size 通常只有 1，昇腾 310 选择了**较小的矩阵计算维度（4×16×16）**以快速实现矩阵乘——不追求峰值吞吐，而是追求低延迟。&lt;/p&gt;
+&lt;h3 id=&#34;623-计算加速原理&#34;&gt;6.2.3 计算加速原理
+&lt;/h3&gt;&lt;p&gt;在神经网络中，卷积计算的计算量往往是决定性的。昇腾 AI 处理器从软硬件架构上都对卷积计算进行了深度优化。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;卷积 → 矩阵乘法的转换&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0267-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.2.6 卷积层计算过程：Im2Col &amp;#43; GEMM&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;卷积计算在底层被拆解为几步：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Im2Col&lt;/strong&gt;：将输入特征矩阵 X 和权重矩阵 W 展开为 X_I2C 和 W_I2C&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;GEMM&lt;/strong&gt;：矩阵相乘得到中间输出 Y₀&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;加偏置&lt;/strong&gt;：累加偏置项 b，得到最终输出 Y&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;AI Core 卷积计算数据通路&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0268-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.2.7 AI Core卷积计算数据流&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;整个数据流的核心路径：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;数据搬运&lt;/strong&gt;：矩阵 X 和 W 从 DDR/HBM → 输入缓冲区 → 存储转换单元（MTU）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;格式转换&lt;/strong&gt;：MTU 对 X 和 W 进行补零和 Im2Col 重组，得到 X_I2C 和 W_I2C&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;矩阵计算&lt;/strong&gt;：X_I2C 和 W_I2C 送入矩阵计算单元，分块为 16×16 矩阵进行乘法&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;偏置累加&lt;/strong&gt;：累加器将偏置项与中间结果 Y₀ 累加得到 Y&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;激活/池化&lt;/strong&gt;：向量计算单元对 Y 进行激活和池化处理&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;关键优化：如果权重 W_I2C 需要重复使用，可以将其&lt;strong&gt;固定在输入缓冲区&lt;/strong&gt;中反复使用，避免重复从 DDR/HBM 读取——这就是&amp;quot;数据复用&amp;quot;在硬件层面的体现。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;63-昇腾-ai-核心单元&#34;&gt;6.3 昇腾 AI 核心单元
+&lt;/h2&gt;&lt;h3 id=&#34;631-达芬奇架构&#34;&gt;6.3.1 达芬奇架构
+&lt;/h3&gt;&lt;p&gt;达芬奇架构的本质是&lt;strong&gt;特定域架构（DSA）&lt;/strong&gt;——既不像 CPU/GPU 那样追求通用，也不像 ASIC 那样只做一件事。它专门针对深度学习领域的常见计算模式进行了优化。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0270-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.3.1 AI Core的达芬奇架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;AI Core 包含三种基础计算资源，对应三种常见的计算模式：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;计算单元&lt;/th&gt;
+          &lt;th&gt;对应模式&lt;/th&gt;
+          &lt;th&gt;支持的精度&lt;/th&gt;
+          &lt;th&gt;功能定位&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;矩阵计算单元（Cube Unit）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;张量计算&lt;/td&gt;
+          &lt;td&gt;INT8、INT4、FP16&lt;/td&gt;
+          &lt;td&gt;&amp;ldquo;主力军&amp;rdquo;，负责矩阵乘法&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;向量计算单元（Vector Unit）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;向量计算&lt;/td&gt;
+          &lt;td&gt;FP16、FP32&lt;/td&gt;
+          &lt;td&gt;&amp;ldquo;辅助军&amp;rdquo;，负责激活、池化等&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;标量计算单元（Scalar Unit）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;标量计算&lt;/td&gt;
+          &lt;td&gt;-&lt;/td&gt;
+          &lt;td&gt;&amp;ldquo;指挥部&amp;rdquo;，负责控制和地址计算&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;这三种计算单元形成了三条&lt;strong&gt;独立的执行流水线&lt;/strong&gt;，在系统软件的统一调度下互相配合。&lt;/p&gt;
+&lt;p&gt;特别值得注意的是&lt;strong&gt;存储转换单元（MTU）&lt;/strong&gt;——这是达芬奇架构的一大特色。在 GPU 中，Im2Col 这样的格式转换是通过软件实现的，效率低下。达芬奇架构直接把这一步&lt;strong&gt;固化在硬件电路中&lt;/strong&gt;，能够在极短时间内完成整个转置过程，实现不间断的卷积计算。&lt;/p&gt;
+&lt;h3 id=&#34;632-计算单元&#34;&gt;6.3.2 计算单元
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;矩阵计算单元 —— 一指令定乾坤&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;矩阵计算单元是 AI Core 的算力核心。它能用&lt;strong&gt;一条指令完成两个 16×16 矩阵的相乘&lt;/strong&gt;（这也是&amp;quot;Cube&amp;quot;名称的来历——16³ = 4096）：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0274-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.3.6 矩阵计算单元的工作方式&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;矩阵计算单元内部有 256 个矩阵计算子电路，可以并行完成结果矩阵的 256 个元素计算。处理大型矩阵时，采用**分块平铺（Tiling）**策略——将大矩阵切成多个 16×16 子矩阵，分批计算、累加结果。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&amp;ldquo;大Z小z&amp;quot;数据排列&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;为了匹配矩阵计算单元的工作方式，数据需要按照特定的分形格式排列：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0275-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.3.7 大Z小z与大Z小n排列方式&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;大Z小z&amp;rdquo;&lt;/strong&gt;（图左）：分块之间按行排序，块内按行排序 → 常用于&lt;strong&gt;特征图&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;大Z小n&amp;rdquo;&lt;/strong&gt;（图中）：分块之间按行排序，块内按列排序 → 常用于&lt;strong&gt;权重&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;大N小z&amp;rdquo;&lt;/strong&gt;（图右）：分块之间按列排序，块内按行排序 → 常用于&lt;strong&gt;卷积输出&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;分步计算大型矩阵&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0276-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.3.8 大型矩阵的分块分步计算&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;计算 C₁ 结果子矩阵需要两步：先用 A₁×B₁ 算中间结果，再用 A₂×B₂ 计算并累加——这种&amp;quot;分步累加&amp;quot;的策略充分利用了片上缓存的容量和数据局部性。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;向量计算单元&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;向量单元是矩阵计算单元和输出缓冲区之间的&amp;quot;桥梁&amp;rdquo;。矩阵运算完成后，向量单元可以顺便完成 ReLU 激活、池化等操作，支持连续寻址和固定间隔寻址等多种模式。&lt;/p&gt;
+&lt;h3 id=&#34;633-存储系统&#34;&gt;6.3.3 存储系统
+&lt;/h3&gt;&lt;p&gt;达芬奇架构通过精心设计的&lt;strong&gt;分布式缓冲区&lt;/strong&gt;保证数据的及时供应，消除数据流传输瓶颈。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0278-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.3.10 AI Core存储单元&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;存储系统的关键组件：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;组件&lt;/th&gt;
+          &lt;th&gt;功能&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;总线接口单元（BIU）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;AI Core 与外部交互的&amp;quot;大门&amp;rdquo;，负责读写请求转换&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;存储转换单元（MTU）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;数据格式转换（补零、Im2Col、转置、解压缩）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;输入缓冲区&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;暂存需要频繁重复使用的数据，减少外部读取&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;输出缓冲区&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;暂存中间结果和输出数据，必须经过它才能写回核外&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;寄存器&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;矩阵计算单元的 16×16 输入/结果寄存器&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;数据通路——多进单出&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0280-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.3.11 AI Core完整数据通路&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;达芬奇架构的数据通路设计非常独特——&lt;strong&gt;多进单出&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;数据流入&lt;/strong&gt;：可以通过多条通路，从外部直接流入矩阵计算单元、输入缓冲区和输出缓冲区中的任何一个&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;数据流出&lt;/strong&gt;：必须通过输出缓冲区，最终才能写回核外存储系统&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这样设计的逻辑是：神经网络的输入数据种类繁多（多通道特征图、多个卷积核的权重和偏置），但输出只生成特征矩阵——&lt;strong&gt;用并行输入提高供给效率，用统一输出简化控制&lt;/strong&gt;。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;与谷歌 TPU 的统一缓冲区理念相似，AI Core 也采用了大容量片上缓冲区设计，通过增大片上缓存来减少片外访问频次，从而降低数据搬运功耗。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;634-控制单元&#34;&gt;6.3.4 控制单元
+&lt;/h3&gt;&lt;p&gt;控制单元相当于 AI Core 的&amp;quot;司令部&amp;rdquo;，负责整个计算过程的指令调度。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0282-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.3.12 AI Core控制单元&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;指令执行的核心流程：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;指令缓存 → 标量指令处理队列（解码） → 指令发射模块 → 分发到对应队列
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                                                      ├── 矩阵运算队列 → 矩阵计算单元
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                                                      ├── 向量运算队列 → 向量计算单元
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                                                      └── 存储转换队列 → 存储转换单元
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;关键设计要点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;多流水并行执行&lt;/strong&gt;：矩阵、向量、存储转换三条流水线可以同时运行，提升整体执行效率&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;事件同步模块&lt;/strong&gt;：通过软件插入同步符来控制流水线之间的依赖关系——当矩阵运算需要等待向量计算的结果时，事件同步模块会暂停矩阵流水线直到数据就绪&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;系统控制模块&lt;/strong&gt;：负责任务块的配置、启动、状态报告和中断处理&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在达芬奇架构中，无论是流水线内部还是流水线之间的同步，都是通过&lt;strong&gt;事件同步模块 + 软件控制&lt;/strong&gt;来实现的——这给了程序员极大的灵活性，同时也对编程能力提出了更高要求。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;64-昇腾数据布局转换&#34;&gt;6.4 昇腾数据布局转换
+&lt;/h2&gt;&lt;h3 id=&#34;641-昇腾数据排布&#34;&gt;6.4.1 昇腾数据排布
+&lt;/h3&gt;&lt;p&gt;数据排布格式的选择直接影响矩阵乘法和访存的效率。昇腾既不选择 NHWC，也不选择 NCHW，而是采用了一种&lt;strong&gt;自有的五维数据格式&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;NC1HWC0 格式&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;昇腾将特征图的 C 维度进行分割，统一采用 &lt;strong&gt;NC1HWC0&lt;/strong&gt; 的五维格式存储：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0284-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.4.1 NC1HWC0数据排布格式&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;将 C 维度分割为 C₁ 份 C₀（C₁ = C / C₀，向上取整）&lt;/li&gt;
+&lt;li&gt;对于 FP16 类型，C₀ = 16；对于 INT8 类型，C₀ = 32&lt;/li&gt;
+&lt;li&gt;这恰好对齐了矩阵计算单元&amp;quot;一条指令处理 16×16 矩阵&amp;quot;的能力&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;转换代码一目了然：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# NHWC → NC1HWC0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;Tensor&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;reshape&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;([&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;N&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;H&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;W&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;C1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;C0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;transpose&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;([&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# NCHW → NC1HWC0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;Tensor&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;reshape&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;([&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;N&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;C1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;C0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;H&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;W&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;transpose&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;([&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;Fractal Z 与 NZ 格式&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;为了更高效地搬运和进行矩阵计算，昇腾引入了&lt;strong&gt;分形数据格式&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0285-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.4.2 NZ格式：矩阵分形排布&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0285-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.4.3 NZ分形操作：大N小z&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;NZ 格式的核心规律：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;分形之间按列主序排布&lt;/strong&gt;（大 N）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;分形内部按行主序排布&lt;/strong&gt;（小 z）&lt;/li&gt;
+&lt;li&gt;存储优先级：W₀ 方向 → H₀ 方向 → H₁ 方向 → W₁ 方向 → N 方向&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;将 ND 格式转换为 NZ 格式的过程：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;(N, H, W) → pad → (N, H₁×H₀, W₁×W₀) → reshape → (N, H₁, H₀, W₁, W₀) → transpose → (N, W₁, H₁, H₀, W₀)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;642-ai-编译器布局转换算法&#34;&gt;6.4.2 AI 编译器布局转换算法
+&lt;/h3&gt;&lt;p&gt;数据布局转换的目的是将内部数据布局转化为后端硬件友好的形式。但这需要权衡——&lt;strong&gt;布局转换本身也有开销&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0286-11.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.4.4 数据格式转换算子CASTDATA&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;AI 编译器通过插入 &lt;strong&gt;CASTDATA 算子&lt;/strong&gt;来实现数据格式转换。但编译器还要做优化——&lt;strong&gt;消除多余的转换&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0287-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图6.4.5 编译器插入与消除CASTDATA算子&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;三种典型场景：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;场景一（左）&lt;/strong&gt;：OP1 和 OP2 都使用 NCHW，无需插入转换&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;场景二（中）&lt;/strong&gt;：OP1 需要 NHWC 但输入是 NCHW，插入两次转换（输入 NCHW→NHWC、输出 NHWC→NCHW）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;场景三（右）&lt;/strong&gt;：OP1 用 NHWC、OP2 用 NCHW，中间需要一次转换&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;如果三个连续的 1×1 卷积算子都是 NHWC 格式，编译器会自动消除它们之间多余的转换算子——这就是&amp;quot;上下文感知&amp;quot;的优化能力。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;训练场景与推理场景的一个关键区别是：推理时需要额外处理&lt;strong&gt;权重数据布局的转换&lt;/strong&gt;，因为训练通常用 GPU（偏 NCHW），而推理可能在手机 CPU 上执行。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;小结与思考&#34;&gt;小结与思考
+&lt;/h2&gt;&lt;p&gt;这一章从昇腾的产业生态讲到 AI Core 的微观架构，信息密度非常大。让我用几个问题来收尾：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;达芬奇架构和 CUDA Core / TPU 脉动阵列的本质区别是什么？&lt;/strong&gt; 达芬奇有三条独立流水线（矩阵+向量+标量），既有 TPU 的专用效率（硬件化 Im2Col），又有 GPU 的灵活性（可编程标量单元控制）。这是一种&amp;quot;DSA + 可编程&amp;quot;的折衷设计。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;存储转换单元（MTU）为什么如此重要？&lt;/strong&gt; 在 GPU 中，Im2Col 用软件做、效率低；在 TPU 中，数据靠脉动阵列在 PE 之间&amp;quot;流动&amp;quot;。达芬奇用一个&lt;strong&gt;硬件模块&lt;/strong&gt;来专门完成数据格式转换——这是对&amp;quot;频繁操作硬件化&amp;quot;这一理念的极致贯彻。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;&amp;ldquo;多进单出&amp;quot;数据通路的设计智慧&lt;/strong&gt;：神经网络输入&amp;quot;多&amp;rdquo;（多通道特征图、多权重矩阵），输出&amp;quot;一&amp;quot;（最终特征图）。用多条路径同时拉数据进来，用一条路径统一管输出——以最小的硬件成本适配算法特征。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;NC1HWC0 五维格式的巧妙之处&lt;/strong&gt;：C₀ 取 16（FP16）正好匹配矩阵计算单元的 16×16——这不是巧合，是软硬件协同设计的&amp;quot;对齐&amp;quot;。从芯片设计到数据格式到编译器，昇腾的全栈自研优势在这里体现得淋漓尽致。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;如果说英伟达的护城河是 CUDA 生态 + Tensor Core，谷歌的护城河是脉动阵列 + TPU Pod，那华为昇腾的护城河就是&lt;strong&gt;全栈自研 + 端边云统一架构 + 中国市场深度绑定&lt;/strong&gt;。从达芬奇架构的硬件设计，到 CANN 的软件生态，再到 MindSpore 的框架层——昇腾正在构建一个完整的、不受制于人的 AI 计算体系。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;em&gt;下一篇预告：AI 硬件的旅程到这里暂告一段落。从 CPU → GPU → TPU → NPU，我们看到了四种截然不同的设计哲学。接下来，让我们进入 AI 编译与计算架构的世界，看看编译器是如何在&amp;quot;上层算法&amp;quot;和&amp;quot;底层硬件&amp;quot;之间架起桥梁的。&lt;/em&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
