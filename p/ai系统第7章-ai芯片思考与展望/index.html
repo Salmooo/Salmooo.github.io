@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="《AI系统：原理与架构》学习笔记 — 从CUDA编程模型到GPU算力峰值，从SIMT架构到DSA设计取舍，从AI芯片八点思考到超异构计算的未来">
+<title>AI系统：第7章 AI芯片思考与展望</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC7%E7%AB%A0-ai%E8%8A%AF%E7%89%87%E6%80%9D%E8%80%83%E4%B8%8E%E5%B1%95%E6%9C%9B/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="AI系统：第7章 AI芯片思考与展望">
+<meta property='og:description' content="《AI系统：原理与架构》学习笔记 — 从CUDA编程模型到GPU算力峰值，从SIMT架构到DSA设计取舍，从AI芯片八点思考到超异构计算的未来">
+<meta property='og:url' content='https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC7%E7%AB%A0-ai%E8%8A%AF%E7%89%87%E6%80%9D%E8%80%83%E4%B8%8E%E5%B1%95%E6%9C%9B/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='AI System' /><meta property='article:tag' content='CUDA' /><meta property='article:tag' content='GPU' /><meta property='article:tag' content='DSA' /><meta property='article:tag' content='TPU' /><meta property='article:tag' content='AI Chip' /><meta property='article:tag' content='Heterogeneous Computing' /><meta property='article:tag' content='AI Infra' />
+<meta name="twitter:title" content="AI系统：第7章 AI芯片思考与展望">
+<meta name="twitter:description" content="《AI系统：原理与架构》学习笔记 — 从CUDA编程模型到GPU算力峰值，从SIMT架构到DSA设计取舍，从AI芯片八点思考到超异构计算的未来">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#本章概览">本章概览</a></li>
+    <li><a href="#71-gpu-架构与-cuda-关系">7.1 GPU 架构与 CUDA 关系</a>
+      <ol>
+        <li><a href="#711-cuda-基本概念">7.1.1 CUDA 基本概念</a></li>
+        <li><a href="#712-cuda-线程层次结构">7.1.2 CUDA 线程层次结构</a></li>
+        <li><a href="#713-算力峰值计算">7.1.3 算力峰值计算</a></li>
+      </ol>
+    </li>
+    <li><a href="#72-从-gpu-对-ai-芯片思考">7.2 从 GPU 对 AI 芯片思考</a>
+      <ol>
+        <li><a href="#721-英伟达生态的思考点">7.2.1 英伟达生态的思考点</a>
+          <ol>
+            <li><a href="#1-simt-与-cuda-的关系">1. SIMT 与 CUDA 的关系</a></li>
+            <li><a href="#2-dsa-硬件架构执行方式">2. DSA 硬件架构执行方式</a></li>
+          </ol>
+        </li>
+        <li><a href="#722-借鉴与思考点">7.2.2 借鉴与思考点</a>
+          <ol>
+            <li><a href="#1-流水编排">1. 流水编排</a></li>
+            <li><a href="#2-simt-前端硬件">2. SIMT 前端硬件</a></li>
+            <li><a href="#3-分支预测机制">3. 分支预测机制</a></li>
+            <li><a href="#4-交互方式">4. 交互方式</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#73-ai-芯片发展方向">7.3 AI 芯片发展方向</a>
+      <ol>
+        <li><a href="#731-模型对内存和算力的需求">7.3.1 模型对内存和算力的需求</a></li>
+        <li><a href="#732-模型结构快速演变">7.3.2 模型结构快速演变</a></li>
+        <li><a href="#733-生产部署提供多租户">7.3.3 生产部署提供多租户</a></li>
+        <li><a href="#734-sram-与-dram-的权衡">7.3.4 SRAM 与 DRAM 的权衡</a></li>
+        <li><a href="#735-内存优先于计算速度">7.3.5 内存优先于计算速度</a></li>
+        <li><a href="#736-dsa-既要专业也要灵活">7.3.6 DSA 既要专业也要灵活</a></li>
+        <li><a href="#737-半导体供应链的选型">7.3.7 半导体供应链的选型</a></li>
+        <li><a href="#738-编译器优化和-ai-应用兼容">7.3.8 编译器优化和 AI 应用兼容</a></li>
+      </ol>
+    </li>
+    <li><a href="#74-超异构计算">7.4 超异构计算</a>
+      <ol>
+        <li><a href="#741-异构与超异构场景">7.4.1 异构与超异构场景</a></li>
+        <li><a href="#742-计算体系迎来异构">7.4.2 计算体系迎来异构</a></li>
+        <li><a href="#743-从异构到超异构">7.4.3 从异构到超异构</a></li>
+        <li><a href="#744-超异构的挑战与思考">7.4.4 超异构的挑战与思考</a>
+          <ol>
+            <li><a href="#1-超异构的软件层">1. 超异构的软件层</a></li>
+            <li><a href="#2-硬件定义软件-vs-软件定义硬件">2. 硬件定义软件 vs 软件定义硬件</a></li>
+            <li><a href="#3-计算体系与编译体系">3. 计算体系与编译体系</a></li>
+            <li><a href="#4-超异构的未来">4. 超异构的未来</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#小结与思考">小结与思考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/ai/" >
+                AI
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC7%E7%AB%A0-ai%E8%8A%AF%E7%89%87%E6%80%9D%E8%80%83%E4%B8%8E%E5%B1%95%E6%9C%9B/">AI系统：第7章 AI芯片思考与展望</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            《AI系统：原理与架构》学习笔记 — 从CUDA编程模型到GPU算力峰值，从SIMT架构到DSA设计取舍，从AI芯片八点思考到超异构计算的未来
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    6 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="本章概览">本章概览
+</h2><p>前面六章我们把 AI 芯片&quot;四大天王&quot;（CPU、GPU、TPU、NPU）逐一拆解了个遍。到了第 7 章，是时候站在更高处，思考一些&quot;大问题&quot;了。</p>
+<p>这一章不纠结于某个芯片的具体架构参数，而是从三个维度对 AI 芯片进行&quot;灵魂拷问&quot;：</p>
+<ul>
+<li><strong>回看 CUDA</strong>：英伟达凭什么统治 AI 训练？CUDA 的线程层次、Warp 调度、算力峰值计算——这些基础概念构成了理解整个 AI 芯片生态的&quot;通用语言&quot;</li>
+<li><strong>对比 DSA</strong>：GPU 的 SIMT 和 AI 芯片的 DSA，在流水编排、分支预测、代码易用性上各有什么优劣？DSA 能从 CUDA 身上学到什么？</li>
+<li><strong>展望未来</strong>：David Patterson 的 TPU 团队八年心得——8 点思考直指 AI 芯片的核心矛盾；超异构计算会是终极答案吗？</li>
+</ul>
+<blockquote>
+<p><strong>一句话总结</strong>：CUDA 的成功不在于性能多强，而在于它让&quot;写并行程序&quot;这件事对普通人来说第一次变得可触及——这是所有 AI 芯片追赶者必须过的一关。</p>
+</blockquote>
+<hr>
+<h2 id="71-gpu-架构与-cuda-关系">7.1 GPU 架构与 CUDA 关系
+</h2><h3 id="711-cuda-基本概念">7.1.1 CUDA 基本概念
+</h3><p>2006 年 11 月，英伟达推出 <strong>CUDA（Compute Unified Device Architecture，统一计算设备架构）</strong>——一个通用并行计算架构和编程模型，把 GPU 从&quot;图形专用&quot;变成了&quot;通用并行计算设备&quot;。</p>
+<p>CUDA 基于 LLVM 构建编译器，开发人员用 CUDA C/C++ 编写并行程序，通过 CUDA API 将计算任务发到 GPU 执行。CUDA 还支持 Python、Fortran 等语言，兼容 OpenCL 和 DirectCompute。</p>
+<p><img src="/images/ai_system/ch7/ai_system.pdf-0289-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.1.1 CUDA编程模型与应用框架"
+	
+	
+></p>
+<p>CUDA 在软件方面由以下组件构成：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>组件</th>
+          <th>功能</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>CUDA 库</strong></td>
+          <td>基础运算库</td>
+      </tr>
+      <tr>
+          <td><strong>CUDA API + Runtime</strong></td>
+          <td>编程接口与运行时</td>
+      </tr>
+      <tr>
+          <td><strong>CUFFT / CUBLAS</strong></td>
+          <td>高级数学库（FFT / 线性代数）</td>
+      </tr>
+      <tr>
+          <td><strong>CUDA TOOLKIT</strong></td>
+          <td>编译器 + C++ 核</td>
+      </tr>
+      <tr>
+          <td><strong>CUDA DRIVER</strong></td>
+          <td>驱动 GPU，管理内存和图像</td>
+      </tr>
+      <tr>
+          <td><strong>CUDA-X LIBRARIES</strong></td>
+          <td>ML/DL/HPC 加速库</td>
+      </tr>
+      <tr>
+          <td><strong>APPS &amp; FRAMEWORKS</strong></td>
+          <td>对接 TensorFlow、PyTorch 等框架</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><img src="/images/ai_system/ch7/ai_system.pdf-0290-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.1.2 CUDA 软件栈"
+	
+	
+></p>
+<h3 id="712-cuda-线程层次结构">7.1.2 CUDA 线程层次结构
+</h3><p>CUDA 最基本的执行单位是<strong>线程（Thread）</strong>。线程通过三级层次组织并行计算：</p>
+<p><img src="/images/ai_system/ch7/ai_system.pdf-0291-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.1.3 CUDA 线程层次结构"
+	
+	
+></p>
+<ul>
+<li><strong>Grid（网格）</strong>：一个 Kernel 启动的所有线程，共享全局内存</li>
+<li><strong>Block（线程块）</strong>：Grid 内的分组，块间并行、无法通信、无执行顺序；每个 Block 有共享内存</li>
+<li><strong>Thread（线程）</strong>：最小执行单位，同一 Block 内的线程可同步、可通过共享内存通信</li>
+</ul>
+<blockquote>
+<p>简单记忆：把一个大问题 → 切分成独立 Block 并行解决的子问题 → 子问题再切分为 Block 内线程协作解决。</p>
+</blockquote>
+<p><strong>CUDA 编程核心：Kernel</strong></p>
+<p>Kernel 是在 GPU 上并行执行的函数，用 <code>__global__</code> 声明，调用时用 <code>&lt;&lt;&lt;grid, block&gt;&gt;&gt;</code> 指定执行结构。</p>
+<p>以下对比展示了 CPU 和 GPU 执行向量加法的区别：</p>
+<p><strong>CPU 版本（cuda_host.cpp）</strong>——仅使用 CPU 实现加法：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">add</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">float</span> <span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="kt">float</span> <span class="o">*</span><span class="n">y</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">1</span><span class="o">&lt;&lt;</span><span class="mi">25</span><span class="p">;</span>  <span class="c1">// 30M elements
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">float</span> <span class="o">*</span><span class="n">x</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">float</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">float</span> <span class="o">*</span><span class="n">y</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">float</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 初始化...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">add</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>   <span class="c1">// 在 CPU 上串行执行
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">delete</span> <span class="p">[]</span> <span class="n">x</span><span class="p">;</span> <span class="k">delete</span> <span class="p">[]</span> <span class="n">y</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>GPU 版本（cuda_device.cu）</strong>——使用 CUDA 在 GPU 上并行执行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">__global__</span> <span class="kt">void</span> <span class="nf">add</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">float</span> <span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="kt">float</span> <span class="o">*</span><span class="n">y</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">1</span><span class="o">&lt;&lt;</span><span class="mi">25</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">float</span> <span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">y</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">cudaMallocManaged</span><span class="p">(</span><span class="o">&amp;</span><span class="n">x</span><span class="p">,</span> <span class="n">N</span><span class="o">*</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">));</span>  <span class="c1">// 统一内存
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">cudaMallocManaged</span><span class="p">(</span><span class="o">&amp;</span><span class="n">y</span><span class="p">,</span> <span class="n">N</span><span class="o">*</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 初始化...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">add</span><span class="o">&lt;&lt;&lt;</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="o">&gt;&gt;&gt;</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>  <span class="c1">// 在 GPU 上执行！
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">cudaDeviceSynchronize</span><span class="p">();</span> <span class="c1">// CPU 等待 GPU 完成
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">cudaFree</span><span class="p">(</span><span class="n">x</span><span class="p">);</span> <span class="n">cudaFree</span><span class="p">(</span><span class="n">y</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>CUDA 编程流程总结</strong>：</p>
+<ol>
+<li>编写 Kernel 函数描述并行计算任务</li>
+<li>在主机上配置线程块和网格，将 Kernel 发送到 GPU 执行</li>
+<li>在主机上处理数据传输和结果处理</li>
+</ol>
+<p><strong>三级线程层次结构详图</strong>：</p>
+<p><img src="/images/ai_system/ch7/ai_system.pdf-0293-09.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.1.4 Grid/Block/Thread 三级线程层次"
+	
+	
+></p>
+<p><strong>CUDA 与硬件的对应关系</strong>：</p>
+<p><img src="/images/ai_system/ch7/ai_system.pdf-0294-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.1.5 CUDA 软件层次与 GPU 硬件对应"
+	
+	
+></p>
+<ul>
+<li>软件侧的 Thread → 硬件上的 CUDA Core（线程数量超配，CUDA Core 固定数量）</li>
+<li>Block 只在一个 SM 上通过 Warp 调度，一旦调用就一直保留到执行完 Kernel</li>
+<li>多个 SM 组成的 TPC 和 GPC 实现硬件级并行计算</li>
+</ul>
+<h3 id="713-算力峰值计算">7.1.3 算力峰值计算
+</h3><p>GPU 算力峰值（Peak FLOPS）是在理想情况下能达到的最大计算能力，单位为 FLOPS（GFLOPS / TFLOPS）。</p>
+<p><strong>决定因素</strong>：</p>
+<ul>
+<li><strong>CUDA 核心数量</strong>：算力与核心数成正比</li>
+<li><strong>核心频率</strong>：频率越高，每秒执行的指令数越多</li>
+<li><strong>每个核心的计算能力</strong>：每个核心每个时钟周期能执行的 FLOPS</li>
+<li><strong>并行度</strong>：同时执行的线程数量</li>
+</ul>
+<p><strong>计算公式</strong>：</p>
+\[
+\text{Peak FLOPS} = F_{clk} \times N_{SM} \times F_{req}
+\]<p>其中：</p>
+<ul>
+<li>\(F_{clk}\)：GPU 时钟周期内指令执行数（FLOPS/Cycle）</li>
+<li>\(N_{SM}\)：SM 数量</li>
+<li>\(F_{req}\)：Tensor Core 核心运行频率（GHz）</li>
+</ul>
+<hr>
+<h2 id="72-从-gpu-对-ai-芯片思考">7.2 从 GPU 对 AI 芯片思考
+</h2><h3 id="721-英伟达生态的思考点">7.2.1 英伟达生态的思考点
+</h3><p>从软件和硬件架构角度看，CUDA 和 SIMT 存在深度绑定关系。而当前 AI 芯片采用的 <strong>DSA 架构</strong>，其编程模型和硬件执行模型都还处于较为早期的状态。</p>
+<p><strong>流水掩盖</strong>：对 DSA 而言，实现架构层面的隐藏流水编排机制、提出易用性堪比 CUDA 的软件是可能的，但如果核心问题没解决，即使形式上与 CUDA 类似也会有易用性问题——开发者很难获得足够好的初始性能。</p>
+<p><strong>软硬件协同</strong>：DSA 架构一方面需要建立开放的软硬件架构联合对抗 CUDA 生态，另一方面需要明确面向不同层次开发者的易用性和软件开发形态。</p>
+<h4 id="1-simt-与-cuda-的关系">1. SIMT 与 CUDA 的关系
+</h4><p>CUDA 的成功之处在于通过 SIMT 架构<strong>掩盖了流水编排</strong>、实现了<strong>并行指令隐藏</strong>、提升了<strong>编程易用性</strong>。英伟达为维护 CUDA 生态，对 SIMT 硬件架构做了取舍（保留 SM、Warp、Thread 等概念），这使得 CUDA 近几年没有重大架构变化。</p>
+<p>DSA 在硬件架构上比较激进，不是因为软件做得好，而是一开始没考虑编程体系——自然没有软件和硬件协同带来的架构约束。</p>
+<h4 id="2-dsa-硬件架构执行方式">2. DSA 硬件架构执行方式
+</h4><p>DSA 硬件一般单核单线程，线程内指令通过多核共享 Cache 协作。裸接口通常是一个核一个线程，每个线程内串行调用 DSA 指令集，正确性部分靠软件同步、部分靠硬件保证。</p>
+<h3 id="722-借鉴与思考点">7.2.2 借鉴与思考点
+</h3><h4 id="1-流水编排">1. 流水编排
+</h4><p>英伟达 GPU 依靠<strong>多线程交错执行</strong>来提升并行性能——大量线程通过不同 Block 和 Thread 读取数据、执行计算。而 SIMD 依赖 CPU 自身乱序、投机、缓存和预取能力。</p>
+<p>关键洞察：即使为 DSA 的 SIMD 硬件封装了 SIMT 前端，如果遇到指令依赖，基础性能也会很差——<strong>流水编排仍然需要开发者手动实现</strong>。</p>
+<h4 id="2-simt-前端硬件">2. SIMT 前端硬件
+</h4><p><img src="/images/ai_system/ch7/ai_system.pdf-0297-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.2.1 Warp 调度器动态交错执行"
+	
+	
+></p>
+<p>增加 SIMT 前端硬件后，通过 <strong>Warp（线程束）</strong> 隐藏线程指令流水：</p>
+<ul>
+<li>每个 Thread Block 需要很多并行线程，隐式分成若干个 Warp</li>
+<li>每个 Warp 包含串行交错的访存和计算</li>
+<li>GPU 通过 <strong>Warp Scheduler</strong> 动态交错执行：Warp0 阻塞就切换到 Warp1</li>
+</ul>
+<blockquote>
+<p>CUDA 没有解决 DSA 指令掩盖，只是给了开发者一个 Warp 概念来透传指令 API——所以 CUDA 的上手门槛并不低，需要充分了解 GPU 硬件细节。</p>
+</blockquote>
+<h4 id="3-分支预测机制">3. 分支预测机制
+</h4><p><img src="/images/ai_system/ch7/ai_system.pdf-0298-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.2.2 SIMT 分支预测与控制流"
+	
+	
+></p>
+<p>SPMD 编程模型对分支预测和控制流的高容忍度是支撑易用性的重要方法。英伟达 GPU 使线程在 Warp-Base SIMD 上执行不同分支——每个线程都可以执行带条件的控制流指令，同时不同线程间可以走不同的控制流路径。</p>
+<p>但当 Warp 内部线程分支到不同执行路径时，会发生<strong>分支执行冲突</strong>——不同时间执行不同路径会增加时耗。</p>
+<p><strong>动态 Warp Formation/Merging</strong> 是解决方案：</p>
+<ul>
+<li>分支后动态合并执行相同指令的线程</li>
+<li>从等待的 Warp 中形成新 Warp</li>
+<li>将 Warp X 和 Warp Y 合并为 Warp Z（更好地执行相同指令）</li>
+</ul>
+<p><img src="/images/ai_system/ch7/ai_system.pdf-0300-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.2.6 动态 Warp 分组机制"
+	
+	
+></p>
+<p>动态 Warp 分组更多在编译器层面解决分支预测问题，根据线程执行情况和数据依赖性动态组织 Warp 中的线程，提高并行计算性能和资源利用率。但<strong>不推荐在 CUDA 编程中出现大量 if/else 语句</strong>。</p>
+<h4 id="4-交互方式">4. 交互方式
+</h4><p>CUDA 运行时提供主机和设备的 C++ 交互方式（寒武纪 BANG C 语言就在这个层面参考了 CUDA）。在软件层面，CUDA 非常容易实现向量加法。</p>
+<p>CUDA 的易用性对初阶用户来说是极致的——入门开发者任意写一个简单算子（Kernel），就能获得比 CPU 高 5~10 倍的峰值性能。</p>
+<blockquote>
+<p>DSA 的软肋：流水和指令使用缺乏完备、隐式的支持，指令流水的支持需要开发者手动掩盖、切块，使用底层指令让写出正确 Kernel 耗时更长。</p>
+</blockquote>
+<hr>
+<h2 id="73-ai-芯片发展方向">7.3 AI 芯片发展方向
+</h2><p>2017 年，David Patterson 加入谷歌 TPU 团队，2020 年在伯克利发表演讲&quot;A Decade of Machine Learning Accelerators: Lessons Learned and Carbon Footprint&quot;，分享了 TPU 团队近几年的心得体会。本节摘录并深入探讨其中 <strong>8 点思考</strong>。</p>
+<h3 id="731-模型对内存和算力的需求">7.3.1 模型对内存和算力的需求
+</h3><p>AI 模型近几年所需的内存和算力<strong>平均每年增长 50%</strong>，模型所需内存和算力增长 10~20 倍。但从芯片设计到实际应用需要约 5 年周期（设计 1 年 + 部署 1 年 + 优化 3 年）。</p>
+<p>训练模型参数量的增长速度比推理更快：2016~2023 年 SOTA 训练模型的算力需求年均增长 10 倍；GPT-2 到 GPT-3 参数量提高了约 100 倍（15亿 → 1750亿）。</p>
+<p>但 AI 芯片内存容量增长相对缓慢：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>芯片</th>
+          <th>HBM 最大内存</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>A100</td>
+          <td>80 GB</td>
+      </tr>
+      <tr>
+          <td>H100</td>
+          <td>188 GB</td>
+      </tr>
+      <tr>
+          <td>TPU v4</td>
+          <td>32 GB</td>
+      </tr>
+      <tr>
+          <td>特斯拉 DOJO</td>
+          <td>16 GB</td>
+      </tr>
+      <tr>
+          <td>华为昇腾</td>
+          <td>64 GB</td>
+      </tr>
+      <tr>
+          <td>寒武纪 MLU 370</td>
+          <td>24/48 GB</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="732-模型结构快速演变">7.3.2 模型结构快速演变
+</h3><p>DNN 是一个发展迅速的领域：</p>
+<ul>
+<li>2016 年：MLP、LSTM 是主流</li>
+<li>2020 年：CNN、RNN、BERT 广泛应用</li>
+<li>如今：Transformer 家族（GPT-3.5、Phi-3、Gemma、Llama）参数从十亿级到万亿级</li>
+</ul>
+<blockquote>
+<p><strong>DSA 架构需要足够通用以支持未来可能出现的新模型</strong>——这是它面临的最大挑战之一。</p>
+</blockquote>
+<h3 id="733-生产部署提供多租户">7.3.3 生产部署提供多租户
+</h3><p>大部分 AI 论文假设同一时间 NPU 只运行一个模型，但实际需要切换不同模型：</p>
+<ul>
+<li>机器翻译涉及语言对比，需要不同模型</li>
+<li>一个主模型配套多个模型实验</li>
+<li>对吞吐量和时延有不同要求，不同模型使用不同 Batch Size</li>
+</ul>
+<p>因此需要<strong>多租户技术（Multi-Tenancy）</strong>：算力切分、显存虚拟化、内存寻址、虚拟内存页。</p>
+<p><img src="/images/ai_system/ch7/ai_system.pdf-0303-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.3.1 GPU 虚拟化技术"
+	
+	
+></p>
+<p>目前常见的 GPU 虚拟化技术包括：NVIDIA vGPU、AMD MxGPU、Intel GVT-g。</p>
+<h3 id="734-sram-与-dram-的权衡">7.3.4 SRAM 与 DRAM 的权衡
+</h3><p>根据 8 个模型的基准数据，其中 6 个涉及多租户技术。如果从 CPU 主机重新加载参数，上下文切换需要 10s——因此需要更快的 DRAM（片外存储）用于交换多种模型数据。</p>
+<p>很多模型所需内存远大于单芯片最大 SRAM（片上存储）。部分芯片的设计思路是期望用 SRAM 解决所有任务、减少内存数据搬运时间，但这在多租户场景下很难实现。</p>
+<blockquote>
+<p><strong>AI 芯片不仅需要更大的 SRAM，更需要存储速度更快的片外 DRAM。</strong></p>
+</blockquote>
+<h3 id="735-内存优先于计算速度">7.3.5 内存优先于计算速度
+</h3><p>现代微处理器最大的瓶颈是<strong>能耗</strong>，而不是芯片集成度：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>能耗对比（相对值）</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>算术运算</td>
+          <td>1×</td>
+      </tr>
+      <tr>
+          <td>访问片上 SRAM</td>
+          <td>100×</td>
+      </tr>
+      <tr>
+          <td>访问片外 DRAM</td>
+          <td><strong>5000~10000×</strong></td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>访问片外 DRAM 的能耗是算术运算的 5000~10000 倍！<strong>GPGPU 的功耗大多浪费在数据搬运上，而非核心计算。</strong></p>
+</blockquote>
+<p>图7.3.3 展示了谷歌 TPU v1 架构——65536（256×256）个矩阵乘法单元，700 MHz 时钟，峰值 92 TOPS：</p>
+<p><img src="/images/ai_system/ch7/ai_system.pdf-0304-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.3.3 谷歌 TPU v1 架构"
+	
+	
+></p>
+<p>TPU 使用<strong>脉动阵列</strong>以固定时间间隔使数据从不同方向流入处理单元。20 世纪 70 年代因只有单金属层才提出脉动阵列减少布线；如今多达 10 个金属层，最大难点是能耗，而脉动阵列能效高，使芯片容纳更多乘法单元，从而<strong>分摊内存访问开销</strong>。</p>
+<h3 id="736-dsa-既要专业也要灵活">7.3.6 DSA 既要专业也要灵活
+</h3><p>DSA 的难点在于既要对模型进行针对性优化，又要保持一定灵活性：</p>
+<ul>
+<li><strong>训练比推理更复杂</strong>：计算量更大，包含反向传播、转置和求导，需要更大内存存储中间结果</li>
+<li><strong>需要支持更广泛的数据格式</strong>：BF16、FP16、HF32 等用于 AI 计算</li>
+<li><strong>指令、流水、可编程性要求更高</strong>：需要灵活的编译器和上层软硬件配套</li>
+<li>CUDA 在这个方面已积累多年，TPU 目前支持 INT8、BF16 等格式</li>
+</ul>
+<h3 id="737-半导体供应链的选型">7.3.7 半导体供应链的选型
+</h3><p>计算逻辑进步很快，但芯片制程工艺发展相对较慢。SRAM 和 HBM 比 DDR4 和 GDDR6 速度更快、能效更高。大模型训练普遍使用 BF16，部分使用 FP8 推理。如果选型错误（如只用 FP32 模拟 BF16），训练迭代速度将减慢。</p>
+<p>不同操作格式的能耗对比（7nm 工艺，单位 pJ）：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>INT8</th>
+          <th>BF16</th>
+          <th>FP16</th>
+          <th>FP32</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>加法</td>
+          <td>0.007</td>
+          <td>0.11</td>
+          <td>0.16</td>
+          <td>0.38</td>
+      </tr>
+      <tr>
+          <td>乘法</td>
+          <td>0.07</td>
+          <td>0.21</td>
+          <td>0.34</td>
+          <td>1.31</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>从 45nm 到 7nm，能耗平均降低 2.6 倍。BF16 乘法的能耗仅为 FP32 的 1/6——这就是为什么大模型训练偏爱 BF16。</p>
+</blockquote>
+<h3 id="738-编译器优化和-ai-应用兼容">7.3.8 编译器优化和 AI 应用兼容
+</h3><p>DSA 编译器需要对 AI 模型进行分析和优化，将 AI 指令转换为高效底层代码：</p>
+<ul>
+<li><strong>多核并行</strong>：实现 4096 个芯片的并行</li>
+<li><strong>数据级并行</strong>：向量、矩阵、张量功能单元</li>
+<li><strong>指令级并行</strong>：322~400 位超长指令字（VLIW）</li>
+<li><strong>内存传输管理</strong>：编译器需要管理内存传输</li>
+<li><strong>数据布局兼容</strong>：兼容不同功能单元和内存中的数据布局</li>
+</ul>
+<p><img src="/images/ai_system/ch7/ai_system.pdf-0307-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.3.4 编译器优化后性能提升约 2 倍"
+	
+	
+></p>
+<blockquote>
+<p>与 CPU 的 GCC 和 GPU 的 CUDA 相比，DSA 的软件栈还不够成熟，但编译器优化能带来约 2 倍的性能提升（C++ 编译器一年能提升 5%~10% 就算很好了）。</p>
+</blockquote>
+<p><strong>算子融合（Operator Fusion）</strong> 能减少内存访问，省略中间结果写入 HBM 再读取的步骤。通过 MLPerf 基准测试，算子融合平均能带来超过 <strong>2 倍</strong>的性能提升。</p>
+<p><strong>FlashAttention</strong> 是 IO 感知优化的经典案例：</p>
+<p><img src="/images/ai_system/ch7/ai_system.pdf-0307-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.3.5 FlashAttention 的 IO 优化策略"
+	
+	
+></p>
+<ul>
+<li>运行速度比 PyTorch 标准注意力快 <strong>2~4 倍</strong></li>
+<li>所需内存仅为标准注意力的 <strong>1/20~1/5</strong></li>
+<li>核心思路：从 HBM 中读取块 → 在 SRAM 中计算 → 写到 HBM，避免从 HBM 读取/写入注意力矩阵</li>
+<li><strong>算法没有减少计算量，而是从 IO 感知出发减少了 HBM 访问次数</strong></li>
+</ul>
+<hr>
+<h2 id="74-超异构计算">7.4 超异构计算
+</h2><h3 id="741-异构与超异构场景">7.4.1 异构与超异构场景
+</h3><p>摩尔定律放缓，传统单一架构难以满足日益增长的计算需求。异构计算通过整合不同类型计算单元的优势来解决这一问题。</p>
+<p><strong>异构计算主要优势</strong>：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>优势</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>性能飞跃</strong></td>
+          <td>CPU + GPU + FPGA 有机结合，实现 1+1&gt;2</td>
+      </tr>
+      <tr>
+          <td><strong>灵活定制</strong></td>
+          <td>针对不同计算任务，灵活选择最合适的计算单元</td>
+      </tr>
+      <tr>
+          <td><strong>降低成本</strong></td>
+          <td>用更低成本实现更高性能，性价比更优</td>
+      </tr>
+      <tr>
+          <td><strong>降低功耗</strong></td>
+          <td>动态调整资源分配，提升能源利用效率</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>特斯拉 HW3 FSD 芯片</strong>是异构计算的典型案例——单一芯片包含 CPU、GPU、NPU 多种架构：</p>
+<p><img src="/images/ai_system/ch7/ai_system.pdf-0309-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.4.1 特斯拉 HW3 FSD 芯片"
+	
+	
+></p>
+<p>作为汽车芯片，它要负责雷达、GPS、地图等多种功能，传统单一架构难以高效完成。将各组件有机结合的异构芯片可以更好地处理复杂情况：</p>
+<p><img src="/images/ai_system/ch7/ai_system.pdf-0310-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.4.3 异构芯片各组件协同架构"
+	
+	
+></p>
+<h3 id="742-计算体系迎来异构">7.4.2 计算体系迎来异构
+</h3><p>异构计算的出现和发展源于：</p>
+<ul>
+<li>传统冯·诺依曼结构受制于存储和计算单元之间的数据交换瓶颈</li>
+<li>半导体工艺发展使 CPU 主频提升受限</li>
+<li>深度学习等 AI 技术对计算能力提出了更高要求</li>
+</ul>
+<p><strong>CPU-GPU 异构工作流</strong>：</p>
+<p><img src="/images/ai_system/ch7/ai_system.pdf-0311-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.4.4 CPU-GPU 异构工作流"
+	
+	
+></p>
+<ol>
+<li>CPU 把数据准备好（CPU 内存）</li>
+<li>数据从 CPU 内存复制到 GPU 内存（Step1）</li>
+<li>CPU 指示 GPU 工作，配置并启动 GPU 内核（Step2）</li>
+<li>多个 GPU 内核并行执行（Step3）</li>
+<li>处理结果复制回 CPU 内存（Step4）</li>
+<li>CPU 对结果进行后续处理</li>
+</ol>
+<p><strong>异构架构三大优势</strong>：</p>
+<ul>
+<li><strong>适用于高性能计算</strong>：单一计算类型和架构已无法处理更复杂多样的数据</li>
+<li><strong>适用于海量数据</strong>：个人每天 ~1 GB，智能汽车 ~50 GB，智能医院 ~3 TB，智慧城市 ~50 PB</li>
+<li><strong>共享内存空间</strong>：消除冗余内存副本，CPU 和 GPU 统一内存池</li>
+</ul>
+<p><strong>ASIC 在异构中的角色</strong>：通过驱动程序与 CSR 和可配置表项交互，CPU 控制数据输入/输出和运行控制。</p>
+<p><img src="/images/ai_system/ch7/ai_system.pdf-0312-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.4.5 ASIC 工作流示意图"
+	
+	
+></p>
+<p>从 CPU 到 ASIC，架构越来越碎片化——指令复杂度决定了系统的软硬件解耦程度。这形成了<strong>易用性和性能之间的权衡</strong>：</p>
+<p><img src="/images/ai_system/ch7/ai_system.pdf-0313-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.4.6 易用性与性能的权衡关系"
+	
+	
+></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>处理器</th>
+          <th>灵活性</th>
+          <th>性能效率</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>GPU</td>
+          <td>较好</td>
+          <td>不够极致</td>
+      </tr>
+      <tr>
+          <td>DSA</td>
+          <td>较差</td>
+          <td>优异</td>
+      </tr>
+      <tr>
+          <td>FPGA</td>
+          <td>中等</td>
+          <td>功耗成本较高</td>
+      </tr>
+      <tr>
+          <td>ASIC</td>
+          <td>完全固定</td>
+          <td>极致</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>异构计算的问题</strong>：复杂系统需要灵活处理器，性能挑战需要定制加速器——单一处理器无法兼顾性能和灵活性。</p>
+<h3 id="743-从异构到超异构">7.4.3 从异构到超异构
+</h3><p><strong>超异构出现的三大驱动力</strong>：</p>
+<ol>
+<li><strong>需求驱动</strong>：元宇宙等新兴技术需要算力提升 1000 倍</li>
+<li><strong>工艺和封装支撑</strong>：Chiplet 封装使单芯片层次构建规模数量级提升的超大系统</li>
+<li><strong>系统架构持续创新</strong>：通过架构创新实现多个数量级的性能提升</li>
+</ol>
+<p>超异构并非简单集成——而是把更多异构计算<strong>整合重构</strong>，各类型处理器间充分、灵活的数据交互，形成统一的超异构计算体系。</p>
+<p><img src="/images/ai_system/ch7/ai_system.pdf-0314-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.4.7 异构计算发展流程"
+	
+	
+></p>
+<p><strong>超异构基本特征</strong>：</p>
+<ul>
+<li><strong>超大规模计算集群</strong>：CPU、GPU、FPGA、DSA 等多种计算单元通过高速互联网络连接</li>
+<li><strong>复杂计算系统</strong>：由分层分块组件组成，需统一管理和调度</li>
+</ul>
+<h3 id="744-超异构的挑战与思考">7.4.4 超异构的挑战与思考
+</h3><h4 id="1-超异构的软件层">1. 超异构的软件层
+</h4><p>软件需要跨平台复用：跨架构、跨处理器类型、跨厂家平台、跨位置、跨设备类型——软件架构的复杂性增长是最大挑战。</p>
+<p><strong>解决办法</strong>：</p>
+<ul>
+<li><strong>开放接口/架构及生态</strong>：形成标准开放接口</li>
+<li><strong>软件兼容</strong>：减少定制化开发，兼容已有软件生态</li>
+<li><strong>编程体系</strong>：提供门槛更低的编译体系（如 CUDA、Ascend C）</li>
+<li><strong>开放架构</strong>：防止架构过多导致市场碎片化</li>
+</ul>
+<h4 id="2-硬件定义软件-vs-软件定义硬件">2. 硬件定义软件 vs 软件定义硬件
+</h4><p><img src="/images/ai_system/ch7/ai_system.pdf-0316-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.4.10 HDW、SDH 与 Co-Design 三种关系"
+	
+	
+></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>模式</th>
+          <th>核心理念</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>硬件定义软件（HDW）</strong></td>
+          <td>硬件加速器 + 专用指令集，充分发挥硬件性能</td>
+      </tr>
+      <tr>
+          <td><strong>软件定义硬件（SDH）</strong></td>
+          <td>软件抽象层（SAL）解耦软硬件，跨平台运行</td>
+      </tr>
+      <tr>
+          <td><strong>软硬件协同定义（Co-Design）</strong></td>
+          <td>软硬件团队紧密合作，1+1&gt;2</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>系统复杂度决定了哪种关系占主导：复杂度低的系统（如 CPU）→ 硬件定义软件；复杂度高的系统（如 GPU）→ 软件定义硬件，系统实现变成持续优化和迭代的过程。</p>
+<h4 id="3-计算体系与编译体系">3. 计算体系与编译体系
+</h4><p>超异构架构需要构建高效、标准、开放的接口和架构体系，避免场景覆盖的碎片化。当前正处于计算体系变革和编译体系变革的 10 年。</p>
+<h4 id="4-超异构的未来">4. 超异构的未来
+</h4><p><strong>跨平台统一计算架构</strong>是未来计算资源中心化的关键：</p>
+<p><img src="/images/ai_system/ch7/ai_system.pdf-0317-10.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图7.4.11 跨平台统一计算架构"
+	
+	
+></p>
+<ul>
+<li>将孤岛计算资源连接起来，实现计算资源池化</li>
+<li>支持应用软件跨同类处理器、跨不同类处理器、跨芯片平台、跨云边端运行</li>
+<li>Chiplet + 超异构组合 → 系统规模数量级提升 → 性能数量级提升</li>
+</ul>
+<p><strong>未来计算架构的三大特征</strong>：</p>
+<ul>
+<li><strong>体系异构</strong>：CPU、GPU、FPGA、DSA 多架构组成，接近 CPU 的灵活性 + ASIC 的性能效率</li>
+<li><strong>平台化</strong>：软件定义一切、硬件加速一切，完全可软件编程的硬件加速平台</li>
+<li><strong>开放生态</strong>：拥抱开源，支持云原生、云网边端融合，用户无平台依赖</li>
+</ul>
+<hr>
+<h2 id="小结与思考">小结与思考
+</h2><p>第 7 章是整个 AI 硬件篇的收官之战。它不教你怎么用 CUDA 写代码，而是帮你建立一种<strong>系统性的思考框架</strong>。几个关键问题值得反复咀嚼：</p>
+<ul>
+<li>
+<p><strong>CUDA 到底牛在哪？</strong> 牛在它不仅是一个编程模型，更是一个&quot;生态操作系统&quot;——从硬件（CUDA Core、Tensor Core）到编译器（LLVM-based），到数学库（cuBLAS、cuDNN），再到框架插件（PyTorch/TF 无缝对接），每一层都严丝合缝。这是所有 DSA 追赶者面临的最大鸿沟。</p>
+</li>
+<li>
+<p><strong>DSA 能从 CUDA 学到什么？</strong> ① SIMT 前端的 Warp 调度——用硬件掩盖流水阻塞，而非让开发者手动编排；② 分支预测的编译器层面优化——动态 Warp 分组让开发者对硬件执行无感知；③ 易用性优先——让入门开发者随便写个 Kernel 就能获得不错的性能。</p>
+</li>
+<li>
+<p><strong>David Patterson 的 8 点思考中最核心的是什么？</strong> <strong>内存优先于计算速度</strong>——访问片外 DRAM 的能耗是算术运算的 5000<del>10000 倍！AI 芯片的价值不在于堆更多的乘法器，而在于设计更聪明的数据流、减少 HBM 访问。FlashAttention 就是最好的例证——不减少计算量，只减少 IO，性能提升 2</del>4 倍。</p>
+</li>
+<li>
+<p><strong>超异构是终点吗？</strong> 超异构 = CPU + GPU + FPGA + DSA 的组合，目标是用接近 CPU 的灵活性实现接近 ASIC 的性能。但真正的挑战不在硬件层面（Chiplet 封装已经很成熟了），而在<strong>软件层面</strong>——如何让开发者用一套代码跑通所有异构单元？如何让编译器自动选择最优的计算单元？这些问题不解决，超异构就只是一个概念。</p>
+</li>
+</ul>
+<blockquote>
+<p>从第 4 章的 GPU 到第 7 章的超异构，我们完成了一次 AI 硬件的&quot;全景扫描&quot;。下一章开始，我们将进入 <strong>AI 编译与计算架构</strong>——看看编译器是如何在&quot;上层算法&quot;和&quot;底层硬件&quot;之间架起桥梁的。这是理解 AI Infra 全栈能力的最后一块拼图。</p>
+</blockquote>
+<hr>
+<p><em>下一篇预告：第 8 章将进入传统编译器与 LLVM 的世界。理解 GCC 的编译四阶段和 LLVM 的模块化 IR 设计，是理解 AI 编译器（TVM、MLIR）的必修课。</em></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ai-system/">AI System</a>
+        
+            <a href="/tags/cuda/">CUDA</a>
+        
+            <a href="/tags/gpu/">GPU</a>
+        
+            <a href="/tags/dsa/">DSA</a>
+        
+            <a href="/tags/tpu/">TPU</a>
+        
+            <a href="/tags/ai-chip/">AI Chip</a>
+        
+            <a href="/tags/heterogeneous-computing/">Heterogeneous Computing</a>
+        
+            <a href="/tags/ai-infra/">AI Infra</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC2%E7%AB%A0-ai%E8%AE%A1%E7%AE%97%E4%BD%93%E7%B3%BB/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第2章 AI计算体系</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC4%E7%AB%A0-gpu%E4%BB%A5%E8%8B%B1%E4%BC%9F%E8%BE%BE%E4%B8%BA%E4%BE%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第4章 GPU——以英伟达为例</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC5%E7%AB%A0-tpu%E4%BB%A5%E8%B0%B7%E6%AD%8C%E4%B8%BA%E4%BE%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第5章 TPU——以谷歌为例</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第1章 AI系统概述</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC6%E7%AB%A0-npu%E4%BB%A5%E6%98%87%E8%85%BE%E4%B8%BA%E4%BE%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第6章 NPU——以昇腾为例</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

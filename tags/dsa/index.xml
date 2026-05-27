@@ -1,0 +1,754 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>DSA on SalmoneX Blog</title>
+        <link>https://Salmooo.github.io/tags/dsa/</link>
+        <description>Recent content in DSA on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright><atom:link href="https://Salmooo.github.io/tags/dsa/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>AI系统：第7章 AI芯片思考与展望</title>
+        <link>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC7%E7%AB%A0-ai%E8%8A%AF%E7%89%87%E6%80%9D%E8%80%83%E4%B8%8E%E5%B1%95%E6%9C%9B/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC7%E7%AB%A0-ai%E8%8A%AF%E7%89%87%E6%80%9D%E8%80%83%E4%B8%8E%E5%B1%95%E6%9C%9B/</guid>
+        <description>&lt;h2 id=&#34;本章概览&#34;&gt;本章概览
+&lt;/h2&gt;&lt;p&gt;前面六章我们把 AI 芯片&amp;quot;四大天王&amp;quot;（CPU、GPU、TPU、NPU）逐一拆解了个遍。到了第 7 章，是时候站在更高处，思考一些&amp;quot;大问题&amp;quot;了。&lt;/p&gt;
+&lt;p&gt;这一章不纠结于某个芯片的具体架构参数，而是从三个维度对 AI 芯片进行&amp;quot;灵魂拷问&amp;quot;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;回看 CUDA&lt;/strong&gt;：英伟达凭什么统治 AI 训练？CUDA 的线程层次、Warp 调度、算力峰值计算——这些基础概念构成了理解整个 AI 芯片生态的&amp;quot;通用语言&amp;quot;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;对比 DSA&lt;/strong&gt;：GPU 的 SIMT 和 AI 芯片的 DSA，在流水编排、分支预测、代码易用性上各有什么优劣？DSA 能从 CUDA 身上学到什么？&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;展望未来&lt;/strong&gt;：David Patterson 的 TPU 团队八年心得——8 点思考直指 AI 芯片的核心矛盾；超异构计算会是终极答案吗？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;一句话总结&lt;/strong&gt;：CUDA 的成功不在于性能多强，而在于它让&amp;quot;写并行程序&amp;quot;这件事对普通人来说第一次变得可触及——这是所有 AI 芯片追赶者必须过的一关。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;71-gpu-架构与-cuda-关系&#34;&gt;7.1 GPU 架构与 CUDA 关系
+&lt;/h2&gt;&lt;h3 id=&#34;711-cuda-基本概念&#34;&gt;7.1.1 CUDA 基本概念
+&lt;/h3&gt;&lt;p&gt;2006 年 11 月，英伟达推出 &lt;strong&gt;CUDA（Compute Unified Device Architecture，统一计算设备架构）&lt;/strong&gt;——一个通用并行计算架构和编程模型，把 GPU 从&amp;quot;图形专用&amp;quot;变成了&amp;quot;通用并行计算设备&amp;quot;。&lt;/p&gt;
+&lt;p&gt;CUDA 基于 LLVM 构建编译器，开发人员用 CUDA C/C++ 编写并行程序，通过 CUDA API 将计算任务发到 GPU 执行。CUDA 还支持 Python、Fortran 等语言，兼容 OpenCL 和 DirectCompute。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0289-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.1.1 CUDA编程模型与应用框架&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;CUDA 在软件方面由以下组件构成：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;组件&lt;/th&gt;
+          &lt;th&gt;功能&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;CUDA 库&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;基础运算库&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;CUDA API + Runtime&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;编程接口与运行时&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;CUFFT / CUBLAS&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;高级数学库（FFT / 线性代数）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;CUDA TOOLKIT&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;编译器 + C++ 核&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;CUDA DRIVER&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;驱动 GPU，管理内存和图像&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;CUDA-X LIBRARIES&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;ML/DL/HPC 加速库&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;APPS &amp;amp; FRAMEWORKS&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;对接 TensorFlow、PyTorch 等框架&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0290-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.1.2 CUDA 软件栈&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;712-cuda-线程层次结构&#34;&gt;7.1.2 CUDA 线程层次结构
+&lt;/h3&gt;&lt;p&gt;CUDA 最基本的执行单位是&lt;strong&gt;线程（Thread）&lt;/strong&gt;。线程通过三级层次组织并行计算：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0291-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.1.3 CUDA 线程层次结构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Grid（网格）&lt;/strong&gt;：一个 Kernel 启动的所有线程，共享全局内存&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Block（线程块）&lt;/strong&gt;：Grid 内的分组，块间并行、无法通信、无执行顺序；每个 Block 有共享内存&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Thread（线程）&lt;/strong&gt;：最小执行单位，同一 Block 内的线程可同步、可通过共享内存通信&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;简单记忆：把一个大问题 → 切分成独立 Block 并行解决的子问题 → 子问题再切分为 Block 内线程协作解决。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;CUDA 编程核心：Kernel&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Kernel 是在 GPU 上并行执行的函数，用 &lt;code&gt;__global__&lt;/code&gt; 声明，调用时用 &lt;code&gt;&amp;lt;&amp;lt;&amp;lt;grid, block&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt; 指定执行结构。&lt;/p&gt;
+&lt;p&gt;以下对比展示了 CPU 和 GPU 执行向量加法的区别：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;CPU 版本（cuda_host.cpp）&lt;/strong&gt;——仅使用 CPU 实现加法：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;add&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;n&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;float&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;float&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;n&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;++&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;];&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;N&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;25&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;  &lt;span class=&#34;c1&#34;&gt;// 30M elements
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;kt&#34;&gt;float&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;x&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;new&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;float&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;N&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;];&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;kt&#34;&gt;float&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;y&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;new&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;float&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;N&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;];&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;c1&#34;&gt;// 初始化...
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;n&#34;&gt;add&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;N&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;   &lt;span class=&#34;c1&#34;&gt;// 在 CPU 上串行执行
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;k&#34;&gt;delete&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[]&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;delete&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[]&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;GPU 版本（cuda_device.cu）&lt;/strong&gt;——使用 CUDA 在 GPU 上并行执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;__global__&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;add&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;n&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;float&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;float&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;n&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;++&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;];&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;N&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;25&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;kt&#34;&gt;float&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;cudaMallocManaged&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;N&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;sizeof&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;float&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;));&lt;/span&gt;  &lt;span class=&#34;c1&#34;&gt;// 统一内存
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;n&#34;&gt;cudaMallocManaged&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;N&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;sizeof&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;float&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;));&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;c1&#34;&gt;// 初始化...
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;n&#34;&gt;add&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&amp;lt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;N&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;  &lt;span class=&#34;c1&#34;&gt;// 在 GPU 上执行！
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;n&#34;&gt;cudaDeviceSynchronize&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;// CPU 等待 GPU 完成
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;n&#34;&gt;cudaFree&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;cudaFree&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;CUDA 编程流程总结&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;编写 Kernel 函数描述并行计算任务&lt;/li&gt;
+&lt;li&gt;在主机上配置线程块和网格，将 Kernel 发送到 GPU 执行&lt;/li&gt;
+&lt;li&gt;在主机上处理数据传输和结果处理&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;三级线程层次结构详图&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0293-09.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.1.4 Grid/Block/Thread 三级线程层次&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;CUDA 与硬件的对应关系&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0294-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.1.5 CUDA 软件层次与 GPU 硬件对应&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;软件侧的 Thread → 硬件上的 CUDA Core（线程数量超配，CUDA Core 固定数量）&lt;/li&gt;
+&lt;li&gt;Block 只在一个 SM 上通过 Warp 调度，一旦调用就一直保留到执行完 Kernel&lt;/li&gt;
+&lt;li&gt;多个 SM 组成的 TPC 和 GPC 实现硬件级并行计算&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;713-算力峰值计算&#34;&gt;7.1.3 算力峰值计算
+&lt;/h3&gt;&lt;p&gt;GPU 算力峰值（Peak FLOPS）是在理想情况下能达到的最大计算能力，单位为 FLOPS（GFLOPS / TFLOPS）。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;决定因素&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;CUDA 核心数量&lt;/strong&gt;：算力与核心数成正比&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;核心频率&lt;/strong&gt;：频率越高，每秒执行的指令数越多&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;每个核心的计算能力&lt;/strong&gt;：每个核心每个时钟周期能执行的 FLOPS&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;并行度&lt;/strong&gt;：同时执行的线程数量&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;计算公式&lt;/strong&gt;：&lt;/p&gt;
+\[
+\text{Peak FLOPS} = F_{clk} \times N_{SM} \times F_{req}
+\]&lt;p&gt;其中：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;\(F_{clk}\)：GPU 时钟周期内指令执行数（FLOPS/Cycle）&lt;/li&gt;
+&lt;li&gt;\(N_{SM}\)：SM 数量&lt;/li&gt;
+&lt;li&gt;\(F_{req}\)：Tensor Core 核心运行频率（GHz）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;72-从-gpu-对-ai-芯片思考&#34;&gt;7.2 从 GPU 对 AI 芯片思考
+&lt;/h2&gt;&lt;h3 id=&#34;721-英伟达生态的思考点&#34;&gt;7.2.1 英伟达生态的思考点
+&lt;/h3&gt;&lt;p&gt;从软件和硬件架构角度看，CUDA 和 SIMT 存在深度绑定关系。而当前 AI 芯片采用的 &lt;strong&gt;DSA 架构&lt;/strong&gt;，其编程模型和硬件执行模型都还处于较为早期的状态。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;流水掩盖&lt;/strong&gt;：对 DSA 而言，实现架构层面的隐藏流水编排机制、提出易用性堪比 CUDA 的软件是可能的，但如果核心问题没解决，即使形式上与 CUDA 类似也会有易用性问题——开发者很难获得足够好的初始性能。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;软硬件协同&lt;/strong&gt;：DSA 架构一方面需要建立开放的软硬件架构联合对抗 CUDA 生态，另一方面需要明确面向不同层次开发者的易用性和软件开发形态。&lt;/p&gt;
+&lt;h4 id=&#34;1-simt-与-cuda-的关系&#34;&gt;1. SIMT 与 CUDA 的关系
+&lt;/h4&gt;&lt;p&gt;CUDA 的成功之处在于通过 SIMT 架构&lt;strong&gt;掩盖了流水编排&lt;/strong&gt;、实现了&lt;strong&gt;并行指令隐藏&lt;/strong&gt;、提升了&lt;strong&gt;编程易用性&lt;/strong&gt;。英伟达为维护 CUDA 生态，对 SIMT 硬件架构做了取舍（保留 SM、Warp、Thread 等概念），这使得 CUDA 近几年没有重大架构变化。&lt;/p&gt;
+&lt;p&gt;DSA 在硬件架构上比较激进，不是因为软件做得好，而是一开始没考虑编程体系——自然没有软件和硬件协同带来的架构约束。&lt;/p&gt;
+&lt;h4 id=&#34;2-dsa-硬件架构执行方式&#34;&gt;2. DSA 硬件架构执行方式
+&lt;/h4&gt;&lt;p&gt;DSA 硬件一般单核单线程，线程内指令通过多核共享 Cache 协作。裸接口通常是一个核一个线程，每个线程内串行调用 DSA 指令集，正确性部分靠软件同步、部分靠硬件保证。&lt;/p&gt;
+&lt;h3 id=&#34;722-借鉴与思考点&#34;&gt;7.2.2 借鉴与思考点
+&lt;/h3&gt;&lt;h4 id=&#34;1-流水编排&#34;&gt;1. 流水编排
+&lt;/h4&gt;&lt;p&gt;英伟达 GPU 依靠&lt;strong&gt;多线程交错执行&lt;/strong&gt;来提升并行性能——大量线程通过不同 Block 和 Thread 读取数据、执行计算。而 SIMD 依赖 CPU 自身乱序、投机、缓存和预取能力。&lt;/p&gt;
+&lt;p&gt;关键洞察：即使为 DSA 的 SIMD 硬件封装了 SIMT 前端，如果遇到指令依赖，基础性能也会很差——&lt;strong&gt;流水编排仍然需要开发者手动实现&lt;/strong&gt;。&lt;/p&gt;
+&lt;h4 id=&#34;2-simt-前端硬件&#34;&gt;2. SIMT 前端硬件
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0297-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.2.1 Warp 调度器动态交错执行&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;增加 SIMT 前端硬件后，通过 &lt;strong&gt;Warp（线程束）&lt;/strong&gt; 隐藏线程指令流水：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;每个 Thread Block 需要很多并行线程，隐式分成若干个 Warp&lt;/li&gt;
+&lt;li&gt;每个 Warp 包含串行交错的访存和计算&lt;/li&gt;
+&lt;li&gt;GPU 通过 &lt;strong&gt;Warp Scheduler&lt;/strong&gt; 动态交错执行：Warp0 阻塞就切换到 Warp1&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;CUDA 没有解决 DSA 指令掩盖，只是给了开发者一个 Warp 概念来透传指令 API——所以 CUDA 的上手门槛并不低，需要充分了解 GPU 硬件细节。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;3-分支预测机制&#34;&gt;3. 分支预测机制
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0298-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.2.2 SIMT 分支预测与控制流&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;SPMD 编程模型对分支预测和控制流的高容忍度是支撑易用性的重要方法。英伟达 GPU 使线程在 Warp-Base SIMD 上执行不同分支——每个线程都可以执行带条件的控制流指令，同时不同线程间可以走不同的控制流路径。&lt;/p&gt;
+&lt;p&gt;但当 Warp 内部线程分支到不同执行路径时，会发生&lt;strong&gt;分支执行冲突&lt;/strong&gt;——不同时间执行不同路径会增加时耗。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;动态 Warp Formation/Merging&lt;/strong&gt; 是解决方案：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;分支后动态合并执行相同指令的线程&lt;/li&gt;
+&lt;li&gt;从等待的 Warp 中形成新 Warp&lt;/li&gt;
+&lt;li&gt;将 Warp X 和 Warp Y 合并为 Warp Z（更好地执行相同指令）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0300-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.2.6 动态 Warp 分组机制&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;动态 Warp 分组更多在编译器层面解决分支预测问题，根据线程执行情况和数据依赖性动态组织 Warp 中的线程，提高并行计算性能和资源利用率。但&lt;strong&gt;不推荐在 CUDA 编程中出现大量 if/else 语句&lt;/strong&gt;。&lt;/p&gt;
+&lt;h4 id=&#34;4-交互方式&#34;&gt;4. 交互方式
+&lt;/h4&gt;&lt;p&gt;CUDA 运行时提供主机和设备的 C++ 交互方式（寒武纪 BANG C 语言就在这个层面参考了 CUDA）。在软件层面，CUDA 非常容易实现向量加法。&lt;/p&gt;
+&lt;p&gt;CUDA 的易用性对初阶用户来说是极致的——入门开发者任意写一个简单算子（Kernel），就能获得比 CPU 高 5~10 倍的峰值性能。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;DSA 的软肋：流水和指令使用缺乏完备、隐式的支持，指令流水的支持需要开发者手动掩盖、切块，使用底层指令让写出正确 Kernel 耗时更长。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;73-ai-芯片发展方向&#34;&gt;7.3 AI 芯片发展方向
+&lt;/h2&gt;&lt;p&gt;2017 年，David Patterson 加入谷歌 TPU 团队，2020 年在伯克利发表演讲&amp;quot;A Decade of Machine Learning Accelerators: Lessons Learned and Carbon Footprint&amp;quot;，分享了 TPU 团队近几年的心得体会。本节摘录并深入探讨其中 &lt;strong&gt;8 点思考&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;731-模型对内存和算力的需求&#34;&gt;7.3.1 模型对内存和算力的需求
+&lt;/h3&gt;&lt;p&gt;AI 模型近几年所需的内存和算力&lt;strong&gt;平均每年增长 50%&lt;/strong&gt;，模型所需内存和算力增长 10~20 倍。但从芯片设计到实际应用需要约 5 年周期（设计 1 年 + 部署 1 年 + 优化 3 年）。&lt;/p&gt;
+&lt;p&gt;训练模型参数量的增长速度比推理更快：2016~2023 年 SOTA 训练模型的算力需求年均增长 10 倍；GPT-2 到 GPT-3 参数量提高了约 100 倍（15亿 → 1750亿）。&lt;/p&gt;
+&lt;p&gt;但 AI 芯片内存容量增长相对缓慢：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;芯片&lt;/th&gt;
+          &lt;th&gt;HBM 最大内存&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;A100&lt;/td&gt;
+          &lt;td&gt;80 GB&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;H100&lt;/td&gt;
+          &lt;td&gt;188 GB&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;TPU v4&lt;/td&gt;
+          &lt;td&gt;32 GB&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;特斯拉 DOJO&lt;/td&gt;
+          &lt;td&gt;16 GB&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;华为昇腾&lt;/td&gt;
+          &lt;td&gt;64 GB&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;寒武纪 MLU 370&lt;/td&gt;
+          &lt;td&gt;24/48 GB&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;732-模型结构快速演变&#34;&gt;7.3.2 模型结构快速演变
+&lt;/h3&gt;&lt;p&gt;DNN 是一个发展迅速的领域：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;2016 年：MLP、LSTM 是主流&lt;/li&gt;
+&lt;li&gt;2020 年：CNN、RNN、BERT 广泛应用&lt;/li&gt;
+&lt;li&gt;如今：Transformer 家族（GPT-3.5、Phi-3、Gemma、Llama）参数从十亿级到万亿级&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;DSA 架构需要足够通用以支持未来可能出现的新模型&lt;/strong&gt;——这是它面临的最大挑战之一。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;733-生产部署提供多租户&#34;&gt;7.3.3 生产部署提供多租户
+&lt;/h3&gt;&lt;p&gt;大部分 AI 论文假设同一时间 NPU 只运行一个模型，但实际需要切换不同模型：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;机器翻译涉及语言对比，需要不同模型&lt;/li&gt;
+&lt;li&gt;一个主模型配套多个模型实验&lt;/li&gt;
+&lt;li&gt;对吞吐量和时延有不同要求，不同模型使用不同 Batch Size&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;因此需要&lt;strong&gt;多租户技术（Multi-Tenancy）&lt;/strong&gt;：算力切分、显存虚拟化、内存寻址、虚拟内存页。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0303-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.3.1 GPU 虚拟化技术&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;目前常见的 GPU 虚拟化技术包括：NVIDIA vGPU、AMD MxGPU、Intel GVT-g。&lt;/p&gt;
+&lt;h3 id=&#34;734-sram-与-dram-的权衡&#34;&gt;7.3.4 SRAM 与 DRAM 的权衡
+&lt;/h3&gt;&lt;p&gt;根据 8 个模型的基准数据，其中 6 个涉及多租户技术。如果从 CPU 主机重新加载参数，上下文切换需要 10s——因此需要更快的 DRAM（片外存储）用于交换多种模型数据。&lt;/p&gt;
+&lt;p&gt;很多模型所需内存远大于单芯片最大 SRAM（片上存储）。部分芯片的设计思路是期望用 SRAM 解决所有任务、减少内存数据搬运时间，但这在多租户场景下很难实现。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;AI 芯片不仅需要更大的 SRAM，更需要存储速度更快的片外 DRAM。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;735-内存优先于计算速度&#34;&gt;7.3.5 内存优先于计算速度
+&lt;/h3&gt;&lt;p&gt;现代微处理器最大的瓶颈是&lt;strong&gt;能耗&lt;/strong&gt;，而不是芯片集成度：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;操作&lt;/th&gt;
+          &lt;th&gt;能耗对比（相对值）&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;算术运算&lt;/td&gt;
+          &lt;td&gt;1×&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;访问片上 SRAM&lt;/td&gt;
+          &lt;td&gt;100×&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;访问片外 DRAM&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;5000~10000×&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;访问片外 DRAM 的能耗是算术运算的 5000~10000 倍！&lt;strong&gt;GPGPU 的功耗大多浪费在数据搬运上，而非核心计算。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;图7.3.3 展示了谷歌 TPU v1 架构——65536（256×256）个矩阵乘法单元，700 MHz 时钟，峰值 92 TOPS：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0304-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.3.3 谷歌 TPU v1 架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;TPU 使用&lt;strong&gt;脉动阵列&lt;/strong&gt;以固定时间间隔使数据从不同方向流入处理单元。20 世纪 70 年代因只有单金属层才提出脉动阵列减少布线；如今多达 10 个金属层，最大难点是能耗，而脉动阵列能效高，使芯片容纳更多乘法单元，从而&lt;strong&gt;分摊内存访问开销&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;736-dsa-既要专业也要灵活&#34;&gt;7.3.6 DSA 既要专业也要灵活
+&lt;/h3&gt;&lt;p&gt;DSA 的难点在于既要对模型进行针对性优化，又要保持一定灵活性：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;训练比推理更复杂&lt;/strong&gt;：计算量更大，包含反向传播、转置和求导，需要更大内存存储中间结果&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;需要支持更广泛的数据格式&lt;/strong&gt;：BF16、FP16、HF32 等用于 AI 计算&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;指令、流水、可编程性要求更高&lt;/strong&gt;：需要灵活的编译器和上层软硬件配套&lt;/li&gt;
+&lt;li&gt;CUDA 在这个方面已积累多年，TPU 目前支持 INT8、BF16 等格式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;737-半导体供应链的选型&#34;&gt;7.3.7 半导体供应链的选型
+&lt;/h3&gt;&lt;p&gt;计算逻辑进步很快，但芯片制程工艺发展相对较慢。SRAM 和 HBM 比 DDR4 和 GDDR6 速度更快、能效更高。大模型训练普遍使用 BF16，部分使用 FP8 推理。如果选型错误（如只用 FP32 模拟 BF16），训练迭代速度将减慢。&lt;/p&gt;
+&lt;p&gt;不同操作格式的能耗对比（7nm 工艺，单位 pJ）：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;操作&lt;/th&gt;
+          &lt;th&gt;INT8&lt;/th&gt;
+          &lt;th&gt;BF16&lt;/th&gt;
+          &lt;th&gt;FP16&lt;/th&gt;
+          &lt;th&gt;FP32&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;加法&lt;/td&gt;
+          &lt;td&gt;0.007&lt;/td&gt;
+          &lt;td&gt;0.11&lt;/td&gt;
+          &lt;td&gt;0.16&lt;/td&gt;
+          &lt;td&gt;0.38&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;乘法&lt;/td&gt;
+          &lt;td&gt;0.07&lt;/td&gt;
+          &lt;td&gt;0.21&lt;/td&gt;
+          &lt;td&gt;0.34&lt;/td&gt;
+          &lt;td&gt;1.31&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;从 45nm 到 7nm，能耗平均降低 2.6 倍。BF16 乘法的能耗仅为 FP32 的 1/6——这就是为什么大模型训练偏爱 BF16。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;738-编译器优化和-ai-应用兼容&#34;&gt;7.3.8 编译器优化和 AI 应用兼容
+&lt;/h3&gt;&lt;p&gt;DSA 编译器需要对 AI 模型进行分析和优化，将 AI 指令转换为高效底层代码：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;多核并行&lt;/strong&gt;：实现 4096 个芯片的并行&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;数据级并行&lt;/strong&gt;：向量、矩阵、张量功能单元&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;指令级并行&lt;/strong&gt;：322~400 位超长指令字（VLIW）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;内存传输管理&lt;/strong&gt;：编译器需要管理内存传输&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;数据布局兼容&lt;/strong&gt;：兼容不同功能单元和内存中的数据布局&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0307-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.3.4 编译器优化后性能提升约 2 倍&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;与 CPU 的 GCC 和 GPU 的 CUDA 相比，DSA 的软件栈还不够成熟，但编译器优化能带来约 2 倍的性能提升（C++ 编译器一年能提升 5%~10% 就算很好了）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;算子融合（Operator Fusion）&lt;/strong&gt; 能减少内存访问，省略中间结果写入 HBM 再读取的步骤。通过 MLPerf 基准测试，算子融合平均能带来超过 &lt;strong&gt;2 倍&lt;/strong&gt;的性能提升。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;FlashAttention&lt;/strong&gt; 是 IO 感知优化的经典案例：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0307-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.3.5 FlashAttention 的 IO 优化策略&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;运行速度比 PyTorch 标准注意力快 &lt;strong&gt;2~4 倍&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;所需内存仅为标准注意力的 &lt;strong&gt;1/20~1/5&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;核心思路：从 HBM 中读取块 → 在 SRAM 中计算 → 写到 HBM，避免从 HBM 读取/写入注意力矩阵&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;算法没有减少计算量，而是从 IO 感知出发减少了 HBM 访问次数&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;74-超异构计算&#34;&gt;7.4 超异构计算
+&lt;/h2&gt;&lt;h3 id=&#34;741-异构与超异构场景&#34;&gt;7.4.1 异构与超异构场景
+&lt;/h3&gt;&lt;p&gt;摩尔定律放缓，传统单一架构难以满足日益增长的计算需求。异构计算通过整合不同类型计算单元的优势来解决这一问题。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;异构计算主要优势&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;优势&lt;/th&gt;
+          &lt;th&gt;说明&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;性能飞跃&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;CPU + GPU + FPGA 有机结合，实现 1+1&amp;gt;2&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;灵活定制&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;针对不同计算任务，灵活选择最合适的计算单元&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;降低成本&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;用更低成本实现更高性能，性价比更优&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;降低功耗&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;动态调整资源分配，提升能源利用效率&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;特斯拉 HW3 FSD 芯片&lt;/strong&gt;是异构计算的典型案例——单一芯片包含 CPU、GPU、NPU 多种架构：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0309-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.4.1 特斯拉 HW3 FSD 芯片&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;作为汽车芯片，它要负责雷达、GPS、地图等多种功能，传统单一架构难以高效完成。将各组件有机结合的异构芯片可以更好地处理复杂情况：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0310-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.4.3 异构芯片各组件协同架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;742-计算体系迎来异构&#34;&gt;7.4.2 计算体系迎来异构
+&lt;/h3&gt;&lt;p&gt;异构计算的出现和发展源于：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;传统冯·诺依曼结构受制于存储和计算单元之间的数据交换瓶颈&lt;/li&gt;
+&lt;li&gt;半导体工艺发展使 CPU 主频提升受限&lt;/li&gt;
+&lt;li&gt;深度学习等 AI 技术对计算能力提出了更高要求&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;CPU-GPU 异构工作流&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0311-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.4.4 CPU-GPU 异构工作流&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;CPU 把数据准备好（CPU 内存）&lt;/li&gt;
+&lt;li&gt;数据从 CPU 内存复制到 GPU 内存（Step1）&lt;/li&gt;
+&lt;li&gt;CPU 指示 GPU 工作，配置并启动 GPU 内核（Step2）&lt;/li&gt;
+&lt;li&gt;多个 GPU 内核并行执行（Step3）&lt;/li&gt;
+&lt;li&gt;处理结果复制回 CPU 内存（Step4）&lt;/li&gt;
+&lt;li&gt;CPU 对结果进行后续处理&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;异构架构三大优势&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;适用于高性能计算&lt;/strong&gt;：单一计算类型和架构已无法处理更复杂多样的数据&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;适用于海量数据&lt;/strong&gt;：个人每天 ~1 GB，智能汽车 ~50 GB，智能医院 ~3 TB，智慧城市 ~50 PB&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;共享内存空间&lt;/strong&gt;：消除冗余内存副本，CPU 和 GPU 统一内存池&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;ASIC 在异构中的角色&lt;/strong&gt;：通过驱动程序与 CSR 和可配置表项交互，CPU 控制数据输入/输出和运行控制。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0312-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.4.5 ASIC 工作流示意图&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;从 CPU 到 ASIC，架构越来越碎片化——指令复杂度决定了系统的软硬件解耦程度。这形成了&lt;strong&gt;易用性和性能之间的权衡&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0313-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.4.6 易用性与性能的权衡关系&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;处理器&lt;/th&gt;
+          &lt;th&gt;灵活性&lt;/th&gt;
+          &lt;th&gt;性能效率&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;GPU&lt;/td&gt;
+          &lt;td&gt;较好&lt;/td&gt;
+          &lt;td&gt;不够极致&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;DSA&lt;/td&gt;
+          &lt;td&gt;较差&lt;/td&gt;
+          &lt;td&gt;优异&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;FPGA&lt;/td&gt;
+          &lt;td&gt;中等&lt;/td&gt;
+          &lt;td&gt;功耗成本较高&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;ASIC&lt;/td&gt;
+          &lt;td&gt;完全固定&lt;/td&gt;
+          &lt;td&gt;极致&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;异构计算的问题&lt;/strong&gt;：复杂系统需要灵活处理器，性能挑战需要定制加速器——单一处理器无法兼顾性能和灵活性。&lt;/p&gt;
+&lt;h3 id=&#34;743-从异构到超异构&#34;&gt;7.4.3 从异构到超异构
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;超异构出现的三大驱动力&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;需求驱动&lt;/strong&gt;：元宇宙等新兴技术需要算力提升 1000 倍&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;工艺和封装支撑&lt;/strong&gt;：Chiplet 封装使单芯片层次构建规模数量级提升的超大系统&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;系统架构持续创新&lt;/strong&gt;：通过架构创新实现多个数量级的性能提升&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;超异构并非简单集成——而是把更多异构计算&lt;strong&gt;整合重构&lt;/strong&gt;，各类型处理器间充分、灵活的数据交互，形成统一的超异构计算体系。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0314-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.4.7 异构计算发展流程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;超异构基本特征&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;超大规模计算集群&lt;/strong&gt;：CPU、GPU、FPGA、DSA 等多种计算单元通过高速互联网络连接&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;复杂计算系统&lt;/strong&gt;：由分层分块组件组成，需统一管理和调度&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;744-超异构的挑战与思考&#34;&gt;7.4.4 超异构的挑战与思考
+&lt;/h3&gt;&lt;h4 id=&#34;1-超异构的软件层&#34;&gt;1. 超异构的软件层
+&lt;/h4&gt;&lt;p&gt;软件需要跨平台复用：跨架构、跨处理器类型、跨厂家平台、跨位置、跨设备类型——软件架构的复杂性增长是最大挑战。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;解决办法&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;开放接口/架构及生态&lt;/strong&gt;：形成标准开放接口&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;软件兼容&lt;/strong&gt;：减少定制化开发，兼容已有软件生态&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;编程体系&lt;/strong&gt;：提供门槛更低的编译体系（如 CUDA、Ascend C）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;开放架构&lt;/strong&gt;：防止架构过多导致市场碎片化&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;2-硬件定义软件-vs-软件定义硬件&#34;&gt;2. 硬件定义软件 vs 软件定义硬件
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0316-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.4.10 HDW、SDH 与 Co-Design 三种关系&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;模式&lt;/th&gt;
+          &lt;th&gt;核心理念&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;硬件定义软件（HDW）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;硬件加速器 + 专用指令集，充分发挥硬件性能&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;软件定义硬件（SDH）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;软件抽象层（SAL）解耦软硬件，跨平台运行&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;软硬件协同定义（Co-Design）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;软硬件团队紧密合作，1+1&amp;gt;2&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;系统复杂度决定了哪种关系占主导：复杂度低的系统（如 CPU）→ 硬件定义软件；复杂度高的系统（如 GPU）→ 软件定义硬件，系统实现变成持续优化和迭代的过程。&lt;/p&gt;
+&lt;h4 id=&#34;3-计算体系与编译体系&#34;&gt;3. 计算体系与编译体系
+&lt;/h4&gt;&lt;p&gt;超异构架构需要构建高效、标准、开放的接口和架构体系，避免场景覆盖的碎片化。当前正处于计算体系变革和编译体系变革的 10 年。&lt;/p&gt;
+&lt;h4 id=&#34;4-超异构的未来&#34;&gt;4. 超异构的未来
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;跨平台统一计算架构&lt;/strong&gt;是未来计算资源中心化的关键：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch7/ai_system.pdf-0317-10.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图7.4.11 跨平台统一计算架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;将孤岛计算资源连接起来，实现计算资源池化&lt;/li&gt;
+&lt;li&gt;支持应用软件跨同类处理器、跨不同类处理器、跨芯片平台、跨云边端运行&lt;/li&gt;
+&lt;li&gt;Chiplet + 超异构组合 → 系统规模数量级提升 → 性能数量级提升&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;未来计算架构的三大特征&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;体系异构&lt;/strong&gt;：CPU、GPU、FPGA、DSA 多架构组成，接近 CPU 的灵活性 + ASIC 的性能效率&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;平台化&lt;/strong&gt;：软件定义一切、硬件加速一切，完全可软件编程的硬件加速平台&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;开放生态&lt;/strong&gt;：拥抱开源，支持云原生、云网边端融合，用户无平台依赖&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;小结与思考&#34;&gt;小结与思考
+&lt;/h2&gt;&lt;p&gt;第 7 章是整个 AI 硬件篇的收官之战。它不教你怎么用 CUDA 写代码，而是帮你建立一种&lt;strong&gt;系统性的思考框架&lt;/strong&gt;。几个关键问题值得反复咀嚼：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;CUDA 到底牛在哪？&lt;/strong&gt; 牛在它不仅是一个编程模型，更是一个&amp;quot;生态操作系统&amp;quot;——从硬件（CUDA Core、Tensor Core）到编译器（LLVM-based），到数学库（cuBLAS、cuDNN），再到框架插件（PyTorch/TF 无缝对接），每一层都严丝合缝。这是所有 DSA 追赶者面临的最大鸿沟。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;DSA 能从 CUDA 学到什么？&lt;/strong&gt; ① SIMT 前端的 Warp 调度——用硬件掩盖流水阻塞，而非让开发者手动编排；② 分支预测的编译器层面优化——动态 Warp 分组让开发者对硬件执行无感知；③ 易用性优先——让入门开发者随便写个 Kernel 就能获得不错的性能。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;David Patterson 的 8 点思考中最核心的是什么？&lt;/strong&gt; &lt;strong&gt;内存优先于计算速度&lt;/strong&gt;——访问片外 DRAM 的能耗是算术运算的 5000&lt;del&gt;10000 倍！AI 芯片的价值不在于堆更多的乘法器，而在于设计更聪明的数据流、减少 HBM 访问。FlashAttention 就是最好的例证——不减少计算量，只减少 IO，性能提升 2&lt;/del&gt;4 倍。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;超异构是终点吗？&lt;/strong&gt; 超异构 = CPU + GPU + FPGA + DSA 的组合，目标是用接近 CPU 的灵活性实现接近 ASIC 的性能。但真正的挑战不在硬件层面（Chiplet 封装已经很成熟了），而在&lt;strong&gt;软件层面&lt;/strong&gt;——如何让开发者用一套代码跑通所有异构单元？如何让编译器自动选择最优的计算单元？这些问题不解决，超异构就只是一个概念。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;从第 4 章的 GPU 到第 7 章的超异构，我们完成了一次 AI 硬件的&amp;quot;全景扫描&amp;quot;。下一章开始，我们将进入 &lt;strong&gt;AI 编译与计算架构&lt;/strong&gt;——看看编译器是如何在&amp;quot;上层算法&amp;quot;和&amp;quot;底层硬件&amp;quot;之间架起桥梁的。这是理解 AI Infra 全栈能力的最后一块拼图。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;em&gt;下一篇预告：第 8 章将进入传统编译器与 LLVM 的世界。理解 GCC 的编译四阶段和 LLVM 的模块化 IR 设计，是理解 AI 编译器（TVM、MLIR）的必修课。&lt;/em&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

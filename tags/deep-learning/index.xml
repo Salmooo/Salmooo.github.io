@@ -2148,7 +2148,7 @@
 &lt;/h2&gt;&lt;h3 id=&#34;621-昇腾-ai-处理器概述&#34;&gt;6.2.1 昇腾 AI 处理器概述
 &lt;/h3&gt;&lt;p&gt;2018 年，华为推出了基于&lt;strong&gt;达芬奇架构&lt;/strong&gt;的昇腾 AI 处理器。这不是一个&amp;quot;追赶式&amp;quot;的设计，而是从零开始，专为 AI 计算量身打造的架构。&lt;/p&gt;
 &lt;p&gt;达芬奇架构的核心武器是 &lt;strong&gt;3D Cube 矩阵计算单元&lt;/strong&gt;——一条指令即可完成 4096 次乘加运算：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch6/ai_system.pdf-0262-08.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/static/images/ai_system/ch6/ai_system.pdf-0262-08.png&#34;
 	
 	
 	
