@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="《AI系统：原理与架构》学习笔记 — 从编译器基础概念出发，深入GCC与LLVM两大编译器巨头的架构设计，掌握IR、Pass、三地址码、SSA等编译核心概念">
+<title>AI系统：第8章 传统编译器</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC8%E7%AB%A0-%E4%BC%A0%E7%BB%9F%E7%BC%96%E8%AF%91%E5%99%A8/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="AI系统：第8章 传统编译器">
+<meta property='og:description' content="《AI系统：原理与架构》学习笔记 — 从编译器基础概念出发，深入GCC与LLVM两大编译器巨头的架构设计，掌握IR、Pass、三地址码、SSA等编译核心概念">
+<meta property='og:url' content='https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC8%E7%AB%A0-%E4%BC%A0%E7%BB%9F%E7%BC%96%E8%AF%91%E5%99%A8/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='AI System' /><meta property='article:tag' content='Compiler' /><meta property='article:tag' content='GCC' /><meta property='article:tag' content='LLVM' /><meta property='article:tag' content='Clang' /><meta property='article:tag' content='IR' /><meta property='article:tag' content='AI Infra' />
+<meta name="twitter:title" content="AI系统：第8章 传统编译器">
+<meta name="twitter:description" content="《AI系统：原理与架构》学习笔记 — 从编译器基础概念出发，深入GCC与LLVM两大编译器巨头的架构设计，掌握IR、Pass、三地址码、SSA等编译核心概念">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#本章概览">本章概览</a></li>
+    <li><a href="#81-编译器基础概念">8.1 编译器基础概念</a>
+      <ol>
+        <li><a href="#811-编译器-vs-解释器">8.1.1 编译器 vs 解释器</a></li>
+        <li><a href="#812-jit-与-aot-编译方式">8.1.2 JIT 与 AOT 编译方式</a></li>
+        <li><a href="#813-pass-与中间表示-ir">8.1.3 Pass 与中间表示 IR</a></li>
+      </ol>
+    </li>
+    <li><a href="#82-传统编译器介绍">8.2 传统编译器介绍</a>
+      <ol>
+        <li><a href="#821-什么是编译器">8.2.1 什么是编译器？</a></li>
+        <li><a href="#822-gcc-vs-llvmclang">8.2.2 GCC vs LLVM/Clang</a></li>
+      </ol>
+    </li>
+    <li><a href="#83-gcc-编译流程详解">8.3 GCC 编译流程详解</a></li>
+    <li><a href="#84-llvm-架构设计">8.4 LLVM 架构设计</a>
+      <ol>
+        <li><a href="#841-llvm-发展历程">8.4.1 LLVM 发展历程</a></li>
+        <li><a href="#842-llvm-架构特点模块化--统一-ir">8.4.2 LLVM 架构特点：模块化 + 统一 IR</a></li>
+      </ol>
+    </li>
+    <li><a href="#85-llvm-ir-详解">8.5 LLVM IR 详解</a>
+      <ol>
+        <li><a href="#851-什么是-llvm-ir">8.5.1 什么是 LLVM IR？</a></li>
+        <li><a href="#852-llvm-ir-示例">8.5.2 LLVM IR 示例</a></li>
+        <li><a href="#853-三地址码tac">8.5.3 三地址码（TAC）</a></li>
+        <li><a href="#854-llvm-ir-设计原则">8.5.4 LLVM IR 设计原则</a></li>
+      </ol>
+    </li>
+    <li><a href="#86-llvm-前端clang-深度解析">8.6 LLVM 前端——Clang 深度解析</a></li>
+    <li><a href="#87-llvm-优化层pass-机制">8.7 LLVM 优化层——Pass 机制</a></li>
+    <li><a href="#88-llvm-后端代码生成">8.8 LLVM 后端——代码生成</a>
+      <ol>
+        <li><a href="#关键步骤">关键步骤</a></li>
+      </ol>
+    </li>
+    <li><a href="#89-llvm-编译器全流程回顾">8.9 LLVM 编译器全流程回顾</a></li>
+    <li><a href="#小结与思考">小结与思考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/ai/" >
+                AI
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC8%E7%AB%A0-%E4%BC%A0%E7%BB%9F%E7%BC%96%E8%AF%91%E5%99%A8/">AI系统：第8章 传统编译器</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            《AI系统：原理与架构》学习笔记 — 从编译器基础概念出发，深入GCC与LLVM两大编译器巨头的架构设计，掌握IR、Pass、三地址码、SSA等编译核心概念
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    5 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="本章概览">本章概览
+</h2><p>如果说 AI 芯片是&quot;发动机&quot;，那编译器就是&quot;翻译官&quot;——它把程序员写的高级语言转化为芯片能直接执行的机器码。在 AI 系统栈中，AI 编译器正变得越来越重要，而要理解 AI 编译器，必须先理解传统编译器。</p>
+<p>本章从零开始讲编译器：什么是编译器？它和解释器有什么区别？JIT 和 AOT 分别适合什么场景？Pass 和 IR 扮演什么角色？——打好这些基础后，我们深入两大开源编译器 <strong>GCC</strong> 和 <strong>LLVM/Clang</strong>，理解它们的架构设计、编译流程、优化策略，以及 LLVM IR 的精妙之处。</p>
+<blockquote>
+<p>编译技术是计算机科学皇冠上的一颗明珠——它是连接&quot;人写的代码&quot;与&quot;机器运行的程序&quot;的桥梁。</p>
+</blockquote>
+<hr>
+<h2 id="81-编译器基础概念">8.1 编译器基础概念
+</h2><h3 id="811-编译器-vs-解释器">8.1.1 编译器 vs 解释器
+</h3><p>编译器（Compiler）和解释器（Interpreter）都能将高级语言转换为机器语言，本质区别在于<strong>时机</strong>：</p>
+<ul>
+<li><strong>编译器</strong>：在程序运行<strong>之前</strong>把整个源代码一次性翻译成机器码（如 C、C++ → 可执行文件）</li>
+<li><strong>解释器</strong>：在程序运行<strong>之时</strong>逐行翻译并执行（如 Python、JavaScript）</li>
+</ul>
+<p><img src="/images/ai_system/ch8/ai_system.pdf-0321-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图8.1.1 编译器特点"
+	
+	
+></p>
+<blockquote>
+<p>编译器 = 整体翻译（先翻译完再执行）→ 快但不够灵活；解释器 = 同声传译（边翻译边执行）→ 灵活但慢。</p>
+</blockquote>
+<p>当前主流开源编译器（LLVM、GCC）通常采用三段式架构：</p>
+<ul>
+<li><strong>前端（Frontend）</strong>：词法分析 → 语法分析 → 语义分析 → 生成中间代码（IR）</li>
+<li><strong>中间优化器（Optimizer）</strong>：对 IR 做各种优化（去冗余、子表达式消除等）</li>
+<li><strong>后端（Backend）</strong>：将优化后的 IR 针对具体硬件生成目标机器码</li>
+</ul>
+<h3 id="812-jit-与-aot-编译方式">8.1.2 JIT 与 AOT 编译方式
+</h3><p>程序有两种运行方式：</p>
+<ul>
+<li><strong>AOT（Ahead of Time，提前编译）</strong>：代码执行前全部翻译为机器码。代表：C/C++ 应用。</li>
+<li><strong>JIT（Just in Time，即时编译）</strong>：边翻译边运行。代表：JavaScript、Python、PyTorch JIT。</li>
+</ul>
+<p><img src="/images/ai_system/ch8/ai_system.pdf-0322-09.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图8.1.3 JIT编译方式"
+	
+	
+></p>
+<p><img src="/images/ai_system/ch8/ai_system.pdf-0322-10.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图8.1.4 AOT编译方式"
+	
+	
+></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>维度</th>
+          <th>JIT</th>
+          <th>AOT</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>优点</td>
+          <td>可据当前硬件实时优化；可据运行情况动态调优；支持动态链接</td>
+          <td>无运行时编译开销；启动即达最高性能；执行快</td>
+      </tr>
+      <tr>
+          <td>缺点</td>
+          <td>占用运行时资源、可能卡顿；初始编译耗时</td>
+          <td>安装时间增加；占用更多内存；牺牲部分一致性</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>在 AI 框架中，TensorFlow（静态图）偏向 AOT，PyTorch 2.X（Inductor）和计图（Jittor）偏向 JIT。两者并不互斥——MLIR + TensorFlow 同时支持 AOT 和 JIT。</p>
+</blockquote>
+<h3 id="813-pass-与中间表示-ir">8.1.3 Pass 与中间表示 IR
+</h3><p><strong>Pass</strong> 是编译器对程序的一次完整扫描或处理——可以理解为编译器流水线上的一道&quot;工序&quot;。LLVM 中的 Pass 分三类：</p>
+<ul>
+<li><strong>Analysis Pass</strong>：只分析、不修改 IR（如收集程序信息）</li>
+<li><strong>Transform Pass</strong>：修改和优化 IR（如函数内联 Inline）</li>
+<li><strong>Utility Pass</strong>：辅助工具类 Pass</li>
+</ul>
+<p><img src="/images/ai_system/ch8/ai_system.pdf-0325-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图8.1.5 Pass Pipeline"
+	
+	
+></p>
+<blockquote>
+<p>Pass 由 PassManager 统一调度，多个 Pass 组成优化流水线（Pipeline）。</p>
+</blockquote>
+<p><strong>IR（中间表示）</strong> 是编译器最核心的数据结构。编译器的前端、优化器、后端之间<strong>唯一交换的数据就是 IR</strong>——这实现了模块解耦。</p>
+<p><img src="/images/ai_system/ch8/ai_system.pdf-0326-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图8.1.6 编译器前端与后端"
+	
+	
+></p>
+<p>IR 按抽象层级分为三层：</p>
+<ul>
+<li><strong>HIR（High IR）</strong>：靠近源码，适合源码级分析（如 AST）</li>
+<li><strong>MIR（Middle IR）</strong>：与源码和目标平台都无关，适合通用优化（如三地址码 TAC）</li>
+<li><strong>LIR（Low IR）</strong>：靠近机器指令，适合硬件相关优化</li>
+</ul>
+<blockquote>
+<p>多层 IR 的核心优势：保留更多源码信息、优化更灵活、Pass 执行更高效。</p>
+</blockquote>
+<hr>
+<h2 id="82-传统编译器介绍">8.2 传统编译器介绍
+</h2><h3 id="821-什么是编译器">8.2.1 什么是编译器？
+</h3><p>&ldquo;编译器只是一段程序，用来将编程语言 A 翻译成编程语言 B。&ldquo;简而言之，它将人可读的高级语言（C、Python）转化为机器可执行的低级指令（二进制）。</p>
+<p>编译器出现的根本原因：直接用二进制编写程序太痛苦了。1957 年第一个编译器 IBM Fortran 诞生，此后编译器经历了六个发展阶段：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>阶段</th>
+          <th>年代</th>
+          <th>关键事件</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>第一阶段</td>
+          <td>1950s</td>
+          <td>第一个编译器，将算术公式翻为机器码</td>
+      </tr>
+      <tr>
+          <td>第二阶段</td>
+          <td>1960s</td>
+          <td>Fortran、COBOL、LISP 等多种语言和编译器涌现</td>
+      </tr>
+      <tr>
+          <td>第三阶段</td>
+          <td>1970s</td>
+          <td>结构化编程（Pascal、C），注重可读性与可维护性</td>
+      </tr>
+      <tr>
+          <td>第四阶段</td>
+          <td>1980s</td>
+          <td>并行/分布式语言（Ada、Prolog），关注并行能力</td>
+      </tr>
+      <tr>
+          <td>第五阶段</td>
+          <td>1990s</td>
+          <td>跨平台/动态特性（Java、C#、Python），关注安全与效率</td>
+      </tr>
+      <tr>
+          <td>第六阶段</td>
+          <td>2000s~</td>
+          <td>AI 框架爆发（Torch→TF→PyTorch），AKG、MLIR 等 AI 编译器涌现</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>编译器基本构成：<strong>前端 → 优化器 → 后端</strong></p>
+<p><img src="/images/ai_system/ch8/ai_system.pdf-0330-07.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图8.2.4 编译器三段式架构"
+	
+	
+></p>
+<h3 id="822-gcc-vs-llvmclang">8.2.2 GCC vs LLVM/Clang
+</h3><p>两大编译器巨头的对比：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>维度</th>
+          <th>GCC</th>
+          <th>Clang/LLVM</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>开源协议</td>
+          <td>GNU GPL</td>
+          <td>Apache 2.0</td>
+      </tr>
+      <tr>
+          <td>代码架构</td>
+          <td>一体化（紧耦合）</td>
+          <td>模块化（库化）</td>
+      </tr>
+      <tr>
+          <td>支持平台</td>
+          <td>UNIX、Windows、Mac</td>
+          <td>UNIX、Mac</td>
+      </tr>
+      <tr>
+          <td>前端语言</td>
+          <td>C/C++/Fortran/Java/Go 等</td>
+          <td>主要 C/C++/Obj-C</td>
+      </tr>
+      <tr>
+          <td>构建工具</td>
+          <td>Make</td>
+          <td>CMake</td>
+      </tr>
+      <tr>
+          <td>调试器</td>
+          <td>GDB</td>
+          <td>LLDB</td>
+      </tr>
+      <tr>
+          <td>错误提示</td>
+          <td>较晦涩</td>
+          <td>清晰，含修复建议</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>GCC 兼容性最强（跨平台事实标准），但代码耦合度高、难以独立复用。苹果因为 GCC 对 Objective-C 支持不力且代码难拆分，2005 年启动 Clang 项目，基于 LLVM 构建了全新的编译器体系。</p>
+</blockquote>
+<hr>
+<h2 id="83-gcc-编译流程详解">8.3 GCC 编译流程详解
+</h2><p>GCC 的编译过程分为四个阶段：<strong>预处理 → 编译 → 汇编 → 链接</strong></p>
+<p><img src="/images/ai_system/ch8/ai_system.pdf-0334-09.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图8.3.1 GCC编译流程"
+	
+	
+></p>
+<p><strong>① 预处理（.c → .i）</strong></p>
+<ul>
+<li>头文件展开、宏替换（<code>#define HELLOWORD</code> → <code>&quot;hello world\n&quot;</code>）</li>
+<li>条件编译判断（<code>#if</code>、<code>#ifdef</code>）</li>
+<li>删除注释和多余空白</li>
+<li>保留 <code>#pragma</code> 指令</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">gcc -E hello.c -o hello.i
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>② 编译（.i → .s）</strong></p>
+<ul>
+<li>词法分析、语法分析、语义分析</li>
+<li>将预处理后的代码转成<strong>汇编代码</strong>（.s 文件）</li>
+<li>这是 GCC 前端的主要工作</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">gcc -S hello.i -o hello.s
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>③ 汇编（.s → .o）</strong></p>
+<ul>
+<li>汇编器（as）将汇编代码转成<strong>机器指令</strong></li>
+<li>生成可重定位目标文件（.o）</li>
+<li>这是 GCC 后端的核心工作</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">gcc -c hello.s -o hello.o
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>④ 链接（.o → 可执行文件）</strong></p>
+<ul>
+<li>链接器将目标文件 + 库文件 → 可执行文件</li>
+<li><strong>静态链接</strong>：库函数直接复制进可执行文件（体积大、独立运行）</li>
+<li><strong>动态链接</strong>：只记录文件名，运行时加载动态库（体积小、依赖环境）</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">gcc -o hello.o -o hello
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>使用 <code>gcc -v hello.c -o hello</code> 可查看完整编译过程。</p>
+</blockquote>
+<hr>
+<h2 id="84-llvm-架构设计">8.4 LLVM 架构设计
+</h2><h3 id="841-llvm-发展历程">8.4.1 LLVM 发展历程
+</h3><p>LLVM 起源自 2000 年伊利诺伊大学的研究项目，最初全称是&quot;低级虚拟机（Low Level Virtual Machine）&quot;。2005 年苹果雇佣了 LLVM 之父 Chris Lattner 为 MacOS/iOS 构建开发工具，LLVM 从此成为苹果生态的核心组件。</p>
+<blockquote>
+<p>如今 LLVM 已不再只是&quot;虚拟机&rdquo;——它已发展为包含 LLVM IR、LLVM 调试工具、C++ 标准库等在内的庞大编译器工具集合品牌。</p>
+</blockquote>
+<h3 id="842-llvm-架构特点模块化--统一-ir">8.4.2 LLVM 架构特点：模块化 + 统一 IR
+</h3><p>LLVM 最大的创新在于：<strong>组件独立、库化架构、统一 IR</strong>。</p>
+<ul>
+<li>前端工程师只需实现前端 → 产生 IR，无需关心后端</li>
+<li>后端工程师只需对接目标硬件特性与 IR，无需关心前端</li>
+<li><strong>核心纽带就是统一的 LLVM IR</strong></li>
+</ul>
+<p><img src="/images/ai_system/ch8/ai_system.pdf-0339-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图8.4.1 GCC IR 对应关系"
+	
+	
+></p>
+<blockquote>
+<p>传统 GCC 中每种语言和每种硬件之间是多对多映射（m × n 种编译器），LLVM 通过统一 IR 简化为 m + n 种编译器——这是质变。</p>
+</blockquote>
+<p><img src="/images/ai_system/ch8/ai_system.pdf-0340-09.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图8.4.3 LLVM 整体架构"
+	
+	
+></p>
+<p>LLVM 的 Clang 前端将 C/C++/Obj-C 代码经过：</p>
+<ol>
+<li><strong>词法分析</strong> → 生成 token 流</li>
+<li><strong>语法分析</strong> → 构建 AST（抽象语法树）</li>
+<li><strong>语义分析</strong> → 类型检查，生成 LLVM IR</li>
+</ol>
+<p>优化层通过多个 <strong>Pass</strong> 提升 IR 性能：常量折叠、循环优化、死代码消除等。</p>
+<p>后端负责将优化后的 IR 转为目标机器码：指令选择 → 寄存器分配 → 指令调度 → 代码生成。</p>
+<p><img src="/images/ai_system/ch8/ai_system.pdf-0341-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图8.4.5 LLVM 详细架构"
+	
+	
+></p>
+<p><img src="/images/ai_system/ch8/ai_system.pdf-0341-14.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图8.4.6 LLVM IR 全流程"
+	
+	
+></p>
+<blockquote>
+<p>LLVM IR 流程：C 代码 → 预处理 → .ll/.bc 文件 → llc 工具 → 汇编代码 → 链接 → 可执行文件。</p>
+</blockquote>
+<hr>
+<h2 id="85-llvm-ir-详解">8.5 LLVM IR 详解
+</h2><h3 id="851-什么是-llvm-ir">8.5.1 什么是 LLVM IR？
+</h3><p>LLVM IR 是 LLVM 的核心——它是一种类似汇编的底层语言，但<strong>强类型、精简指令集（RISC）风格、平台无关</strong>。</p>
+<p><img src="/images/ai_system/ch8/ai_system.pdf-0344-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图8.5.1 AST IR 表示"
+	
+	
+></p>
+<blockquote>
+<p>IR 不只有一种形态：前端出 AST 形的 IR，中端优化后出 DAG 图给后端——IR 是&quot;抽象表达&rdquo;，没有固定形态。</p>
+</blockquote>
+<p>LLVM IR 的优势：</p>
+<ul>
+<li><strong>更独立</strong>：可在编译器之外的工具中重用（如静态分析器）</li>
+<li><strong>更正式</strong>：有明确定义的 C++ API</li>
+<li><strong>更接近硬件</strong>：提供类似 RISC-V 的模拟指令集 + 强类型，底层又足够灵活</li>
+</ul>
+<h3 id="852-llvm-ir-示例">8.5.2 LLVM IR 示例
+</h3><p>以下 C 代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">test</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">,</span> <span class="kt">int</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>编译为 LLVM IR（<code>clang -S -emit-llvm test.c</code>）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-llvm" data-lang="llvm"><span class="line"><span class="cl"><span class="k">define</span> <span class="err">dso_local</span> <span class="kt">void</span> <span class="vg">@test</span><span class="p">(</span><span class="k">i32</span> <span class="err">no</span><span class="k">undef</span> <span class="n">%0</span><span class="p">,</span> <span class="k">i32</span> <span class="err">no</span><span class="k">undef</span> <span class="n">%1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">%3</span> <span class="p">=</span> <span class="k">alloca</span> <span class="k">i32</span><span class="p">,</span> <span class="k">align</span> <span class="m">4</span>     <span class="c">; 局部变量
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>  <span class="n">%4</span> <span class="p">=</span> <span class="k">alloca</span> <span class="k">i32</span><span class="p">,</span> <span class="k">align</span> <span class="m">4</span>
+</span></span><span class="line"><span class="cl">  <span class="n">%5</span> <span class="p">=</span> <span class="k">alloca</span> <span class="k">i32</span><span class="p">,</span> <span class="k">align</span> <span class="m">4</span>
+</span></span><span class="line"><span class="cl">  <span class="k">store</span> <span class="k">i32</span> <span class="n">%0</span><span class="p">,</span> <span class="err">ptr</span> <span class="n">%3</span><span class="p">,</span> <span class="k">align</span> <span class="m">4</span> <span class="c">; a 存入
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>  <span class="k">store</span> <span class="k">i32</span> <span class="n">%1</span><span class="p">,</span> <span class="err">ptr</span> <span class="n">%4</span><span class="p">,</span> <span class="k">align</span> <span class="m">4</span> <span class="c">; b 存入
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>  <span class="n">%6</span> <span class="p">=</span> <span class="k">load</span> <span class="k">i32</span><span class="p">,</span> <span class="err">ptr</span> <span class="n">%3</span><span class="p">,</span> <span class="k">align</span> <span class="m">4</span>
+</span></span><span class="line"><span class="cl">  <span class="n">%7</span> <span class="p">=</span> <span class="k">load</span> <span class="k">i32</span><span class="p">,</span> <span class="err">ptr</span> <span class="n">%4</span><span class="p">,</span> <span class="k">align</span> <span class="m">4</span>
+</span></span><span class="line"><span class="cl">  <span class="n">%8</span> <span class="p">=</span> <span class="k">add</span> <span class="k">nsw</span> <span class="k">i32</span> <span class="n">%6</span><span class="p">,</span> <span class="n">%7</span>      <span class="c">; c = a + b
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>  <span class="k">store</span> <span class="k">i32</span> <span class="n">%8</span><span class="p">,</span> <span class="err">ptr</span> <span class="n">%5</span><span class="p">,</span> <span class="k">align</span> <span class="m">4</span>
+</span></span><span class="line"><span class="cl">  <span class="k">ret</span> <span class="kt">void</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>基本语法：<code>@</code> 表示全局，<code>%</code> 表示局部变量，<code>alloca</code> 分配栈内存，<code>store</code>/<code>load</code> 读写，<code>add</code> 运算，<code>i32</code> 是 32 位整数，<code>align</code> 是字节对齐。</p>
+</blockquote>
+<h3 id="853-三地址码tac">8.5.3 三地址码（TAC）
+</h3><p>LLVM IR 采用<strong>三地址码</strong>格式——每条指令最多三个操作数：两个源 + 一个目标。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">%result = add i32 %a, %b
+</span></span><span class="line"><span class="cl">→ 四元组表示: (add, %a, %b, %result)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>三地址码的优点：<strong>简单、清晰、便于优化</strong>（常量折叠、死代码消除、寄存器分配都依赖这种格式）。</p>
+<h3 id="854-llvm-ir-设计原则">8.5.4 LLVM IR 设计原则
+</h3><ul>
+<li><strong>SSA（静态单赋值）</strong>：每个变量只被赋值一次，极大简化数据流分析和优化</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-llvm" data-lang="llvm"><span class="line"><span class="cl"><span class="c">; 错误（非 SSA）：%0 被赋值两次
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="n">%0</span> <span class="p">=</span> <span class="k">mul</span> <span class="k">i32</span> <span class="m">1</span><span class="p">,</span> <span class="m">2</span>
+</span></span><span class="line"><span class="cl"><span class="n">%0</span> <span class="p">=</span> <span class="k">add</span> <span class="k">i32</span> <span class="n">%0</span><span class="p">,</span> <span class="m">3</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c">; 正确（SSA）：
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="n">%0</span> <span class="p">=</span> <span class="k">mul</span> <span class="k">i32</span> <span class="m">1</span><span class="p">,</span> <span class="m">2</span>
+</span></span><span class="line"><span class="cl"><span class="n">%1</span> <span class="p">=</span> <span class="k">add</span> <span class="k">i32</span> <span class="n">%0</span><span class="p">,</span> <span class="m">3</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>强类型系统</strong>：每个值都有明确类型（i32、float、struct 等）</li>
+<li><strong>模块化设计</strong>：Module → Function → BasicBlock → Instruction 四级结构</li>
+<li><strong>目标无关</strong>：IR 不依赖具体 CPU 架构，后端负责翻译</li>
+</ul>
+<hr>
+<h2 id="86-llvm-前端clang-深度解析">8.6 LLVM 前端——Clang 深度解析
+</h2><p><img src="/images/ai_system/ch8/ai_system.pdf-0354-11.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图8.7.1 Clang 前端流程"
+	
+	
+></p>
+<p>Clang 前端三步：</p>
+<p><strong>① 词法分析（Lexical Analysis）</strong></p>
+<p>将源代码分解为 token 流（关键字、标识符、运算符、常量等），并精确记录每个 token 在源文件的位置。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">clang -cc1 -dump-tokens hello.c
+</span></span><span class="line"><span class="cl"><span class="c1"># 输出：int &#39;int&#39; Loc=&lt;hello.c:5:1&gt;  identifier &#39;main&#39; Loc=&lt;hello.c:5:5&gt; ...</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>② 语法分析（Syntax Analysis）</strong></p>
+<p>根据语法规则将 token 流组织成 <strong>AST（抽象语法树）</strong>。只验证结构，不做语义判断。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">clang -fsyntax-only -Xclang -ast-dump hello.c
+</span></span><span class="line"><span class="cl"><span class="c1"># 输出：FunctionDecl、ParmVarDecl、CompoundStmt、ReturnStmt 等 AST 节点</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>③ 语义分析（Semantic Analysis）</strong></p>
+<p>借助符号表检查类型匹配、变量声明范围、函数调用正确性等——确保代码&quot;意思是对的&quot;。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">a</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">a</span><span class="p">[</span><span class="mi">5</span><span class="p">];</span>  <span class="c1">// ❌ error: redefinition of &#39;a&#39; with a different type
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>语义分析输出的是<strong>类型无误的 AST</strong>，作为编译器后端的输入。</p>
+</blockquote>
+<hr>
+<h2 id="87-llvm-优化层pass-机制">8.7 LLVM 优化层——Pass 机制
+</h2><p>LLVM 优化层输入 AST，输出 DAG 图。每一种优化方式称为一个 <strong>Pass</strong>。</p>
+<ul>
+<li><strong>Analysis Pass</strong>：只读分析（如计算支配树 DominatorTree）</li>
+<li><strong>Transform Pass</strong>：修改 IR（如死代码消除 ADCE、常量合并 MDGC）</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">clang -emit-llvm -c hello.c -o hello.bc
+</span></span><span class="line"><span class="cl">opt -passes<span class="o">=</span><span class="s1">&#39;instcount,adce,mdgc&#39;</span> -o hello-tmp.bc hello.bc -stats
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Pass 依赖关系：</p>
+<ul>
+<li><strong>显式依赖</strong>：Pass 管理器自动安排依赖的 Pass 先运行</li>
+<li><strong>隐式依赖</strong>：需手动按正确顺序将 Pass 加入队列</li>
+</ul>
+<hr>
+<h2 id="88-llvm-后端代码生成">8.8 LLVM 后端——代码生成
+</h2><p>后端将优化后的 IR 转换为目标平台的机器码，涉及四层指令表示：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>层级</th>
+          <th>表示</th>
+          <th>描述</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>1</td>
+          <td>LLVM IR</td>
+          <td>高级抽象，平台无关</td>
+      </tr>
+      <tr>
+          <td>2</td>
+          <td>SelectionDAG 节点</td>
+          <td>基本块级的数据流依赖图</td>
+      </tr>
+      <tr>
+          <td>3</td>
+          <td>MachineInstr</td>
+          <td>机器相关的三地址指令</td>
+      </tr>
+      <tr>
+          <td>4</td>
+          <td>MCInst</td>
+          <td>最终二进制编码指令</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><img src="/images/ai_system/ch8/ai_system.pdf-0360-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图8.8.1 LLVM 后端 Pipeline"
+	
+	
+></p>
+<blockquote>
+<p>白色 Pass 非必要，灰色 Pass 必要。越往下越接近真实硬件指令。</p>
+</blockquote>
+<h3 id="关键步骤">关键步骤
+</h3><p><strong>① 指令选择（Instruction Selection）</strong></p>
+<p>将 LLVM IR 转为目标特定的 SelectionDAG 节点 → 用树模式匹配算法选出最优指令序列。</p>
+<p><img src="/images/ai_system/ch8/ai_system.pdf-0361-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图8.8.2 SelectionDAG 节点示例"
+	
+	
+></p>
+<ul>
+<li>灰色粗实线 = 强顺序约束（相邻指令必须紧挨）</li>
+<li>虚线 = 非数据流链（强制顺序）</li>
+</ul>
+<p><strong>② 寄存器分配</strong></p>
+<p>虚拟寄存器 → 物理寄存器映射。物理寄存器有限，溢出时需&quot;spill&quot;到内存。关键算法：线性扫描分配、图着色分配。</p>
+<p><strong>③ 指令调度</strong></p>
+<ul>
+<li><strong>Pre-RA 调度</strong>：寄存器分配前，最大化并行度</li>
+<li><strong>Post-RA 调度</strong>：寄存器分配后，处理资源冲突、插入填充指令</li>
+</ul>
+<p><strong>④ 代码输出</strong></p>
+<p>指令融合 → 启发式优化 → 循环优化 → 生成汇编/机器码。</p>
+<hr>
+<h2 id="89-llvm-编译器全流程回顾">8.9 LLVM 编译器全流程回顾
+</h2><p><img src="/images/ai_system/ch8/ai_system.pdf-0364-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图8.8.3 LLVM 全流程"
+	
+	
+></p>
+<p>整个编译生命周期：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">C/C++ 源码
+</span></span><span class="line"><span class="cl">  ↓ [Clang 前端]
+</span></span><span class="line"><span class="cl">词法分析 → token 流
+</span></span><span class="line"><span class="cl">语法分析 → AST
+</span></span><span class="line"><span class="cl">语义分析 → 类型无误的 AST
+</span></span><span class="line"><span class="cl">  ↓
+</span></span><span class="line"><span class="cl">LLVM IR（SSA 形式的三地址码）
+</span></span><span class="line"><span class="cl">  ↓ [Pass 优化]
+</span></span><span class="line"><span class="cl">常量传播、死代码消除、循环优化...
+</span></span><span class="line"><span class="cl">  ↓
+</span></span><span class="line"><span class="cl">DAG 图
+</span></span><span class="line"><span class="cl">  ↓ [后端]
+</span></span><span class="line"><span class="cl">指令选择 → 寄存器分配 → 指令调度 → 代码输出
+</span></span><span class="line"><span class="cl">  ↓
+</span></span><span class="line"><span class="cl">目标机器码（x86 / ARM / ...）
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="小结与思考">小结与思考
+</h2><p>这一章从编译器最基础的概念讲起，一路深入到 GCC 编译四阶段、LLVM 模块化架构和 LLVM IR 的精妙设计。最后回顾几个关键问题：</p>
+<ul>
+<li>
+<p><strong>编译器和解释器的本质区别是什么？</strong> 编译器在运行前一次性翻译整个程序（快但不够灵活），解释器边运行边翻译（灵活但慢）。AI 框架中 AOT 和 JIT 各有适用场景——移动端推理偏 AOT，训练/调试偏 JIT。</p>
+</li>
+<li>
+<p><strong>为什么 LLVM 能取代 GCC 成为苹果首选？</strong> 模块化 + 统一 IR。GCC 紧耦合、难拆分，LLVM 前后端独立、复用性强——新增语言只需写前端，新增硬件只需写后端。</p>
+</li>
+<li>
+<p><strong>LLVM IR 最核心的设计理念是什么？</strong> ① SSA（静态单赋值）简化数据流分析；② 三地址码提供简洁统一的指令表示；③ 平台无关——所有优化在 IR 层完成，后端只做翻译。</p>
+</li>
+<li>
+<p><strong>Pass 机制为什么重要？</strong> Pass 是编译优化的最小单元，通过 PassManager 灵活组合分析 Pass 和转换 Pass，形成完整优化流水线——这种机制也被 AI 编译器（如 MLIR）广泛使用。</p>
+</li>
+</ul>
+<blockquote>
+<p>理解传统编译器是理解 AI 编译器的基础。下一章将直接进入 AI 编译器的世界——看看 AI 框架如何将&quot;神经网络&quot;编译成&quot;芯片上的计算图&quot;。</p>
+</blockquote>
+<hr>
+<p><em>下一篇预告：第9章将进入 AI 编译器的世界，探讨为什么 AI 芯片时代迫切需要新一代编译器。</em></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ai-system/">AI System</a>
+        
+            <a href="/tags/compiler/">Compiler</a>
+        
+            <a href="/tags/gcc/">GCC</a>
+        
+            <a href="/tags/llvm/">LLVM</a>
+        
+            <a href="/tags/clang/">Clang</a>
+        
+            <a href="/tags/ir/">IR</a>
+        
+            <a href="/tags/ai-infra/">AI Infra</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第1章 AI系统概述</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC2%E7%AB%A0-ai%E8%AE%A1%E7%AE%97%E4%BD%93%E7%B3%BB/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第2章 AI计算体系</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC5%E7%AB%A0-tpu%E4%BB%A5%E8%B0%B7%E6%AD%8C%E4%B8%BA%E4%BE%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第5章 TPU——以谷歌为例</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC6%E7%AB%A0-npu%E4%BB%A5%E6%98%87%E8%85%BE%E4%B8%BA%E4%BE%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第6章 NPU——以昇腾为例</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC7%E7%AB%A0-ai%E8%8A%AF%E7%89%87%E6%80%9D%E8%80%83%E4%B8%8E%E5%B1%95%E6%9C%9B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第7章 AI芯片思考与展望</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

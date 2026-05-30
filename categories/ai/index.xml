@@ -3333,6 +3333,717 @@
 &lt;p&gt;&lt;em&gt;下一篇预告：第 8 章将进入传统编译器与 LLVM 的世界。理解 GCC 的编译四阶段和 LLVM 的模块化 IR 设计，是理解 AI 编译器（TVM、MLIR）的必修课。&lt;/em&gt;&lt;/p&gt;
 </description>
         </item>
+        <item>
+        <title>AI系统：第8章 传统编译器</title>
+        <link>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC8%E7%AB%A0-%E4%BC%A0%E7%BB%9F%E7%BC%96%E8%AF%91%E5%99%A8/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC8%E7%AB%A0-%E4%BC%A0%E7%BB%9F%E7%BC%96%E8%AF%91%E5%99%A8/</guid>
+        <description>&lt;h2 id=&#34;本章概览&#34;&gt;本章概览
+&lt;/h2&gt;&lt;p&gt;如果说 AI 芯片是&amp;quot;发动机&amp;quot;，那编译器就是&amp;quot;翻译官&amp;quot;——它把程序员写的高级语言转化为芯片能直接执行的机器码。在 AI 系统栈中，AI 编译器正变得越来越重要，而要理解 AI 编译器，必须先理解传统编译器。&lt;/p&gt;
+&lt;p&gt;本章从零开始讲编译器：什么是编译器？它和解释器有什么区别？JIT 和 AOT 分别适合什么场景？Pass 和 IR 扮演什么角色？——打好这些基础后，我们深入两大开源编译器 &lt;strong&gt;GCC&lt;/strong&gt; 和 &lt;strong&gt;LLVM/Clang&lt;/strong&gt;，理解它们的架构设计、编译流程、优化策略，以及 LLVM IR 的精妙之处。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;编译技术是计算机科学皇冠上的一颗明珠——它是连接&amp;quot;人写的代码&amp;quot;与&amp;quot;机器运行的程序&amp;quot;的桥梁。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;81-编译器基础概念&#34;&gt;8.1 编译器基础概念
+&lt;/h2&gt;&lt;h3 id=&#34;811-编译器-vs-解释器&#34;&gt;8.1.1 编译器 vs 解释器
+&lt;/h3&gt;&lt;p&gt;编译器（Compiler）和解释器（Interpreter）都能将高级语言转换为机器语言，本质区别在于&lt;strong&gt;时机&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;编译器&lt;/strong&gt;：在程序运行&lt;strong&gt;之前&lt;/strong&gt;把整个源代码一次性翻译成机器码（如 C、C++ → 可执行文件）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;解释器&lt;/strong&gt;：在程序运行&lt;strong&gt;之时&lt;/strong&gt;逐行翻译并执行（如 Python、JavaScript）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch8/ai_system.pdf-0321-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图8.1.1 编译器特点&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;编译器 = 整体翻译（先翻译完再执行）→ 快但不够灵活；解释器 = 同声传译（边翻译边执行）→ 灵活但慢。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;当前主流开源编译器（LLVM、GCC）通常采用三段式架构：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;前端（Frontend）&lt;/strong&gt;：词法分析 → 语法分析 → 语义分析 → 生成中间代码（IR）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;中间优化器（Optimizer）&lt;/strong&gt;：对 IR 做各种优化（去冗余、子表达式消除等）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;后端（Backend）&lt;/strong&gt;：将优化后的 IR 针对具体硬件生成目标机器码&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;812-jit-与-aot-编译方式&#34;&gt;8.1.2 JIT 与 AOT 编译方式
+&lt;/h3&gt;&lt;p&gt;程序有两种运行方式：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;AOT（Ahead of Time，提前编译）&lt;/strong&gt;：代码执行前全部翻译为机器码。代表：C/C++ 应用。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;JIT（Just in Time，即时编译）&lt;/strong&gt;：边翻译边运行。代表：JavaScript、Python、PyTorch JIT。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch8/ai_system.pdf-0322-09.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图8.1.3 JIT编译方式&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch8/ai_system.pdf-0322-10.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图8.1.4 AOT编译方式&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;维度&lt;/th&gt;
+          &lt;th&gt;JIT&lt;/th&gt;
+          &lt;th&gt;AOT&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;优点&lt;/td&gt;
+          &lt;td&gt;可据当前硬件实时优化；可据运行情况动态调优；支持动态链接&lt;/td&gt;
+          &lt;td&gt;无运行时编译开销；启动即达最高性能；执行快&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;缺点&lt;/td&gt;
+          &lt;td&gt;占用运行时资源、可能卡顿；初始编译耗时&lt;/td&gt;
+          &lt;td&gt;安装时间增加；占用更多内存；牺牲部分一致性&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在 AI 框架中，TensorFlow（静态图）偏向 AOT，PyTorch 2.X（Inductor）和计图（Jittor）偏向 JIT。两者并不互斥——MLIR + TensorFlow 同时支持 AOT 和 JIT。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;813-pass-与中间表示-ir&#34;&gt;8.1.3 Pass 与中间表示 IR
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;Pass&lt;/strong&gt; 是编译器对程序的一次完整扫描或处理——可以理解为编译器流水线上的一道&amp;quot;工序&amp;quot;。LLVM 中的 Pass 分三类：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Analysis Pass&lt;/strong&gt;：只分析、不修改 IR（如收集程序信息）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Transform Pass&lt;/strong&gt;：修改和优化 IR（如函数内联 Inline）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Utility Pass&lt;/strong&gt;：辅助工具类 Pass&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch8/ai_system.pdf-0325-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图8.1.5 Pass Pipeline&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Pass 由 PassManager 统一调度，多个 Pass 组成优化流水线（Pipeline）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;IR（中间表示）&lt;/strong&gt; 是编译器最核心的数据结构。编译器的前端、优化器、后端之间&lt;strong&gt;唯一交换的数据就是 IR&lt;/strong&gt;——这实现了模块解耦。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch8/ai_system.pdf-0326-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图8.1.6 编译器前端与后端&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;IR 按抽象层级分为三层：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;HIR（High IR）&lt;/strong&gt;：靠近源码，适合源码级分析（如 AST）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;MIR（Middle IR）&lt;/strong&gt;：与源码和目标平台都无关，适合通用优化（如三地址码 TAC）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;LIR（Low IR）&lt;/strong&gt;：靠近机器指令，适合硬件相关优化&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;多层 IR 的核心优势：保留更多源码信息、优化更灵活、Pass 执行更高效。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;82-传统编译器介绍&#34;&gt;8.2 传统编译器介绍
+&lt;/h2&gt;&lt;h3 id=&#34;821-什么是编译器&#34;&gt;8.2.1 什么是编译器？
+&lt;/h3&gt;&lt;p&gt;&amp;ldquo;编译器只是一段程序，用来将编程语言 A 翻译成编程语言 B。&amp;ldquo;简而言之，它将人可读的高级语言（C、Python）转化为机器可执行的低级指令（二进制）。&lt;/p&gt;
+&lt;p&gt;编译器出现的根本原因：直接用二进制编写程序太痛苦了。1957 年第一个编译器 IBM Fortran 诞生，此后编译器经历了六个发展阶段：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;阶段&lt;/th&gt;
+          &lt;th&gt;年代&lt;/th&gt;
+          &lt;th&gt;关键事件&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;第一阶段&lt;/td&gt;
+          &lt;td&gt;1950s&lt;/td&gt;
+          &lt;td&gt;第一个编译器，将算术公式翻为机器码&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;第二阶段&lt;/td&gt;
+          &lt;td&gt;1960s&lt;/td&gt;
+          &lt;td&gt;Fortran、COBOL、LISP 等多种语言和编译器涌现&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;第三阶段&lt;/td&gt;
+          &lt;td&gt;1970s&lt;/td&gt;
+          &lt;td&gt;结构化编程（Pascal、C），注重可读性与可维护性&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;第四阶段&lt;/td&gt;
+          &lt;td&gt;1980s&lt;/td&gt;
+          &lt;td&gt;并行/分布式语言（Ada、Prolog），关注并行能力&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;第五阶段&lt;/td&gt;
+          &lt;td&gt;1990s&lt;/td&gt;
+          &lt;td&gt;跨平台/动态特性（Java、C#、Python），关注安全与效率&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;第六阶段&lt;/td&gt;
+          &lt;td&gt;2000s~&lt;/td&gt;
+          &lt;td&gt;AI 框架爆发（Torch→TF→PyTorch），AKG、MLIR 等 AI 编译器涌现&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;编译器基本构成：&lt;strong&gt;前端 → 优化器 → 后端&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch8/ai_system.pdf-0330-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图8.2.4 编译器三段式架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;822-gcc-vs-llvmclang&#34;&gt;8.2.2 GCC vs LLVM/Clang
+&lt;/h3&gt;&lt;p&gt;两大编译器巨头的对比：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;维度&lt;/th&gt;
+          &lt;th&gt;GCC&lt;/th&gt;
+          &lt;th&gt;Clang/LLVM&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;开源协议&lt;/td&gt;
+          &lt;td&gt;GNU GPL&lt;/td&gt;
+          &lt;td&gt;Apache 2.0&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;代码架构&lt;/td&gt;
+          &lt;td&gt;一体化（紧耦合）&lt;/td&gt;
+          &lt;td&gt;模块化（库化）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;支持平台&lt;/td&gt;
+          &lt;td&gt;UNIX、Windows、Mac&lt;/td&gt;
+          &lt;td&gt;UNIX、Mac&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;前端语言&lt;/td&gt;
+          &lt;td&gt;C/C++/Fortran/Java/Go 等&lt;/td&gt;
+          &lt;td&gt;主要 C/C++/Obj-C&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;构建工具&lt;/td&gt;
+          &lt;td&gt;Make&lt;/td&gt;
+          &lt;td&gt;CMake&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;调试器&lt;/td&gt;
+          &lt;td&gt;GDB&lt;/td&gt;
+          &lt;td&gt;LLDB&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;错误提示&lt;/td&gt;
+          &lt;td&gt;较晦涩&lt;/td&gt;
+          &lt;td&gt;清晰，含修复建议&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;GCC 兼容性最强（跨平台事实标准），但代码耦合度高、难以独立复用。苹果因为 GCC 对 Objective-C 支持不力且代码难拆分，2005 年启动 Clang 项目，基于 LLVM 构建了全新的编译器体系。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;83-gcc-编译流程详解&#34;&gt;8.3 GCC 编译流程详解
+&lt;/h2&gt;&lt;p&gt;GCC 的编译过程分为四个阶段：&lt;strong&gt;预处理 → 编译 → 汇编 → 链接&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch8/ai_system.pdf-0334-09.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图8.3.1 GCC编译流程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;① 预处理（.c → .i）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;头文件展开、宏替换（&lt;code&gt;#define HELLOWORD&lt;/code&gt; → &lt;code&gt;&amp;quot;hello world\n&amp;quot;&lt;/code&gt;）&lt;/li&gt;
+&lt;li&gt;条件编译判断（&lt;code&gt;#if&lt;/code&gt;、&lt;code&gt;#ifdef&lt;/code&gt;）&lt;/li&gt;
+&lt;li&gt;删除注释和多余空白&lt;/li&gt;
+&lt;li&gt;保留 &lt;code&gt;#pragma&lt;/code&gt; 指令&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;gcc -E hello.c -o hello.i
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;② 编译（.i → .s）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;词法分析、语法分析、语义分析&lt;/li&gt;
+&lt;li&gt;将预处理后的代码转成&lt;strong&gt;汇编代码&lt;/strong&gt;（.s 文件）&lt;/li&gt;
+&lt;li&gt;这是 GCC 前端的主要工作&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;gcc -S hello.i -o hello.s
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;③ 汇编（.s → .o）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;汇编器（as）将汇编代码转成&lt;strong&gt;机器指令&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;生成可重定位目标文件（.o）&lt;/li&gt;
+&lt;li&gt;这是 GCC 后端的核心工作&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;gcc -c hello.s -o hello.o
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;④ 链接（.o → 可执行文件）&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;链接器将目标文件 + 库文件 → 可执行文件&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;静态链接&lt;/strong&gt;：库函数直接复制进可执行文件（体积大、独立运行）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;动态链接&lt;/strong&gt;：只记录文件名，运行时加载动态库（体积小、依赖环境）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;gcc -o hello.o -o hello
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;使用 &lt;code&gt;gcc -v hello.c -o hello&lt;/code&gt; 可查看完整编译过程。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;84-llvm-架构设计&#34;&gt;8.4 LLVM 架构设计
+&lt;/h2&gt;&lt;h3 id=&#34;841-llvm-发展历程&#34;&gt;8.4.1 LLVM 发展历程
+&lt;/h3&gt;&lt;p&gt;LLVM 起源自 2000 年伊利诺伊大学的研究项目，最初全称是&amp;quot;低级虚拟机（Low Level Virtual Machine）&amp;quot;。2005 年苹果雇佣了 LLVM 之父 Chris Lattner 为 MacOS/iOS 构建开发工具，LLVM 从此成为苹果生态的核心组件。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;如今 LLVM 已不再只是&amp;quot;虚拟机&amp;rdquo;——它已发展为包含 LLVM IR、LLVM 调试工具、C++ 标准库等在内的庞大编译器工具集合品牌。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;842-llvm-架构特点模块化--统一-ir&#34;&gt;8.4.2 LLVM 架构特点：模块化 + 统一 IR
+&lt;/h3&gt;&lt;p&gt;LLVM 最大的创新在于：&lt;strong&gt;组件独立、库化架构、统一 IR&lt;/strong&gt;。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;前端工程师只需实现前端 → 产生 IR，无需关心后端&lt;/li&gt;
+&lt;li&gt;后端工程师只需对接目标硬件特性与 IR，无需关心前端&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;核心纽带就是统一的 LLVM IR&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch8/ai_system.pdf-0339-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图8.4.1 GCC IR 对应关系&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;传统 GCC 中每种语言和每种硬件之间是多对多映射（m × n 种编译器），LLVM 通过统一 IR 简化为 m + n 种编译器——这是质变。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch8/ai_system.pdf-0340-09.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图8.4.3 LLVM 整体架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;LLVM 的 Clang 前端将 C/C++/Obj-C 代码经过：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;词法分析&lt;/strong&gt; → 生成 token 流&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;语法分析&lt;/strong&gt; → 构建 AST（抽象语法树）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;语义分析&lt;/strong&gt; → 类型检查，生成 LLVM IR&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;优化层通过多个 &lt;strong&gt;Pass&lt;/strong&gt; 提升 IR 性能：常量折叠、循环优化、死代码消除等。&lt;/p&gt;
+&lt;p&gt;后端负责将优化后的 IR 转为目标机器码：指令选择 → 寄存器分配 → 指令调度 → 代码生成。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch8/ai_system.pdf-0341-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图8.4.5 LLVM 详细架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch8/ai_system.pdf-0341-14.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图8.4.6 LLVM IR 全流程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;LLVM IR 流程：C 代码 → 预处理 → .ll/.bc 文件 → llc 工具 → 汇编代码 → 链接 → 可执行文件。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;85-llvm-ir-详解&#34;&gt;8.5 LLVM IR 详解
+&lt;/h2&gt;&lt;h3 id=&#34;851-什么是-llvm-ir&#34;&gt;8.5.1 什么是 LLVM IR？
+&lt;/h3&gt;&lt;p&gt;LLVM IR 是 LLVM 的核心——它是一种类似汇编的底层语言，但&lt;strong&gt;强类型、精简指令集（RISC）风格、平台无关&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch8/ai_system.pdf-0344-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图8.5.1 AST IR 表示&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;IR 不只有一种形态：前端出 AST 形的 IR，中端优化后出 DAG 图给后端——IR 是&amp;quot;抽象表达&amp;rdquo;，没有固定形态。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;LLVM IR 的优势：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;更独立&lt;/strong&gt;：可在编译器之外的工具中重用（如静态分析器）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;更正式&lt;/strong&gt;：有明确定义的 C++ API&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;更接近硬件&lt;/strong&gt;：提供类似 RISC-V 的模拟指令集 + 强类型，底层又足够灵活&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;852-llvm-ir-示例&#34;&gt;8.5.2 LLVM IR 示例
+&lt;/h3&gt;&lt;p&gt;以下 C 代码：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;test&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;c&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;a&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;编译为 LLVM IR（&lt;code&gt;clang -S -emit-llvm test.c&lt;/code&gt;）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-llvm&#34; data-lang=&#34;llvm&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;define&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;dso_local&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;vg&#34;&gt;@test&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;i32&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;no&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;undef&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;%0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;i32&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;no&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;undef&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;%1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;n&#34;&gt;%3&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;alloca&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;i32&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;align&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;4&lt;/span&gt;     &lt;span class=&#34;c&#34;&gt;; 局部变量
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;  &lt;span class=&#34;n&#34;&gt;%4&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;alloca&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;i32&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;align&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;4&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;n&#34;&gt;%5&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;alloca&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;i32&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;align&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;4&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;k&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;i32&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;%0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;ptr&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;%3&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;align&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;4&lt;/span&gt; &lt;span class=&#34;c&#34;&gt;; a 存入
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;  &lt;span class=&#34;k&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;i32&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;%1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;ptr&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;%4&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;align&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;4&lt;/span&gt; &lt;span class=&#34;c&#34;&gt;; b 存入
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;  &lt;span class=&#34;n&#34;&gt;%6&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;load&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;i32&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;ptr&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;%3&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;align&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;4&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;n&#34;&gt;%7&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;load&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;i32&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;ptr&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;%4&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;align&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;4&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;n&#34;&gt;%8&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;add&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;nsw&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;i32&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;%6&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;%7&lt;/span&gt;      &lt;span class=&#34;c&#34;&gt;; c = a + b
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;  &lt;span class=&#34;k&#34;&gt;store&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;i32&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;%8&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;ptr&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;%5&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;align&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;4&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;k&#34;&gt;ret&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;基本语法：&lt;code&gt;@&lt;/code&gt; 表示全局，&lt;code&gt;%&lt;/code&gt; 表示局部变量，&lt;code&gt;alloca&lt;/code&gt; 分配栈内存，&lt;code&gt;store&lt;/code&gt;/&lt;code&gt;load&lt;/code&gt; 读写，&lt;code&gt;add&lt;/code&gt; 运算，&lt;code&gt;i32&lt;/code&gt; 是 32 位整数，&lt;code&gt;align&lt;/code&gt; 是字节对齐。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;853-三地址码tac&#34;&gt;8.5.3 三地址码（TAC）
+&lt;/h3&gt;&lt;p&gt;LLVM IR 采用&lt;strong&gt;三地址码&lt;/strong&gt;格式——每条指令最多三个操作数：两个源 + 一个目标。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;%result = add i32 %a, %b
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;→ 四元组表示: (add, %a, %b, %result)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;三地址码的优点：&lt;strong&gt;简单、清晰、便于优化&lt;/strong&gt;（常量折叠、死代码消除、寄存器分配都依赖这种格式）。&lt;/p&gt;
+&lt;h3 id=&#34;854-llvm-ir-设计原则&#34;&gt;8.5.4 LLVM IR 设计原则
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;SSA（静态单赋值）&lt;/strong&gt;：每个变量只被赋值一次，极大简化数据流分析和优化&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-llvm&#34; data-lang=&#34;llvm&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c&#34;&gt;; 错误（非 SSA）：%0 被赋值两次
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;%0&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;mul&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;i32&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;2&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;%0&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;add&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;i32&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;%0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;3&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c&#34;&gt;; 正确（SSA）：
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c&#34;&gt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;%0&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;mul&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;i32&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;2&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;%1&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;add&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;i32&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;%0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;3&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;强类型系统&lt;/strong&gt;：每个值都有明确类型（i32、float、struct 等）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;模块化设计&lt;/strong&gt;：Module → Function → BasicBlock → Instruction 四级结构&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;目标无关&lt;/strong&gt;：IR 不依赖具体 CPU 架构，后端负责翻译&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;86-llvm-前端clang-深度解析&#34;&gt;8.6 LLVM 前端——Clang 深度解析
+&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch8/ai_system.pdf-0354-11.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图8.7.1 Clang 前端流程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;Clang 前端三步：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;① 词法分析（Lexical Analysis）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;将源代码分解为 token 流（关键字、标识符、运算符、常量等），并精确记录每个 token 在源文件的位置。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;clang -cc1 -dump-tokens hello.c
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 输出：int &amp;#39;int&amp;#39; Loc=&amp;lt;hello.c:5:1&amp;gt;  identifier &amp;#39;main&amp;#39; Loc=&amp;lt;hello.c:5:5&amp;gt; ...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;② 语法分析（Syntax Analysis）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;根据语法规则将 token 流组织成 &lt;strong&gt;AST（抽象语法树）&lt;/strong&gt;。只验证结构，不做语义判断。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;clang -fsyntax-only -Xclang -ast-dump hello.c
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 输出：FunctionDecl、ParmVarDecl、CompoundStmt、ReturnStmt 等 AST 节点&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;③ 语义分析（Semantic Analysis）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;借助符号表检查类型匹配、变量声明范围、函数调用正确性等——确保代码&amp;quot;意思是对的&amp;quot;。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;];&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;5&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;];&lt;/span&gt;  &lt;span class=&#34;c1&#34;&gt;// ❌ error: redefinition of &amp;#39;a&amp;#39; with a different type
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;语义分析输出的是&lt;strong&gt;类型无误的 AST&lt;/strong&gt;，作为编译器后端的输入。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;87-llvm-优化层pass-机制&#34;&gt;8.7 LLVM 优化层——Pass 机制
+&lt;/h2&gt;&lt;p&gt;LLVM 优化层输入 AST，输出 DAG 图。每一种优化方式称为一个 &lt;strong&gt;Pass&lt;/strong&gt;。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Analysis Pass&lt;/strong&gt;：只读分析（如计算支配树 DominatorTree）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Transform Pass&lt;/strong&gt;：修改 IR（如死代码消除 ADCE、常量合并 MDGC）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;clang -emit-llvm -c hello.c -o hello.bc
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;opt -passes&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;instcount,adce,mdgc&amp;#39;&lt;/span&gt; -o hello-tmp.bc hello.bc -stats
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Pass 依赖关系：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;显式依赖&lt;/strong&gt;：Pass 管理器自动安排依赖的 Pass 先运行&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;隐式依赖&lt;/strong&gt;：需手动按正确顺序将 Pass 加入队列&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;88-llvm-后端代码生成&#34;&gt;8.8 LLVM 后端——代码生成
+&lt;/h2&gt;&lt;p&gt;后端将优化后的 IR 转换为目标平台的机器码，涉及四层指令表示：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;层级&lt;/th&gt;
+          &lt;th&gt;表示&lt;/th&gt;
+          &lt;th&gt;描述&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;1&lt;/td&gt;
+          &lt;td&gt;LLVM IR&lt;/td&gt;
+          &lt;td&gt;高级抽象，平台无关&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;2&lt;/td&gt;
+          &lt;td&gt;SelectionDAG 节点&lt;/td&gt;
+          &lt;td&gt;基本块级的数据流依赖图&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;3&lt;/td&gt;
+          &lt;td&gt;MachineInstr&lt;/td&gt;
+          &lt;td&gt;机器相关的三地址指令&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;4&lt;/td&gt;
+          &lt;td&gt;MCInst&lt;/td&gt;
+          &lt;td&gt;最终二进制编码指令&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch8/ai_system.pdf-0360-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图8.8.1 LLVM 后端 Pipeline&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;白色 Pass 非必要，灰色 Pass 必要。越往下越接近真实硬件指令。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;关键步骤&#34;&gt;关键步骤
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;① 指令选择（Instruction Selection）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;将 LLVM IR 转为目标特定的 SelectionDAG 节点 → 用树模式匹配算法选出最优指令序列。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch8/ai_system.pdf-0361-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图8.8.2 SelectionDAG 节点示例&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;灰色粗实线 = 强顺序约束（相邻指令必须紧挨）&lt;/li&gt;
+&lt;li&gt;虚线 = 非数据流链（强制顺序）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;② 寄存器分配&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;虚拟寄存器 → 物理寄存器映射。物理寄存器有限，溢出时需&amp;quot;spill&amp;quot;到内存。关键算法：线性扫描分配、图着色分配。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;③ 指令调度&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Pre-RA 调度&lt;/strong&gt;：寄存器分配前，最大化并行度&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Post-RA 调度&lt;/strong&gt;：寄存器分配后，处理资源冲突、插入填充指令&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;④ 代码输出&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;指令融合 → 启发式优化 → 循环优化 → 生成汇编/机器码。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;89-llvm-编译器全流程回顾&#34;&gt;8.9 LLVM 编译器全流程回顾
+&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch8/ai_system.pdf-0364-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图8.8.3 LLVM 全流程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;整个编译生命周期：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;C/C++ 源码
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ↓ [Clang 前端]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;词法分析 → token 流
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;语法分析 → AST
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;语义分析 → 类型无误的 AST
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;LLVM IR（SSA 形式的三地址码）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ↓ [Pass 优化]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;常量传播、死代码消除、循环优化...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;DAG 图
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ↓ [后端]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;指令选择 → 寄存器分配 → 指令调度 → 代码输出
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;目标机器码（x86 / ARM / ...）
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;h2 id=&#34;小结与思考&#34;&gt;小结与思考
+&lt;/h2&gt;&lt;p&gt;这一章从编译器最基础的概念讲起，一路深入到 GCC 编译四阶段、LLVM 模块化架构和 LLVM IR 的精妙设计。最后回顾几个关键问题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;编译器和解释器的本质区别是什么？&lt;/strong&gt; 编译器在运行前一次性翻译整个程序（快但不够灵活），解释器边运行边翻译（灵活但慢）。AI 框架中 AOT 和 JIT 各有适用场景——移动端推理偏 AOT，训练/调试偏 JIT。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;为什么 LLVM 能取代 GCC 成为苹果首选？&lt;/strong&gt; 模块化 + 统一 IR。GCC 紧耦合、难拆分，LLVM 前后端独立、复用性强——新增语言只需写前端，新增硬件只需写后端。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;LLVM IR 最核心的设计理念是什么？&lt;/strong&gt; ① SSA（静态单赋值）简化数据流分析；② 三地址码提供简洁统一的指令表示；③ 平台无关——所有优化在 IR 层完成，后端只做翻译。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Pass 机制为什么重要？&lt;/strong&gt; Pass 是编译优化的最小单元，通过 PassManager 灵活组合分析 Pass 和转换 Pass，形成完整优化流水线——这种机制也被 AI 编译器（如 MLIR）广泛使用。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;理解传统编译器是理解 AI 编译器的基础。下一章将直接进入 AI 编译器的世界——看看 AI 框架如何将&amp;quot;神经网络&amp;quot;编译成&amp;quot;芯片上的计算图&amp;quot;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;em&gt;下一篇预告：第9章将进入 AI 编译器的世界，探讨为什么 AI 芯片时代迫切需要新一代编译器。&lt;/em&gt;&lt;/p&gt;
+</description>
+        </item>
         
     </channel>
 </rss>
