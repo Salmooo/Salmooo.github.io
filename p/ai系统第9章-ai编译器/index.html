@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="《AI系统：原理与架构》学习笔记 — 深入理解AI编译器：从碎片化到\"大一统\"，从朴素编译器到通用编译器的演进之路">
+<title>AI系统：第9章 AI编译器</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC9%E7%AB%A0-ai%E7%BC%96%E8%AF%91%E5%99%A8/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="AI系统：第9章 AI编译器">
+<meta property='og:description' content="《AI系统：原理与架构》学习笔记 — 深入理解AI编译器：从碎片化到\"大一统\"，从朴素编译器到通用编译器的演进之路">
+<meta property='og:url' content='https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC9%E7%AB%A0-ai%E7%BC%96%E8%AF%91%E5%99%A8/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='AI System' /><meta property='article:tag' content='Deep Learning' /><meta property='article:tag' content='AI Infra' /><meta property='article:tag' content='AI Compiler' /><meta property='article:tag' content='TVM' /><meta property='article:tag' content='XLA' /><meta property='article:tag' content='MLIR' /><meta property='article:tag' content='IR' />
+<meta name="twitter:title" content="AI系统：第9章 AI编译器">
+<meta name="twitter:description" content="《AI系统：原理与架构》学习笔记 — 深入理解AI编译器：从碎片化到\"大一统\"，从朴素编译器到通用编译器的演进之路">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#本章概览">本章概览</a></li>
+    <li><a href="#91-为什么需要-ai-编译器">9.1 为什么需要 AI 编译器</a>
+      <ol>
+        <li><a href="#911-硬件碎片化之痛">9.1.1 硬件碎片化之痛</a></li>
+        <li><a href="#912-应用层的两大挑战">9.1.2 应用层的两大挑战</a></li>
+      </ol>
+    </li>
+    <li><a href="#传统编译器-vs-ai-编译器">传统编译器 vs AI 编译器</a>
+      <ol>
+        <li><a href="#二者的主要联系">二者的主要联系</a></li>
+        <li><a href="#编译目标的差异">编译目标的差异</a></li>
+        <li><a href="#软件栈的差异">软件栈的差异</a></li>
+        <li><a href="#ir优化策略的差异">IR、优化策略的差异</a></li>
+      </ol>
+    </li>
+    <li><a href="#92-ai-编译器历史阶段">9.2 AI 编译器历史阶段</a>
+      <ol>
+        <li><a href="#阶段一朴素-ai-编译器以-tensorflow-早期为代表">阶段一：朴素 AI 编译器（以 TensorFlow 早期为代表）</a></li>
+        <li><a href="#阶段二专用-ai-编译器以-pytorch--tvm--xla-为代表">阶段二：专用 AI 编译器（以 PyTorch + TVM / XLA 为代表）</a></li>
+        <li><a href="#阶段三通用-ai-编译器未来方向">阶段三：通用 AI 编译器（未来方向）</a></li>
+      </ol>
+    </li>
+    <li><a href="#93-ai-编译器基本架构">9.3 AI 编译器基本架构</a>
+      <ol>
+        <li><a href="#931-专用架构当前主流">9.3.1 专用架构（当前主流）</a></li>
+        <li><a href="#932-通用架构理想蓝图">9.3.2 通用架构（理想蓝图）</a></li>
+        <li><a href="#933-多层-ir-设计">9.3.3 多层 IR 设计</a></li>
+        <li><a href="#934-前端优化-vs-后端优化">9.3.4 前端优化 vs 后端优化</a></li>
+        <li><a href="#935-ai-编译器全栈产品">9.3.5 AI 编译器全栈产品</a></li>
+      </ol>
+    </li>
+    <li><a href="#94-ai-编译器挑战与思考">9.4 AI 编译器挑战与思考</a>
+      <ol>
+        <li><a href="#941-业界主流编译器对比">9.4.1 业界主流编译器对比</a></li>
+        <li><a href="#942-五大核心挑战">9.4.2 五大核心挑战</a></li>
+        <li><a href="#943-ai-编译器的未来">9.4.3 AI 编译器的未来</a></li>
+      </ol>
+    </li>
+    <li><a href="#小结与思考">小结与思考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/ai/" >
+                AI
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC9%E7%AB%A0-ai%E7%BC%96%E8%AF%91%E5%99%A8/">AI系统：第9章 AI编译器</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            《AI系统：原理与架构》学习笔记 — 深入理解AI编译器：从碎片化到&#34;大一统&#34;，从朴素编译器到通用编译器的演进之路
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    4 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="本章概览">本章概览
+</h2><p>如果说前面几章讨论的是&quot;算力硬件&quot;，那么第9章讨论的就是&quot;连接算法与硬件的桥梁&quot;——<strong>AI 编译器</strong>。</p>
+<p>当前 AI 硬件市场极度碎片化：每家芯片公司都在推出自己的 AI 编译器、框架甚至软件栈。这种局面让人想起 GCC 出现之前的编译器&quot;战国时代&quot;。Chris 预言，未来十年将是 AI 编译器快速发展的十年，一个新的&quot;大一统&quot;时代即将到来。</p>
+<p>本章从&quot;为什么需要 AI 编译器&quot;这个根本问题出发，<strong>横向对比传统编译器与 AI 编译器的差异</strong>，<strong>纵向梳理 AI 编译器从朴素到通用的三个历史阶段</strong>，然后深入剖析通用 AI 编译器的<strong>前后端架构与多层 IR 设计</strong>，最后以 TVM / XLA / Glow 等业界主流编译器为例，探讨 AI 编译器面临的挑战与未来方向。</p>
+<blockquote>
+<p>核心洞察：<strong>AI 编译器 = 图级优化 + 算子级优化 + 硬件抽象</strong>，它站在传统编译器（GCC / LLVM）的肩膀上，是 AI 时代基础设施中最关键的一环。</p>
+</blockquote>
+<hr>
+<h2 id="91-为什么需要-ai-编译器">9.1 为什么需要 AI 编译器
+</h2><h3 id="911-硬件碎片化之痛">9.1.1 硬件碎片化之痛
+</h3><p>现代 AI 硬件平台变得极其复杂：<strong>标量、向量、多核、多包、多机架</strong>等多层次并行架构，加上 GPU / FPGA / ASIC / NPU 等异构计算的百花齐放，让开发者面临一个灵魂拷问——</p>
+<p><strong>&ldquo;如何为所有这些硬件写代码？&rdquo;</strong></p>
+<p><img src="/images/ai_system/ch9/ai_system.pdf-0367-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图9.1.1 AI算法与硬件之间的鸿沟"
+	
+	
+></p>
+<blockquote>
+<p>图9.1.1：多种多样的 AI 算法与不同硬件厂商的加速器之间存在巨大鸿沟——中间缺少的正是 AI 编译器。</p>
+</blockquote>
+<p>软件碎片化的危险在于它会<strong>反噬硬件行业</strong>：如果硬件制造商无法提供兼容且优化良好的软件方案，其市场竞争力将被削弱。回顾历史，GCC 终结了编译器生态的碎片化，LLVM 进一步推动了编译技术的发展——AI 编译器正处于类似的十字路口。</p>
+<p>AI 编译器需要提供：</p>
+<ul>
+<li><strong>硬件抽象</strong>：跨越 GPU / FPGA / ASIC 等多样化加速器，为开发者提供统一编程接口</li>
+<li><strong>异构计算支持</strong>：识别不同处理器的特性，有效调度和优化任务</li>
+<li><strong>DSL 支持</strong>：将领域特定语言映射到底层硬件，实现高性能执行</li>
+</ul>
+<p><img src="/images/ai_system/ch9/ai_system.pdf-0368-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图9.1.2 AI编译器让模型部署在不同硬件"
+	
+	
+></p>
+<blockquote>
+<p>图9.1.2：在不同 AI 编译器的帮助下，AI 算法模型可以方便高效地部署在各类硬件设备上。</p>
+</blockquote>
+<h3 id="912-应用层的两大挑战">9.1.2 应用层的两大挑战
+</h3><p>从上层应用视角看，AI 编译器面临两个核心挑战：</p>
+<p><strong>挑战一：算子优化的&quot;体力活&quot;</strong></p>
+<p>每天都有新 AI 算法被提出，带来大量新算子。简单实现一个算子不难，但把它在特定 AI 芯片上优化到极致却是巨大的工程量。虽然 cuDNN、MKL-DNN 等通用算子库能帮上忙，但它们也限制了编程灵活性。</p>
+<p><img src="/images/ai_system/ch9/ai_system.pdf-0370-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图9.1.5 TensorFlow早期调用cuDNN/MKL-DNN"
+	
+	
+></p>
+<blockquote>
+<p>图9.1.5：TensorFlow 早期通过调用通用优化算子库实现高效计算——但这种&quot;人工手写 Kernel&quot;的模式不可持续。</p>
+</blockquote>
+<p><strong>挑战二：性能可移植性之困</strong></p>
+<p>不同芯片的矩阵计算单元和编程范式极不相同。目前缺乏 GCC / LLVM 这样的统一编译工具链，CPU 和 GPU 上已有的优化 Pass 很难移植到 NPU 上。业界亟需一个类似 GCC 或 LLVM 的 AI 编译器大一统方案。</p>
+<hr>
+<h2 id="传统编译器-vs-ai-编译器">传统编译器 vs AI 编译器
+</h2><p>这两者的关系不是&quot;替代&quot;而是<strong>互补与协同</strong>。AI 编译器在很多方面站在传统编译器的肩膀上。</p>
+<h3 id="二者的主要联系">二者的主要联系
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>维度</th>
+          <th>共同点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>实现思路</strong></td>
+          <td>都通过自动化方式进行程序优化和代码生成</td>
+      </tr>
+      <tr>
+          <td><strong>优化方式</strong></td>
+          <td>都通过统一 IR 执行不同 Pass 进行优化</td>
+      </tr>
+      <tr>
+          <td><strong>软件栈结构</strong></td>
+          <td>都采用前端 → 优化 → 后端三段式结构</td>
+      </tr>
+      <tr>
+          <td><strong>依赖关系</strong></td>
+          <td>AI 编译器最终依赖传统编译器（如 LLVM）完成机器码生成</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="编译目标的差异">编译目标的差异
+</h3><p><img src="/images/ai_system/ch9/ai_system.pdf-0372-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图9.1.6 传统编译器 vs AI编译器编译目标"
+	
+	
+></p>
+<blockquote>
+<p>图9.1.6：传统编译器输入是高级语言代码，AI 编译器输入是神经网络模型的计算图——这是两者最根本的区别。</p>
+</blockquote>
+<ul>
+<li><strong>传统编译器</strong>：核心使命是<strong>简化编程过程</strong>，将人类可读代码转化为机器可执行代码</li>
+<li><strong>AI 编译器</strong>：核心使命是<strong>优化程序性能</strong>，确保神经网络模型在硬件上高效运行（降低编程难度退居次要位置）</li>
+</ul>
+<h3 id="软件栈的差异">软件栈的差异
+</h3><p><img src="/images/ai_system/ch9/ai_system.pdf-0372-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图9.1.7 软件栈对比"
+	
+	
+></p>
+<blockquote>
+<p>图9.1.7：传统编译器（左）与 AI 编译器（右）的架构对比。</p>
+</blockquote>
+<ul>
+<li><strong>传统前端</strong>：词法分析 → 语法分析 → 语义分析 → IR</li>
+<li><strong>AI 前端</strong>：将深度神经网络 API 表达为计算图</li>
+<li><strong>传统中间</strong>：通用优化 Pass</li>
+<li><strong>AI 中间</strong>：图算融合、算子融合、自动微分、并行切分</li>
+<li><strong>传统后端</strong>：代码布局、寄存器分配</li>
+<li><strong>AI 后端</strong>：针对目标硬件 Kernel 级别定制优化</li>
+</ul>
+<h3 id="ir优化策略的差异">IR、优化策略的差异
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>维度</th>
+          <th>传统编译器</th>
+          <th>AI 编译器</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>IR 层次</strong></td>
+          <td>低层次 IR（接近机器指令）</td>
+          <td>高层次 IR（描述神经网络数学运算）</td>
+      </tr>
+      <tr>
+          <td><strong>优化策略</strong></td>
+          <td>通用优化，保持程序正确性</td>
+          <td>领域特定优化（算子融合、量化降精度）</td>
+      </tr>
+      <tr>
+          <td><strong>计算精度</strong></td>
+          <td>不改变变量类型</td>
+          <td>可降低精度（int8 / fp16 / bf16）</td>
+      </tr>
+      <tr>
+          <td><strong>硬件适配</strong></td>
+          <td>通用硬件平台</td>
+          <td>针对 GPU / TPU / NPU 等 DSA 芯片</td>
+      </tr>
+  </tbody>
+</table></div>
+<hr>
+<h2 id="92-ai-编译器历史阶段">9.2 AI 编译器历史阶段
+</h2><p>AI 编译器的发展经历了三个阶段，这是理解整个领域的最佳框架：</p>
+<p><img src="/images/ai_system/ch9/ai_system.pdf-0374-11.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图9.2.1 AI编译器三阶段"
+	
+	
+></p>
+<blockquote>
+<p>图9.2.1：朴素 AI 编译器（阶段一）→ 专用 AI 编译器（阶段二）→ 通用 AI 编译器（阶段三）。</p>
+</blockquote>
+<h3 id="阶段一朴素-ai-编译器以-tensorflow-早期为代表">阶段一：朴素 AI 编译器（以 TensorFlow 早期为代表）
+</h3><ul>
+<li><strong>图抽象</strong>：静态图（Static Graph），执行前定义完整计算流程，允许编译器进行全局优化</li>
+<li><strong>算子抽象</strong>：手写 Kernel + 调用 cuDNN 等第三方库</li>
+</ul>
+<p><img src="/images/ai_system/ch9/ai_system.pdf-0376-13.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图9.2.2 朴素AI编译器结构"
+	
+	
+></p>
+<blockquote>
+<p>图9.2.2：朴素 AI 编译器由 Graph IR 和 Tensor IR 两层构成。</p>
+</blockquote>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>静态图与 Python 的动态特性不兼容，易用性差</li>
+<li>算子粒度和边界固定，无法根据运行时硬件特性做更细粒度优化</li>
+<li>对 DSA 芯片（如 TPU）的支持不足</li>
+</ul>
+<h3 id="阶段二专用-ai-编译器以-pytorch--tvm--xla-为代表">阶段二：专用 AI 编译器（以 PyTorch + TVM / XLA 为代表）
+</h3><p>这一阶段发生了两个关键变化：</p>
+<ol>
+<li><strong>表达形式演进</strong>：PyTorch 动态图成为标杆，编译器需要将灵活的动态图转换为可优化的静态图 IR</li>
+<li><strong>性能突破</strong>：打破算子的固定边界——子图展开（大算子拆小）+ 算子融合（小算子合并），根据硬件特性自动组合优化</li>
+</ol>
+<blockquote>
+<p>这一阶段编译器开始具备<strong>自动调优</strong>能力，通过搜索最佳参数配置来释放硬件性能。</p>
+</blockquote>
+<p><strong>缺点</strong>：计算图构建（表达层）与算子实现（算子层）分离，导致协作复杂；泛化能力不足（动态 Shape、稀疏计算、多设备并行等场景支持有限）。</p>
+<h3 id="阶段三通用-ai-编译器未来方向">阶段三：通用 AI 编译器（未来方向）
+</h3><p>阶段三是业界正在努力的方向，核心愿景是：</p>
+<ul>
+<li><strong>统一表达</strong>：计算图和算子不再分离，在统一框架下同时进行图级和算子级优化</li>
+<li><strong>自动优化</strong>：自动调度、自动分块、自动代码生成，大幅降低开发门槛</li>
+<li><strong>泛化优化</strong>：动静统一、动态 Shape 处理、稀疏性优化、高阶微分、自动并行化</li>
+<li><strong>模块化设计</strong>：编译器、运行时、异构支持等独立模块可灵活组合</li>
+</ul>
+<hr>
+<h2 id="93-ai-编译器基本架构">9.3 AI 编译器基本架构
+</h2><h3 id="931-专用架构当前主流">9.3.1 专用架构（当前主流）
+</h3><p><img src="/images/ai_system/ch9/ai_system.pdf-0380-07.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图9.3.1 专用AI编译器架构"
+	
+	
+></p>
+<blockquote>
+<p>图9.3.1：当前专用 AI 编译器架构——以 PyTorch 为标杆，Python → Graph IR → Graph Optimizer → Tensor IR → Ops Optimizer → 后端代码生成。</p>
+</blockquote>
+<h3 id="932-通用架构理想蓝图">9.3.2 通用架构（理想蓝图）
+</h3><p>通用 AI 编译器架构清晰分为<strong>前端</strong>和<strong>后端</strong>两大部分：</p>
+<p><img src="/images/ai_system/ch9/ai_system.pdf-0381-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图9.3.2 通用AI编译器架构"
+	
+	
+></p>
+<blockquote>
+<p>图9.3.2：通用 AI 编译器架构全景——前端负责框架接入和图级优化，后端负责硬件特定优化和代码生成。</p>
+</blockquote>
+<p><strong>编译器前端</strong>：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>组件</th>
+          <th>功能</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>输入格式</td>
+          <td>支持 PyTorch / TF / ONNX / MindSpore 等多框架模型</td>
+      </tr>
+      <tr>
+          <td>转换</td>
+          <td>TVM Relay / nGraph Bridge / TorchScript 等，转为统一 IR</td>
+      </tr>
+      <tr>
+          <td>高级 IR / 图 IR</td>
+          <td>设备无关，DAG 或有向无环图表示 + 张量计算</td>
+      </tr>
+      <tr>
+          <td>计算图优化</td>
+          <td>代数简化、算子融合、CSE、DCE、静态内存优化、布局转换</td>
+      </tr>
+      <tr>
+          <td>优化方法</td>
+          <td>Pattern Matcher（模式匹配）+ Graph Rewriting（图重写）</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>编译器后端</strong>：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>组件</th>
+          <th>功能</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>硬件特定优化</td>
+          <td>Intrinsic Mapping、内存分配、内存时延隐藏、循环优化、并行化</td>
+      </tr>
+      <tr>
+          <td>调度</td>
+          <td>自动调度（多面体模型）+ 手动调度（Halide）</td>
+      </tr>
+      <tr>
+          <td>自动调优</td>
+          <td>参数化 + 成本模型 + 参数搜索</td>
+      </tr>
+      <tr>
+          <td>内核库</td>
+          <td>Intel DNNL / NVIDIA cuDNN / AMD MIOpen 等</td>
+      </tr>
+      <tr>
+          <td>低级 IR</td>
+          <td>Halide IR / 多面体模型 IR / 其他特有 IR</td>
+      </tr>
+      <tr>
+          <td>代码生成</td>
+          <td>LLVM / CUDA / OpenCL / OpenGL → 支持 x86 / ARM / GPU / ASIC / DSP</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="933-多层-ir-设计">9.3.3 多层 IR 设计
+</h3><p><strong>高级 IR</strong>：描述神经网络模型的<strong>计算图结构</strong>——卷积、矩阵乘、激活函数等。硬件无关，支持跨平台优化。</p>
+<p><strong>低级 IR</strong>：描述<strong>更细粒度的计算和内存访问</strong>，可分为三类：</p>
+<ul>
+<li><strong>基于 Halide 的 IR</strong>：将计算和调度分离，灵活调整计算和内存访问</li>
+<li><strong>基于多面体模型的 IR</strong>：建模循环嵌套和数据依赖，最大化并行能力</li>
+<li><strong>其他独特 IR</strong>：针对特定场景或硬件定制</li>
+</ul>
+<h3 id="934-前端优化-vs-后端优化">9.3.4 前端优化 vs 后端优化
+</h3><p><strong>前端优化（图级）</strong>：与硬件无关，全局视角优化计算图：</p>
+<ul>
+<li><strong>节点级</strong>：零维张量消除、空操作消除</li>
+<li><strong>块级</strong>：代数简化、常量折叠、算子融合</li>
+<li><strong>数据流级</strong>：公共子表达式消除、死代码消除、内存布局优化、并行化</li>
+</ul>
+<p><strong>后端优化（算子级）</strong>：与硬件相关，充分利用芯片特性：</p>
+<ul>
+<li>特定硬件优化（Intrinsic Mapping、循环优化、并行化）</li>
+<li>自动调优（Halide / TVM 方法、多面体模型参数调整）</li>
+<li>优化内核库（cuDNN / DNNL / MIOpen 等）</li>
+</ul>
+<h3 id="935-ai-编译器全栈产品">9.3.5 AI 编译器全栈产品
+</h3><p><img src="/images/ai_system/ch9/ai_system.pdf-0387-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图9.3.3 AI编译器全栈产品"
+	
+	
+></p>
+<blockquote>
+<p>图9.3.3：从底层硬件到顶层框架的完整栈——Hardware → Kernel Level（TVM / CANN / cuDNN）→ Graph Level（XLA / Glow / nGraph）→ DL Models（PyTorch / TF / MindSpore）。</p>
+</blockquote>
+<hr>
+<h2 id="94-ai-编译器挑战与思考">9.4 AI 编译器挑战与思考
+</h2><h3 id="941-业界主流编译器对比">9.4.1 业界主流编译器对比
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>编译器</th>
+          <th>开发者</th>
+          <th>关键特点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>TVM</strong></td>
+          <td>Apache</td>
+          <td>Relay 图优化 + TVM 算子优化双栈，跨 CPU / GPU / FPGA / 自定义硬件</td>
+      </tr>
+      <tr>
+          <td><strong>nGraph</strong></td>
+          <td>Intel</td>
+          <td>跨平台高性能计算，推理和训练效率平衡</td>
+      </tr>
+      <tr>
+          <td><strong>TC</strong></td>
+          <td>Meta</td>
+          <td>JIT 编译 + 多面体模型自动调度</td>
+      </tr>
+      <tr>
+          <td><strong>Glow</strong></td>
+          <td>Meta</td>
+          <td>推理专用，内存预分配 + 异步执行 + 低精度计算</td>
+      </tr>
+      <tr>
+          <td><strong>XLA</strong></td>
+          <td>Google</td>
+          <td>大算子拆小 → 优化 → 融合，加速 TensorFlow 计算</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="942-五大核心挑战">9.4.2 五大核心挑战
+</h3><p><strong>1. 动态 Shape 泛化</strong></p>
+<p>静态 Shape 在编译时容易优化，但 NLP 等场景中序列长度不固定，导致大量动态 Shape 需求——编译器无法完全静态优化，需要运行时系统配合。</p>
+<p><strong>2. Python 编译静态化</strong></p>
+<p>Python 是动态类型语言，将其转换为编译器 IR 的静态类型是一大难点。当前两大路线：</p>
+<ul>
+<li><strong>Tracing Based</strong>（如 PyTorch.fx）：跟踪执行路径进行静态分析</li>
+<li><strong>AST Transform</strong>（如 torch.jit.trace）：源码级转换</li>
+</ul>
+<p><img src="/images/ai_system/ch9/ai_system.pdf-0391-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图9.4.1 Python执行流程"
+	
+	
+></p>
+<blockquote>
+<p>图9.4.1：Python 执行流程——.py → 字节码 .pyc → Python 虚拟机执行 或 JIT 编译为机器码。</p>
+</blockquote>
+<p>两大 Python 解释器代表：</p>
+<ul>
+<li><strong>CPython</strong>：混合编译解释，字节码 + C 函数库执行（主流方案）</li>
+<li><strong>PyPy</strong>：JIT 即时编译，运行时将热点代码直接编译为机器码</li>
+</ul>
+<p><img src="/images/ai_system/ch9/ai_system.pdf-0392-14.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图9.4.3 PyPy JIT编译"
+	
+	
+></p>
+<blockquote>
+<p>图9.4.3：PyPy 利用 JIT 编译技术执行 Python 代码，在保持 CPython 兼容性的同时提升性能。</p>
+</blockquote>
+<p>挑战包括：类型推导、控制流表达（if / for / while 的静态化）、JIT 编译开销的权衡。</p>
+<p><strong>3. 充分发挥硬件性能</strong></p>
+<p>需要打开图和算子的边界，通过垂直融合（Buffer Fusion）和水平并行（Data Parallel）重新组合优化，同时自动生成 Kernel 的调度、分块、向量化代码。</p>
+<p><strong>4. 特殊算法优化</strong></p>
+<p>大模型训练中的内存墙和性能墙问题，需要多维混合并行（数据并行 + 张量并行 + 流水并行），以及重计算、混合精度、异构并行等 Scale Up 技术。</p>
+<p><strong>5. 易用性与性能兼顾</strong></p>
+<p>编译器需要对用户透明、编译开销可控、优化效果真正超过人工——只有当 AI 编译器在性能上能替代或超越手工优化时，才能真正发挥价值。</p>
+<h3 id="943-ai-编译器的未来">9.4.3 AI 编译器的未来
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>方向</th>
+          <th>愿景</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>编译器形态</strong></td>
+          <td>推理用 AOT 预编译，训练用 JIT 即时编译，灵活切换</td>
+      </tr>
+      <tr>
+          <td><strong>IR 形态</strong></td>
+          <td>类似 MLIR 的统一 IR，支持多框架多语言跨平台</td>
+      </tr>
+      <tr>
+          <td><strong>自动并行</strong></td>
+          <td>跨机器跨节点自动检测并行机会，自适应分配调度</td>
+      </tr>
+      <tr>
+          <td><strong>自动微分</strong></td>
+          <td>支持高阶微分，方便的图操作接口</td>
+      </tr>
+      <tr>
+          <td><strong>Kernel 自动生成</strong></td>
+          <td>根据算法和硬件自动生成优化计算核心，降低开发门槛</td>
+      </tr>
+  </tbody>
+</table></div>
+<hr>
+<h2 id="小结与思考">小结与思考
+</h2><p>第 9 章构建了 AI 编译器的完整知识框架。让我们用几个问题来收尾：</p>
+<ul>
+<li>
+<p><strong>为什么需要 AI 编译器？</strong> AI 算法的多样性和 AI 硬件的碎片化之间横着一条巨大的鸿沟。AI 编译器是跨越这条鸿沟的桥梁——它提供硬件抽象、自动优化和统一编程接口。</p>
+</li>
+<li>
+<p><strong>AI 编译器和传统编译器是什么关系？</strong> 不是替代，而是<strong>互补与协同</strong>。AI 编译器在传统编译器（GCC / LLVM）的肩膀上，专注于神经网络领域的图级和算子级优化，最终仍依赖传统编译器完成机器码生成。</p>
+</li>
+<li>
+<p><strong>AI 编译器演进的关键节点是什么？</strong> 朴素阶段（静态图 + 手写 Kernel）→ 专用阶段（动态图 + 自动调优 + 打开图算边界）→ 通用阶段（统一表达 + 全自动优化 + 模块化设计）。当前业界正处于从阶段二迈向阶段三的关键时期。</p>
+</li>
+<li>
+<p><strong>图算能否统一表达，形成通用的 AI 编译器？</strong> 这是本章留给读者的核心思考。随着 AI + 科学计算、AI + 大数据等新场景驱动，计算图层和算子层的边界正在模糊。类似 MLIR 的统一 IR 或许就是答案。</p>
+</li>
+</ul>
+<blockquote>
+<p>正如 GCC 终结了编译器的&quot;战国时代&quot;，LLVM 推动了整个编译器领域的发展——AI 编译器领域也必将迎来它的&quot;GCC 时刻&quot;。</p>
+</blockquote>
+<hr>
+<p><em>下一篇预告：第10章将深入 AI 编译器的前端优化，详解算子融合、常量折叠、公共子表达式消除等 Pass 技术。</em></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ai-system/">AI System</a>
+        
+            <a href="/tags/deep-learning/">Deep Learning</a>
+        
+            <a href="/tags/ai-infra/">AI Infra</a>
+        
+            <a href="/tags/ai-compiler/">AI Compiler</a>
+        
+            <a href="/tags/tvm/">TVM</a>
+        
+            <a href="/tags/xla/">XLA</a>
+        
+            <a href="/tags/mlir/">MLIR</a>
+        
+            <a href="/tags/ir/">IR</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第1章 AI系统概述</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC2%E7%AB%A0-ai%E8%AE%A1%E7%AE%97%E4%BD%93%E7%B3%BB/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第2章 AI计算体系</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC5%E7%AB%A0-tpu%E4%BB%A5%E8%B0%B7%E6%AD%8C%E4%B8%BA%E4%BE%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第5章 TPU——以谷歌为例</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC6%E7%AB%A0-npu%E4%BB%A5%E6%98%87%E8%85%BE%E4%B8%BA%E4%BE%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第6章 NPU——以昇腾为例</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC8%E7%AB%A0-%E4%BC%A0%E7%BB%9F%E7%BC%96%E8%AF%91%E5%99%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第8章 传统编译器</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

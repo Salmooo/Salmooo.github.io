@@ -234,6 +234,8 @@
   </url><url>
     <loc>https://Salmooo.github.io/tags/ai-chip/</loc>
   </url><url>
+    <loc>https://Salmooo.github.io/tags/ai-compiler/</loc>
+  </url><url>
     <loc>https://Salmooo.github.io/tags/ai-core/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/ai-infra/</loc>
@@ -253,6 +255,8 @@
     <loc>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC7%E7%AB%A0-ai%E8%8A%AF%E7%89%87%E6%80%9D%E8%80%83%E4%B8%8E%E5%B1%95%E6%9C%9B/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC8%E7%AB%A0-%E4%BC%A0%E7%BB%9F%E7%BC%96%E8%AF%91%E5%99%A8/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC9%E7%AB%A0-ai%E7%BC%96%E8%AF%91%E5%99%A8/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/algorithm/</loc>
   </url><url>
@@ -333,6 +337,10 @@
     <loc>https://Salmooo.github.io/tags/tensor-core/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/tpu/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/tvm/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/xla/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/p/%E5%BD%A2%E5%BC%8F%E9%AA%8C%E8%AF%81%E5%8F%91%E5%B1%95%E7%AE%80%E5%8F%B2/</loc>
   </url><url>
