@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="《AI系统：原理与架构》学习笔记 — 深入AI编译器前端优化，涵盖计算图IR、算子融合、布局转换、内存分配、常量折叠、CSE、死代码消除、代数简化等核心技术">
+<title>AI系统：第10章 前端优化</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC10%E7%AB%A0-%E5%89%8D%E7%AB%AF%E4%BC%98%E5%8C%96/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="AI系统：第10章 前端优化">
+<meta property='og:description' content="《AI系统：原理与架构》学习笔记 — 深入AI编译器前端优化，涵盖计算图IR、算子融合、布局转换、内存分配、常量折叠、CSE、死代码消除、代数简化等核心技术">
+<meta property='og:url' content='https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC10%E7%AB%A0-%E5%89%8D%E7%AB%AF%E4%BC%98%E5%8C%96/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='AI System' /><meta property='article:tag' content='Deep Learning' /><meta property='article:tag' content='AI Infra' /><meta property='article:tag' content='Compiler' /><meta property='article:tag' content='IR' /><meta property='article:tag' content='Graph Optimization' /><meta property='article:tag' content='Operator Fusion' /><meta property='article:tag' content='Memory Allocation' />
+<meta name="twitter:title" content="AI系统：第10章 前端优化">
+<meta name="twitter:description" content="《AI系统：原理与架构》学习笔记 — 深入AI编译器前端优化，涵盖计算图IR、算子融合、布局转换、内存分配、常量折叠、CSE、死代码消除、代数简化等核心技术">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#本章概览">本章概览</a></li>
+    <li><a href="#102-图算-ir--一切优化的基石">10.2 图算 IR —— 一切优化的基石</a>
+      <ol>
+        <li><a href="#1021-计算图基本构成">10.2.1 计算图基本构成</a></li>
+        <li><a href="#1022-ai-框架如何生成计算图">10.2.2 AI 框架如何生成计算图</a></li>
+        <li><a href="#1023-计算图对-ai-编译器的作用">10.2.3 计算图对 AI 编译器的作用</a></li>
+      </ol>
+    </li>
+    <li><a href="#103-算子融合--少就是多">10.3 算子融合 —— &ldquo;少就是多&rdquo;</a>
+      <ol>
+        <li><a href="#1031-为什么要做算子融合">10.3.1 为什么要做算子融合？</a></li>
+        <li><a href="#1032-四种经典融合方式">10.3.2 四种经典融合方式</a></li>
+        <li><a href="#1033-综合案例复杂计算图瘦身">10.3.3 综合案例：复杂计算图&quot;瘦身&quot;</a></li>
+        <li><a href="#1034-conv-bn-relu-融合深度剖析">10.3.4 Conv-BN-ReLU 融合深度剖析</a></li>
+      </ol>
+    </li>
+    <li><a href="#104-布局转换--数据怎么摆最省力">10.4 布局转换 —— 数据怎么&quot;摆&quot;最省力</a>
+      <ol>
+        <li><a href="#1041-内存对齐从硬件层面理解">10.4.1 内存对齐：从硬件层面理解</a></li>
+        <li><a href="#1042-行优先-vs-列优先">10.4.2 行优先 vs 列优先</a></li>
+        <li><a href="#1043-nchw-vs-nhwc--gpu-vs-cpu-的分水岭">10.4.3 NCHW vs NHWC — GPU vs CPU 的分水岭</a></li>
+      </ol>
+    </li>
+    <li><a href="#105-内存分配--把有限的内存用到极致">10.5 内存分配 —— 把有限的内存用到极致</a>
+      <ol>
+        <li><a href="#1051-为什么内存分配如此重要">10.5.1 为什么内存分配如此重要？</a></li>
+        <li><a href="#1052-内存的划分静态-vs-动态">10.5.2 内存的划分：静态 vs 动态</a></li>
+        <li><a href="#1053-内存优化算法">10.5.3 内存优化算法</a>
+          <ol>
+            <li><a href="#两种核心复用操作">两种核心复用操作</a></li>
+            <li><a href="#复杂模型的内存优化过程">复杂模型的内存优化过程</a></li>
+            <li><a href="#并行分配不止考虑串行">并行分配：不止考虑串行</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#106-常量折叠--能提前算的别拖到运行时">10.6 常量折叠 —— &ldquo;能提前算的别拖到运行时&rdquo;</a>
+      <ol>
+        <li><a href="#1061-传统编译器的常量折叠">10.6.1 传统编译器的常量折叠</a></li>
+        <li><a href="#1062-ai-编译器的常量折叠">10.6.2 AI 编译器的常量折叠</a></li>
+      </ol>
+    </li>
+    <li><a href="#107-公共子表达式消除cse--重复计算只算一次">10.7 公共子表达式消除（CSE） —— 重复计算只算一次</a>
+      <ol>
+        <li><a href="#传统编译器的-cse">传统编译器的 CSE</a></li>
+        <li><a href="#ai-编译器的-cse">AI 编译器的 CSE</a></li>
+      </ol>
+    </li>
+    <li><a href="#108-死代码消除dce--删掉永远不会跑的代码">10.8 死代码消除（DCE） —— 删掉永远不会跑的代码</a>
+      <ol>
+        <li><a href="#传统编译器的-dce">传统编译器的 DCE</a></li>
+        <li><a href="#ai-编译器的-dce">AI 编译器的 DCE</a></li>
+      </ol>
+    </li>
+    <li><a href="#109-代数简化--用数学变形加速计算">10.9 代数简化 —— 用数学&quot;变形&quot;加速计算</a>
+      <ol>
+        <li><a href="#1091-算术简化结合律交换律分配律">10.9.1 算术简化：结合律、交换律、分配律</a></li>
+        <li><a href="#1092-运行简化消除冗余操作">10.9.2 运行简化：消除冗余操作</a></li>
+        <li><a href="#1093-广播简化先算小的再广播">10.9.3 广播简化：先算小的再广播</a></li>
+      </ol>
+    </li>
+    <li><a href="#本章小结">本章小结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/ai/" >
+                AI
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC10%E7%AB%A0-%E5%89%8D%E7%AB%AF%E4%BC%98%E5%8C%96/">AI系统：第10章 前端优化</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            《AI系统：原理与架构》学习笔记 — 深入AI编译器前端优化，涵盖计算图IR、算子融合、布局转换、内存分配、常量折叠、CSE、死代码消除、代数简化等核心技术
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    4 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="本章概览">本章概览
+</h2><p>如果说前面几章聚焦于 AI 硬件（GPU、TPU、NPU），那么第 10 章正式进入 AI 编译器的核心地带 —— <strong>前端优化（Front-end Optimization）</strong>。前端优化发生在&quot;开发者写的 Python 模型代码&quot;和&quot;硬件真正执行&quot;之间的关键环节，它的使命是将高层计算图转换为更高效、更低开销的形式。</p>
+<p>本章覆盖了 AI 编译器中 8 大前端优化技术：</p>
+<ol>
+<li><strong>图算 IR（计算图）</strong>：一切优化的基础 —— 计算图是什么、怎么生成、静态 vs 动态</li>
+<li><strong>算子融合</strong>：将多个算子&quot;焊&quot;在一起，减少访存和 Kernel 调度开销</li>
+<li><strong>布局转换</strong>：NCHW vs NHWC，数据在内存中怎么排最有效率</li>
+<li><strong>内存分配</strong>：静态内存 vs 动态内存，内存复用/替代/共享</li>
+<li><strong>常量折叠</strong>：编译期&quot;提前算好&quot;，省去运行时开销</li>
+<li><strong>公共子表达式消除（CSE）</strong>：重复计算只算一次</li>
+<li><strong>死代码消除（DCE）</strong>：删掉永远不会跑的代码</li>
+<li><strong>代数简化</strong>：利用交换律/结合律/分配律，数学上等价但更快</li>
+</ol>
+<blockquote>
+<p>这 8 项技术层层递进，共同构成了 AI 编译器前端的&quot;工具箱&quot;。理解它们的原理，你就能真正看懂 PyTorch <code>torch.compile</code>、TensorFlow XLA、TVM 等编译器在背后做了什么。</p>
+</blockquote>
+<hr>
+<h2 id="102-图算-ir--一切优化的基石">10.2 图算 IR —— 一切优化的基石
+</h2><h3 id="1021-计算图基本构成">10.2.1 计算图基本构成
+</h3><p><strong>计算图（Computational Graph）</strong> 是一个<strong>有向无环图（DAG）</strong>，用于表示神经网络模型在训练与推理过程中的计算逻辑与状态。它由两个基本元素构成：</p>
+<ul>
+<li><strong>张量（Tensor）</strong>：多维数据，具有形状（Shape）和元素类型等属性，在图中用<strong>有向边</strong>表示</li>
+<li><strong>算子（Operator）</strong>：基本运算单元，在图中用<strong>节点</strong>表示，底层硬件实现称为 <strong>Kernel</strong></li>
+</ul>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0399-09.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="计算图基本构成 — 二维和三维张量"
+	
+	
+></p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0399-10.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="前向&#43;反向传播计算图"
+	
+	
+></p>
+<blockquote>
+<p>节点间的有向线段既表示张量的流动，也描述了计算间的依赖关系。前向传播计算图 + 反向传播计算图合在一起，就构成了完整训练过程的全貌。</p>
+</blockquote>
+<h3 id="1022-ai-框架如何生成计算图">10.2.2 AI 框架如何生成计算图
+</h3><p><strong>自动微分的关键</strong>：开发者只需编写前向传播代码，AI 框架会自动追踪数据流，为每个参数精确微分，构建出完整的反向传播计算图。</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0400-07.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="AI框架自动建立反向传播计算图"
+	
+	
+></p>
+<p>两种生成方式：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>模式</th>
+          <th>静态图（Eager 关闭）</th>
+          <th>动态图（Define-by-Run）</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>执行方式</strong></td>
+          <td>先构建完整图，再执行</td>
+          <td>边定义边执行</td>
+      </tr>
+      <tr>
+          <td><strong>即时结果</strong></td>
+          <td>否</td>
+          <td>是</td>
+      </tr>
+      <tr>
+          <td><strong>调试难度</strong></td>
+          <td>难</td>
+          <td>简单</td>
+      </tr>
+      <tr>
+          <td><strong>控制流</strong></td>
+          <td>框架特定语法（如 tf.cond）</td>
+          <td>前端语言原生语法</td>
+      </tr>
+      <tr>
+          <td><strong>性能</strong></td>
+          <td>图优化空间大、性能更佳</td>
+          <td>优化受限、性能较差</td>
+      </tr>
+      <tr>
+          <td><strong>内存</strong></td>
+          <td>相对较少</td>
+          <td>相对较多</td>
+      </tr>
+      <tr>
+          <td><strong>部署</strong></td>
+          <td>可直接部署（含计算图信息）</td>
+          <td>不可直接部署</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>PyTorch 2.0 引入的 <strong>Dynamo</strong> 核心使命就是把动态图&quot;转&quot;成静态图，从而获得编译优化红利。</p>
+</blockquote>
+<p><strong>动态图转静态图</strong>的两种方式：</p>
+<ul>
+<li><strong>基于追踪（Tracing）</strong>：以动态图模式执行并记录调度算子，保存为静态图模型</li>
+<li><strong>基于源码转换（FX）</strong>：分析前端代码，自动将动态图代码转为静态图</li>
+</ul>
+<h3 id="1023-计算图对-ai-编译器的作用">10.2.3 计算图对 AI 编译器的作用
+</h3><ol>
+<li><strong>方便底层编译优化</strong>：计算图描述了全局信息，AI 编译器可以在执行前进行系统级优化 —— 分析数据依赖、做图优化 Pass、动态/静态内存优化、调整算子调度策略</li>
+<li><strong>分层优化便于扩展</strong>：将前端优化分为三个解耦层 —— 计算图优化 → 运行时调度优化 → 算子/Kernel 执行优化，各层独立 Pass，灵活扩展</li>
+</ol>
+<hr>
+<h2 id="103-算子融合--少就是多">10.3 算子融合 —— &ldquo;少就是多&rdquo;
+</h2><h3 id="1031-为什么要做算子融合">10.3.1 为什么要做算子融合？
+</h3><p>算子融合主要解决两大瓶颈：</p>
+<ul>
+<li><strong>内存墙</strong>：访存瓶颈。将存在数据依赖的&quot;生产者-消费者&quot;算子融合，提升中间 Tensor 的访存局部性（Buffer 融合）</li>
+<li><strong>并行墙</strong>：芯片多核增加与单算子多核并行度不匹配。将可并行的分支节点编排融合</li>
+</ul>
+<h3 id="1032-四种经典融合方式">10.3.2 四种经典融合方式
+</h3><p><img src="/images/ai_system/ch10/ai_system.pdf-0404-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.3.1 纵向融合：C与D融合，减少一次Kernel调度和一次中间缓存"
+	
+	
+></p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0404-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.3.2 复制&#43;融合：A分别与B、C融合，并发执行只需一次访存"
+	
+	
+></p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0404-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.3.3 横向融合：B与C融合，减少Kernel调度，缓存效率更高"
+	
+	
+></p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0404-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.3.4 纵向融合：A与B融合，结果放内存再给C，提高内存运算效率"
+	
+	
+></p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0404-07.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.3.5 卷积核融合：两个卷积核融合为一个"
+	
+	
+></p>
+<h3 id="1033-综合案例复杂计算图瘦身">10.3.3 综合案例：复杂计算图&quot;瘦身&quot;
+</h3><p>下图展示了一个更综合的融合案例：</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0405-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.3.6 复杂计算图融合前后对比 — 将3×3×256 &#43; 1×1×256 → 3×3×512，再纵向融合Split&#43;Conv&#43;Add&#43;ReLU → Conv2d_ReLU"
+	
+	
+></p>
+<p>通过横向融合 Enlarge + 纵向融合 + 激活融合，从复杂计算图得到一个极简版本 —— 减少了 Kernel 调度，实现了&quot;少就是多&quot;。</p>
+<h3 id="1034-conv-bn-relu-融合深度剖析">10.3.4 Conv-BN-ReLU 融合深度剖析
+</h3><p>这是最经典的算子融合案例。先理解 BN 的计算流程：</p>
+<p><strong>BN 前向计算</strong>：求均值 \(\mu\) → 求方差 \(\sigma^2\) → 归一化 \(\hat{x}\) → 线性变换 \(y = \gamma \hat{x} + \beta\)</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0406-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.3.7 BN前向计算数据依赖关系"
+	
+	
+></p>
+<p><strong>BN 反向计算</strong>：两次使用输入特征 \(X\) 及输出误差 \(\Delta Y\)，分别计算参数误差 \(\Delta\gamma, \Delta\beta\) 和输入误差 \(\Delta X\)。</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0406-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.3.8 BN反向计算过程 — 关键访存特征：两次使用X和ΔY"
+	
+	
+></p>
+<p><strong>融合的动机</strong>：Conv-BN-ReLU 三者在计算访存上存在大量中间结果的读写，融合后可大幅减少访存。</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0407-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.3.9 Conv-BN-ReLU计算访存分析 — 中间结果需写入主存再读回"
+	
+	
+></p>
+<p>融合的核心思路是将 BN 拆成两个子层 BN_A 和 BN_B，分别融合到相邻的卷积层和激活层中，形成&quot;归一化缩放 → 激活层 → 卷积层 → 计算卷积结果均值与方差&quot;的流水线，整个过程只需一次读取和一次写回。</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0408-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.3.10 Conv-BN-ReLU融合后结构 — 只需一次读入、一次写出"
+	
+	
+></p>
+<blockquote>
+<p>数学推导：将卷积公式代入 BN 公式 → 合并权重 \(w' = \frac{\gamma w}{\sigma}\) 和偏置 \(b' = \frac{\gamma(b-\mu)}{\sigma} + \beta\) → 再叠加上 ReLU → 得到融合后的单一算子 <code>Conv2d_BN_ReLU</code>。</p>
+</blockquote>
+<hr>
+<h2 id="104-布局转换--数据怎么摆最省力">10.4 布局转换 —— 数据怎么&quot;摆&quot;最省力
+</h2><h3 id="1041-内存对齐从硬件层面理解">10.4.1 内存对齐：从硬件层面理解
+</h3><p>处理器从内存读取数据是按**字（Word）**为单位（32 位系统 4 字节，64 位系统 8 字节），而非按字节。</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0409-10.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.4.1 内存对齐示意"
+	
+	
+></p>
+<p><strong>没有内存对齐</strong>的代价：读取一个跨对齐边界的 INT（4 字节）需要两次总线操作 → 合并数据。</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0410-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.4.2 无内存对齐：需要读取两次，访问事务数翻倍"
+	
+	
+></p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0410-10.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.4.3 有内存对齐：一次读取即可完成"
+	
+	
+></p>
+<h3 id="1042-行优先-vs-列优先">10.4.2 行优先 vs 列优先
+</h3><p>二维张量（矩阵）在内存中的线性排布有两种基本方式：</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0411-13.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.4.5 行优先排布（Row-Major）：按行依次存储"
+	
+	
+></p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0412-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.4.6 列优先排布（Column-Major）：按列依次存储"
+	
+	
+></p>
+<p><strong>核心原则</strong>：相邻操作访存地址应尽可能接近 —— 行优先遍历用行优先存储，列优先遍历用列优先存储（<strong>空间局部性原理</strong>）。</p>
+<p>对于三维张量，按排列组合有 \(3! = 6\) 种排布方式（D1,2,3 / D1,3,2 / D2,1,3 / D2,3,1 / D3,1,2 / D3,2,1），选择相当复杂。</p>
+<h3 id="1043-nchw-vs-nhwc--gpu-vs-cpu-的分水岭">10.4.3 NCHW vs NHWC — GPU vs CPU 的分水岭
+</h3><p>卷积神经网络的特征图通常用四维数组 <code>[N, C, H, W]</code> 存储。</p>
+<p><strong>NCHW（通道优先）</strong>：先取 W 方向 → 再取 H 方向 → 最后取 C 方向。同一通道的数值连续排布。</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0413-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.4.8 NCHW 数据排布方式 — 通道内连续"
+	
+	
+></p>
+<ul>
+<li>✅ 适合 <strong>GPU</strong>：对大通道做 MaxPooling 等操作时，一次加载一整个通道，GPU 大内存带宽 + 强并行性完美匹配</li>
+<li>❌ 需要较大临时存储</li>
+</ul>
+<p><strong>NHWC（通道交错）</strong>：先取 C 方向（同一位置不同通道）→ 再取 W → 再取 H。</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0414-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.4.10 NHWC 数据排布方式 — 不同通道同一位置连续"
+	
+	
+></p>
+<ul>
+<li>✅ 适合 <strong>CPU</strong>：多核 CPU 可分别并行处理同一位置的不同通道，配合 1×1 卷积（Conv1×1）效率极高</li>
+<li>✅ 临时空间小，可边读边算</li>
+</ul>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>特性</th>
+          <th>NCHW</th>
+          <th>NHWC</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>适合硬件</td>
+          <td>GPU</td>
+          <td>多核 CPU</td>
+      </tr>
+      <tr>
+          <td>通道数据</td>
+          <td>连续</td>
+          <td>交错</td>
+      </tr>
+      <tr>
+          <td>典型操作</td>
+          <td>MaxPooling、大通道卷积</td>
+          <td>Conv1×1、Depthwise Conv</td>
+      </tr>
+      <tr>
+          <td>TensorFlow 默认</td>
+          <td><code>channels_first</code></td>
+          <td><code>channels_last</code></td>
+      </tr>
+  </tbody>
+</table></div>
+<hr>
+<h2 id="105-内存分配--把有限的内存用到极致">10.5 内存分配 —— 把有限的内存用到极致
+</h2><h3 id="1051-为什么内存分配如此重要">10.5.1 为什么内存分配如此重要？
+</h3><p>现代神经网络动辄数百亿参数。以 ImageNet 训练为例：</p>
+<ul>
+<li>Inception v4（BatchSize=32）：需要约 <strong>40 GB</strong> NPU 内存</li>
+<li>Wide ResNet-152（BatchSize=64）：需要约 <strong>180 GB</strong> NPU 内存</li>
+</ul>
+<p>在 NPU 内存增长远慢于模型膨胀的现实下，高效的内存分配成为生死攸关的优化。</p>
+<h3 id="1052-内存的划分静态-vs-动态">10.5.2 内存的划分：静态 vs 动态
+</h3><p><strong>静态内存</strong>（模型初始化时一次性申请，全程不变）：</p>
+<ul>
+<li>模型权重参数（Parameter）</li>
+<li>常量值节点（如归一化的均值/方差）</li>
+<li>模型输出</li>
+</ul>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0416-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.5.1 静态内存占用示意（加粗框标注部分）"
+	
+	
+></p>
+<p><strong>动态内存</strong>（随计算进行动态申请和释放）：</p>
+<ul>
+<li>输出张量（中间结果，用完即释放）</li>
+<li>工作区张量（临时缓冲区，如自定义 CUDA Kernel 的 workspace）</li>
+</ul>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0417-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.5.2 动态内存占用示意 — 占据大部分NPU内存"
+	
+	
+></p>
+<h3 id="1053-内存优化算法">10.5.3 内存优化算法
+</h3><p>四种策略：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>策略</th>
+          <th>方法</th>
+          <th>典型应用</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>空间换内存</strong></td>
+          <td>CPU Offload</td>
+          <td>MoE 模型</td>
+      </tr>
+      <tr>
+          <td><strong>计算换内存</strong></td>
+          <td>梯度检查点（Gradient Checkpointing）</td>
+          <td>大模型训练</td>
+      </tr>
+      <tr>
+          <td><strong>模型压缩</strong></td>
+          <td>量化/剪枝/蒸馏</td>
+          <td>端侧推理</td>
+      </tr>
+      <tr>
+          <td><strong>内存复用</strong></td>
+          <td>分析数据流，重用内存</td>
+          <td>编译器优化</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>实际效果</strong>：MobileNet v2 经内存优化后，NPU 内存消耗明显减少，碎片数量显著降低。</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0418-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.5.3 内存优化前后对比 — 上为优化前（碎片化严重），下为优化后（紧凑高效）"
+	
+	
+></p>
+<h4 id="两种核心复用操作">两种核心复用操作
+</h4><ol>
+<li><strong>内存替代（Inplace Operation）</strong>：一块内存不再需要时，下一个 element-wise 操作原地覆盖。</li>
+</ol>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0419-12.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.5.4 内存替代 — 左图可复用（算子C复用B的内存），右图不可（算子F仍需B的结果）"
+	
+	
+></p>
+<ol start="2">
+<li><strong>内存共享（Memory Sharing）</strong>：两个数据大小相同且前一个不再需要时，后一个覆盖前一个。</li>
+</ol>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0419-13.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.5.5 内存共享 — 算子E共享算子B的内存空间"
+	
+	
+></p>
+<h4 id="复杂模型的内存优化过程">复杂模型的内存优化过程
+</h4><p>AI 编译器在初始化时感知每个算子的被使用次数并标记，然后按照生命周期进行 tag 分配、释放、复用的调度：</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0420-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.5.6 复杂计算图内存优化全过程 — 不同颜色代表不同内存分配空间"
+	
+	
+></p>
+<h4 id="并行分配不止考虑串行">并行分配：不止考虑串行
+</h4><p>内存分配还要考虑并行度。同样是有效的分配方案，右侧方案允许 \(A[2]\) 和 \(A[5]\) 并行执行，而左侧方案引入了不必要的依赖。</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0421-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.5.7 串行vs并行内存分配 — 右侧方案并行度更高"
+	
+	
+></p>
+<hr>
+<h2 id="106-常量折叠--能提前算的别拖到运行时">10.6 常量折叠 —— &ldquo;能提前算的别拖到运行时&rdquo;
+</h2><h3 id="1061-传统编译器的常量折叠">10.6.1 传统编译器的常量折叠
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">day_sec</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># 编译器直接替换为 day_sec = 86400</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>传统编译器通过常量传播（分析控制流图的可达性）识别常量表达式，在编译期求值替换。</p>
+<h3 id="1062-ai-编译器的常量折叠">10.6.2 AI 编译器的常量折叠
+</h3><p>AI 编译器对<strong>计算图</strong>进行常量折叠，三种类型：</p>
+<p><strong>类型一：全常量输入节点</strong></p>
+<ul>
+<li>如两个形状为 (N,C,H,W) 的四维常量 Tensor 做 AddN → 编译期直接算出结果替换节点</li>
+</ul>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0423-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.6.1 AddN 常量折叠 — 编译期计算常量Tensor，替换掉AddN节点"
+	
+	
+></p>
+<p><strong>类型二：形状确定的 Shape 类操作</strong></p>
+<ul>
+<li>如 Size、Shape 等操作只依赖输入形状而非具体值 → 形状在编译期确定即可折叠</li>
+</ul>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0423-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.6.2 Size 常量折叠 — 对(1,2,3,4)的Size操作直接替换为常量24"
+	
+	
+></p>
+<p><strong>类型三：链式折叠</strong></p>
+<ul>
+<li>节点输入不全为常量，但经过一系列折叠后可变为常量节点</li>
+</ul>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0423-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.6.3 链式常量折叠 — AddN1先折叠，使AddN2也满足折叠条件"
+	
+	
+></p>
+<blockquote>
+<p>注意：如果常量太大（以字节为单位），AI 编译器可能选择不替换，防止计算图变得过大。</p>
+</blockquote>
+<hr>
+<h2 id="107-公共子表达式消除cse--重复计算只算一次">10.7 公共子表达式消除（CSE） —— 重复计算只算一次
+</h2><h3 id="传统编译器的-cse">传统编译器的 CSE
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">temp</span> <span class="o">=</span> <span class="n">b</span> <span class="o">*</span> <span class="n">c</span>
+</span></span><span class="line"><span class="cl"><span class="n">a</span> <span class="o">=</span> <span class="n">b</span> <span class="o">*</span> <span class="n">c</span> <span class="o">+</span> <span class="n">g</span>    <span class="c1"># → a = temp + g</span>
+</span></span><span class="line"><span class="cl"><span class="n">d</span> <span class="o">=</span> <span class="n">b</span> <span class="o">*</span> <span class="n">c</span> <span class="o">+</span> <span class="n">e</span>    <span class="c1"># → d = temp + e</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>局部 CSE</strong>：限于基本块内（如 LVN 算法）</li>
+<li><strong>全局 CSE</strong>：跨多个基本块（如 LCM 算法）</li>
+</ul>
+<h3 id="ai-编译器的-cse">AI 编译器的 CSE
+</h3><p>AI 编译器在计算图中搜索<strong>相同结构的子图</strong>，将所有不同输出连接到同一个子图上，然后通过死代码消除删除重复子图。</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0425-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.7.1 AI编译器CSE — Op3和Op4使用了相同的{Op1→Op2}子图，合并后删除重复"
+	
+	
+></p>
+<p><strong>TensorFlow 的实现思路</strong>：</p>
+<ol>
+<li>反向 DFS 遍历获取逆后续节点集（确保处理某节点时其输入已处理完）</li>
+<li>用混合哈希为每个操作节点计算签名（输出节点数、类型、输入节点信息等）</li>
+<li>维护候选集，新节点哈希命中则复用已有节点，旧节点留待 DCE 删除</li>
+</ol>
+<hr>
+<h2 id="108-死代码消除dce--删掉永远不会跑的代码">10.8 死代码消除（DCE） —— 删掉永远不会跑的代码
+</h2><h3 id="传统编译器的-dce">传统编译器的 DCE
+</h3><p><strong>不可达操作</strong>两类：</p>
+<ul>
+<li>不可达基本块中的操作（控制流图中不存在从入口基本块到达的路径）</li>
+<li>条件分支优化导致的舍弃分支中的操作</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">flag</span><span class="p">):</span>        <span class="c1"># 编译优化后 →</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">flag</span><span class="p">):</span>         <span class="c1"># def test(flag):</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;T&#34;</span><span class="p">)</span>     <span class="c1">#     print(&#34;F&#34;)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span><span class="p">:</span>              <span class="c1">#     return</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;F&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;unreach.&#34;</span><span class="p">)</span>  <span class="c1"># ← 不可达代码</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>无用操作</strong>：结果无外部可见效应的操作（如定义后从未使用的变量赋值）。</p>
+<h3 id="ai-编译器的-dce">AI 编译器的 DCE
+</h3><p>在计算图中：</p>
+<ul>
+<li><strong>不可达节点</strong>：从输入节点通过有向边无法到达的节点 → 直接删除</li>
+<li><strong>无用节点</strong>：输出没有后继节点，不影响最终输出 → 直接删除</li>
+</ul>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0428-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.8.2 计算图中不可达节点消除 — 节点B从输入无法到达，被删除"
+	
+	
+></p>
+<blockquote>
+<p>训练时产生的大量子图在推理时通常是无用的，DCE 可以大幅压缩推理模型。</p>
+</blockquote>
+<hr>
+<h2 id="109-代数简化--用数学变形加速计算">10.9 代数简化 —— 用数学&quot;变形&quot;加速计算
+</h2><h3 id="1091-算术简化结合律交换律分配律">10.9.1 算术简化：结合律、交换律、分配律
+</h3><p><strong>结合律简化</strong>：</p>
+<p>\((A \star B) \otimes ((A \star B) \otimes C) \rightarrow (A \star B) \otimes C\)</p>
+<p>其中 \(\star\) 为 Conv，\(\otimes\) 为 MatMul。</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0430-13.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.9.1 结合律简化 — 将A与B的卷积抽离，减少运算算子"
+	
+	
+></p>
+<p><strong>交换律简化</strong>：</p>
+<p>\(\text{ReduceSum}(\text{BitShift}(A)) \rightarrow \text{BitShift}(\text{ReduceSum}(A))\)</p>
+<p>先 ReduceSum 降维，再 BitShift，运算开销大幅减少。</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0430-14.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.9.2 交换律简化 — 先ReduceSum得到一个维度更小的Batch再BitShift"
+	
+	
+></p>
+<p><strong>分配律简化</strong>（提取公因式）：</p>
+<p>\((A \cdot B) \star C + (A \cdot B) \star D \rightarrow (A \cdot B) \star (C + D)\)</p>
+<p>将 4 次算子操作降为 3 次。</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0431-11.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.9.3 分配律简化 — 提取公因式，C和D先加和再做乘法"
+	
+	
+></p>
+<blockquote>
+<p>⚠️ 注意：矩阵乘法不满足交换律（\(AB \neq BA\)）！应用代数简化前必须先确认算子是否满足对应的运算律。</p>
+</blockquote>
+<h3 id="1092-运行简化消除冗余操作">10.9.2 运行简化：消除冗余操作
+</h3><p><strong>对合算子简化</strong>（逆函数 = 自身函数，两次操作等于无操作）：</p>
+<p>\(\text{Op}(\text{Op}(x)) \rightarrow x\)，如取反、倒数、逻辑非、矩阵转置等。</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0432-13.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.9.4 对合算子简化 — 两次Op1等于无操作，简化为只剩Op2"
+	
+	
+></p>
+<p><strong>幂等算子简化</strong>（多次操作等价于一次）：</p>
+<p>\(\text{Op}(\text{Op}(x)) \rightarrow \text{Op}(x)\)，如 \(\text{Reshape}(\text{Reshape}(x,\text{shape1}),\text{shape2}) \rightarrow \text{Reshape}(x,\text{shape2})\)</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0432-14.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.9.5 幂等算子简化 — 多个Op1等价于一个"
+	
+	
+></p>
+<h3 id="1093-广播简化先算小的再广播">10.9.3 广播简化：先算小的再广播
+</h3><p>\((S1 + \text{Mat1}) + (S2 + \text{Mat2}) \rightarrow (S1 + S2) + (\text{Mat1} + \text{Mat2})\)</p>
+<p>两个向量先相加（维度小）再广播到矩阵维度，比先各自广播再相加节省一次广播开销。</p>
+<p><img src="/images/ai_system/ch10/ai_system.pdf-0433-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图10.9.6 广播简化 — 两个向量先相加再广播，节省一次广播开销"
+	
+	
+></p>
+<hr>
+<h2 id="本章小结">本章小结
+</h2><p>第 10 章系统梳理了 AI 编译器前端优化的 8 大技术。这些技术之间有清晰的递进关系：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">计算图 IR（基础表示）
+</span></span><span class="line"><span class="cl">    ├── 算子融合（减少 Kernel 调度 + 访存）
+</span></span><span class="line"><span class="cl">    ├── 布局转换（优化数据访存模式）
+</span></span><span class="line"><span class="cl">    ├── 内存分配（高效复用有限 NPU 内存）
+</span></span><span class="line"><span class="cl">    ├── 常量折叠（编译期求值替换）
+</span></span><span class="line"><span class="cl">    ├── 公共子表达式消除（去重）
+</span></span><span class="line"><span class="cl">    ├── 死代码消除（删除无用代码）
+</span></span><span class="line"><span class="cl">    └── 代数简化（数学等价变换）
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>核心启示</strong>：</p>
+<ol>
+<li><strong>一切优化始于计算图</strong>：AI 编译器先拿到全局计算图，才能做各种图级别优化 Pass，就像 LLVM 基于 IR 做优化一样</li>
+<li><strong>访存是最大的瓶颈</strong>：算子融合、布局转换、内存分配——三项技术的底层目标都是减少对主存的访问、提升片上缓存利用率（对抗&quot;内存墙&quot;）</li>
+<li><strong>编译期能做的事别拖到运行时</strong>：常量折叠、CSE、DCE、代数简化——在编译期就&quot;算好&quot;、&ldquo;去重&rdquo;、&ldquo;删掉&rdquo;</li>
+<li><strong>数学是优化的好朋友</strong>：代数简化利用结合律/交换律/分配律，在不改变计算结果的前提下调整执行顺序，实现&quot;数学上等价、性能上更优&quot;</li>
+</ol>
+<p>下一章将进入 <strong>后端优化</strong>——当计算图在前端被充分优化后，如何针对具体硬件生成高效的可执行代码。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ai-system/">AI System</a>
+        
+            <a href="/tags/deep-learning/">Deep Learning</a>
+        
+            <a href="/tags/ai-infra/">AI Infra</a>
+        
+            <a href="/tags/compiler/">Compiler</a>
+        
+            <a href="/tags/ir/">IR</a>
+        
+            <a href="/tags/graph-optimization/">Graph Optimization</a>
+        
+            <a href="/tags/operator-fusion/">Operator Fusion</a>
+        
+            <a href="/tags/memory-allocation/">Memory Allocation</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC8%E7%AB%A0-%E4%BC%A0%E7%BB%9F%E7%BC%96%E8%AF%91%E5%99%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第8章 传统编译器</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC9%E7%AB%A0-ai%E7%BC%96%E8%AF%91%E5%99%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第9章 AI编译器</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第1章 AI系统概述</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC2%E7%AB%A0-ai%E8%AE%A1%E7%AE%97%E4%BD%93%E7%B3%BB/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第2章 AI计算体系</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC5%E7%AB%A0-tpu%E4%BB%A5%E8%B0%B7%E6%AD%8C%E4%B8%BA%E4%BE%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第5章 TPU——以谷歌为例</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

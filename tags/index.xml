@@ -248,6 +248,14 @@
         <description></description>
         </item>
         <item>
+        <title>Graph Optimization</title>
+        <link>https://Salmooo.github.io/tags/graph-optimization/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/graph-optimization/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>Heterogeneous Computing</title>
         <link>https://Salmooo.github.io/tags/heterogeneous-computing/</link>
         <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -304,6 +312,14 @@
         <description></description>
         </item>
         <item>
+        <title>Memory Allocation</title>
+        <link>https://Salmooo.github.io/tags/memory-allocation/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/memory-allocation/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>NPU</title>
         <link>https://Salmooo.github.io/tags/npu/</link>
         <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -325,6 +341,14 @@
         <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
         
         <guid>https://Salmooo.github.io/tags/nvlink/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Operator Fusion</title>
+        <link>https://Salmooo.github.io/tags/operator-fusion/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/operator-fusion/</guid>
         <description></description>
         </item>
         <item>
