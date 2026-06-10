@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="《AI系统：原理与架构》学习笔记 — 深入AI编译器的后端优化：从计算与调度分离，到循环优化、指令优化、存储优化，再到Auto-Tuning自动调优">
+<title>AI系统：第11章 后端优化</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC11%E7%AB%A0-%E5%90%8E%E7%AB%AF%E4%BC%98%E5%8C%96/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="AI系统：第11章 后端优化">
+<meta property='og:description' content="《AI系统：原理与架构》学习笔记 — 深入AI编译器的后端优化：从计算与调度分离，到循环优化、指令优化、存储优化，再到Auto-Tuning自动调优">
+<meta property='og:url' content='https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC11%E7%AB%A0-%E5%90%8E%E7%AB%AF%E4%BC%98%E5%8C%96/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='AI System' /><meta property='article:tag' content='Deep Learning' /><meta property='article:tag' content='AI Infra' /><meta property='article:tag' content='Compiler' /><meta property='article:tag' content='Backend Optimization' /><meta property='article:tag' content='Triton' /><meta property='article:tag' content='Halide' /><meta property='article:tag' content='Auto Tuning' />
+<meta name="twitter:title" content="AI系统：第11章 后端优化">
+<meta name="twitter:description" content="《AI系统：原理与架构》学习笔记 — 深入AI编译器的后端优化：从计算与调度分离，到循环优化、指令优化、存储优化，再到Auto-Tuning自动调优">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#本章概览">本章概览</a></li>
+    <li><a href="#111-后端优化引言">11.1 后端优化引言</a>
+      <ol>
+        <li><a href="#1111-前端优化-vs-后端优化">11.1.1 前端优化 vs 后端优化</a></li>
+        <li><a href="#1112-后端优化的三步流程">11.1.2 后端优化的三步流程</a></li>
+        <li><a href="#1113-算子优化的两大挑战">11.1.3 算子优化的两大挑战</a></li>
+      </ol>
+    </li>
+    <li><a href="#112-计算与调度">11.2 计算与调度</a>
+      <ol>
+        <li><a href="#1121-高斯的启示计算与调度分离">11.2.1 高斯的启示：计算与调度分离</a></li>
+        <li><a href="#1122-调度树把调度抽象成一棵树">11.2.2 调度树：把调度抽象成一棵树</a></li>
+        <li><a href="#1123-halide-调度变换实战">11.2.3 Halide 调度变换实战</a></li>
+      </ol>
+    </li>
+    <li><a href="#113-算子手工优化">11.3 算子手工优化</a>
+      <ol>
+        <li><a href="#1131-用-roofline-模型找到瓶颈">11.3.1 用 Roofline 模型找到瓶颈</a></li>
+        <li><a href="#1132-三大优化策略">11.3.2 三大优化策略</a></li>
+        <li><a href="#1133-triton面向块编程的-dsl">11.3.3 Triton：面向&quot;块&quot;编程的 DSL</a></li>
+        <li><a href="#1134-triton-实现原理">11.3.4 Triton 实现原理</a></li>
+      </ol>
+    </li>
+    <li><a href="#114-算子循环优化">11.4 算子循环优化</a>
+      <ol>
+        <li><a href="#1141-两个核心矛盾数据局部性-vs-计算并行性">11.4.1 两个核心矛盾：数据局部性 vs 计算并行性</a></li>
+        <li><a href="#1142-循环优化五大法宝">11.4.2 循环优化五大法宝</a></li>
+      </ol>
+    </li>
+    <li><a href="#115-指令和存储优化">11.5 指令和存储优化</a>
+      <ol>
+        <li><a href="#1151-指令优化向量化与张量化">11.5.1 指令优化：向量化与张量化</a></li>
+        <li><a href="#1152-存储优化时延隐藏与内存分配">11.5.2 存储优化：时延隐藏与内存分配</a></li>
+      </ol>
+    </li>
+    <li><a href="#116-auto-tuning-原理">11.6 Auto-Tuning 原理</a>
+      <ol>
+        <li><a href="#1161-为什么需要自动调优">11.6.1 为什么需要自动调优？</a></li>
+        <li><a href="#1162-自动调优的四步法">11.6.2 自动调优的四步法</a></li>
+      </ol>
+    </li>
+    <li><a href="#小结与思考">小结与思考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/ai/" >
+                AI
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC11%E7%AB%A0-%E5%90%8E%E7%AB%AF%E4%BC%98%E5%8C%96/">AI系统：第11章 后端优化</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            《AI系统：原理与架构》学习笔记 — 深入AI编译器的后端优化：从计算与调度分离，到循环优化、指令优化、存储优化，再到Auto-Tuning自动调优
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    5 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="本章概览">本章概览
+</h2><p>前面几章我们讨论了 AI 编译器前端优化（计算图级别的图算融合、死代码消除等）。但问题是：<strong>优化后的计算图到了底层，算子的每一个循环、每一次内存访问，谁来优化？</strong> 答案就是本章的主角——<strong>后端优化</strong>。</p>
+<p>如果说前端优化是&quot;宏观调度&quot;（整个计算图的拓扑结构优化），那后端优化就是&quot;微观精雕&quot;——深入到单个算子的循环嵌套、内存布局、指令选择，把每一滴硬件性能都榨出来。</p>
+<p>本章将从 <strong>计算与调度的分离哲学</strong> 出发，依次讲解循环优化五大法宝、指令和存储优化、DSL 开发（Triton），最后聊到自动调优——让机器帮我们找到最优的算子实现。</p>
+<hr>
+<h2 id="111-后端优化引言">11.1 后端优化引言
+</h2><h3 id="1111-前端优化-vs-后端优化">11.1.1 前端优化 vs 后端优化
+</h3><p>AI 编译器有两层中间表示（IR），对应两类优化：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>优化类型</th>
+          <th>关注范围</th>
+          <th>核心工作</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>前端优化</strong></td>
+          <td>整个计算图拓扑结构</td>
+          <td>算子融合、消除、化简，降低计算和存储开销（第10章内容）</td>
+      </tr>
+      <tr>
+          <td><strong>后端优化</strong></td>
+          <td>单个算子的内部实现</td>
+          <td>循环内存编排、指令选择、存储分配，让算子跑得最快</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>一个形象的类比：前端优化是城市规划师，决定哪条路该拓宽、哪个路口该合并；后端优化是 F1 赛车技师，对每一台引擎的进气和点火时机做微调。</p>
+</blockquote>
+<p><img src="/images/ai_system/ch11/ai_system.pdf-0434-10.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图11.1.1 后端优化分类"
+	
+	
+></p>
+<h3 id="1112-后端优化的三步流程">11.1.2 后端优化的三步流程
+</h3><p>后端优化有标准的&quot;三部曲&quot;：</p>
+<ol>
+<li><strong>生成低级 IR</strong>：将 Graph IR 转换为 Tensor IR。不同 AI 编译器内部低级 IR 形式不同，但同一算子的算法原理一致。</li>
+<li><strong>后端优化</strong>：针对不同硬件架构（如 Conv1x1、Conv3x3、Conv7x7 都需要不同的循环优化方法），找到算子的最优实现。<strong>为什么不能直接丢给 GCC/LLVM？</strong> 两个原因：①数据形式不同——深度学习以张量为主，传统编译器擅长标量；②缺乏 DSL 支持——传统编译器不懂神经网络的领域特定语言。</li>
+<li><strong>代码生成</strong>：将优化后的低级 IR 转化为机器指令（通常是借助 LLVM/NVCC 等成熟编译工具）。</li>
+</ol>
+<h3 id="1113-算子优化的两大挑战">11.1.3 算子优化的两大挑战
+</h3><p>算子按计算形式分为两类：</p>
+<ul>
+<li><strong>访存密集型（Memory-Bound）</strong>：频繁读取写入内存，性能受限于内存带宽。如 RNN 训练——计算密度低，瓶颈在 Host 端 Op Launch 上。</li>
+<li><strong>计算密集型（Compute-Bound）</strong>：大量计算、相对少的内存访问。如矩阵乘法、卷积——性能和算力强相关。</li>
+</ul>
+<p>算子优化的三大挑战：</p>
+<ul>
+<li><strong>优化手段多样</strong>：不同算子、不同参数适用不同优化，组合优化甚至是 NP 问题</li>
+<li><strong>通用性与移植性</strong>：不同硬件架构差异巨大</li>
+<li><strong>不同优化间相互影响</strong>：各种优化会相互制约</li>
+</ul>
+<p>两大解决思路：</p>
+<ul>
+<li><strong>算子库</strong>：硬件厂商预置高度优化的计算核心（cuBLAS、cuDNN、oneDNN 等）。问题是迭代慢、跨平台一致性差、算子组合爆炸。</li>
+<li><strong>自动生成</strong>：Auto Tuning（启发式搜索参数组合）和 Polyhedral（多面体编译优化）方法。</li>
+</ul>
+<hr>
+<h2 id="112-计算与调度">11.2 计算与调度
+</h2><h3 id="1121-高斯的启示计算与调度分离">11.2.1 高斯的启示：计算与调度分离
+</h3><p>还记得高斯求和的故事吗？计算 1+2+&hellip;+100，逐个加需要 99 次运算，但高斯发现两两配对（1+100=101, 2+99=101&hellip;），只需一次乘法 50×101=5050。</p>
+<p>对于计算机运算，同样存在这样的&quot;捷径&quot;。<strong>一个计算可以有多种不同的实现方式</strong>——用最朴素的循环，或用向量化、循环分块、并行化。这就是<strong>计算与调度分离</strong>的核心思想：</p>
+<ul>
+<li><strong>计算（Computation）</strong>：描述实现算法的逻辑，不关心具体怎么执行</li>
+<li><strong>调度（Schedule）</strong>：对计算进行优化控制——执行顺序、内存布局、并行策略</li>
+</ul>
+<p>这种思想的最佳践行者就是 <strong>Halide</strong>——一个用 C++ 作为宿主语言的图像处理 DSL。它让你先定义&quot;要算什么&quot;，再独立地指定&quot;怎么算&quot;，两者解耦。</p>
+<p>以矩阵乘法为例，最朴素的实现：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">;</span> <span class="o">++</span><span class="n">k</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">B</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>同样一个矩阵乘法，可以用循环分块、向量化、甚至把它们组合起来——算法功能完全一样，但速度天差地别。<strong>所有可能的调度方式构成了&quot;调度空间&quot;，AI 编译器的目标就是从中找到最优解。</strong></p>
+<h3 id="1122-调度树把调度抽象成一棵树">11.2.2 调度树：把调度抽象成一棵树
+</h3><p>对于一个算子的计算形式（多层嵌套循环 + 多维张量输入），可以通过三个要素来刻画：</p>
+<ul>
+<li><strong>循环节点</strong>：表示沿某个维度如何遍历计算（顺序、并行、向量化、展开）</li>
+<li><strong>存储节点</strong>：表示中间结果的存储位置</li>
+<li><strong>计算节点</strong>：叶子节点，表示正在执行的计算</li>
+</ul>
+<p>这就是<strong>调度树</strong>。给定一棵调度树，通过深度优先遍历就能生成对应的程序代码。</p>
+<p><img src="/images/ai_system/ch11/ai_system.pdf-0441-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图11.2.1 调度树结构"
+	
+	
+></p>
+<blockquote>
+<p>理解调度树的好处在于：只要树是合法的，你就可以随意变换它，生成不同性能的程序——这就是&quot;计算与调度分离&quot;的工程实现。</p>
+</blockquote>
+<h3 id="1123-halide-调度变换实战">11.2.3 Halide 调度变换实战
+</h3><p>以 Halide 为例，一个简单的梯度计算：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">Var</span> <span class="nf">x</span><span class="p">(</span><span class="s">&#34;x&#34;</span><span class="p">),</span> <span class="n">y</span><span class="p">(</span><span class="s">&#34;y&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">Func</span> <span class="nf">gradient</span><span class="p">(</span><span class="s">&#34;gradient&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">gradient</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">Buffer</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">output</span> <span class="o">=</span> <span class="n">gradient</span><span class="p">.</span><span class="n">realize</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>等价于：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">y</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">x</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Evaluating at x = %d, y = %d: %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>现在用 Halide 调度 API 进行优化——融合（Fuse）+ 分块（Tile）+ 并行（Parallel）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">Var</span> <span class="n">fused</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">gradient</span><span class="p">.</span><span class="n">fuse</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fused</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// → 将两层循环合并为一个 16 次迭代的循环
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="n">Var</span> <span class="n">x_outer</span><span class="p">,</span> <span class="n">y_outer</span><span class="p">,</span> <span class="n">x_inner</span><span class="p">,</span> <span class="n">y_inner</span><span class="p">,</span> <span class="n">tile_index</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">gradient</span><span class="p">.</span><span class="n">tile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_outer</span><span class="p">,</span> <span class="n">y_outer</span><span class="p">,</span> <span class="n">x_inner</span><span class="p">,</span> <span class="n">y_inner</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">gradient</span><span class="p">.</span><span class="n">fuse</span><span class="p">(</span><span class="n">x_outer</span><span class="p">,</span> <span class="n">y_outer</span><span class="p">,</span> <span class="n">tile_index</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">gradient</span><span class="p">.</span><span class="n">parallel</span><span class="p">(</span><span class="n">tile_index</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// → 外层 tile 融合后并行执行，内层保持原始循环
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="/images/ai_system/ch11/ai_system.pdf-0442-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图11.2.2 调度变换示意"
+	
+	
+></p>
+<p><img src="/images/ai_system/ch11/ai_system.pdf-0442-07.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图11.2.3 并行化变换"
+	
+	
+></p>
+<p>在调度树中，这些操作对应着：</p>
+<ul>
+<li><strong>Fuse</strong>：将两个相邻循环节点合并为一个</li>
+<li><strong>Parallel</strong>：改变循环类型为并行化</li>
+<li><strong>Vectorize</strong>、<strong>Unrolling</strong> 同理，只是更改循环节点上的属性</li>
+</ul>
+<p>Halide 提供的调度优化方式包括：<strong>Reorder（交换）、Split（拆分）、Fuse（融合）、Tile（平铺）、Vectorize（向量化）、Unroll（展开）、Parallel（并行）</strong>。以 Halide 思想为指导的 AI 编译器 TVM 继承了所有这些优化方式。</p>
+<hr>
+<h2 id="113-算子手工优化">11.3 算子手工优化
+</h2><h3 id="1131-用-roofline-模型找到瓶颈">11.3.1 用 Roofline 模型找到瓶颈
+</h3><p>在动手优化前，先搞清楚：<strong>当前程序的瓶颈是算力不够，还是内存带宽不够？</strong></p>
+<p>Roofline 模型定义了四个关键指标：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>指标</th>
+          <th>含义</th>
+          <th>公式/说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>计算量</strong></td>
+          <td>一次完整计算的浮点运算数</td>
+          <td>如卷积层：\(M^2 \times K^2 \times C_{in} \times C_{out}\)</td>
+      </tr>
+      <tr>
+          <td><strong>访存量</strong></td>
+          <td>一次完整计算的内存交换总量</td>
+          <td>参数 + 输出特征图（Byte）</td>
+      </tr>
+      <tr>
+          <td><strong>计算强度</strong></td>
+          <td>每字节内存交换对应的浮点计算次数</td>
+          <td>计算量 ÷ 访存量，越大内存效率越高</td>
+      </tr>
+      <tr>
+          <td><strong>理论性能</strong></td>
+          <td>硬件算力上限</td>
+          <td>Roofline 模型给出的天花板</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><img src="/images/ai_system/ch11/ai_system.pdf-0444-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图11.3.1 Roofline 模型分析"
+	
+	
+></p>
+<p>从图中可以清晰看到：MobileNet 处于<strong>带宽受限区域</strong>（在 1080T 上理论性能只有 3.3 TFLOPS），而 VGG 处于<strong>算力受限区域</strong>（能充分利用 1080T 的算力）。<strong>知道自己卡在哪里，才知道优化方向。</strong></p>
+<h3 id="1132-三大优化策略">11.3.2 三大优化策略
+</h3><p><strong>① 循环优化</strong>：AI 算子是高度规则的多层嵌套循环，通过调整循环结构可以显著减少开销。常见技术包括：</p>
+<ul>
+<li>循环分块（Loop Blocking）——提高 Cache 命中率</li>
+<li>循环展开（Loop Unrolling）——减少分支跳转</li>
+<li>循环重排（Loop Reordering）——改善数据访问模式</li>
+<li>循环融合（Loop Fusion）——减少内存访问次数</li>
+<li>循环拆分（Loop Splitting）——创造更多优化机会</li>
+</ul>
+<p>（这些将在 11.4 节详细展开）</p>
+<p><strong>② 指令优化</strong>：利用处理器的向量指令（Intel AVX-512、ARM SVE）和张量指令（NVIDIA Tensor Core、Intel VNNI），让一条指令同时操作多个数据。</p>
+<p><strong>③ 存储优化</strong>：精细调整数据访问模式和内存层次结构——预取（Prefetching）、双缓冲（Double Buffering）、内存池等，隐藏内存访问时延。</p>
+<h3 id="1133-triton面向块编程的-dsl">11.3.3 Triton：面向&quot;块&quot;编程的 DSL
+</h3><p>手写 CUDA Kernel 是出了名的&quot;劝退&quot;——你需要同时考虑 DRAM、SRAM、计算单元的调度。<strong>Triton（OpenAI 研发的开源 DSL）改变了这个局面</strong>：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>对比维度</th>
+          <th>CUDA</th>
+          <th>Triton</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>编程模型</td>
+          <td>面向 Thread（线程级细粒度）</td>
+          <td>面向 Thread Block（块级编程）</td>
+      </tr>
+      <tr>
+          <td>开发者关注点</td>
+          <td>内存管理、线程管理、指令选择</td>
+          <td>Kernel Launch 参数、分块大小、块间交互</td>
+      </tr>
+      <tr>
+          <td>性能 vs 效率</td>
+          <td>极致性能，极低开发效率</td>
+          <td>90%+ 极致性能，数十倍开发效率</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><img src="/images/ai_system/ch11/ai_system.pdf-0446-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图11.3.2 CUDA vs Triton 编程模型对比"
+	
+	
+></p>
+<p>在矩阵乘法中，CUDA 在细粒度线程上编程，而 Triton 是逐块计算的——这种块状迭代空间给了程序员更多灵活性，同时让编译器有更大的优化空间。</p>
+<p>一个用 Triton 写的矩阵乘法 Kernel：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="nd">@triton.jit</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">matmul_kernel</span><span class="p">(</span><span class="n">a_ptr</span><span class="p">,</span> <span class="n">b_ptr</span><span class="p">,</span> <span class="n">c_ptr</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                  <span class="n">M</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                  <span class="n">BLOCK_M</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="p">,</span> <span class="n">BLOCK_K</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">offs_m</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">BLOCK_M</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">offs_n</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">offs_k</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">BLOCK_K</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># ... 计算指针偏移 ...</span>
+</span></span><span class="line"><span class="cl">    <span class="n">accumulator</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">BLOCK_M</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tl</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">BLOCK_K</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="n">a</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">a_ptrs</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">b</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">b_ptrs</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">accumulator</span> <span class="o">+=</span> <span class="n">tl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># 移动指针到下一块 ...</span>
+</span></span><span class="line"><span class="cl">    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">c_ptrs</span><span class="p">,</span> <span class="n">accumulator</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Triton 已被集成进 JAX、PyTorch Inductor 等主流框架，实现了从&quot;实验室&quot;到&quot;生产环境&quot;的跃迁。</p>
+<h3 id="1134-triton-实现原理">11.3.4 Triton 实现原理
+</h3><p>Triton 基于 MLIR 构建，架构如下：</p>
+<p><img src="/images/ai_system/ch11/ai_system.pdf-0448-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图11.3.3 Triton 架构概览"
+	
+	
+></p>
+<p><strong>Frontend</strong>：<code>@triton.jit</code> 注解 → 解析 Python AST → 生成 Triton IR (Triton Dialect)</p>
+<p><strong>Optimizer</strong> 的工作流：</p>
+<p><img src="/images/ai_system/ch11/ai_system.pdf-0448-10.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图11.3.4 Triton Optimizer 工作流"
+	
+	
+></p>
+<p>分为三阶段：①Triton IR 优化 → ②Triton IR 到 TritonGPU IR 的转换 → ③TritonGPU IR 优化。贯穿整个流程的核心数据结构是 <strong>TritonGPU IR</strong>。</p>
+<p>Triton 的两大优化思想：</p>
+<ul>
+<li><strong>Layout 抽象</strong>：描述计算资源和输入/输出元素的坐标映射关系——块编码、共享内存编码、切片编码，以 Attribute 附着在 Tensor 上。不兼容时插入中转 Layout。</li>
+<li><strong>优化 Pass</strong>：包括 Coalescing（向量化访存）、Pipeline/Prefetch（缓解计算访存差异）、Swizzling（避免 Shared Memory Bank-Conflict）。用户只需关注业务逻辑。</li>
+</ul>
+<hr>
+<h2 id="114-算子循环优化">11.4 算子循环优化
+</h2><h3 id="1141-两个核心矛盾数据局部性-vs-计算并行性">11.4.1 两个核心矛盾：数据局部性 vs 计算并行性
+</h3><p><strong>数据局部性</strong>源于计算机的存储层次——从寄存器（最快最小）到 Cache（L1/L2/L3）到主存（慢但大）。Cache 里应该放 CPU 最可能再次访问的数据，这依赖两个局部性原理：</p>
+<ul>
+<li><strong>时间局部性</strong>：刚处理过的数据很可能被再次处理</li>
+<li><strong>空间局部性</strong>：刚访问过的数据附近的数据很可能马上被访问</li>
+</ul>
+<p>以一个简单的两层嵌套循环为例：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">B</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>A[i]</code> 在内层循环完整结束后才被重用（时间局部性），每个 <code>A</code> 元素被重用 m 次；<code>B[j]</code> 每次内层循环都改变（空间局部性），每个 <code>B</code> 元素被重用 n 次。<strong>两者呈现不同的局部性模式</strong>——这直接决定了优化策略。</p>
+<p><strong>计算并行性</strong>则来自多核 CPU（线程级并行）和向量寄存器（数据级并行 SIMD）——一次操作多个数据元素。一个 512bit 的向量寄存器可以容纳 64 个 64bit 元素，或 128 个 32bit 元素，或 512 个 8bit 元素。</p>
+<h3 id="1142-循环优化五大法宝">11.4.2 循环优化五大法宝
+</h3><p><strong>① 循环分块（Loop Blocking/Tiling）</strong></p>
+<p>这是利用 Cache 局部性最核心的优化。大数据集无法一次放入 Cache，循环按顺序访问时后面数据会把前面的顶出去（Cache Miss），导致大量时间花在加载数据上。</p>
+<p><img src="/images/ai_system/ch11/ai_system.pdf-0451-07.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图11.4.1 循环分块的访问模式变化"
+	
+	
+></p>
+<p>做法：将大数据集切分成小块，一次加载进 Cache，执行完尽可能多的计算才换出。以之前的代码为例，对 <code>j</code> 层做分块（tile size = T）并提到最外层：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">for</span> <span class="n">j_o</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="n">j_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j_o</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">j_o</span> <span class="o">+</span> <span class="n">T</span><span class="p">,</span> <span class="n">m</span><span class="p">)):</span>
+</span></span><span class="line"><span class="cl">            <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">B</span><span class="p">[</span><span class="n">j_i</span><span class="p">]</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>当 T 个 B 元素能放进 Cache 时，<code>i</code> 循环切换时 B 仍然在 Cache 中——<strong>Cache Miss 从 \(n \times m/b\) 降到了 \(m/b\)</strong>。更进一步，对 <code>i</code> 也做分块（tile size = W），A 的 Cache Miss 也从 \(n/b\) 变成了 \(n/b\)（前提是 W 个 A 也能放进 Cache）。</p>
+<blockquote>
+<p>分块大小（T、W）的选择很微妙：太大 → Cache 装不下，未充分利用就被替换；太小 → 额外开销掩盖收益。目前主流方法有基于分析的静态方法和基于经验搜索的 Auto Tuning。</p>
+</blockquote>
+<p><strong>② 循环展开（Loop Unrolling）</strong></p>
+<p>将循环体复制 n 次（展开因子），减少循环计数、条件判断和分支跳转的开销：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># 原始循环</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 展开因子=4</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span> <span class="o">+=</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>好处：减少循环开销、提高指令并发度、减少流水线停顿。风险：循环体超过指令缓存容量会导致 Cache Miss，展开过多也会增加寄存器压力。</p>
+<p><strong>③ 循环重排（Loop Reordering）</strong></p>
+<p>矩阵乘法中，如果 B 是逐列访问而数据是行优先存储的，访问模式就很&quot;反人类&quot;。交换内层循环顺序可以让所有元素按顺序读写：</p>
+<p><img src="/images/ai_system/ch11/ai_system.pdf-0454-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图11.4.2 循环重排示意——矩阵乘法中的 B 矩阵访问"
+	
+	
+></p>
+<p>一次计算输出的一行（中间结果），全部累加后得到结果矩阵的一行——利用的是空间局部性。</p>
+<p><strong>④ 循环融合（Loop Fusion）</strong></p>
+<p>将相邻循环合并，减少内存访问次数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># 融合前：两个独立循环，a 写入后被清出 Cache，第二个循环又要重新读取</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">y</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 融合后：a 刚写入就读取，还在 Cache 里</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span>
+</span></span><span class="line"><span class="cl">    <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">y</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>⚠️ 注意：循环融合需要检查数据依赖！如果前后循环存在写后读（RAW）依赖，融合可能产生错误结果。</p>
+</blockquote>
+<p><strong>⑤ 循环拆分（Loop Splitting）</strong></p>
+<p>将有条件分支的循环拆分为纯计算部分（可上加速器）和带控制流部分（退回 CPU）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># 拆分前</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">temp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">data</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 拆分后：纯计算部分 → GPU/NPU；条件部分 → CPU</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">temp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">data</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>循环拆分还能和融合结合——比如把两个有依赖的循环中的一个拆开，将无依赖的部分融合进去，提升局部性。</p>
+<hr>
+<h2 id="115-指令和存储优化">11.5 指令和存储优化
+</h2><h3 id="1151-指令优化向量化与张量化">11.5.1 指令优化：向量化与张量化
+</h3><p><strong>向量化（Vectorization）</strong>：SIMD 的工程实现——将多个连续数据批量加载进向量寄存器，对整个寄存器一次性操作：</p>
+<p><img src="/images/ai_system/ch11/ai_system.pdf-0457-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图11.5.1 向量化硬件实现"
+	
+	
+></p>
+<p>普通循环 <code>C[i] = A[i] + B[i]</code> 需要 n 次迭代。向量化后 <code>C[i:i+3] = A[i:i+3] + B[i:i+3]</code>，迭代次数直接除以 4。对应硬件指令：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>指令集</th>
+          <th>加法指令</th>
+          <th>乘法指令</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Intel SSE</td>
+          <td><code>_mm_add_ps</code></td>
+          <td><code>_mm_mul_ps</code></td>
+      </tr>
+      <tr>
+          <td>Intel AVX/AVX2</td>
+          <td><code>_mm256_add_ps</code></td>
+          <td><code>_mm256_mul_ps</code></td>
+      </tr>
+      <tr>
+          <td>ARM NEON</td>
+          <td><code>vaddq_f32</code></td>
+          <td><code>vmulq_f32</code></td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>张量化（Tensorization）</strong>：向量化的&quot;升级版&quot;。神经网络中的张量是 4 维的 <code>[N, C, H, W]</code>，传统多层循环逐个计算效率极低。<strong>NVIDIA Tensor Core</strong> 就是为此而生——Volta 架构中一个 SM 包含 128 个 Tensor Core，专门加速矩阵乘法和累加操作。Intel 也有对应的 VNNI 技术。</p>
+<p>当模型中出现新算子时，依赖硬件厂商算子库就不够用了——这就回到了前面聊的 Triton 和 Auto Tuning 方案。</p>
+<h3 id="1152-存储优化时延隐藏与内存分配">11.5.2 存储优化：时延隐藏与内存分配
+</h3><p><strong>访存时延隐藏</strong></p>
+<p>在纯串行架构中，执行流程是&quot;加载数据 → 执行计算 → 写回结果&quot;，每一步的时间都累加。现代硬件通过并行来打破这个限制：</p>
+<ul>
+<li><strong>CPU</strong>：多线程 + 硬件隐式数据预取。一个线程等待内存时，CPU 切换到另一个线程继续算。</li>
+<li><strong>GPU</strong>：Warp Schedule——在等待内存操作完成时动态调度其他 Warp 执行计算，通过上下文切换隐藏内存时延。</li>
+</ul>
+<p><img src="/images/ai_system/ch11/ai_system.pdf-0459-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图11.5.2 GPU Warp Schedule 时延隐藏"
+	
+	
+></p>
+<ul>
+<li><strong>NPU</strong>：解耦访问/执行（DAE）架构——内存访问操作和计算操作分开执行，并行进行。通常配合双缓冲机制缓存不同 LOAD 指令的数据。</li>
+</ul>
+<p><strong>存储分配</strong></p>
+<p>传统编译器的内存模型（栈、静态区、堆）在 AI 系统中远远不够。专用硬件有各自的内存管理：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>硬件</th>
+          <th>内存层次</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>GPU</strong></td>
+          <td>全局内存（显存，大但慢）→ 共享内存（线程块级，快但小）→ 寄存器（线程级，最快）</td>
+      </tr>
+      <tr>
+          <td><strong>NPU</strong></td>
+          <td>片上内存（权重和激活数据）→ 高并发内存访问 → 专用内存控制器</td>
+      </tr>
+  </tbody>
+</table></div>
+<hr>
+<h2 id="116-auto-tuning-原理">11.6 Auto-Tuning 原理
+</h2><h3 id="1161-为什么需要自动调优">11.6.1 为什么需要自动调优？
+</h3><p>手工编写高性能算子库面临三个&quot;越来越&quot;：</p>
+<ul>
+<li><strong>优化手段越来越多</strong>：循环优化、存储优化、指令优化……每种又有自己的参数（如分块因子），软硬件的组合让手工调优耗费巨大精力</li>
+<li><strong>硬件平台越来越多样</strong>：CPU、GPU、FPGA、ASIC，每种都有不同的优化策略；以卷积为例，不同硬件上的实现差异极大</li>
+<li><strong>软硬件迭代越来越快</strong>：新处理器架构层出不穷，新算子（几十种卷积变体、各种激活函数）不断涌现</li>
+</ul>
+<h3 id="1162-自动调优的四步法">11.6.2 自动调优的四步法
+</h3><p>自动调优的核心思路：<strong>让编译器在一个巨大的优化空间中自动搜索，找到最佳配置</strong>。</p>
+<p>四步流程：</p>
+<ol>
+<li><strong>性能分析</strong>：分析程序运行情况，识别瓶颈和优化机会</li>
+<li><strong>参数搜索</strong>：系统性地探索不同编译选项和运行参数</li>
+<li><strong>性能评估</strong>：对不同配置进行测试，评估性能影响</li>
+<li><strong>反馈学习</strong>：根据评估结果调整搜索策略，进一步优化参数选择</li>
+</ol>
+<p>这个过程本质上是在一个极其庞大的搜索空间（优化组合 × 参数配置 × 硬件特性）中寻找最优解。虽然自动调优还处于活跃研究阶段，但它已经是生产级 AI 编译器的标配能力。</p>
+<hr>
+<h2 id="小结与思考">小结与思考
+</h2><p>这一章从后端优化的概念出发，一路讲到循环优化、指令/存储优化，再到自动调优，信息密度相当高。但我们真正要记住的核心逻辑其实只有一条：</p>
+<p><strong>后端优化的本质，是在&quot;计算定义&quot;和&quot;硬件执行&quot;之间架一座最优的桥梁。</strong></p>
+<ul>
+<li><strong>计算与调度分离</strong>（Halide/TVM）让我们可以独立地定义算法和优化策略——换个调度方案，同样的计算性能可能差几十倍</li>
+<li><strong>循环优化五大法宝</strong>（分块、展开、重排、融合、拆分）本质上都是在和数据局部性与计算并行性较劲——目的就是让 Cache 命中率更高、流水线更满、SIMD 单元更忙</li>
+<li><strong>Triton</strong> 证明了&quot;面向块编程&quot;比&quot;面向线程编程&quot;更高效、更友好——90% 的极致性能换取数十倍的开发效率，这笔交易是划算的</li>
+<li><strong>自动调优</strong>是终极方案——人工不可能遍历所有优化组合，但机器可以</li>
+</ul>
+<blockquote>
+<p>前端优化让计算图&quot;瘦身&quot;，后端优化让每个算子&quot;跑更快&quot;。两者合在一起，才构成 AI 编译器的完整能力。</p>
+</blockquote>
+<hr>
+<p><em>下一篇预告：第12章将进入计算架构的领地，详解 SIMD/SIMT 与 AI 芯片编程体系。</em></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ai-system/">AI System</a>
+        
+            <a href="/tags/deep-learning/">Deep Learning</a>
+        
+            <a href="/tags/ai-infra/">AI Infra</a>
+        
+            <a href="/tags/compiler/">Compiler</a>
+        
+            <a href="/tags/backend-optimization/">Backend Optimization</a>
+        
+            <a href="/tags/triton/">Triton</a>
+        
+            <a href="/tags/halide/">Halide</a>
+        
+            <a href="/tags/auto-tuning/">Auto Tuning</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC10%E7%AB%A0-%E5%89%8D%E7%AB%AF%E4%BC%98%E5%8C%96/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第10章 前端优化</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第1章 AI系统概述</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC2%E7%AB%A0-ai%E8%AE%A1%E7%AE%97%E4%BD%93%E7%B3%BB/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第2章 AI计算体系</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC5%E7%AB%A0-tpu%E4%BB%A5%E8%B0%B7%E6%AD%8C%E4%B8%BA%E4%BE%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第5章 TPU——以谷歌为例</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC6%E7%AB%A0-npu%E4%BB%A5%E6%98%87%E8%85%BE%E4%B8%BA%E4%BE%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第6章 NPU——以昇腾为例</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
