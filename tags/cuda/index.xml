@@ -7,6 +7,674 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en</language>
         <copyright>salmone</copyright><atom:link href="https://Salmooo.github.io/tags/cuda/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>AI系统：第12章 计算架构</title>
+        <link>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC12%E7%AB%A0-%E8%AE%A1%E7%AE%97%E6%9E%B6%E6%9E%84/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC12%E7%AB%A0-%E8%AE%A1%E7%AE%97%E6%9E%B6%E6%9E%84/</guid>
+        <description>&lt;h2 id=&#34;本章概览&#34;&gt;本章概览
+&lt;/h2&gt;&lt;p&gt;前面几章我们看了 GPU 长得什么样（第4章）、TPU 是怎么设计的（第5章）、NPU 又是怎么玩的（第6章），到了第12章，该从&amp;quot;具体芯片&amp;quot;抽身出来，看看这些芯片背后的&lt;strong&gt;通用计算架构理论&lt;/strong&gt;了。&lt;/p&gt;
+&lt;p&gt;这一章的核心主题其实就是两个词：&lt;strong&gt;SIMD 和 SIMT&lt;/strong&gt;。听起来像是一对双胞胎，但它们之间的区别和联系，恰恰是理解现代 AI 芯片设计的关键。&lt;/p&gt;
+&lt;p&gt;本章要回答的核心问题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;AI 芯片的并行分哪几类？指令级、数据级、任务级各自怎么玩？&lt;/li&gt;
+&lt;li&gt;SIMD 和 SIMT 到底啥区别？为什么英伟达选了 SIMT 而不是纯 SIMD？&lt;/li&gt;
+&lt;li&gt;CUDA 的编程模型（SPMD）和硬件执行模型（SIMT）是什么关系？&lt;/li&gt;
+&lt;li&gt;Warp、Thread Block、Grid 这些概念在硬件层面到底长什么样？&lt;/li&gt;
+&lt;li&gt;编程模型和硬件执行模型从概念层面如何区分？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;一句话总结&lt;/strong&gt;：理解 SIMD 和 SIMT 的关系，就是理解了 GPU 为什么能成为 AI 计算的&amp;quot;标配&amp;quot;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;121-芯片的编程体系&#34;&gt;12.1 芯片的编程体系
+&lt;/h2&gt;&lt;h3 id=&#34;1211-ai-芯片并行分类&#34;&gt;12.1.1 AI 芯片并行分类
+&lt;/h3&gt;&lt;p&gt;AI 芯片最核心的任务就是&lt;strong&gt;并行计算&lt;/strong&gt;。从程序并行的角度，可以把并行分成三个层次：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;并行类型&lt;/th&gt;
+          &lt;th&gt;缩写&lt;/th&gt;
+          &lt;th&gt;核心思路&lt;/th&gt;
+          &lt;th&gt;实现方式&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;指令级并行&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;ILP&lt;/td&gt;
+          &lt;td&gt;同一时间执行多条指令&lt;/td&gt;
+          &lt;td&gt;流水线技术，多阶段重叠执行&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;数据级并行&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;DLP&lt;/td&gt;
+          &lt;td&gt;同一时间处理多个数据&lt;/td&gt;
+          &lt;td&gt;向量处理器 / SIMD 架构&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;任务级并行&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;TLP&lt;/td&gt;
+          &lt;td&gt;大任务拆成小任务同时跑&lt;/td&gt;
+          &lt;td&gt;多线程 / 分布式计算&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;这三者并不是互斥的——现代 GPU 往往三层并行一起上。ILP 让单条指令跑得更顺，DLP 让多个数据一起算，TLP 让整个任务分而治之。&lt;/p&gt;
+&lt;h3 id=&#34;1212-并行处理硬件架构&#34;&gt;12.1.2 并行处理硬件架构
+&lt;/h3&gt;&lt;p&gt;按照数据与指令的关系，硬件架构可以分为 SISD、SIMD、MISD 和 MIMD 四种（这部分在第 3 章已有详细介绍）。&lt;/p&gt;
+&lt;p&gt;SISD 是传统的串行计算，不支持并行。CPU 和 GPU 主要用的是 &lt;strong&gt;SIMD&lt;/strong&gt;：处理器硬件里塞了多个处理单元（PU），一个控制器同时指挥多个 PU，对一组数据中的每一个执行相同的操作。&lt;/p&gt;
+&lt;p&gt;但英伟达 GPU 做的更进了一步——它采用了 &lt;strong&gt;SIMT&lt;/strong&gt;（单指令多线程）架构。SIMT 是 SIMD 的一种特殊形态，核心区别在于：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;SIMT 让程序员可以为&lt;strong&gt;独立的标量线程&lt;/strong&gt;编写线程级并行代码，也能为&lt;strong&gt;协同线程&lt;/strong&gt;编写数据并行代码。而 SIMD 要求所有操作在同一个同步组里执行。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0464-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.1.1 神经网络中的矩阵乘计算&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;1213-ai-计算方式与硬件模型&#34;&gt;12.1.3 AI 计算方式与硬件模型
+&lt;/h3&gt;&lt;p&gt;神经网络的核心计算是&lt;strong&gt;矩阵乘&lt;/strong&gt;（X · W），不管是 FFN、CNN、LSTM 还是 Transformer，90% 以上的计算量都是矩阵乘。&lt;/p&gt;
+&lt;p&gt;训练和推理两个阶段都需要大规模矩阵乘。AI 框架（PyTorch、MindSpore 等）自动构建前向计算图和反向计算图，最终变成算子的执行序列，算子最终跑在底层 AI 芯片上。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0465-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.1.2 AI框架开发流程：算法→框架→算子→芯片&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;这里引出了两个关键概念：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;硬件执行模型（Execution Model）&lt;/strong&gt;：硬件怎么执行程序——SIMD 还是 SIMT？指令怎么排？&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;编程模型（Programming Model）&lt;/strong&gt;：程序员怎么写程序——直接用 SIMD 指令？还是 CUDA 这样更高层的抽象？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;程序员只关心编程模型，硬件关心的是具体指令怎么跑。两者之间的&amp;quot;翻译官&amp;quot;就是编译器。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;122-simd--simt-与芯片架构&#34;&gt;12.2 SIMD &amp;amp; SIMT 与芯片架构
+&lt;/h2&gt;&lt;p&gt;这一节是本章的&amp;quot;硬核核心&amp;quot;——把 SIMD 和 SIMT 的本质掰开揉碎讲清楚。&lt;/p&gt;
+&lt;h3 id=&#34;1221-simd-计算本质&#34;&gt;12.2.1 SIMD 计算本质
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;SIMD = 单指令多数据&lt;/strong&gt;。一句话说就是：一条指令，同时对多个数据执行相同的操作。&lt;/p&gt;
+&lt;p&gt;关键理解点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;SIMD 利用的是&lt;strong&gt;数据级并行&lt;/strong&gt;，不是并发。有多个计算，但只有一个进程。&lt;/li&gt;
+&lt;li&gt;SIMD 是&lt;strong&gt;单线程&lt;/strong&gt;操作，硬件上只需要一个计算核心，只不过这个核心一次可以操作多个数据。&lt;/li&gt;
+&lt;li&gt;需要与 GPU 的多线程并行区分开。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;举个例子，两个向量对应元素相乘：C[0:3] = A[0:3] × B[0:3]。不用 SIMD 时，要循环 4 次；用了 SIMD，一条指令搞定，代码量变 1/4，执行周期也降到 1/4。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0466-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.2.1/12.2.2 SIMD向量乘法与硬件ALU扩展&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;SIMD 指令层面的对比：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 不用 SIMD：四次独立加载、计算、存储
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;t1 = LD B, i
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;t2 = LD C, i
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;t3 = t1 + t2
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;ST A, i, t3
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# ... 重复三次 ...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 用 SIMD：一条指令同时操作四个元素
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;v1 = LD B, i, 4
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;v2 = LD C, i, 4
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;v3 = v1 + v2, 4
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;ST A, i, 4, v3
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;SIMD 的优缺点&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;✅ 优点：显著提升计算性能，充分利用内存总线带宽&lt;/li&gt;
+&lt;li&gt;❌ 缺点：要求数据在类型、格式、大小上&lt;strong&gt;严格对齐&lt;/strong&gt;——因为 ALU 宽度是固定的&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Intel 从 MMX 开始支持 SIMD，后来又出了 SSE、AVX 等扩展；ARM 通过 NEON 把 SIMD 引入了 ARM-Cortex 架构。NEON 的 SIMD 单元位宽是 128 bit，一个寄存器可以存 4 个 32 bit 的元素。&lt;/p&gt;
+&lt;h3 id=&#34;1222-simt-计算本质&#34;&gt;12.2.2 SIMT 计算本质
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;SIMT = 单指令多线程&lt;/strong&gt;。这是英伟达提出的，基于 GPU 的新概念。&lt;/p&gt;
+&lt;p&gt;SIMD 和 SIMT 的基本原理相同——都是单指令多数据。但&lt;strong&gt;关键区别&lt;/strong&gt;在于：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;维度&lt;/th&gt;
+          &lt;th&gt;SIMD&lt;/th&gt;
+          &lt;th&gt;SIMT&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;执行方式&lt;/td&gt;
+          &lt;td&gt;所有向量元素在同一个线程内同步执行&lt;/td&gt;
+          &lt;td&gt;多个线程在一个 Warp 中&lt;strong&gt;独立&lt;/strong&gt;执行&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;线程模型&lt;/td&gt;
+          &lt;td&gt;单线程&lt;/td&gt;
+          &lt;td&gt;多线程（形式上），每个线程有自己的 RF、ALU&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;寻址方式&lt;/td&gt;
+          &lt;td&gt;必须连续取址，数据严格对齐&lt;/td&gt;
+          &lt;td&gt;允许独立寻址，每个线程可以访问不同地址&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;灵活性&lt;/td&gt;
+          &lt;td&gt;较低&lt;/td&gt;
+          &lt;td&gt;较高，线程可以有不同的分支&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;还是用向量乘法的例子 C[0:3] = A[0:3] × B[0:3] 来理解：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;SIMD&lt;/strong&gt;：一个线程拿着 4 个 ALU，一次性把 4 对元素乘完&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;SIMT&lt;/strong&gt;：开 4 个线程，每个线程只算一对元素的乘法，4 个线程并行跑&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0468-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.2.3 SIMT给每个元素分配一个线程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;在硬件层面，SIMT 提供了一个&lt;strong&gt;多核系统（SIMT Core Cluster）&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;CPU 负责把 Kernel 加载进来&lt;/li&gt;
+&lt;li&gt;每个 SIMT Core 有独立的寄存器文件（RF）、ALU、Data Cache&lt;/li&gt;
+&lt;li&gt;但&lt;strong&gt;只有一个指令计数寄存器和指令解码寄存器&lt;/strong&gt;——指令被广播给所有 SIMT 核&lt;/li&gt;
+&lt;li&gt;GPU 由多个 SIMT Core Cluster 组成&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0469-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.2.4 SIMT多核硬件结构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;GPU 的 SIMT 可以看作特殊的 SIMD 结构&lt;/strong&gt;，硬件核心流水被分为：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;SIMT 前端（Frontend）&lt;/strong&gt;：取指、指令发射——负责&amp;quot;哪个线程执行什么&amp;quot;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;SIMD 后端（Datapath）&lt;/strong&gt;：实际的并行计算——负责&amp;quot;把数据算出来&amp;quot;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0469-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.2.5 SIMT前端&amp;#43;SIMD后端流水线&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;流水线中存在三个调度循环：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;取指循环&lt;/strong&gt;：从指令缓存中取指令&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;指令发射循环&lt;/strong&gt;：把指令分发到各线程&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;寄存器访问循环&lt;/strong&gt;：读写寄存器数据&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0470-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.2.6 SIMT硬件核心流水：把线程分发到ALU&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;SIMD 和 SIMT 的总结对比&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;基本原理相同：都是单指令多数据&lt;/li&gt;
+&lt;li&gt;SIMT 形式上多线程，但硬件端本质上还是单线程（多个核心实现多线程并行）&lt;/li&gt;
+&lt;li&gt;SIMT 比 SIMD 更灵活：允许独立寻址，不要求数据严格对齐&lt;/li&gt;
+&lt;li&gt;SIMT 是 SIMD 的推广，对开发者更友好&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;1223-nvidia-cuda-实现&#34;&gt;12.2.3 NVIDIA CUDA 实现
+&lt;/h3&gt;&lt;p&gt;CUDA 的线程层级是理解 GPU 编程的基础：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Grid（网格）→ Block（线程块）→ Thread（线程）→ Warp（线程束，32线程）
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Grid&lt;/strong&gt;：整个计算任务，被分成多个 Block&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Block&lt;/strong&gt;：映射到 SM 上执行，一个 Block 内的线程共享内存、可以快速同步&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Thread&lt;/strong&gt;：最小执行单位，有自己的 threadIdx&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Warp&lt;/strong&gt;：SM 的调度单位，32 个线程为一组，Warp 内的线程执行 SIMD&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0471-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.2.7 GPU线程分级：Grid → Block → Thread&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;CUDA 编程模型基于 &lt;strong&gt;SPMD&lt;/strong&gt;（单程序多数据）模式。程序员为每个标量线程写代码，通过线程索引区分不同线程的行为：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0471-12.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.2.8 CUDA线程索引threadIdx.x&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;线程索引由两部分组成：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;blockIdx&lt;/strong&gt;：当前线程在哪个 Block&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;threadIdx&lt;/strong&gt;：当前线程在 Block 里的位置&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;blockIdx.x&lt;/code&gt; 和 &lt;code&gt;blockDim.x&lt;/code&gt; 用来访问块索引和块维度中的 x 分量。在 CUDA 中，块索引和块维度都是三维向量（x, y, z），最高支持三维的线程组织。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0472-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.2.9 blockIdx与blockDim：线程索引的三维模型&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;英伟达 GPU 软件与硬件的对应关系&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;软件概念&lt;/th&gt;
+          &lt;th&gt;硬件单元&lt;/th&gt;
+          &lt;th&gt;说明&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Thread&lt;/td&gt;
+          &lt;td&gt;CUDA Core&lt;/td&gt;
+          &lt;td&gt;单个线程在单个核心上跑&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Warp&lt;/td&gt;
+          &lt;td&gt;SM 调度单元&lt;/td&gt;
+          &lt;td&gt;32 线程一组，执行 SIMD&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Block&lt;/td&gt;
+          &lt;td&gt;SM&lt;/td&gt;
+          &lt;td&gt;一个 Block 在一个 SM 上跑完&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Grid&lt;/td&gt;
+          &lt;td&gt;GPU&lt;/td&gt;
+          &lt;td&gt;整个任务分布在所有 SM 上&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;关键理解：&lt;strong&gt;Block 线程块只在一个 SM 上通过 Warp 调度&lt;/strong&gt;，一旦调用了就不会迁移。SM 可以同时保存多个 Block，块间并行执行。&lt;/p&gt;
+&lt;h3 id=&#34;1224-编程-vs-硬件执行本质&#34;&gt;12.2.4 编程 vs 硬件执行本质
+&lt;/h3&gt;&lt;p&gt;这一小节虽然短，但概念非常重要：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;编程模型（Programming Model）&lt;/strong&gt;：程序员眼中的抽象世界。怎么组织程序、用什么数据结构、怎么写并发——这些是程序员关心的。比如 CUDA 的 SPMD 模型。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;硬件执行模型（Hardware Execution Model）&lt;/strong&gt;：硬件实际怎么干活。指令怎么排、数据怎么传、SIMD 还是 SIMT——这些是芯片设计者关心的。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;编程模型通过编译器转换为硬件执行模型&lt;/strong&gt;。理解两者的差异，才能真正写出高性能的 GPU 代码。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;123-simd--simt-与编程关系&#34;&gt;12.3 SIMD &amp;amp; SIMT 与编程关系
+&lt;/h2&gt;&lt;p&gt;前面讲了&amp;quot;是什么&amp;quot;，这一节讲&amp;quot;怎么写&amp;quot;——从编程的角度看不同并行模型的差异。&lt;/p&gt;
+&lt;h3 id=&#34;1231-实现并行的三种编程方式&#34;&gt;12.3.1 实现并行的三种编程方式
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;模型&lt;/th&gt;
+          &lt;th&gt;执行方式&lt;/th&gt;
+          &lt;th&gt;适用场景&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;SISD&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;串行，一条指令处理一个数据&lt;/td&gt;
+          &lt;td&gt;单线程程序，传统 CPU&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;SIMD&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;一条指令同时处理多个数据&lt;/td&gt;
+          &lt;td&gt;图像处理、科学计算&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;MIMD/SPMD&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;多处理器各自执行，可相同程序不同数据&lt;/td&gt;
+          &lt;td&gt;分布式系统、GPU 编程&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;1232-串行执行-sisd&#34;&gt;12.3.2 串行执行 SISD
+&lt;/h3&gt;&lt;p&gt;串行执行的典型代码：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;N&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;++&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;C&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;A&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;B&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;];&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;每次循环只算一对数据。CPU 为了提高效率，用了三种优化手段：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1. 流水执行（Pipeline Execution）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;指令被拆成多个阶段（取指→解码→执行→访存→写回），不同指令的不同阶段可以重叠执行。就像工厂流水线——第一件产品在&amp;quot;组装&amp;quot;时，第二件已经在&amp;quot;喷漆&amp;quot;了。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0475-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.3.1 流水执行：未用流水线 vs 使用流水线&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2. 乱序执行（Out-of-Order Execution）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;处理器在不改变程序语义的前提下，重新排列指令执行顺序。比如指令 2 不依赖指令 1 的结果，那指令 2 可以插队先跑——充分利用 CPU 空闲时间。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0476-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.3.2/12.3.3 乱序执行：把依赖指令移到独立指令之后&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3. 超长指令集（VLIW）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;一条指令打包多个操作，同一个时钟周期内并行执行。并行由编译器在编译时决定，硬件只管执行。&lt;/p&gt;
+&lt;h3 id=&#34;1233-数据并行-simd&#34;&gt;12.3.3 数据并行 SIMD
+&lt;/h3&gt;&lt;p&gt;从编程角度看 SIMD 数据并行：每个循环迭代是独立的，程序员或编译器生成 SIMD 指令，在不同数据的迭代中执行相同指令。硬件层面提供更宽的 ALU。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0476-09.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.3.4 SIMD数据并行：硬件每次执行相同指令，但读取不同数据&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;执行模式可以总结为：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;[VLD, VLD, VADD, VST], VLEN
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;其中 VLEN 表示向量长度——一次操作几个数据元素。&lt;/p&gt;
+&lt;h3 id=&#34;1234-多线程-spmd&#34;&gt;12.3.4 多线程 SPMD
+&lt;/h3&gt;&lt;p&gt;SPMD（单程序多数据）是 CUDA 采用的编程模型。每个线程执行相同的程序代码，但处理不同的数据。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0477-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.3.5 SPMD：每个线程执行相同程序，处理不同数据&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;SPMD 和 SIMD 的核心区别&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;SIMD 是在相同指令下执行不同数据 → 硬件层面的并行&lt;/li&gt;
+&lt;li&gt;SPMD 是用线程来管理每个迭代 → 编程模型层面的并行&lt;/li&gt;
+&lt;li&gt;SPMD 最终执行在 SIMD 机器上 → 由此发展出 SIMT&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;1235-英伟达-simt-机制&#34;&gt;12.3.5 英伟达 SIMT 机制
+&lt;/h3&gt;&lt;p&gt;英伟达 GPU 的完整执行链路：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;SPMD（编程模型）→ SIMT（硬件执行模型）→ SIMD（底层计算）
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;从程序员视角：写 SPMD 代码（CUDA），每个线程处理不同数据&lt;/li&gt;
+&lt;li&gt;从硬件视角：SIMT 把线程动态分成 Warp，每个 Warp 里执行 SIMD&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0478-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.3.6 英伟达SIMT机制：SPMD编程 &amp;#43; SIMT执行 &amp;#43; SIMD计算&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;Warp 是执行相同指令的线程集合，作为 SM 的调度单位。每个 Warp 中实现单指令多数据。&lt;/p&gt;
+&lt;h3 id=&#34;1236-三者间关系&#34;&gt;12.3.6 三者间关系
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0478-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.3.7 SISD/SIMD/SIMT按时间轴执行方式对比&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;综合起来，几个核心概念的定义和区分：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;概念&lt;/th&gt;
+          &lt;th&gt;性质&lt;/th&gt;
+          &lt;th&gt;定义&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;SIMD&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;指令执行方式 + 硬件体系结构&lt;/td&gt;
+          &lt;td&gt;单指令对多数据并行操作&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;SIMT&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;硬件架构&lt;/td&gt;
+          &lt;td&gt;以 SIMD 指令为主，加上 Warp Scheduler 等硬件模块，支持 SPMD 编程模型&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;SPMD&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;编程模型&lt;/td&gt;
+          &lt;td&gt;单程序多数据，CUDA 采用的编程范式&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;DSA&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;硬件架构&lt;/td&gt;
+          &lt;td&gt;NPU/TPU 等专用 AI 架构，应用于大规模数据处理&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;值得注意的是，英伟达在 GPU 中加入了 Tensor Core，专门用于神经网络矩阵计算，同时支持混合精度——因此英伟达 GPU 实际上是 &lt;strong&gt;SIMT + DSA&lt;/strong&gt; 的混合模式。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;124-cuda-计算架构&#34;&gt;12.4 CUDA 计算架构
+&lt;/h2&gt;&lt;h3 id=&#34;1-simd-与-simt-执行模式对比&#34;&gt;1. SIMD 与 SIMT 执行模式对比
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;SIMD 执行指令&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;[VLD, VLD, VADD, VST], VLEN
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;单顺序指令流，每条指令多个数据同时执行。是大多数 AI 芯片采用的方案。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;SIMT 执行指令&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;[LD, LD, ADD, ST], NumThreads
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;标量指令的多个指令流，动态按 Warp 分组执行。是英伟达 GPU 的方案。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;英伟达选择 SIMT 的原因&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;开发者不用费劲把数据凑成合适的矢量长度再传入硬件&lt;/li&gt;
+&lt;li&gt;硬件层面解决了大部分 SIMD Data Path 的流水编排问题&lt;/li&gt;
+&lt;li&gt;每个线程相对灵活，允许不同分支（这是 SIMT 的核心优势）&lt;/li&gt;
+&lt;li&gt;一组执行相同指令的线程由硬件动态组成 Warp，提升并行度&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0480-10.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.4.112.4.3 Warp迭代执行：Warp0执行第032线程，Warp1执行第33~64线程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;假设一个 Warp 包含 32 个线程，需要进行 32000 次迭代，就需要 1000 个 Warp。每个 Warp 内的线程并行执行 SIMD，不同 Warp 之间硬件动态调度。&lt;/p&gt;
+&lt;h3 id=&#34;2-warp-和-warp-level-fgmt-关系&#34;&gt;2. Warp 和 Warp-Level FGMT 关系
+&lt;/h3&gt;&lt;p&gt;SIMT 架构通过**细粒度多线程（FGMT）**调度来隐藏延迟：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;将执行流水线细分为更小单元，不同线程的指令交错执行&lt;/li&gt;
+&lt;li&gt;减少指令等待时间和资源浪费&lt;/li&gt;
+&lt;li&gt;实现访存和计算并行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Warp&lt;/strong&gt; 是在不同地址数据下、执行相同指令的线程集合。多个 Warp 组成 SIMD Pipeline。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0481-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.4.4 Thread Warp结构：多个线程组成Warp&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;FGMT 的核心机制&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;SIMD Pipeline 中每个线程一次执行一条指令&lt;/li&gt;
+&lt;li&gt;Warp 支持乱序执行以隐藏访存延迟&lt;/li&gt;
+&lt;li&gt;线程寄存器值保留在 RF 中，FGMT 允许长延迟&lt;/li&gt;
+&lt;li&gt;英伟达通过 &lt;strong&gt;Warp Scheduler&lt;/strong&gt; 硬件调度：一个 Warp 访存等待时，调度器切换到另一个就绪的 Warp，让计算单元始终在忙&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0482-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.4.5 Warp Scheduler通过切换Warp隐藏访存延迟&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;SIMT 相比 SIMD 最根本性的优势在于：&lt;strong&gt;硬件层面解决了大部分流水编排问题&lt;/strong&gt;。Warp 指令级并行中，每个 Warp 有 32 个线程和 8 条执行通道，每个时钟周期执行一次 Warp，一次 Warp 完成 24 次操作。&lt;/p&gt;
+&lt;p&gt;在 GPU 宏观架构层面，数据流向是：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;GDDR → 内存控制器 → 片内总线 → CUDA Core / Tensor Core
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                                              ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                                     SIMD 执行单元（并行计算）
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch12/ai_system.pdf-0482-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图12.4.6 GPU宏观架构：从GDDR到CUDA Core的数据通路&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;-学完这章我的几点感悟&#34;&gt;🤔 学完这章，我的几点感悟
+&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;SIMD 是基础，SIMT 是进化&lt;/strong&gt;。SIMD 解决了&amp;quot;怎么并行算&amp;quot;的问题，SIMT 解决了&amp;quot;怎么让并行更好编程&amp;quot;的问题。这个进化逻辑贯穿了整个 GPU 发展史。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;编程模型 ≠ 硬件执行模型&lt;/strong&gt;。CUDA 让你写的是 SPMD（每个线程处理不同数据），但底层硬件跑的是 SIMT（动态 Warp 分组 + SIMD 计算）。理解这层&amp;quot;翻译&amp;quot;关系，才能写出真正高性能的 Kernel。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Warp 是 GPU 的灵魂概念&lt;/strong&gt;。32 个线程一组、动态调度、FGMT 隐藏延迟——这套机制让 GPU 在处理大规模并行任务时效率惊人。如果你只能记住本章的一个概念，记住 Warp 就够了。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;灵活性是 SIMT 胜过 SIMD 的关键&lt;/strong&gt;。SIMD 要求数据严格对齐，SIMT 允许每个线程独立寻址、独立分支。这在大模型时代尤为重要——不是所有计算都是规整的矩阵乘。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;软硬件协同设计的典范&lt;/strong&gt;。从 SPMD 编程模型到 SIMT 硬件架构再到 SIMD 底层计算，英伟达打造了一条完整的&amp;quot;抽象层栈&amp;quot;——每一层都隐藏了下一层的复杂性，让开发者既能享受高性能，又不用被硬件细节折磨。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;小结&#34;&gt;小结
+&lt;/h2&gt;&lt;p&gt;第 12 章帮我们建立了一个完整的并行计算架构认知：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;并行分类&lt;/strong&gt;：指令级并行（ILP）、数据级并行（DLP）、任务级并行（TLP）三层结构，现代 GPU 三层并用。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;SIMD 本质&lt;/strong&gt;：单线程多数据，一条指令同时操作多个数据元素。高效但要求数据严格对齐。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;SIMT 本质&lt;/strong&gt;：形式上多线程，底层执行 SIMD。比 SIMD 更灵活，支持独立寻址和分支。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;CUDA 编程模型&lt;/strong&gt;：Grid → Block → Thread → Warp 的层级结构，SPMD 编程范式。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Warp 调度&lt;/strong&gt;：FGMT 细粒度多线程隐藏访存延迟，Warp Scheduler 硬件保证计算单元持续忙碌。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;概念区分&lt;/strong&gt;：SPMD 是编程模型，SIMT 是硬件执行模型，SIMD 是底层计算方式——三者各司其职。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;核心启示&lt;/strong&gt;：并行计算架构的本质是&amp;quot;用什么样的抽象让程序员舒服，同时用什么样的硬件让计算高效&amp;quot;。SIMT 的成功证明，好的架构设计不仅要解决&amp;quot;能不能算&amp;quot;的问题，更要解决&amp;quot;好不好用&amp;quot;的问题。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;em&gt;下一篇预告：第 13 章将深入探讨 AI 芯片的存储架构，包括片上缓存、HBM、内存层次结构等关键话题。敬请期待！&lt;/em&gt;&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>AI系统：第4章 GPU——以英伟达为例</title>
         <link>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC4%E7%AB%A0-gpu%E4%BB%A5%E8%8B%B1%E4%BC%9F%E8%BE%BE%E4%B8%BA%E4%BE%8B/</link>
         <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
