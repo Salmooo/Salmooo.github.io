@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="《AI系统：原理与架构》学习笔记 — 深入华为CANN异构计算架构与Ascend C算子编程语言，从五层架构设计到向量编程范式">
+<title>AI系统：第13章 CANN &amp; Ascend C 计算架构</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC13%E7%AB%A0-cann-ascend-c-%E8%AE%A1%E7%AE%97%E6%9E%B6%E6%9E%84/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="AI系统：第13章 CANN & Ascend C 计算架构">
+<meta property='og:description' content="《AI系统：原理与架构》学习笔记 — 深入华为CANN异构计算架构与Ascend C算子编程语言，从五层架构设计到向量编程范式">
+<meta property='og:url' content='https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC13%E7%AB%A0-cann-ascend-c-%E8%AE%A1%E7%AE%97%E6%9E%B6%E6%9E%84/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='AI System' /><meta property='article:tag' content='Deep Learning' /><meta property='article:tag' content='AI Infra' /><meta property='article:tag' content='CANN' /><meta property='article:tag' content='Ascend C' /><meta property='article:tag' content='Huawei' /><meta property='article:tag' content='NPU' /><meta property='article:tag' content='Operator' />
+<meta name="twitter:title" content="AI系统：第13章 CANN & Ascend C 计算架构">
+<meta name="twitter:description" content="《AI系统：原理与架构》学习笔记 — 深入华为CANN异构计算架构与Ascend C算子编程语言，从五层架构设计到向量编程范式">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#本章概览">本章概览</a></li>
+    <li><a href="#131-昇腾异构计算架构-cann">13.1 昇腾异构计算架构 CANN</a>
+      <ol>
+        <li><a href="#1311-总体架构">13.1.1 总体架构</a></li>
+        <li><a href="#1312-关键功能特性">13.1.2 关键功能特性</a></li>
+        <li><a href="#1313-cann-各层面能力详解">13.1.3 CANN 各层面能力详解</a>
+          <ol>
+            <li><a href="#1-昇腾计算语言ascendcl">1. 昇腾计算语言（AscendCL）</a></li>
+            <li><a href="#2-昇腾计算服务层">2. 昇腾计算服务层</a></li>
+            <li><a href="#3-昇腾计算编译层">3. 昇腾计算编译层</a></li>
+            <li><a href="#4-昇腾计算执行层">4. 昇腾计算执行层</a></li>
+            <li><a href="#5-昇腾计算基础层">5. 昇腾计算基础层</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#132-cann-与算子">13.2 CANN 与算子</a>
+      <ol>
+        <li><a href="#1321-算子基本介绍">13.2.1 算子基本介绍</a></li>
+        <li><a href="#1322-cann-算子体系">13.2.2 CANN 算子体系</a></li>
+      </ol>
+    </li>
+    <li><a href="#133-算子开发编程语言-ascend-c">13.3 算子开发编程语言 Ascend C</a>
+      <ol>
+        <li><a href="#1331-并行计算基本原理">13.3.1 并行计算基本原理</a>
+          <ol>
+            <li><a href="#并行体系结构分类">并行体系结构分类</a></li>
+            <li><a href="#阿姆达尔定律amdahls-law">阿姆达尔定律（Amdahl&rsquo;s Law）</a></li>
+          </ol>
+        </li>
+        <li><a href="#1332-ascend-c-编程体系">13.3.2 Ascend C 编程体系</a>
+          <ol>
+            <li><a href="#1-ai-core-硬件抽象">1. AI Core 硬件抽象</a></li>
+            <li><a href="#2-spmd-编程模型">2. SPMD 编程模型</a></li>
+            <li><a href="#3-流水编程范式">3. 流水编程范式</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#134-ascend-c-语法扩展">13.4 Ascend C 语法扩展</a>
+      <ol>
+        <li><a href="#1341-语法扩展概述">13.4.1 语法扩展概述</a>
+          <ol>
+            <li><a href="#函数执行空间限定符">函数执行空间限定符</a></li>
+            <li><a href="#地址空间限定符">地址空间限定符</a></li>
+          </ol>
+        </li>
+        <li><a href="#1342-ascend-c-api-概述">13.4.2 Ascend C API 概述</a>
+          <ol>
+            <li><a href="#基础-api四大类">基础 API（四大类）</a></li>
+            <li><a href="#高阶-api">高阶 API</a></li>
+          </ol>
+        </li>
+        <li><a href="#1343-数据存储">13.4.3 数据存储</a></li>
+        <li><a href="#1344-任务间通信与同步">13.4.4 任务间通信与同步</a></li>
+        <li><a href="#1345-资源管理">13.4.5 资源管理</a></li>
+        <li><a href="#1346-临时变量">13.4.6 临时变量</a></li>
+      </ol>
+    </li>
+    <li><a href="#135-ascend-c-编程范式以向量为例">13.5 Ascend C 编程范式——以向量为例</a>
+      <ol>
+        <li><a href="#开发流程概览">开发流程概览</a></li>
+        <li><a href="#step-1-算子分析">Step 1: 算子分析</a></li>
+        <li><a href="#step-2-核函数定义与封装">Step 2: 核函数定义与封装</a></li>
+        <li><a href="#step-3-算子类实现">Step 3: 算子类实现</a>
+          <ol>
+            <li><a href="#数据通路">数据通路</a></li>
+            <li><a href="#算子类代码骨架">算子类代码骨架</a></li>
+          </ol>
+        </li>
+        <li><a href="#数据切分策略">数据切分策略</a></li>
+      </ol>
+    </li>
+    <li><a href="#本章小结">本章小结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/ai/" >
+                AI
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC13%E7%AB%A0-cann-ascend-c-%E8%AE%A1%E7%AE%97%E6%9E%B6%E6%9E%84/">AI系统：第13章 CANN &amp; Ascend C 计算架构</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            《AI系统：原理与架构》学习笔记 — 深入华为CANN异构计算架构与Ascend C算子编程语言，从五层架构设计到向量编程范式
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    8 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="本章概览">本章概览
+</h2><p>第6章我们讲的是昇腾 NPU 的<strong>硬件</strong>（达芬奇架构、AI Core、Cube 单元），这一章则聚焦于它上面的<strong>软件栈</strong>。如果说 AI Core 是昇腾的&quot;肌肉&quot;，那么 CANN 和 Ascend C 就是支配肌肉的&quot;神经系统&quot;。</p>
+<p>本章的核心内容可以拆成两个大块：</p>
+<ul>
+<li><strong>CANN（昇腾 AI 异构计算架构）</strong>：从顶到底的五层软件栈 —— AscendCL → 计算服务层 → 编译层 → 执行层 → 基础层。每一层都有清晰的分工：向上对接 PyTorch / TensorFlow / MindSpore 等框架，向下驱动昇腾 AI 处理器。</li>
+<li><strong>Ascend C 编程语言</strong>：面向算子开发而生的 C/C++ 扩展语言，通过 SPMD 并行模型、流水编程范式、TQue/TPipe/TBuf 等机制，让 AI 开发者能以&quot;写 C++&ldquo;的方式开发高性能算子。</li>
+</ul>
+<blockquote>
+<p><strong>一句话总结</strong>：CANN 是昇腾的&quot;操作系统&rdquo;，Ascend C 是 CANN 的&quot;编程语言&quot;。理解这两者，你就理解了如何从零开始让一段 PyTorch 代码在昇腾芯片上高效运行。</p>
+</blockquote>
+<hr>
+<h2 id="131-昇腾异构计算架构-cann">13.1 昇腾异构计算架构 CANN
+</h2><h3 id="1311-总体架构">13.1.1 总体架构
+</h3><p>CANN（Compute Architecture for Neural Networks）是一套为深度神经网络计算需求专门设计的架构。针对达芬奇架构提供软件层面的支撑，包括管理网络模型、计算流及数据流的软件栈。</p>
+<p>在软件层面，CANN 支持业界多种主流 AI 框架（MindSpore、PyTorch、Jittor 等），并提供：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>组件</th>
+          <th>作用</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Ascend C</strong></td>
+          <td>开放全量低阶 API（高性能自定义算子）+ 高阶 API（快速开发复杂算子）</td>
+      </tr>
+      <tr>
+          <td><strong>GE（图引擎）</strong></td>
+          <td>图优化、图编译、图执行，优化整网性能</td>
+      </tr>
+      <tr>
+          <td><strong>HCCL（集合通信库）</strong></td>
+          <td>改善网络拥塞，提升网络资源利用率和运维效率</td>
+      </tr>
+      <tr>
+          <td><strong>AOL（算子加速库）</strong></td>
+          <td>基础算子 + 大模型融合算子 API，使能大模型极致性能优化</td>
+      </tr>
+      <tr>
+          <td><strong>Runtime 运行时</strong></td>
+          <td>开放硬件资源 API（计算、通信、内存管理等）</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><img src="/images/ai_system/ch13/ai_system.pdf-0485-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.1.1 CANN总体架构全景"
+	
+	
+></p>
+<p>CANN 自顶向下分为 <strong>5 层</strong>：</p>
+<p><img src="/images/ai_system/ch13/ai_system.pdf-0486-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.1.2 CANN五层架构"
+	
+	
+></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>层级</th>
+          <th>名称</th>
+          <th>核心职责</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>L1</strong></td>
+          <td><strong>AscendCL（昇腾计算语言）</strong></td>
+          <td>昇腾开放编程框架，封装底层服务接口，提供 Device/Context/Stream/内存/模型加载等 API</td>
+      </tr>
+      <tr>
+          <td><strong>L2</strong></td>
+          <td><strong>昇腾计算服务层</strong></td>
+          <td>AOL 算子库（NN/BLAS 等）+ AOE 调优引擎 + Framework Adaptor（适配 PyTorch/TF 等）</td>
+      </tr>
+      <tr>
+          <td><strong>L3</strong></td>
+          <td><strong>昇腾计算编译层</strong></td>
+          <td>图编译器（Graph Compiler）+ TBE 张量加速引擎，将 IR 编译为昇腾硬件可执行模型</td>
+      </tr>
+      <tr>
+          <td><strong>L4</strong></td>
+          <td><strong>昇腾计算执行层</strong></td>
+          <td>Runtime 库 + Graph Executor + DVPP/AIPP + HCCL 集合通信</td>
+      </tr>
+      <tr>
+          <td><strong>L5</strong></td>
+          <td><strong>昇腾计算基础层</strong></td>
+          <td>SVM 共享虚拟内存、设备虚拟化（VM）、主机-设备通信（HDC）等基础服务</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="1312-关键功能特性">13.1.2 关键功能特性
+</h3><p>CANN 围绕四大核心场景提供能力：</p>
+<p><strong>1. 推理应用开发</strong>：通过 AscendCL 统一 API 框架，实现对昇腾硬件计算资源、深度学习推理、图像预处理、单算子加速等能力的调用。</p>
+<p><strong>2. 模型训练</strong>：提供 PyTorch/TensorFlow 模型迁移工具 + 自动化调测工具（数据异常检测、融合异常检测、整网数据比对）。</p>
+<p><strong>3. 算子开发</strong>：提供 1400+ 硬件亲和的高性能算子，同时开放自定义算子开发能力。</p>
+<p><strong>4. 四大核心优势</strong>：</p>
+<ul>
+<li><strong>统一 APP 编程语言</strong>：AscendCL 屏蔽底层多种芯片差异</li>
+<li><strong>统一网络构图接口</strong>：标准 AIR 中间表示</li>
+<li><strong>高性能计算引擎及算子库</strong>：预置高性能算子库，降低部署成本</li>
+<li><strong>基础业务</strong>：驱动、虚拟化、媒体、集合通信等</li>
+</ul>
+<h3 id="1313-cann-各层面能力详解">13.1.3 CANN 各层面能力详解
+</h3><h4 id="1-昇腾计算语言ascendcl">1. 昇腾计算语言（AscendCL）
+</h4><p>包含三部分接口：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>接口类型</th>
+          <th>用途</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>应用开发接口</strong></td>
+          <td>深度学习推理、图像预处理、单算子调用及加速，通常用于离线推理应用</td>
+      </tr>
+      <tr>
+          <td><strong>图开发接口</strong></td>
+          <td>统一网络构图，支持多框架调用，可基于算子原型构图或用 Parser 解析神经网络输出 IR</td>
+      </tr>
+      <tr>
+          <td><strong>算子开发接口（Ascend C）</strong></td>
+          <td>C&amp;C++ 原生支持，结构化核函数编程，自动流水并行调度，CPU/NPU 孪生调试</td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="2-昇腾计算服务层">2. 昇腾计算服务层
+</h4><ul>
+<li><strong>AOL 算子库</strong>：NN 算子库、BLAS 算子库、DVPP 算子库、AIPP 算子库、HCCL 算子库、融合算子库</li>
+<li><strong>AOE 调优引擎</strong>：算子调优（OPAT）、子图调优（SGAT）、梯度调优（GDAT）、模型压缩（AMCT）</li>
+</ul>
+<p><img src="/images/ai_system/ch13/ai_system.pdf-0488-09.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.1.3 昇腾算子库体系"
+	
+	
+></p>
+<blockquote>
+<p>调优是门槛很高的开发活动——开发者需要了解片内缓存大小、数据搬运逻辑、调度策略等。AOE 将常见调优手段固化为工具，让开发者只需通过工具分析模型即可获得性能提升。</p>
+</blockquote>
+<h4 id="3-昇腾计算编译层">3. 昇腾计算编译层
+</h4><p>分为<strong>图编译</strong>和<strong>算子编译</strong>两个阶段：</p>
+<p><img src="/images/ai_system/ch13/ai_system.pdf-0489-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.1.4 昇腾计算编译层"
+	
+	
+></p>
+<ul>
+<li><strong>图编译</strong>：形状推导 → 常量折叠 → 死边消除 → 图融合 → 图切分 → 流水执行 → 缓存复用 → 算子引擎选择 → Cost Model → 整图内存复用 → 连续内存分配 → Task 生成</li>
+<li><strong>算子编译</strong>：UB（Unified Buffer）融合、CCE-C 代码生成</li>
+</ul>
+<h4 id="4-昇腾计算执行层">4. 昇腾计算执行层
+</h4><p><img src="/images/ai_system/ch13/ai_system.pdf-0490-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.1.5 昇腾计算执行层"
+	
+	
+></p>
+<p>核心组件：</p>
+<ul>
+<li><strong>Runtime</strong>：执行流管理、上下文管理、事件管理、任务管理、资源申请/管理</li>
+<li><strong>Graph Executor</strong>：计算图加载和执行</li>
+<li><strong>HCCL</strong>：子通信域管理、Rank 管理、梯度切分、集合通信</li>
+<li><strong>DVPP/AIPP</strong>：两个维度上的数据预处理</li>
+</ul>
+<h4 id="5-昇腾计算基础层">5. 昇腾计算基础层
+</h4><p><img src="/images/ai_system/ch13/ai_system.pdf-0491-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.1.6 昇腾计算基础层"
+	
+	
+></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>组件</th>
+          <th>职责</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>RMS（资源管理服务）</strong></td>
+          <td>管理与调度昇腾设备的计算、Device 内存等关键资源</td>
+      </tr>
+      <tr>
+          <td><strong>CMS（通信管理服务）</strong></td>
+          <td>提供片内、片间高效通信</td>
+      </tr>
+      <tr>
+          <td><strong>DMS（设备管理服务）</strong></td>
+          <td>设备配置、切分、升级、故障检测</td>
+      </tr>
+      <tr>
+          <td><strong>DRV（驱动）</strong></td>
+          <td>使能硬件</td>
+      </tr>
+      <tr>
+          <td><strong>UTILITY</strong></td>
+          <td>基础库和系统维测能力</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>基础层的四大竞争力：<strong>高性能</strong>（微秒级确定性调度 + 数据零拷贝）、<strong>高可信</strong>（五道安全防线）、<strong>归一化</strong>（一套架构-接口-代码支持多芯、多板、多场景）、<strong>弹性</strong>（端/边/云灵活适应，细粒度算力切分）。</p>
+<hr>
+<h2 id="132-cann-与算子">13.2 CANN 与算子
+</h2><h3 id="1321-算子基本介绍">13.2.1 算子基本介绍
+</h3><p>算子是编程和数学中的重要概念：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>分类</th>
+          <th>示例</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>一元算子</strong></td>
+          <td>取反、递增</td>
+          <td>对单个操作数操作</td>
+      </tr>
+      <tr>
+          <td><strong>二元算子</strong></td>
+          <td>加法、赋值</td>
+          <td>对两个操作数操作</td>
+      </tr>
+      <tr>
+          <td><strong>关系算子</strong></td>
+          <td>&gt;, &lt;, ==</td>
+          <td>比较值之间关系</td>
+      </tr>
+      <tr>
+          <td><strong>逻辑算子</strong></td>
+          <td>AND, OR</td>
+          <td>逻辑表达式中组合条件</td>
+      </tr>
+      <tr>
+          <td><strong>位运算符</strong></td>
+          <td>&amp;, |, ^</td>
+          <td>操作二进制位</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>在神经网络中，算子就是计算图中的张量处理节点——卷积算子、全连接算子、激活算子等，无一例外地接受张量输入并输出处理结果。</p>
+</blockquote>
+<p><strong>关键认知</strong>：</p>
+<ul>
+<li>并非所有算子都有数学含义——数据排布变换、类型转换、广播与归纳等属于纯编程操作</li>
+<li>同一算子在不同硬件上实现千差万别（CPU/GPU/NPU/TPU 上的卷积完全不同）</li>
+<li>不同算子适合运行在不同硬件上：大量矩阵/向量计算的放专用加速器，分支/上下文切换多的放 CPU</li>
+</ul>
+<h3 id="1322-cann-算子体系">13.2.2 CANN 算子体系
+</h3><p>CANN 算子分为两类：</p>
+<p><img src="/images/ai_system/ch13/ai_system.pdf-0492-09.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.2.1 AI Core 与 AI CPU 的关系"
+	
+	
+></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>算子类型</th>
+          <th>运行位置</th>
+          <th>适用场景</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>AI Core 算子</strong></td>
+          <td>AI Core（矩阵/向量/标量计算密集）</td>
+          <td>大多数计算密集型算子</td>
+      </tr>
+      <tr>
+          <td><strong>AI CPU 算子</strong></td>
+          <td>AI CPU（负责 CPU 类算子）</td>
+          <td>非矩阵类复杂计算、控制算子、标量和向量通用计算</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>AI CPU 涉及的组件</strong>：GE（图引擎）→ AI CPU Engine（子图编译引擎）→ AI CPU Scheduler（模型调度器）→ AI CPU Processor（Task 执行器）→ Data Processor</p>
+<p><strong>三种使用 AI CPU 的场景</strong>：</p>
+<ol>
+<li><strong>场景一</strong>：不适合跑在 AI Core 上的算子——非矩阵类复杂计算、分支密集型算子、离散数据/资源管理/随机数类计算</li>
+<li><strong>场景二</strong>：AI Core 不支持的数据类型——如 Complex32、Complex64</li>
+<li><strong>场景三</strong>：快速打通模型流程——先用 AI CPU 调通功能，后续再转换为 AI Core 算子做性能优化</li>
+</ol>
+<p><strong>AI CPU 开发三步要求</strong>：</p>
+<ol>
+<li>自定义算子类必须是 <code>CpuKernel</code> 的派生类，在命名空间 <code>aicpu</code> 中声明</li>
+<li>实现 <code>Compute</code> 函数（计算逻辑）</li>
+<li>用 <code>REGISTER_CPU_KERNEL</code> 注册算子</li>
+</ol>
+<hr>
+<h2 id="133-算子开发编程语言-ascend-c">13.3 算子开发编程语言 Ascend C
+</h2><h3 id="1331-并行计算基本原理">13.3.1 并行计算基本原理
+</h3><p>并行计算涉及同时在多个硬件处理单元上执行任务，以提高整体计算性能和效率。</p>
+<h4 id="并行体系结构分类">并行体系结构分类
+</h4><p><strong>从硬件/系统/应用层面</strong>：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>类型</th>
+          <th>含义</th>
+          <th>关键技术</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>指令级并行 (ILP)</strong></td>
+          <td>处理器内部多个指令同一时钟周期执行</td>
+          <td>超标量架构（Superscalar）、流水线（Pipelining）</td>
+      </tr>
+      <tr>
+          <td><strong>线程级并行 (TLP)</strong></td>
+          <td>多线程在多核/多处理器上并行运行</td>
+          <td>需程序员显式创建和管理线程</td>
+      </tr>
+      <tr>
+          <td><strong>请求级并行 (RLP)</strong></td>
+          <td>多个独立客户端请求被同时处理</td>
+          <td>Web 服务、数据库等场景</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>从软件设计/编程模型角度</strong>：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>类型</th>
+          <th>含义</th>
+          <th>例子</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>数据级并行</strong></td>
+          <td>相同操作作用于不同数据片段</td>
+          <td>发工资：各处理器计算不同员工的工资</td>
+      </tr>
+      <tr>
+          <td><strong>任务级并行</strong></td>
+          <td>不同任务在不同处理单元执行</td>
+          <td>发工资：一个处理器算税务扣除，另一个算福利待遇</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>Ascend C 就是基于昇腾 AI Core 形成的 <strong>SPMD（单程序多数据）</strong> 编程模型——每个 AI Core 执行相同的程序，但处理不同的数据分片。</p>
+</blockquote>
+<h4 id="阿姆达尔定律amdahls-law">阿姆达尔定律（Amdahl&rsquo;s Law）
+</h4><p>并行加速的上限受限于程序中的串行部分：</p>
+\[
+S = \frac{1}{(1-P) + \frac{P}{N}}
+\]<p>其中 \(S\) 是加速比，\(P\) 是可并行化比例，\(N\) 是处理器数量。</p>
+<p><img src="/images/ai_system/ch13/ai_system.pdf-0496-11.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="阿姆达尔定律公式"
+	
+	
+></p>
+<blockquote>
+<p>如果一个程序有 10% 的代码是串行的（\(P\) = 0.9），即使在无限多处理器上，最大加速比也只能达到 10 倍。</p>
+</blockquote>
+<h3 id="1332-ascend-c-编程体系">13.3.2 Ascend C 编程体系
+</h3><h4 id="1-ai-core-硬件抽象">1. AI Core 硬件抽象
+</h4><p>AI Core 包含三个基础计算单元：</p>
+<p><img src="/images/ai_system/ch13/ai_system.pdf-0498-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.3.2 AI Core 硬件抽象"
+	
+	
+></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>单元</th>
+          <th>角色</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>矩阵计算单元（Cube）</strong></td>
+          <td>矩阵乘累加运算</td>
+      </tr>
+      <tr>
+          <td><strong>向量计算单元（Vector）</strong></td>
+          <td>向量运算</td>
+      </tr>
+      <tr>
+          <td><strong>标量计算单元（Scalar）</strong></td>
+          <td>读取指令序列，发射指令到各单元</td>
+      </tr>
+      <tr>
+          <td><strong>DMA 搬运单元</strong></td>
+          <td>在 Global Memory ↔ Local Memory 之间搬运数据</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>AI Core 内部异步并行过程</strong>：</p>
+<ol>
+<li>Scalar 单元读取指令序列，把向量/矩阵/数据搬运指令发射给对应单元的指令队列</li>
+<li>各单元异步并行执行接收到的指令</li>
+<li>Scalar 单元下发同步指令保证依赖关系</li>
+<li>数据流：DMA 搬入 → Local Memory 计算 → DMA 搬出到 Global Memory</li>
+</ol>
+<h4 id="2-spmd-编程模型">2. SPMD 编程模型
+</h4><p><img src="/images/ai_system/ch13/ai_system.pdf-0499-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.3.3 SPMD 编程模型"
+	
+	
+></p>
+<p>SPMD 的核心思路：</p>
+<ul>
+<li>将待处理数据切分成多片，分发给不同进程（AI Core）</li>
+<li>每个进程对自己的数据分片执行相同的处理任务</li>
+<li>多个 AI Core 共享相同指令代码，通过 <code>block_idx</code> 识别自己身份</li>
+</ul>
+<p><img src="/images/ai_system/ch13/ai_system.pdf-0499-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.3.4 并行计算示意图"
+	
+	
+></p>
+<blockquote>
+<p>为充分利用计算资源，Block 数量通常设为物理核数的整数倍。</p>
+</blockquote>
+<h4 id="3-流水编程范式">3. 流水编程范式
+</h4><p>Ascend C 的核函数内部可以拆分成多个流水任务，通过队列（TQue）完成通信和同步。</p>
+<p>以向量算子为例，三阶段流水：</p>
+<p><img src="/images/ai_system/ch13/ai_system.pdf-0500-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.3.5 流水任务设计"
+	
+	
+></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>阶段</th>
+          <th>作用</th>
+          <th>负责单元</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>阶段1：CopyIn</strong></td>
+          <td>数据从 Global Memory 搬入 Local Memory</td>
+          <td>DMA</td>
+      </tr>
+      <tr>
+          <td><strong>阶段2：Compute</strong></td>
+          <td>向量/矩阵计算</td>
+          <td>Vector/Cube</td>
+      </tr>
+      <tr>
+          <td><strong>阶段3：CopyOut</strong></td>
+          <td>数据从 Local Memory 搬出到 Global Memory</td>
+          <td>DMA</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>流水并行的关键</strong>：对于同一片数据，三个阶段是串行的；但对不同数据切片，三个阶段可以同时执行——CopyIn 搬第 3 块时，Compute 正在算第 2 块，CopyOut 正在搬出第 1 块。</p>
+<p><img src="/images/ai_system/ch13/ai_system.pdf-0500-10.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.3.6 流水运行示意图 (n=3)"
+	
+	
+></p>
+<blockquote>
+<p>TQue 分为 VECIN（搬入队列）和 VECOUT（搬出队列），阶段间通过它们传递数据——这就是 Ascend C 流水编程的核心机制。</p>
+</blockquote>
+<hr>
+<h2 id="134-ascend-c-语法扩展">13.4 Ascend C 语法扩展
+</h2><h3 id="1341-语法扩展概述">13.4.1 语法扩展概述
+</h3><p>Ascend C 本质上是<strong>标准 C++ + 一组扩展语法和 API</strong>，使用华为自研毕昇编译器。</p>
+<h4 id="函数执行空间限定符">函数执行空间限定符
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>限定符</th>
+          <th>执行位置</th>
+          <th>调用者</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>__global__</code></td>
+          <td>设备侧（Device）</td>
+          <td>只能被 Host 侧调用</td>
+          <td>Kernel 函数入口，必须返回 void，使用 <code>&lt;&lt;&lt;&gt;&gt;&gt;</code> 调用，异步执行</td>
+      </tr>
+      <tr>
+          <td><code>__aicore__</code></td>
+          <td>AI Core 上</td>
+          <td>只能被 <code>__global__</code> 或其他 AI Core 函数调用</td>
+          <td>标识函数在 AI Core 设备上执行</td>
+      </tr>
+      <tr>
+          <td><code>__host__</code></td>
+          <td>主机侧（Host）</td>
+          <td>只能被 Host 侧函数调用</td>
+          <td>通常不显式声明</td>
+      </tr>
+  </tbody>
+</table></div>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// 典型用法示例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">__aicore__</span> <span class="kt">void</span> <span class="nf">bar</span><span class="p">()</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">__global__</span> <span class="n">__aicore__</span> <span class="kt">void</span> <span class="nf">foo</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bar</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Host 函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="地址空间限定符">地址空间限定符
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>限定符</th>
+          <th>含义</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>private</strong>（默认）</td>
+          <td>局部变量所在地址空间，不显式标识</td>
+      </tr>
+      <tr>
+          <td><strong><code>__gm__</code></strong></td>
+          <td>设备侧全局内存（Global Memory）上的对象</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="1342-ascend-c-api-概述">13.4.2 Ascend C API 概述
+</h3><p><img src="/images/ai_system/ch13/ai_system.pdf-0503-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.4.1 Ascend C API 体系"
+	
+	
+></p>
+<p>API 的操作数都是 Tensor：<strong>GlobalTensor</strong>（外部存储）和 <strong>LocalTensor</strong>（核上内存）。</p>
+<h4 id="基础-api四大类">基础 API（四大类）
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>API 类型</th>
+          <th>功能</th>
+          <th>示例</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>计算类 API</strong></td>
+          <td>标量/向量/矩阵计算</td>
+          <td>Add, Mul, MatMul</td>
+      </tr>
+      <tr>
+          <td><strong>数据搬运 API</strong></td>
+          <td>Global ↔ Local Memory 搬运</td>
+          <td>DataCopy</td>
+      </tr>
+      <tr>
+          <td><strong>内存管理 API</strong></td>
+          <td>板上动态内存分配与释放</td>
+          <td>AllocTensor, FreeTensor</td>
+      </tr>
+      <tr>
+          <td><strong>任务同步 API</strong></td>
+          <td>任务间通信和同步</td>
+          <td>EnQue, DeQue</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>基础 API 的三种计算方式</strong>：</p>
+<p><img src="/images/ai_system/ch13/ai_system.pdf-0504-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.4.2 向量加法不同级别 API 对比"
+	
+	
+></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>方式</th>
+          <th>特点</th>
+          <th>灵活性</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>整个 Tensor 参与计算</strong></td>
+          <td>运算符重载，<code>dst = src1 + src2</code></td>
+          <td>最简单，功能受限</td>
+      </tr>
+      <tr>
+          <td><strong>Tensor 前 n 个数据计算</strong></td>
+          <td><code>Add(dst, src1, src2, n)</code></td>
+          <td>最常用，兼顾功能和易用性</td>
+      </tr>
+      <tr>
+          <td><strong>Tensor 高维切分计算</strong></td>
+          <td>支持 Repeat Times、Block Stride、Repeat Stride、Mask</td>
+          <td>最灵活，操作粒度最细</td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="高阶-api">高阶 API
+</h4><p>封装常用算法逻辑（MatMul、Softmax 等），减少重复开发：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// 例如使用高阶 API 完成 MatMul
+</span></span></span><span class="line"><span class="cl"><span class="c1">// 创建矩阵乘法类 → 传入 A、B、Bias → 自动完成计算和输出
+</span></span></span><span class="line"><span class="cl"><span class="c1">// 开发者无需实现复杂的数据通路和运算操作
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="1343-数据存储">13.4.3 数据存储
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>数据类型</th>
+          <th>存储位置</th>
+          <th>对应硬件抽象</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>GlobalTensor</strong></td>
+          <td>Global Memory（AI Core 外部）</td>
+          <td>全局内存</td>
+      </tr>
+      <tr>
+          <td><strong>LocalTensor</strong></td>
+          <td>Local Memory（AI Core 内部）</td>
+          <td>片内存储</td>
+      </tr>
+  </tbody>
+</table></div>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// GlobalTensor 关键操作
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span> <span class="k">class</span> <span class="nc">GlobalTensor</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">SetGlobalBuffer</span><span class="p">(</span><span class="n">__gm__</span> <span class="n">T</span><span class="o">*</span> <span class="n">buffer</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">bufferSize</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="n">__gm__</span> <span class="n">T</span><span class="o">*</span> <span class="nf">GetPhyAddr</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint64_t</span> <span class="nf">GetSize</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">GlobalTensor</span> <span class="k">operator</span><span class="p">[](</span><span class="k">const</span> <span class="kt">uint64_t</span> <span class="n">offset</span><span class="p">);</span>  <span class="c1">// 偏移访问
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// LocalTensor 关键操作
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span> <span class="k">class</span> <span class="nc">LocalTensor</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">T</span> <span class="nf">GetValue</span><span class="p">(</span><span class="k">const</span> <span class="kt">uint32_t</span> <span class="n">offset</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">SetValue</span><span class="p">(</span><span class="k">const</span> <span class="kt">uint32_t</span> <span class="n">offset</span><span class="p">,</span> <span class="k">const</span> <span class="n">T1</span> <span class="n">value</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">LocalTensor</span> <span class="k">operator</span><span class="p">[](</span><span class="k">const</span> <span class="kt">uint32_t</span> <span class="n">offset</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="nf">GetSize</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="1344-任务间通信与同步">13.4.4 任务间通信与同步
+</h3><p><strong>TQue</strong> 是 Ascend C 的核心通信队列，通过逻辑位置 <strong>TPosition</strong> 屏蔽物理存储细节。</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>TPosition 类型</th>
+          <th>用途场景</th>
+          <th>含义</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>GM</strong></td>
+          <td>全局</td>
+          <td>全局内存（Global Memory）</td>
+      </tr>
+      <tr>
+          <td><strong>VECIN</strong></td>
+          <td>向量计算</td>
+          <td>搬入数据的存放位置</td>
+      </tr>
+      <tr>
+          <td><strong>VECOUT</strong></td>
+          <td>向量计算</td>
+          <td>搬出数据的存放位置</td>
+      </tr>
+      <tr>
+          <td><strong>VECCALC</strong></td>
+          <td>向量/矩阵计算</td>
+          <td>计算临时变量</td>
+      </tr>
+      <tr>
+          <td><strong>A1 / B1</strong></td>
+          <td>矩阵计算</td>
+          <td>整块矩阵 A/B（类比 L2 Cache）</td>
+      </tr>
+      <tr>
+          <td><strong>A2 / B2</strong></td>
+          <td>矩阵计算</td>
+          <td>切分小块矩阵 A/B（类比 L1 Cache）</td>
+      </tr>
+      <tr>
+          <td><strong>CO1 / CO2</strong></td>
+          <td>矩阵计算</td>
+          <td>小块/整块结果矩阵 C</td>
+      </tr>
+  </tbody>
+</table></div>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// TQue 典型用法
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">TQue</span><span class="o">&lt;</span><span class="n">TPosition</span><span class="o">::</span><span class="n">VECIN</span><span class="p">,</span> <span class="n">BUFFER_NUM</span><span class="o">&gt;</span> <span class="n">que</span><span class="p">;</span>          <span class="c1">// 创建队列
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">LocalTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span> <span class="n">tensor1</span> <span class="o">=</span> <span class="n">que</span><span class="p">.</span><span class="n">AllocTensor</span><span class="p">();</span>     <span class="c1">// 分配空间
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">que</span><span class="p">.</span><span class="n">EnQue</span><span class="p">(</span><span class="n">tensor1</span><span class="p">);</span>                                <span class="c1">// 入队（发送数据）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">LocalTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span> <span class="n">tensor1</span> <span class="o">=</span> <span class="n">que</span><span class="p">.</span><span class="n">DeQue</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span><span class="p">();</span>     <span class="c1">// 出队（接收数据）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">que</span><span class="p">.</span><span class="n">FreeTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span><span class="p">(</span><span class="n">tensor1</span><span class="p">);</span>                     <span class="c1">// 释放空间
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="1345-资源管理">13.4.5 资源管理
+</h3><p><strong>TPipe</strong> 是片上内存的统一管理者，通过 <code>InitBuffer</code> 接口为 TQue 分配内存。</p>
+<p><img src="/images/ai_system/ch13/ai_system.pdf-0508-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.4.3 TPipe 内存管理示意"
+	
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">TPipe</span> <span class="n">pipe</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">pipe</span><span class="p">.</span><span class="n">InitBuffer</span><span class="p">(</span><span class="n">que</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">len</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// que: 队列名
+</span></span></span><span class="line"><span class="cl"><span class="c1">// num: 内存块数（num=2 时开启 Double Buffer 优化）
+</span></span></span><span class="line"><span class="cl"><span class="c1">// len: 每块内存大小（Byte）
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>Double Buffer 机制</strong>：利用 MTE 指令队列与 Vector 指令队列的独立性和可并行性，将数据搬运与计算并行执行，隐藏数据搬运时间，提高 Vector 单元利用率。</p>
+<h3 id="1346-临时变量">13.4.6 临时变量
+</h3><p><strong>TBuf</strong> 管理 Compute 阶段的临时变量，存储位置通过 TPosition 模板参数设置。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">TBuf</span><span class="o">&lt;</span><span class="n">TPosition</span><span class="o">::</span><span class="n">VECCALC</span><span class="o">&gt;</span> <span class="n">calcBuf</span><span class="p">;</span>               <span class="c1">// 声明临时变量
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">pipe</span><span class="p">.</span><span class="n">InitBuffer</span><span class="p">(</span><span class="n">calcBuf</span><span class="p">,</span> <span class="n">len</span><span class="p">);</span>                   <span class="c1">// 初始化
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">LocalTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">calcBuf</span><span class="p">.</span><span class="n">Get</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span><span class="p">();</span>    <span class="c1">// 获取指定长度 Tensor
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">LocalTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">calcBuf</span><span class="p">.</span><span class="n">Get</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">128</span><span class="p">);</span> <span class="c1">// 指定长度
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p><strong>建议</strong>：将 TBuf 声明为算子类成员变量，避免重复申请与释放，提升性能。</p>
+</blockquote>
+<p><strong>TBuf vs TQue 关键差异</strong>：</p>
+<ul>
+<li>TBuf 分配的内存只能参与计算，无法执行入队/出队操作</li>
+<li>TBuf 一次只分配一块内存（TQue 可申请多块）</li>
+<li>TBuf 不需要反复申请/释放</li>
+</ul>
+<hr>
+<h2 id="135-ascend-c-编程范式以向量为例">13.5 Ascend C 编程范式——以向量为例
+</h2><p>本章最重要的部分：通过一个完整的 <code>add_custom</code> 向量算子案例，展示 Ascend C 编程范式的全流程。</p>
+<h3 id="开发流程概览">开发流程概览
+</h3><p><img src="/images/ai_system/ch13/ai_system.pdf-0510-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.5.1 向量算子开发流程"
+	
+	
+></p>
+<p>自定义向量算子的三个步骤：</p>
+<ol>
+<li><strong>算子分析</strong>：明确输入输出、数学表达式、所需 API</li>
+<li><strong>核函数定义与封装</strong>：声明 kernel 函数 + 调用算子类 Init/Process</li>
+<li><strong>算子类实现</strong>：Init（内存初始化）+ Process（CopyIn → Compute → CopyOut）</li>
+</ol>
+<h3 id="step-1-算子分析">Step 1: 算子分析
+</h3><p>以 <code>Add</code> 算子为例：</p>
+<ul>
+<li><strong>数学表达式</strong>：\(z = x + y\)</li>
+<li><strong>输入</strong>：x, y（half/float16）</li>
+<li><strong>输出</strong>：z（与输入同类型）</li>
+<li><strong>Shape</strong>：(8, 2048)，ND 格式</li>
+<li><strong>所需 API</strong>：DataCopy（搬运）、Add（计算）、EnQue/DeQue（队列管理）</li>
+</ul>
+<h3 id="step-2-核函数定义与封装">Step 2: 核函数定义与封装
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// 核函数原型
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">extern</span> <span class="s">&#34;C&#34;</span> <span class="n">__global__</span> <span class="n">__aicore__</span> <span class="kt">void</span> <span class="n">add_custom</span><span class="p">(</span><span class="n">GM_ADDR</span> <span class="n">x</span><span class="p">,</span> <span class="n">GM_ADDR</span> <span class="n">y</span><span class="p">,</span> <span class="n">GM_ADDR</span> <span class="n">z</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">KernelAdd</span> <span class="n">op</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">op</span><span class="p">.</span><span class="n">Init</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">op</span><span class="p">.</span><span class="n">Process</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 封装调用（NPU 侧编译时使用）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span> <span class="nf">add_custom_do</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">blockDim</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">l2ctrl</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">stream</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                   <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">y</span><span class="p">,</span> <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">z</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">add_custom</span><span class="o">&lt;&lt;&lt;</span><span class="n">blockDim</span><span class="p">,</span> <span class="n">l2ctrl</span><span class="p">,</span> <span class="n">stream</span><span class="o">&gt;&gt;&gt;</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="step-3-算子类实现">Step 3: 算子类实现
+</h3><h4 id="数据通路">数据通路
+</h4><p><img src="/images/ai_system/ch13/ai_system.pdf-0512-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.5.2 向量算子三阶段数据通路"
+	
+	
+></p>
+<p>三阶段的完整数据流：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">CopyIn:                       Compute:                      CopyOut:
+</span></span><span class="line"><span class="cl">xGm → xLocal → inQueueX      inQueueX → xLocal             outQueueZ → zLocal
+</span></span><span class="line"><span class="cl">yGm → yLocal → inQueueY      inQueueY → yLocal             zLocal → zGm
+</span></span><span class="line"><span class="cl">                               Add(zLocal, xLocal, yLocal)
+</span></span><span class="line"><span class="cl">                               zLocal → outQueueZ
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="/images/ai_system/ch13/ai_system.pdf-0515-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.5.3 简化数据通路"
+	
+	
+></p>
+<h4 id="算子类代码骨架">算子类代码骨架
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">KernelAdd</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">__aicore__</span> <span class="kr">inline</span> <span class="n">KernelAdd</span><span class="p">()</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">__aicore__</span> <span class="kr">inline</span> <span class="kt">void</span> <span class="nf">Init</span><span class="p">(</span><span class="n">GM_ADDR</span> <span class="n">x</span><span class="p">,</span> <span class="n">GM_ADDR</span> <span class="n">y</span><span class="p">,</span> <span class="n">GM_ADDR</span> <span class="n">z</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 计算本核负责的数据位置
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">xGm</span><span class="p">.</span><span class="n">SetGlobalBuffer</span><span class="p">((</span><span class="n">__gm__</span> <span class="n">half</span><span class="o">*</span><span class="p">)</span><span class="n">x</span> <span class="o">+</span> <span class="n">BLOCK_LENGTH</span> <span class="o">*</span> <span class="n">GetBlockIdx</span><span class="p">(),</span> <span class="n">BLOCK_LENGTH</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">yGm</span><span class="p">.</span><span class="n">SetGlobalBuffer</span><span class="p">((</span><span class="n">__gm__</span> <span class="n">half</span><span class="o">*</span><span class="p">)</span><span class="n">y</span> <span class="o">+</span> <span class="n">BLOCK_LENGTH</span> <span class="o">*</span> <span class="n">GetBlockIdx</span><span class="p">(),</span> <span class="n">BLOCK_LENGTH</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">zGm</span><span class="p">.</span><span class="n">SetGlobalBuffer</span><span class="p">((</span><span class="n">__gm__</span> <span class="n">half</span><span class="o">*</span><span class="p">)</span><span class="n">z</span> <span class="o">+</span> <span class="n">BLOCK_LENGTH</span> <span class="o">*</span> <span class="n">GetBlockIdx</span><span class="p">(),</span> <span class="n">BLOCK_LENGTH</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 初始化 TQue 内存
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">pipe</span><span class="p">.</span><span class="n">InitBuffer</span><span class="p">(</span><span class="n">inQueueX</span><span class="p">,</span> <span class="n">BUFFER_NUM</span><span class="p">,</span> <span class="n">TILE_LENGTH</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">half</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="n">pipe</span><span class="p">.</span><span class="n">InitBuffer</span><span class="p">(</span><span class="n">inQueueY</span><span class="p">,</span> <span class="n">BUFFER_NUM</span><span class="p">,</span> <span class="n">TILE_LENGTH</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">half</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="n">pipe</span><span class="p">.</span><span class="n">InitBuffer</span><span class="p">(</span><span class="n">outQueueZ</span><span class="p">,</span> <span class="n">BUFFER_NUM</span><span class="p">,</span> <span class="n">TILE_LENGTH</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">half</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">__aicore__</span> <span class="kr">inline</span> <span class="kt">void</span> <span class="nf">Process</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">constexpr</span> <span class="kt">int32_t</span> <span class="n">loopCount</span> <span class="o">=</span> <span class="n">TILE_NUM</span> <span class="o">*</span> <span class="n">BUFFER_NUM</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="kt">int32_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">loopCount</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CopyIn</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Compute</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CopyOut</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">private</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">__aicore__</span> <span class="kr">inline</span> <span class="kt">void</span> <span class="n">CopyIn</span><span class="p">(</span><span class="kt">int32_t</span> <span class="n">progress</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">LocalTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span> <span class="n">xLocal</span> <span class="o">=</span> <span class="n">inQueueX</span><span class="p">.</span><span class="n">AllocTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">LocalTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span> <span class="n">yLocal</span> <span class="o">=</span> <span class="n">inQueueY</span><span class="p">.</span><span class="n">AllocTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">DataCopy</span><span class="p">(</span><span class="n">xLocal</span><span class="p">,</span> <span class="n">xGm</span><span class="p">[</span><span class="n">progress</span> <span class="o">*</span> <span class="n">TILE_LENGTH</span><span class="p">],</span> <span class="n">TILE_LENGTH</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">DataCopy</span><span class="p">(</span><span class="n">yLocal</span><span class="p">,</span> <span class="n">yGm</span><span class="p">[</span><span class="n">progress</span> <span class="o">*</span> <span class="n">TILE_LENGTH</span><span class="p">],</span> <span class="n">TILE_LENGTH</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">inQueueX</span><span class="p">.</span><span class="n">EnQue</span><span class="p">(</span><span class="n">xLocal</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">inQueueY</span><span class="p">.</span><span class="n">EnQue</span><span class="p">(</span><span class="n">yLocal</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">__aicore__</span> <span class="kr">inline</span> <span class="kt">void</span> <span class="nf">Compute</span><span class="p">(</span><span class="kt">int32_t</span> <span class="n">progress</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">LocalTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span> <span class="n">xLocal</span> <span class="o">=</span> <span class="n">inQueueX</span><span class="p">.</span><span class="n">DeQue</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">LocalTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span> <span class="n">yLocal</span> <span class="o">=</span> <span class="n">inQueueY</span><span class="p">.</span><span class="n">DeQue</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">LocalTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span> <span class="n">zLocal</span> <span class="o">=</span> <span class="n">outQueueZ</span><span class="p">.</span><span class="n">AllocTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Add</span><span class="p">(</span><span class="n">zLocal</span><span class="p">,</span> <span class="n">xLocal</span><span class="p">,</span> <span class="n">yLocal</span><span class="p">,</span> <span class="n">TILE_LENGTH</span><span class="p">);</span>       <span class="c1">// 核心计算！
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">outQueueZ</span><span class="p">.</span><span class="n">EnQue</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span><span class="p">(</span><span class="n">zLocal</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">inQueueX</span><span class="p">.</span><span class="n">FreeTensor</span><span class="p">(</span><span class="n">xLocal</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">inQueueY</span><span class="p">.</span><span class="n">FreeTensor</span><span class="p">(</span><span class="n">yLocal</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">__aicore__</span> <span class="kr">inline</span> <span class="kt">void</span> <span class="nf">CopyOut</span><span class="p">(</span><span class="kt">int32_t</span> <span class="n">progress</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">LocalTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span> <span class="n">zLocal</span> <span class="o">=</span> <span class="n">outQueueZ</span><span class="p">.</span><span class="n">DeQue</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">DataCopy</span><span class="p">(</span><span class="n">zGm</span><span class="p">[</span><span class="n">progress</span> <span class="o">*</span> <span class="n">TILE_LENGTH</span><span class="p">],</span> <span class="n">zLocal</span><span class="p">,</span> <span class="n">TILE_LENGTH</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">outQueueZ</span><span class="p">.</span><span class="n">FreeTensor</span><span class="p">(</span><span class="n">zLocal</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">TPipe</span> <span class="n">pipe</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TQue</span><span class="o">&lt;</span><span class="n">TPosition</span><span class="o">::</span><span class="n">VECIN</span><span class="p">,</span> <span class="n">BUFFER_NUM</span><span class="o">&gt;</span> <span class="n">inQueueX</span><span class="p">,</span> <span class="n">inQueueY</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TQue</span><span class="o">&lt;</span><span class="n">TPosition</span><span class="o">::</span><span class="n">VECOUT</span><span class="p">,</span> <span class="n">BUFFER_NUM</span><span class="o">&gt;</span> <span class="n">outQueueZ</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">GlobalTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span> <span class="n">xGm</span><span class="p">,</span> <span class="n">yGm</span><span class="p">,</span> <span class="n">zGm</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="数据切分策略">数据切分策略
+</h3><p><img src="/images/ai_system/ch13/ai_system.pdf-0516-10.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图13.5.4 数据切分示意"
+	
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">constexpr</span> <span class="kt">int32_t</span> <span class="n">TOTAL_LENGTH</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">*</span> <span class="mi">2048</span><span class="p">;</span>    <span class="c1">// 数据总长度
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">constexpr</span> <span class="kt">int32_t</span> <span class="n">USE_CORE_NUM</span> <span class="o">=</span> <span class="mi">8</span><span class="p">;</span>           <span class="c1">// 使用 8 个核
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">constexpr</span> <span class="kt">int32_t</span> <span class="n">BLOCK_LENGTH</span> <span class="o">=</span> <span class="n">TOTAL_LENGTH</span> <span class="o">/</span> <span class="n">USE_CORE_NUM</span><span class="p">;</span>  <span class="c1">// 每核：2048
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">constexpr</span> <span class="kt">int32_t</span> <span class="n">TILE_NUM</span> <span class="o">=</span> <span class="mi">8</span><span class="p">;</span>               <span class="c1">// 每核切分 8 块
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">constexpr</span> <span class="kt">int32_t</span> <span class="n">BUFFER_NUM</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>             <span class="c1">// Double Buffer
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">constexpr</span> <span class="kt">int32_t</span> <span class="n">TILE_LENGTH</span> <span class="o">=</span> <span class="n">BLOCK_LENGTH</span> <span class="o">/</span> <span class="n">TILE_NUM</span> <span class="o">/</span> <span class="n">BUFFER_NUM</span><span class="p">;</span>  <span class="c1">// 每块：128
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>切分层次：<strong>总数据 → 分配到 N 个核 → 每核数据切分为 M 块 → 每块再对半分（Double Buffer）</strong></p>
+<blockquote>
+<p><strong>关键认知</strong>：Ascend C 中的&quot;核数&quot;是逻辑核的概念——即同时运行了多少个算子实例（进程数），而非物理处理器核数。建议逻辑核数为物理核数的整数倍。</p>
+</blockquote>
+<hr>
+<h2 id="本章小结">本章小结
+</h2><p>本章从 CANN 五层架构到 Ascend C 编程范式，完整覆盖了昇腾软件栈的核心知识：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>知识模块</th>
+          <th>核心要点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>CANN 五层架构</strong></td>
+          <td>AscendCL → 服务层 → 编译层 → 执行层 → 基础层，层层分明</td>
+      </tr>
+      <tr>
+          <td><strong>CANN 算子体系</strong></td>
+          <td>AI Core 算子（矩阵密集）+ AI CPU 算子（控制流/分支密集），三种 AI CPU 适用场景</td>
+      </tr>
+      <tr>
+          <td><strong>并行计算理论</strong></td>
+          <td>ILP/TLP/RLP、数据并行/任务并行、SPMD 模型、阿姆达尔定律</td>
+      </tr>
+      <tr>
+          <td><strong>Ascend C 编程体系</strong></td>
+          <td>AI Core 硬件抽象（Cube/Vector/Scalar/DMA）、SPMD 模型、流水编程范式</td>
+      </tr>
+      <tr>
+          <td><strong>Ascend C 语法扩展</strong></td>
+          <td>函数/地址空间限定符、基础 API 四件套（计算/搬运/内存/同步）、高阶 API</td>
+      </tr>
+      <tr>
+          <td><strong>核心数据结构</strong></td>
+          <td>GlobalTensor ↔ LocalTensor、TQue（TQueue/TPosition）、TPipe、TBuf、Double Buffer</td>
+      </tr>
+      <tr>
+          <td><strong>向量编程范式</strong></td>
+          <td>算子分析 → 核函数定义 → Init + Process（CopyIn → Compute → CopyOut）→ 数据切分</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>最后值得关注的是：除了向量计算范式，Ascend C 还有<strong>矩阵计算范式</strong>和<strong>向量-矩阵混合（融合算子）编程范式</strong>——后者在实际生产中更为常见，值得进一步深入探索。</p>
+</blockquote>
+<hr>
+<p><em>本文是《AI系统：原理与架构》第13章的学习笔记，内容有精简和重组。建议配合原书阅读以获取更完整的知识体系。</em></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ai-system/">AI System</a>
+        
+            <a href="/tags/deep-learning/">Deep Learning</a>
+        
+            <a href="/tags/ai-infra/">AI Infra</a>
+        
+            <a href="/tags/cann/">CANN</a>
+        
+            <a href="/tags/ascend-c/">Ascend C</a>
+        
+            <a href="/tags/huawei/">Huawei</a>
+        
+            <a href="/tags/npu/">NPU</a>
+        
+            <a href="/tags/operator/">Operator</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC6%E7%AB%A0-npu%E4%BB%A5%E6%98%87%E8%85%BE%E4%B8%BA%E4%BE%8B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第6章 NPU——以昇腾为例</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC10%E7%AB%A0-%E5%89%8D%E7%AB%AF%E4%BC%98%E5%8C%96/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第10章 前端优化</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC11%E7%AB%A0-%E5%90%8E%E7%AB%AF%E4%BC%98%E5%8C%96/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第11章 后端优化</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第1章 AI系统概述</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC2%E7%AB%A0-ai%E8%AE%A1%E7%AE%97%E4%BD%93%E7%B3%BB/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第2章 AI计算体系</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
