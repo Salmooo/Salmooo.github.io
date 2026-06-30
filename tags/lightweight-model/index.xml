@@ -1,0 +1,671 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Lightweight Model on SalmoneX Blog</title>
+        <link>https://Salmooo.github.io/tags/lightweight-model/</link>
+        <description>Recent content in Lightweight Model on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright><atom:link href="https://Salmooo.github.io/tags/lightweight-model/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>AI系统：第15章 模型小型化</title>
+        <link>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC15%E7%AB%A0-%E6%A8%A1%E5%9E%8B%E5%B0%8F%E5%9E%8B%E5%8C%96/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC15%E7%AB%A0-%E6%A8%A1%E5%9E%8B%E5%B0%8F%E5%9E%8B%E5%8C%96/</guid>
+        <description>&lt;h2 id=&#34;本章概览&#34;&gt;本章概览
+&lt;/h2&gt;&lt;p&gt;随着深度学习的发展，神经网络被广泛应用于各种领域。模型性能提高的同时也引入了&lt;strong&gt;巨大的参数量和计算量&lt;/strong&gt;。由于大部分深度神经网络模型参数量很大，无法满足直接部署到移动端的条件，因此在不严重影响模型性能的前提下对模型进行重新设计，来减少网络参数量和计算复杂度，是当前热门的研究方向。&lt;/p&gt;
+&lt;p&gt;第15章从三个层面系统讲解模型小型化：&lt;strong&gt;第一&lt;/strong&gt;，理解模型复杂度的衡量指标（参数量、FLOPs、MACs等）；&lt;strong&gt;第二&lt;/strong&gt;，深入分析CNN模型小型化的七大系列经典架构（SqueezeNet / ShuffleNet / MobileNet / ESPNet / EfficientNet / GhostNet）；&lt;strong&gt;第三&lt;/strong&gt;，探索Transformer模型的小型化方案（MobileViT / MobileFormer / EfficientFormer）。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;核心洞察：&lt;strong&gt;模型小型化 = 结构重新设计 + 高效算子替换 + NAS自动搜索&lt;/strong&gt;。它不是简单的&amp;quot;缩小&amp;quot;，而是在精度与效率之间找到最优平衡点的系统工程。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;151-推理参数基础&#34;&gt;15.1 推理参数基础
+&lt;/h2&gt;&lt;h3 id=&#34;1511-参数量与性能的博弈&#34;&gt;15.1.1 参数量与性能的博弈
+&lt;/h3&gt;&lt;p&gt;模型性能提升的同时也引入了巨大的参数量和计算量。一般来说，&lt;strong&gt;模型参数量越大，精度越高，性能越好&lt;/strong&gt;，但同时部署成本也急剧上升。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0570-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.1.1 左：参数量-精度关系；右：历史模型参数量增长趋势&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0570-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.1.1 右：历年AI模型参数量指数级增长&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.1.1：左图展示了参数量与模型精度的正相关关系；右图展示了历年AI模型参数量的指数级增长趋势（Sevilla et al., 2022）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;1512-复杂度分析&#34;&gt;15.1.2 复杂度分析
+&lt;/h3&gt;&lt;p&gt;模型参数量和计算量是两个重要的考量因素：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;指标&lt;/th&gt;
+          &lt;th&gt;含义&lt;/th&gt;
+          &lt;th&gt;类比&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Params&lt;/strong&gt;（参数量）&lt;/td&gt;
+          &lt;td&gt;模型中的参数数量&lt;/td&gt;
+          &lt;td&gt;空间复杂度&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;FLOPs&lt;/strong&gt;（浮点运算次数）&lt;/td&gt;
+          &lt;td&gt;模型执行所需的总浮点运算量&lt;/td&gt;
+          &lt;td&gt;时间复杂度&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;FLOPS&lt;/strong&gt;（每秒浮点运算次数）&lt;/td&gt;
+          &lt;td&gt;硬件计算能力指标&lt;/td&gt;
+          &lt;td&gt;计算速度&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;MACs&lt;/strong&gt;（乘加操作次数）&lt;/td&gt;
+          &lt;td&gt;乘法和加法操作的总次数&lt;/td&gt;
+          &lt;td&gt;更贴近硬件的计算量&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;MAC&lt;/strong&gt;（内存访问代价）&lt;/td&gt;
+          &lt;td&gt;内存访问的开销&lt;/td&gt;
+          &lt;td&gt;访存成本&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;内存带宽&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;数据从vRAM到计算核心的速度&lt;/td&gt;
+          &lt;td&gt;数据传输瓶颈&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;内存带宽&lt;/strong&gt;是比计算速度更具代表性的性能指标。它取决于内存和计算核心之间数据传输速度以及总线中并行链路的数量。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;1513-典型结构参数量与flops对比&#34;&gt;15.1.3 典型结构参数量与FLOPs对比
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;标准卷积层&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Params = \(k_h \times k_w \times C_{in} \times C_{out}\)&lt;/li&gt;
+&lt;li&gt;FLOPs = \(k_h \times k_w \times C_{in} \times C_{out} \times H \times W\)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;分组卷积&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Params = \(k_h \times k_w \times C_{in} \times C_{out} / g\)&lt;/li&gt;
+&lt;li&gt;FLOPs = \(k_h \times k_w \times C_{in} \times C_{out} \times H \times W / g\)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;其中 \(g\) 为分组数量，分组卷积可将参数量和计算量降低到原来的 \(1/g\)。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;深度可分离卷积&lt;/strong&gt;：进一步将标准卷积分解为逐通道卷积 + 逐点卷积，大幅降低计算成本。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;全连接层&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Params = \(C_{in} \times C_{out}\)&lt;/li&gt;
+&lt;li&gt;FLOPs = \(C_{in} \times C_{out}\)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;152-cnn-模型小型化&#34;&gt;15.2 CNN 模型小型化
+&lt;/h2&gt;&lt;p&gt;神经网络模型被广泛应用于工业领域，但由于存储空间以及算力的限制，大而复杂的模型难以被应用。本章介绍了CNN小型化的七大经典系列。&lt;/p&gt;
+&lt;h3 id=&#34;1521-squeezenet-系列&#34;&gt;15.2.1 SqueezeNet 系列
+&lt;/h3&gt;&lt;h4 id=&#34;squeezenet&#34;&gt;SqueezeNet
+&lt;/h4&gt;&lt;p&gt;SqueezeNet 发表于 ICLR 2017，核心贡献在于提出了 &lt;strong&gt;Fire Module&lt;/strong&gt;：先使用 1×1 卷积降低通道数目（&lt;strong&gt;squeeze&lt;/strong&gt;），然后用 1×1 和 3×3 卷积提升通道数（&lt;strong&gt;expand&lt;/strong&gt;）。它达到了 AlexNet 相同的精度，却只用了 &lt;strong&gt;1/50 的参数量&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0573-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.1 Fire Module结构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.1：Fire Module — squeeze层用1×1卷积降维，expand层混合1×1和3×3卷积升维。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0573-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.2 SqueezeNet整体网络结构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.2：以卷积层开始，后接8个Fire Module，最后以卷积层结束。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;三种设计策略：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;将 3×3 卷积替换为 1×1 卷积，参数量减少为 1/9&lt;/li&gt;
+&lt;li&gt;减少 3×3 卷积的输入/输出通道数&lt;/li&gt;
+&lt;li&gt;将下采样操作延后，保留更大的激活图&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;squeezenext&#34;&gt;SqueezeNext
+&lt;/h4&gt;&lt;p&gt;SqueezeNext 基于残差结构并使用了分离卷积，核心改进包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;两阶段瓶颈模块&lt;/strong&gt;：两个 1×1 卷积将通道数降到原来的 1/4，显著减少参数&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;低秩分解&lt;/strong&gt;：使用 CP 分解将 \(K \times K\) 卷积参数量从 \(K^2\) 降为 \(2K\)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;3×3 拆分为 3×1 + 1×3&lt;/strong&gt;：参数量从 9 降至 6，减少 1/3&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0575-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.3 SqueezeNext Block详细结构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.3：输入通道C → 压缩层1(降为1/2C) → 压缩层2(降为1/4C) → 分离3×3层 → 逐点卷积升维 → 输出。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0575-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.4 SqueezeNext Block简化示意&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.4：SqueezeNext Block核心 = 两个1×1卷积减少参数 + 3×3卷积拆成1×3和3×1组合。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;1522-shufflenet-系列&#34;&gt;15.2.2 ShuffleNet 系列
+&lt;/h3&gt;&lt;h4 id=&#34;shufflenet-v1&#34;&gt;ShuffleNet V1
+&lt;/h4&gt;&lt;p&gt;ShuffleNet 发表于 CVPR 2018，针对极小网络的计算效率问题，提出两个核心操作：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Point-Wise 分组卷积&lt;/strong&gt;：降低 1×1 卷积的计算量&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Channel Shuffle&lt;/strong&gt;：解决分组卷积导致的不同组之间信息隔离问题&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0576-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.5 Point-Wise分组卷积与Channel Shuffle&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.5：(a) 分组卷积导致输出通道只接收部分输入的通道信息；(b)(c) Channel Shuffle将每组再细分后重新混合，实现跨组信息交互。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0577-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.6 ShuffleNet Unit结构（步长=1和步长=2）&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.6：基于残差块和Channel Shuffle设计的ShuffleNet Unit，由深度卷积、逐点分组卷积组成。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;shufflenet-v2&#34;&gt;ShuffleNet V2
+&lt;/h4&gt;&lt;p&gt;ShuffleNet V2 在 V1 基础上提出了 &lt;strong&gt;Channel Split&lt;/strong&gt; 操作，并总结出&lt;strong&gt;四条高效网络设计准则&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;准则&lt;/th&gt;
+          &lt;th&gt;说明&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;G1&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;输入输出通道数相等时，MAC最小，模型最快&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;G2&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;分组数增大时MAC也会增大，应针对硬件合理设计分组数&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;G3&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;网络碎片化程度越高，速度越慢&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;G4&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;不要过多使用逐点运算（Element-wise操作）&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0577-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.7 ShuffleNet V2的Channel Split设计&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.7：(c)(d) Channel Split — 每个单元开始将通道拆分为2个分支，一个恒等映射，一个经多层卷积，最后通道级拼接（Concat），V2的1×1不再使用分组卷积。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;1523-mobilenet-系列&#34;&gt;15.2.3 MobileNet 系列
+&lt;/h3&gt;&lt;p&gt;MobileNet 系列是移动端部署最经典的轻量化模型族，涵盖 V1 / V2 / V3 三个版本。&lt;/p&gt;
+&lt;h4 id=&#34;mobilenet-v1深度可分离卷积&#34;&gt;MobileNet V1：深度可分离卷积
+&lt;/h4&gt;&lt;p&gt;核心贡献是 &lt;strong&gt;深度可分离卷积（Depthwise Separable Convolution）&lt;/strong&gt;，将标准卷积分解为两步：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;逐通道卷积（Depthwise Convolution）&lt;/strong&gt;：一个卷积核只负责一个通道，特征图通道数与输入完全一致。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0578-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.8 逐通道卷积示意&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.8：每个卷积核仅处理一个输入通道，不进行跨通道的信息融合。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;逐点卷积（Pointwise Convolution）&lt;/strong&gt;：使用 1×1 卷积将逐通道卷积的结果在通道方向进行加权组合。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0578-12.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.9 逐点卷积示意&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.9：1×1卷积核将上一步的特征图在通道方向进行加权组合，生成新的特征图。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;MBconv 模块&lt;/strong&gt;：由逐通道卷积 + BN + ReLU 组成，通过不断堆叠构建完整网络。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0579-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.10 MBconv模块与标准卷积对比&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.10：左为标准卷积（3×3 Conv + BN + ReLU），右为MBconv（逐通道卷积 + BN + ReLU + 逐点卷积 + BN + ReLU）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;此外，MobileNet V1 还引入了两个超参数：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;宽度系数 \(\alpha\)&lt;/strong&gt;（0~1）：控制每层通道数的缩放比例&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;分辨率系数 \(\rho\)&lt;/strong&gt;（0~1）：控制输入图像分辨率的缩放比例&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;mobilenet-v2反向残差与线性瓶颈&#34;&gt;MobileNet V2：反向残差与线性瓶颈
+&lt;/h4&gt;&lt;p&gt;MobileNet V2（2018）在 V1 基础上引入了两个核心概念：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;反向残差（Inverted Residual）&lt;/strong&gt;：与传统残差&amp;quot;先降维再升维&amp;quot;相反，先将低维特征扩展到高维，用深度卷积过滤，再降维回去——两端的通道数都很小，整体计算量不大。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0579-14.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.11 反向残差结构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.11：先1×1升维 → 3×3深度卷积 → 1×1降维，与传统残差块方向相反。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;线性瓶颈（Linear Bottleneck）&lt;/strong&gt;：在降维层（最后一个1×1卷积）后不使用ReLU激活，而是线性输出，以避免非线性破坏低维空间的信息。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0580-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.12 线性瓶颈的倒残差结构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.12：输入低维压缩表示 → 1×1升维(ReLU6) → 3×3深度卷积(ReLU6) → 1×1降维(Linear)。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;关于 ReLU6&lt;/strong&gt;：MobileNet 使用 ReLU6（限制最大输出为 6），这是为了在移动端 FP16/INT8 低精度场景下保持良好的数值分辨率，避免激活值范围过大导致精度损失。&lt;/p&gt;
+&lt;h4 id=&#34;mobilenet-v3nas--手工优化&#34;&gt;MobileNet V3：NAS + 手工优化
+&lt;/h4&gt;&lt;p&gt;MobileNet V3 主要贡献：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;NAS 搜索&lt;/strong&gt;：由资源受限的 NAS（Block-Wise）执行模块级搜索，NetAdapt（Layer-Wise）执行局部微调&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;SE 结构（Squeeze-and-Excitation）&lt;/strong&gt;：全局池化 → 两个全连接层 → H-Sigmoid 获取通道权重&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0581-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.13 SE（Squeeze-and-Excitation）结构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.13：通过全局池化压缩 → FC → ReLU → FC → H-Sigmoid 为每个通道生成注意力权重。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;重新设计耗时层&lt;/strong&gt;：减少第一个卷积层的卷积核数（32→16），精简最后阶段（Last Stage），减少 11% 运算时间和 3000 万次乘加操作&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0581-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.14 耗时层精简前后对比&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.14：左为原结构，右为精简后的高效结构 — 将平均池化层前移，移除多余的卷积层。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;H-Swish 激活函数&lt;/strong&gt;：\(H\text{-}Swish[x] = x \cdot \frac{\text{ReLU6}(x+3)}{6}\)，相比 Swish（\(x \cdot \sigma(x)\)），避免了昂贵的 Sigmoid 计算&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;1524-espnet-系列&#34;&gt;15.2.4 ESPNet 系列
+&lt;/h3&gt;&lt;h4 id=&#34;espnet-v1高效空间金字塔卷积&#34;&gt;ESPNet V1：高效空间金字塔卷积
+&lt;/h4&gt;&lt;p&gt;ESPNet 应用在高分辨率图像语义分割，核心贡献是 &lt;strong&gt;ESP 模块（Efficient Spatial Pyramid）&lt;/strong&gt;：将标准卷积分解为逐点卷积（降维）+ 空洞卷积金字塔（多尺度特征提取），大幅减少参数和内存。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0583-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.15 ESP模块结构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.15：(a) ESP模块 — 逐点卷积降维后，使用K组不同膨胀率的空洞卷积提取多尺度特征。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;HFF（Hierarchical Feature Fusion）&lt;/strong&gt;：空洞卷积的简单拼接会引入网格伪像（棋盘效应）。HFF 通过将不同膨胀率输出的特征图在拼接前进行层次化相加，有效消除了网格伪影。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0583-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.16 网格伪像与HFF消除效果&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.16：(a) 膨胀率r=2的3×3卷积产生的网格伪像；(b) 有无HFF的特征图可视化对比。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;espnet-v2eesp模块&#34;&gt;ESPNet V2：EESP模块
+&lt;/h4&gt;&lt;p&gt;EESP 模块相比 ESP 模块的改进：输入层采用分组卷积取代标准空洞卷积，结合深度可分离卷积，使得参数量仅为 ESP 的 &lt;strong&gt;1/8&lt;/strong&gt;（当 M=240, g=K=4, d=60 时）。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0584-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.17 EESP模块结构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.17：(a) ESP模块；(b) EESP模块 — 分组逐点卷积 + 深度可分离扩张卷积；(c) 等价高效实现 — K个逐点卷积合并为单个分组卷积。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;1525-efficientnet-系列&#34;&gt;15.2.5 EfficientNet 系列
+&lt;/h3&gt;&lt;h4 id=&#34;efficientnet-v1复合缩放&#34;&gt;EfficientNet V1：复合缩放
+&lt;/h4&gt;&lt;p&gt;EfficientNet 提出了 &lt;strong&gt;复合缩放方法（Compound Scaling Method）&lt;/strong&gt;，通过一个复合系数 \(\phi\) 统一缩放网络的&lt;strong&gt;深度（d）&lt;/strong&gt;、&lt;strong&gt;宽度（w）&lt;strong&gt;和&lt;/strong&gt;分辨率（r）&lt;/strong&gt;：&lt;/p&gt;
+\[d = \alpha^\phi,\quad w = \beta^\phi,\quad r = \gamma^\phi\]&lt;p&gt;并满足约束 \(\alpha \cdot \beta^2 \cdot \gamma^2 \approx 2\)，使得总 FLOPs 约增加 \(2^\phi\) 倍。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0585-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.18 不同维度的缩放策略对比&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.18：(a) Baseline；(b) 仅宽度缩放；(c) 仅深度缩放；(d) 仅分辨率缩放；(e) EfficientNet的复合缩放——同时平衡三个维度。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;efficientnet-v2&#34;&gt;EfficientNet V2
+&lt;/h4&gt;&lt;p&gt;EfficientNet V2 采用&lt;strong&gt;训练感知 NAS&lt;/strong&gt;联合优化精度、参数效率和训练效率：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;除 MBConv 外引入 &lt;strong&gt;Fused-MBConv&lt;/strong&gt; 模块加速训练&lt;/li&gt;
+&lt;li&gt;使用较小的扩展率（expansion ratio），减少内存访问量&lt;/li&gt;
+&lt;li&gt;倾向选择 3×3 卷积核并增加多个卷积以提升感受野&lt;/li&gt;
+&lt;li&gt;移除最后一个步长为1的阶段以减少参数和内存访问&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;奖励函数：\(A \cdot S^w \cdot P^v\)（A=精度, S=归一化训练时长, P=参数量, w=-0.07, v=-0.05）&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;1526-ghostnet-系列&#34;&gt;15.2.6 GhostNet 系列
+&lt;/h3&gt;&lt;h4 id=&#34;ghostnet-v1廉价操作生成冗余特征&#34;&gt;GhostNet V1：廉价操作生成冗余特征
+&lt;/h4&gt;&lt;p&gt;GhostNet 的核心思想是 &lt;strong&gt;Ghost Module&lt;/strong&gt;：先通过普通卷积生成一部分&amp;quot;原始&amp;quot;特征图，再通过**廉价线性变换（深度卷积）**生成更多&amp;quot;Ghost&amp;quot;特征图，最后将两者拼接。这样以很小的代价生成了与普通卷积等量的特征图。&lt;/p&gt;
+&lt;p&gt;在 ImageNet 分类任务中，GhostNet 在相似计算量下 Top-1 达 &lt;strong&gt;75.7%&lt;/strong&gt;，高于 MobileNet V3 的 75.2%。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0587-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.2.19 Ghost Module与普通卷积对比&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.2.19：(a) 普通卷积直接生成所有特征图；(b) Ghost Module — 先通过普通卷积生成少量原始特征图，再用廉价操作（深度卷积）生成冗余特征图，最后拼接。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;ghostnet-v2解耦全连接注意力&#34;&gt;GhostNet V2：解耦全连接注意力
+&lt;/h4&gt;&lt;p&gt;GhostNet V2 在 Ghost 模块基础上添加了 &lt;strong&gt;DFC（Decoupled Fully Connected）注意力机制&lt;/strong&gt;，用固定权重的全连接层生成具有全局感受野的注意力图。相比自注意力机制，DFC 更简单、部署效率更高。在 167 MFLOPs 下 Top-1 达 75.3%，显著高于 GhostNet V1（74.5%）。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;cnn小型化小结&#34;&gt;CNN小型化小结
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;系列&lt;/th&gt;
+          &lt;th&gt;核心思路&lt;/th&gt;
+          &lt;th&gt;代表年份&lt;/th&gt;
+          &lt;th&gt;关键技术&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;SqueezeNet&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Fire Module（squeeze + expand）&lt;/td&gt;
+          &lt;td&gt;2016-2017&lt;/td&gt;
+          &lt;td&gt;1×1卷积降维、低秩分解&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;ShuffleNet&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Channel Shuffle + 分组卷积&lt;/td&gt;
+          &lt;td&gt;2017-2018&lt;/td&gt;
+          &lt;td&gt;逐点分组卷积、Channel Split&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;MobileNet&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;深度可分离卷积&lt;/td&gt;
+          &lt;td&gt;2017-2019&lt;/td&gt;
+          &lt;td&gt;反向残差、线性瓶颈、SE、NAS&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;ESPNet&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;空洞卷积金字塔&lt;/td&gt;
+          &lt;td&gt;2018&lt;/td&gt;
+          &lt;td&gt;ESP/EESP模块、HFF消除网格伪影&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;EfficientNet&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;复合缩放 + NAS&lt;/td&gt;
+          &lt;td&gt;2019-2020&lt;/td&gt;
+          &lt;td&gt;深度/宽度/分辨率联合缩放&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;GhostNet&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;廉价操作生成冗余特征&lt;/td&gt;
+          &lt;td&gt;2020-2022&lt;/td&gt;
+          &lt;td&gt;Ghost Module、DFC注意力&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;人工设计（SqueezeNet / ShuffleNet / ESPNet / GhostNet）和 NAS 搜索（MobileNet V3 / EfficientNet）是两条互补的技术路线，共同推动了 CNN 轻量化的发展。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;153-transformer-模型小型化&#34;&gt;15.3 Transformer 模型小型化
+&lt;/h2&gt;&lt;p&gt;自 Vision Transformer 出现后，Transformer 在计算机视觉领域取得了显著成功。但基于 Transformer 的模型通常具有&lt;strong&gt;数十亿甚至数百亿个参数&lt;/strong&gt;，使其难以部署到资源受限场景。本节介绍 Transformer 的轻量化方案。&lt;/p&gt;
+&lt;h3 id=&#34;1531-mobilevit-系列&#34;&gt;15.3.1 MobileViT 系列
+&lt;/h3&gt;&lt;h4 id=&#34;mobilevit-v1&#34;&gt;MobileViT V1
+&lt;/h4&gt;&lt;p&gt;MobileViT 是&lt;strong&gt;第一个基于轻量级 CNN 性能的轻量级 ViT&lt;/strong&gt; 工作，性能 SOTA，优于 MobileNet V3、CrossViT 等。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;MobileViT 块&lt;/strong&gt;：将标准卷积的&amp;quot;展开+局部处理+折叠&amp;quot;中的局部建模替换为 Transformer 的全局建模，使模型兼具 CNN 的局部性和 ViT 的全局性。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0589-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.3.1 MobileViT块结构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.3.1：n×n卷积 → 1×1卷积(通道调整) → Unfold → Transformer(全局特征建模) → Fold → 1×1卷积(还原通道) → 残差拼接 → n×n卷积(特征融合)。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;多尺度采样训练&lt;/strong&gt;：在每个 GPU 迭代中随机抽样不同的空间分辨率，最大分辨率用最小批量加速优化，无需手动调整且提高了训练速度。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0589-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.3.2 标准采样 vs 多尺度采样对比&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.3.2：标准采样固定分辨率批量训练 vs 多尺度采样随机分辨率动态批量训练。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;1532-mobileformer-系列&#34;&gt;15.3.2 MobileFormer 系列
+&lt;/h3&gt;&lt;h4 id=&#34;mobileformermobilenet--transformer-并行&#34;&gt;MobileFormer：MobileNet + Transformer 并行
+&lt;/h4&gt;&lt;p&gt;MobileFormer 通过&lt;strong&gt;双线桥&lt;/strong&gt;将 MobileNet 和 Transformer 并行化，融合局部和全局表达能力。与 ViT 不同，它仅使用 &lt;strong&gt;6个或更少&lt;/strong&gt;的可学习 tokens 作为全局先验，计算量更小。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0590-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.3.3 MobileFormer并行结构与双向交叉注意力&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.3.3：Mobile（MobileNet）处理图像提取局部特征，Former（Transformer）使用少量tokens学习全局先验，通过双向交叉注意力连接。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;低成本双线桥&lt;/strong&gt;：Mobile→Former 和 Mobile←Former 两种轻量级交叉注意力。在通道数较少的 Mobile 瓶颈处计算，将键（K）和值（V）的映射矩阵从 Mobile 中移除以节省计算，仅保留在 Former 中。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0591-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.3.4 MobileFormer块详细结构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.3.4：每个MobileFormer块包含Mobile子块、Former子块、Mobile←Former（全局→局部）和Mobile→Former（局部→全局）四个部分。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Mobile 子块&lt;/strong&gt;：使用动态 ReLU 替代 ReLU，参数由 Former 的第一个全局 token 通过两个 MLP 层生成&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Former 子块&lt;/strong&gt;：标准的 Transformer block，处理全局 tokens&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;1533-efficientformer-系列&#34;&gt;15.3.3 EfficientFormer 系列
+&lt;/h3&gt;&lt;h4 id=&#34;efficientformer-v1&#34;&gt;EfficientFormer V1
+&lt;/h4&gt;&lt;p&gt;EfficientFormer 从&lt;strong&gt;时延分析&lt;/strong&gt;出发，先找出 ViT 模型在端侧低效的根源，然后引入维度一致的 Transformer Block 作为设计范式，最后通过架构搜索获得不同系列模型。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;尺寸一致性设计&lt;/strong&gt;：将网络分割为两部分：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;4D 分区&lt;/strong&gt;（MB[4D]）：操作符按 CNN 风格实现，使用池化混合器提取低级特征&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;3D 分区&lt;/strong&gt;（MB[3D]）：线性投影和注意力在 3D 张量上执行，发挥 MHSA 的全局建模能力&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;网络从 4D 分区开始，3D 分区应用于最后阶段。EfficientFormer 是一个&lt;strong&gt;完全基于 Transformer 的模型&lt;/strong&gt;，无需集成 MobileNet 结构。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch15/ai_system.pdf-0593-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图15.3.5 EfficientFormer整体架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图15.3.5：PatchEmbed + 4个Stage（由MetaBlock组成）。前3个Stage为4D分区（CNN风格），最后Stage为3D分区（ViT风格）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;transformer小型化小结&#34;&gt;Transformer小型化小结
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;系列&lt;/th&gt;
+          &lt;th&gt;核心思路&lt;/th&gt;
+          &lt;th&gt;关键技术&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;MobileViT&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;CNN+Transformer融合&lt;/td&gt;
+          &lt;td&gt;局部卷积 + 全局Transformer建模、多尺度采样&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;MobileFormer&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;MobileNet与Transformer并行&lt;/td&gt;
+          &lt;td&gt;双向交叉注意力桥、少量全局tokens（≤6）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;EfficientFormer&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;纯Transformer + 维度一致性设计&lt;/td&gt;
+          &lt;td&gt;4D/3D分区、架构搜索、时延分析驱动&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;小结与思考&#34;&gt;小结与思考
+&lt;/h2&gt;&lt;p&gt;第15章覆盖了从 CNN 到 Transformer 的模型小型化全景。让我们用几个关键问题来收尾：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;为什么需要模型小型化？&lt;/strong&gt; 深度神经网络参数量庞大，面临内存不足和实时性不足的双重挑战，无法直接部署到移动端和嵌入式设备。模型小型化通过重新设计网络结构，在不严重影响精度的前提下降低参数量和计算复杂度。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;CNN轻量化有哪些核心技术路线？&lt;/strong&gt; 主要有两条：&lt;strong&gt;人工设计&lt;/strong&gt;（SqueezeNet的Fire Module、ShuffleNet的Channel Shuffle、MobileNet的深度可分离卷积、ESPNet的空洞卷积金字塔、GhostNet的廉价操作）和 &lt;strong&gt;NAS自动搜索&lt;/strong&gt;（MobileNet V3、EfficientNet系列）。两条路线相互补充，共同推进了轻量化技术的发展。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;为什么连Transformer也需要轻量化？&lt;/strong&gt; Vision Transformer虽然效果好，但参数量动辄数十亿甚至数百亿。MobileViT、MobileFormer、EfficientFormer等工作将CNN的局部高效性与Transformer的全局建模能力结合，或通过维度一致性设计和架构搜索，使Transformer也能在移动端运行。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;&amp;ldquo;小型化&amp;quot;和&amp;quot;压缩&amp;quot;是什么关系？&lt;/strong&gt; 本章讨论的&amp;quot;模型小型化&amp;quot;侧重于从&lt;strong&gt;结构设计&lt;/strong&gt;入手构建轻量模型，而第16章的&amp;quot;模型压缩&amp;rdquo;（量化、剪枝、蒸馏、低秩分解）侧重于对&lt;strong&gt;已有模型&lt;/strong&gt;进行后处理压缩。两者目标一致，但技术路径不同，实际部署中往往结合使用。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;如果说第15章告诉我们&amp;quot;如何设计一个天生就小的模型&amp;quot;，那么即将到来的第16章将告诉我们&amp;quot;如何把一个已经很大的模型变小&amp;quot;——敬请期待模型轻量化四件套：量化、剪枝、知识蒸馏与低秩分解。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;em&gt;下一篇预告：第16章将深入模型轻量化技术，详解模型压缩四件套——量化（Quantization）、剪枝（Pruning）、知识蒸馏（Knowledge Distillation）与低秩分解（Low-Rank Factorization）。&lt;/em&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

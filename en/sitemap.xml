@@ -252,6 +252,8 @@
   </url><url>
     <loc>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC14%E7%AB%A0-%E6%8E%A8%E7%90%86%E7%B3%BB%E7%BB%9F/</loc>
   </url><url>
+    <loc>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC15%E7%AB%A0-%E6%A8%A1%E5%9E%8B%E5%B0%8F%E5%9E%8B%E5%8C%96/</loc>
+  </url><url>
     <loc>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC2%E7%AB%A0-ai%E8%AE%A1%E7%AE%97%E4%BD%93%E7%B3%BB/</loc>
@@ -346,6 +348,8 @@
   </url><url>
     <loc>https://Salmooo.github.io/tags/leetcode/</loc>
   </url><url>
+    <loc>https://Salmooo.github.io/tags/lightweight-model/</loc>
+  </url><url>
     <loc>https://Salmooo.github.io/tags/llvm-17/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/matrix-multiplication/</loc>
@@ -353,6 +357,10 @@
     <loc>https://Salmooo.github.io/tags/memory-allocation/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/mindie/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/mobilenet/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/model-compression/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/npu/</loc>
   </url><url>
@@ -365,6 +373,8 @@
     <loc>https://Salmooo.github.io/tags/operator-fusion/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/parallel-computing/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/shufflenet/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/simd/</loc>
   </url><url>
@@ -381,6 +391,8 @@
     <loc>https://Salmooo.github.io/tags/tensor-core/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/tpu/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/transformer/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/triton/</loc>
   </url><url>
