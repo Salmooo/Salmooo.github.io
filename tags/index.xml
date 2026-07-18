@@ -344,11 +344,27 @@
         <description></description>
         </item>
         <item>
+        <title>INT8</title>
+        <link>https://Salmooo.github.io/tags/int8/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/int8/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>IR</title>
         <link>https://Salmooo.github.io/tags/ir/</link>
         <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
         
         <guid>https://Salmooo.github.io/tags/ir/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Knowledge Distillation</title>
+        <link>https://Salmooo.github.io/tags/knowledge-distillation/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/knowledge-distillation/</guid>
         <description></description>
         </item>
         <item>
@@ -461,6 +477,38 @@
         <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
         
         <guid>https://Salmooo.github.io/tags/parallel-computing/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Pruning</title>
+        <link>https://Salmooo.github.io/tags/pruning/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/pruning/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>PTQ</title>
+        <link>https://Salmooo.github.io/tags/ptq/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/ptq/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>QAT</title>
+        <link>https://Salmooo.github.io/tags/qat/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/qat/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Quantization</title>
+        <link>https://Salmooo.github.io/tags/quantization/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/quantization/</guid>
         <description></description>
         </item>
         <item>

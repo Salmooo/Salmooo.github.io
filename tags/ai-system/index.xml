@@ -4500,6 +4500,755 @@ S = \frac{1}{(1-P) + \frac{P}{N}}
 </description>
         </item>
         <item>
+        <title>AI系统：第16章 模型轻量化</title>
+        <link>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC16%E7%AB%A0-%E6%A8%A1%E5%9E%8B%E8%BD%BB%E9%87%8F%E5%8C%96/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC16%E7%AB%A0-%E6%A8%A1%E5%9E%8B%E8%BD%BB%E9%87%8F%E5%8C%96/</guid>
+        <description>&lt;h2 id=&#34;本章概览&#34;&gt;本章概览
+&lt;/h2&gt;&lt;p&gt;第15章介绍了模型小型化——通过设计紧凑结构（SqueezeNet / MobileNet / ShuffleNet 等）让模型天然轻量。但现实中我们面对的常常是&lt;strong&gt;已经训练好的庞大模型&lt;/strong&gt;，能不能在&amp;quot;事后&amp;quot;做减法？&lt;/p&gt;
+&lt;p&gt;第16章回答的就是这个问题。本章系统性地讲解模型压缩的&lt;strong&gt;四大件&lt;/strong&gt;：量化（Quantization）、剪枝（Pruning）、知识蒸馏（Knowledge Distillation）与低秩分解（Low-Rank Factorization）。其中前三者最为成熟，也是业界落地的&amp;quot;主力军&amp;quot;。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;如果说第15章是&amp;quot;生来就瘦&amp;quot;，那第16章就是&amp;quot;胖了以后再减&amp;quot;——后者的适用场景更广，因为大多数 SOTA 模型都是先训练出一个庞大的教师网络，再压缩给端侧推理使用。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;本章各节之间的逻辑关系：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;16.1&lt;/strong&gt; 先给出模型压缩的整体框架（为什么要压、四大类方法、应用场景）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;16.2～16.4&lt;/strong&gt; 深入量化（从基本原理到 QAT / PTQ 再到端侧部署）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;16.5&lt;/strong&gt; 讨论剪枝（结构化 vs 非结构化、四种剪枝流程）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;16.6&lt;/strong&gt; 讲解知识蒸馏（知识类型、蒸馏方式、Hinton 经典算法）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;161-引言模型压缩全景&#34;&gt;16.1 引言：模型压缩全景
+&lt;/h2&gt;&lt;h3 id=&#34;为什么要压缩&#34;&gt;为什么要压缩？
+&lt;/h3&gt;&lt;p&gt;随着神经网络模型规模不断膨胀，三个痛点日益突出：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;显存不够&lt;/strong&gt;：大模型参数量动辄数十亿，移动端几 MB 的可用空间根本放不下&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;速度太慢&lt;/strong&gt;：推理时延要求毫秒级，庞大的计算图根本跑不动&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;功耗超标&lt;/strong&gt;：端侧设备电池有限，大算力意味着高功耗&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;模型压缩的目标就是在&lt;strong&gt;精度、大小、速度&lt;/strong&gt;三者之间找到最优平衡点。&lt;/p&gt;
+&lt;h3 id=&#34;模型压缩四件套&#34;&gt;模型压缩四件套
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;方法&lt;/th&gt;
+          &lt;th&gt;核心思路&lt;/th&gt;
+          &lt;th&gt;一句话总结&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;量化&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;降低参数表示精度（FP32 → INT8/INT4）&lt;/td&gt;
+          &lt;td&gt;&amp;ldquo;用更少比特表示同一个数&amp;rdquo;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;剪枝&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;删除不重要的参数或结构&lt;/td&gt;
+          &lt;td&gt;&amp;ldquo;砍掉不干活的神经元&amp;rdquo;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;知识蒸馏&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;大模型教小模型&lt;/td&gt;
+          &lt;td&gt;&amp;ldquo;老师把知识浓缩给学生&amp;rdquo;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;低秩分解&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;大矩阵分解为小矩阵乘积&lt;/td&gt;
+          &lt;td&gt;&amp;ldquo;用矩阵分解降维&amp;rdquo;&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;模型压缩流程&#34;&gt;模型压缩流程
+&lt;/h3&gt;&lt;p&gt;模型压缩通常位于&lt;strong&gt;训练完成之后、部署之前&lt;/strong&gt;这一关键阶段，典型流程如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;graph LR
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    A[预训练模型] --&amp;gt; B[模型压缩&amp;lt;br&amp;gt;量化/剪枝/蒸馏]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    B --&amp;gt; C[微调/重训练]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    C --&amp;gt; D[评估]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    D --&amp;gt; E{是否满足&amp;lt;br&amp;gt;部署要求?}
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    E --&amp;gt;|是| F[部署上线]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    E --&amp;gt;|否| B
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;应用场景&#34;&gt;应用场景
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;移动端&lt;/strong&gt;：手机 App 中的实时美颜、语音识别等&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;IoT 设备&lt;/strong&gt;：智能家居中的关键词检测、异常行为识别&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;大模型压缩&lt;/strong&gt;：BERT → TinyBERT、GPT → 量化版部署&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;自动驾驶&lt;/strong&gt;：车载芯片上低时延目标检测&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;162-量化基本原理&#34;&gt;16.2 量化基本原理
+&lt;/h2&gt;&lt;h3 id=&#34;1621-量化的核心价值&#34;&gt;16.2.1 量化的核心价值
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0595-10.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.2.1 量化概念 FP32→INT8&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.2.1：将 FP32/FP16 降低为 INT8 甚至 INT4 等低比特表示——核心思想就是用更少的 bits 表达相同的参数信息。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;神经网络的推理过程有几个特点让量化成为可能：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;参数量大&lt;/strong&gt;：有充分冗余空间供压缩&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;计算量大&lt;/strong&gt;：矩阵乘加占主导，降低精度收益明显&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;对噪声不敏感&lt;/strong&gt;：神经网络天生有一定的容错能力，适度的量化噪声不会严重影响精度&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;量化带来的四大收益：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;优势&lt;/th&gt;
+          &lt;th&gt;说明&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;加速计算&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;INT8 vs FP32 加速比可达 3× 以上&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;节省内存&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;从 32bit 降到 8bit/4bit，存储直接减到 1/4 或 1/8&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;保持精度&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;控制好量化程度，精度损失可控制在极小范围&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;节能减面积&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;更少的位宽 → 更少的访存 → 更低的功耗和芯片面积&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;1622-落地挑战&#34;&gt;16.2.2 落地挑战
+&lt;/h3&gt;&lt;p&gt;量化并非&amp;quot;免费的午餐&amp;quot;，实际部署时有几个现实问题：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;精度挑战&lt;/strong&gt;：低比特（如 INT4）表示能力下降明显，小模型比大模型更难量化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;硬件支持差异&lt;/strong&gt;：不同芯片对低比特指令的支持程度和计算方式不同&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Kernel 优化&lt;/strong&gt;：需要针对特定硬件体系结构做 Kernel 级优化才能充分发挥性能&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;1623-量化原理&#34;&gt;16.2.3 量化原理
+&lt;/h3&gt;&lt;h4 id=&#34;三种量化方法&#34;&gt;三种量化方法
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0598-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.2.2 三种量化方法对比&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.2.2：QAT、PTQ Static、PTQ Dynamic 三种方法概览。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;方法&lt;/th&gt;
+          &lt;th&gt;核心思想&lt;/th&gt;
+          &lt;th&gt;适用场景&lt;/th&gt;
+          &lt;th&gt;精度损失&lt;/th&gt;
+          &lt;th&gt;易用性&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;QAT&lt;/strong&gt;（感知量化训练）&lt;/td&gt;
+          &lt;td&gt;训练中模拟量化，让模型&amp;quot;感知&amp;quot;量化误差并适应&lt;/td&gt;
+          &lt;td&gt;目标检测、分割、OCR 等量化敏感任务&lt;/td&gt;
+          &lt;td&gt;极小&lt;/td&gt;
+          &lt;td&gt;需要重新训练&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;PTQ Static&lt;/strong&gt;（静态离线量化）&lt;/td&gt;
+          &lt;td&gt;用少量校准数据计算量化参数，一次性转换&lt;/td&gt;
+          &lt;td&gt;图像分类等对量化不敏感任务&lt;/td&gt;
+          &lt;td&gt;较少&lt;/td&gt;
+          &lt;td&gt;较好（无需训练）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;PTQ Dynamic&lt;/strong&gt;（动态离线量化）&lt;/td&gt;
+          &lt;td&gt;仅量化权重，激活值运行时动态量化&lt;/td&gt;
+          &lt;td&gt;BERT 等大模型，访存瓶颈型&lt;/td&gt;
+          &lt;td&gt;一般&lt;/td&gt;
+          &lt;td&gt;好（无数据需求）&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;一句话选择指南：如果你追求极致精度且愿意花时间重训练 → QAT；如果想快速拿到量化模型且精度容忍度较高 → PTQ Static；如果只在意模型体积缩小 → PTQ Dynamic。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;饱和量化-vs-非饱和量化&#34;&gt;饱和量化 vs 非饱和量化
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0599-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.2.3 饱和量化 vs 非饱和量化&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.2.3：左→非饱和量化（|max| 映射到 127）；右→饱和量化（通过 KL 散度找最优阈值 T，±|T| 映射到 ±127）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;非饱和量化&lt;/strong&gt;：直接取 |max| 映射，简单粗暴，但对离群值敏感&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;饱和量化&lt;/strong&gt;：用 KL 散度找最优阈值 T，在阈值外的值&amp;quot;截断&amp;quot;到边界。这也是 TensorRT 采用的方法&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;对称量化-vs-非对称量化&#34;&gt;对称量化 vs 非对称量化
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0600-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.2.4 对称量化 vs 非对称量化&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.2.4：左→非对称量化（含零点偏移 Z）；右→对称量化（Z=0 特例）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;量化本质是一个&lt;strong&gt;浮点→定点&lt;/strong&gt;的仿射映射：&lt;/p&gt;
+\[
+Q = \text{round}\left(\frac{R}{S} + Z\right)
+\]&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;对称量化&lt;/strong&gt;：Z=0，range 关于零点对称，实现更简单&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;非对称量化&lt;/strong&gt;：Z≠0，能更精确地刻画不均匀分布的激活值，但计算稍复杂&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;163-感知量化训练qat&#34;&gt;16.3 感知量化训练（QAT）
+&lt;/h2&gt;&lt;h3 id=&#34;1631-qat-整体流程&#34;&gt;16.3.1 QAT 整体流程
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0602-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.3.1 QAT 感知量化训练流程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.3.1：预训练模型 → 插入伪量化节点 → 训练/微调（模拟量化噪声）→ 去掉伪量化节点 → 得到 QAT 模型。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;QAT 的核心思想是：&lt;strong&gt;在训练过程中就让模型&amp;quot;体验&amp;quot;量化带来的精度损失&lt;/strong&gt;，从而学会适应量化环境。具体流程：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;基于预训练好的模型获取计算图&lt;/li&gt;
+&lt;li&gt;对计算图的关键位置插入 FakeQuant（伪量化）节点&lt;/li&gt;
+&lt;li&gt;用训练数据进行微调，最小化量化误差&lt;/li&gt;
+&lt;li&gt;训练完成后移除 FakeQuant 节点，得到可直接部署的量化模型&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;1632-伪量化节点fakequant&#34;&gt;16.3.2 伪量化节点（FakeQuant）
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0603-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.3.2 插入伪量化算子的计算图&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.3.2：同时对输入和权重插入伪量化算子。FakeQuant 在前向时量化→反量化，模拟量化噪声；反向时通过 STE 近似传递梯度。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;FakeQuant 的插入位置一般在：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;卷积层前后&lt;/li&gt;
+&lt;li&gt;全连接层前后&lt;/li&gt;
+&lt;li&gt;激活函数（如 ReLU）前后&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;前向传播&lt;/strong&gt;：FakeQuant 将数据量化到 INT8 → 立即反量化回 FP32，模拟精度损失
+&lt;strong&gt;反向传播&lt;/strong&gt;：量化操作不可导，使用 &lt;strong&gt;STE（Straight-Through Estimator）&lt;/strong&gt; 近似——假设量化操作的梯度为 1，允许梯度&amp;quot;直通&amp;quot;&lt;/p&gt;
+&lt;h4 id=&#34;bn-折叠&#34;&gt;BN 折叠
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0605-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.3.5 BN 折叠前后对比&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.3.5：左→原始 BN 层；右→BN 折叠（将 BN 参数合并到前一层卷积的权重和偏置中）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在推理阶段，为提高效率，通常将 Batch Normalization 的参数&amp;quot;折叠&amp;quot;进前一层的权重和偏置：&lt;/p&gt;
+\[
+w_{\text{fold}} = \frac{\gamma \cdot w}{\sqrt{\text{EMA}(\sigma_B^2) + \epsilon}}
+\]&lt;p&gt;QAT 训练时需要模拟这种折叠，在折叠后的权重上应用量化。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0606-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.3.6/16.3.7 BN折叠训练 vs QAT对比&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.3.6/16.3.7：BN 折叠后的训练模型 vs BN 折叠感知量化训练模型对比。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;常见的算子折叠组合：Conv + BN、Conv + BN + ReLU、Conv + ReLU、Linear + ReLU、BN + ReLU。&lt;/p&gt;
+&lt;h3 id=&#34;1633-ptq-vs-qat&#34;&gt;16.3.3 PTQ vs QAT
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;维度&lt;/th&gt;
+          &lt;th&gt;PTQ&lt;/th&gt;
+          &lt;th&gt;QAT&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;速度&lt;/td&gt;
+          &lt;td&gt;较快&lt;/td&gt;
+          &lt;td&gt;较慢（需重训练）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;是否需要训练&lt;/td&gt;
+          &lt;td&gt;否&lt;/td&gt;
+          &lt;td&gt;是&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;对精度控制&lt;/td&gt;
+          &lt;td&gt;较少&lt;/td&gt;
+          &lt;td&gt;更多（量化参数在训练中学习）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;即插即用性&lt;/td&gt;
+          &lt;td&gt;是&lt;/td&gt;
+          &lt;td&gt;需重训练&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;164-训练后量化与部署&#34;&gt;16.4 训练后量化与部署
+&lt;/h2&gt;&lt;h3 id=&#34;1641-ptq-两种方式&#34;&gt;16.4.1 PTQ 两种方式
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;动态离线量化（PTQ Dynamic）&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;仅量化权重（FP32 → INT8/INT16）&lt;/li&gt;
+&lt;li&gt;激活值在推理时动态量化&lt;/li&gt;
+&lt;li&gt;模型体积缩小 2～4×，但加速效果有限&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;静态离线量化（PTQ Static）&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;同时量化权重和激活值&lt;/li&gt;
+&lt;li&gt;使用少量无标签校准数据，预先计算量化 Scale&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0608-09.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.4.2 静态离线量化步骤&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.4.2：PyTorch 静态离线的四步流程：加载 FP32 模型 → 融合模块 → 插入 Quant/DeQuant 观察器 → 校准计算 Scale → 转换为 INT8 模型。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;量化粒度&#34;&gt;量化粒度
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0609-10.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.4.3 量化粒度：逐张量 vs 逐通道&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.4.3：逐张量（per-tensor）使用同一个 Scale；逐通道（per-channel）每个通道独立 Scale，效果更好但计算更复杂。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;权重量化&lt;/strong&gt;：逐通道 &amp;gt; 逐张量（精度更好），但部分硬件不支持逐通道&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;激活量化&lt;/strong&gt;：一般采用逐张量（per-tensor）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;1642-kl-散度校准法&#34;&gt;16.4.2 KL 散度校准法
+&lt;/h3&gt;&lt;p&gt;KL 散度校准法是 TensorRT 采用的经典方法，核心思路是找到使量化前后分布差异最小的阈值：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;收集校准数据集（500～1000 张图片）的激活值直方图&lt;/li&gt;
+&lt;li&gt;尝试不同阈值，将 FP32 分布量化为 INT8&lt;/li&gt;
+&lt;li&gt;计算量化前后分布的 KL 散度&lt;/li&gt;
+&lt;li&gt;选择使 KL 散度最小的阈值&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;1643-端侧量化推理部署&#34;&gt;16.4.3 端侧量化推理部署
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0611-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.4.4 端侧量化推理三种结构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.4.4：三种推理结构：(a) FP32 输入→FP32 输出 (b) FP32 输入→INT8 输出 (c) INT8 输入→INT8 输出。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0611-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.4.5 INT8 卷积推理中的量化/反量化/重量化&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.4.5：INT8 卷积推理流程——数据在线量化涉及三种操作：Quantize（量化）、Dequantize（反量化）、Requantize（重量化）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;端侧推理中涉及三种关键操作：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;量化（Quantize）&lt;/strong&gt;：FP32 → INT8&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;反量化（Dequantize）&lt;/strong&gt;：INT32（乘加结果）→ FP32（供下一层使用）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;重量化（Requantize）&lt;/strong&gt;：INT32 → INT8（下一层也需要 INT8 输入）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;165-模型剪枝原理&#34;&gt;16.5 模型剪枝原理
+&lt;/h2&gt;&lt;h3 id=&#34;1651-剪枝概述&#34;&gt;16.5.1 剪枝概述
+&lt;/h3&gt;&lt;p&gt;模型剪枝的核心是&lt;strong&gt;删除网络中&amp;quot;不重要&amp;quot;的参数&lt;/strong&gt;，让模型变得更稀疏。与量化不同，剪枝直接改变模型结构，而不仅改变数值精度。&lt;/p&gt;
+&lt;h4 id=&#34;结构化-vs-非结构化&#34;&gt;结构化 vs 非结构化
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0614-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.5.1 结构化剪枝 vs 非结构化剪枝&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.5.1：从左到右，剪枝粒度递增——非结构化（单个权重）→ 滤波器级 → 通道级 → 层级。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;维度&lt;/th&gt;
+          &lt;th&gt;非结构化剪枝&lt;/th&gt;
+          &lt;th&gt;结构化剪枝&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;粒度&lt;/td&gt;
+          &lt;td&gt;逐个参数&lt;/td&gt;
+          &lt;td&gt;滤波器/通道/层&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;稀疏性&lt;/td&gt;
+          &lt;td&gt;不规则的随机稀疏&lt;/td&gt;
+          &lt;td&gt;规则的结构化稀疏&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;压缩比&lt;/td&gt;
+          &lt;td&gt;高&lt;/td&gt;
+          &lt;td&gt;受结构单元数量限制&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;硬件加速&lt;/td&gt;
+          &lt;td&gt;需要特定硬件支持&lt;/td&gt;
+          &lt;td&gt;通用硬件可直接加速&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;精度影响&lt;/td&gt;
+          &lt;td&gt;可控&lt;/td&gt;
+          &lt;td&gt;可能较大&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;一句话：非结构化剪枝压缩比高但&amp;quot;看起来乱&amp;quot;（硬件不易加速），结构化剪枝更&amp;quot;工整&amp;quot;但压缩比受限。实际部署中结构化剪枝更实用。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;1652-四种剪枝流程&#34;&gt;16.5.2 四种剪枝流程
+&lt;/h3&gt;&lt;h4 id=&#34;训练前剪枝pbt&#34;&gt;训练前剪枝（PBT）
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0615-12.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.5.2 训练前剪枝 PBT 流程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.5.2：PBT 在训练前基于随机初始化权重剪枝，然后训练稀疏网络——无预训练开销。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;训练中剪枝pdt&#34;&gt;训练中剪枝（PDT）
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0615-15.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.5.3 训练中剪枝 PDT 流程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.5.3：PDT 将训练和剪枝融合——训练完成即剪枝完成。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;三种实现策略：稀疏正则化（\(L_1\) 约束）、动态稀疏训练（剪枝+再生循环）、评分法。&lt;/p&gt;
+&lt;h4 id=&#34;训练后剪枝pat-最流行&#34;&gt;训练后剪枝（PAT）⭐ 最流行
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0616-14.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.5.4 训练后剪枝 PAT 流程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.5.4：预训练 → 剪枝 → 微调重训练 → 评估 → 迭代——这是最经典的剪枝范式。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;四步曲：预训练 → 评估重要性 → 剪枝 → 微调重训练（可迭代多次）。&lt;/p&gt;
+&lt;h4 id=&#34;运行时剪枝&#34;&gt;运行时剪枝
+&lt;/h4&gt;&lt;p&gt;根据输入数据动态决定剪哪些——同一个模型，不同输入看到不同的子网络。优势是灵活性极高，但工程实现复杂。&lt;/p&gt;
+&lt;h3 id=&#34;剪枝算法&#34;&gt;剪枝算法
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;基于权重大小的贪心法&lt;/strong&gt;：权重越接近 0 → 越不重要 → 优先剪掉。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0618-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.5.5/16.5.6 动态剪枝算法&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.5.5/16.5.6：动态剪枝允许参数恢复——通过掩模矩阵 \(T_k\) 控制连接状态，被剪掉的参数有机会&amp;quot;复活&amp;quot;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;滤波器级结构化剪枝&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0619-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.5.7 滤波器级结构化剪枝&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.5.7：删除某个滤波器 → 对应特征图被移除 → 下一层对应滤波器也被裁剪。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0619-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.5.8 连续卷积层剪枝权重计算&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.5.8：连续卷积剪枝时的两种权重求和策略——蓝色为被移除的特征图，黄色部分权重是否计入下一层求和需要权衡。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;166-知识蒸馏原理&#34;&gt;16.6 知识蒸馏原理
+&lt;/h2&gt;&lt;h3 id=&#34;1661-知识蒸馏概述&#34;&gt;16.6.1 知识蒸馏概述
+&lt;/h3&gt;&lt;p&gt;知识蒸馏是 Hinton 在 2015 年提出的思想，灵感来自&amp;quot;物理蒸馏&amp;quot;——把混合物加热，沸点低的先蒸发再冷凝，留下精华。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0621-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.6.1 知识蒸馏：教师-学生架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.6.1：大的教师模型将知识&amp;quot;蒸馏&amp;quot;传递给小的学生模型——学生用更少的参数达到接近教师的精度。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;知识蒸馏系统由三部分组成：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;知识&lt;/strong&gt;：教师模型的输出（logits）、中间层特征、参数间关系等&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;蒸馏算法&lt;/strong&gt;：如何将知识从教师传递给学生&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;师生架构&lt;/strong&gt;：教师和学生的网络结构设计与交互方式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;1662-三种知识类型&#34;&gt;16.6.2 三种知识类型
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0621-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.6.2 三种知识类型&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.6.2：(a) 基于响应的知识 (b) 基于特征的知识 (c) 基于关系的知识。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;基于响应的知识--最经典&#34;&gt;基于响应的知识 ⭐ 最经典
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0622-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.6.3 基于响应的知识蒸馏&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.6.3：让学生模型的输出 logits 模仿教师模型的输出——&amp;ldquo;老师把答案直接告诉学生&amp;rdquo;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;本质是让学生模型的输出分布（软标签）逼近教师模型，损失函数为：&lt;/p&gt;
+\[
+\mathcal{L}_{\text{ResD}}(z_t, z_s) = \mathcal{L}_R(z_t, z_s)
+\]&lt;h4 id=&#34;基于特征的知识&#34;&gt;基于特征的知识
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0623-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.6.4 基于特征的知识蒸馏&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.6.4：不仅学最终输出，还学中间层特征——&amp;ldquo;不仅抄答案，还要模仿解题过程&amp;rdquo;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;教师和学生模型的特征图形状可能不同，需要通过转换函数 \(\phi_t, \phi_s\) 对齐。&lt;/p&gt;
+&lt;h4 id=&#34;基于关系的知识&#34;&gt;基于关系的知识
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0623-09.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.6.5 基于关系的知识蒸馏&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.6.5：学习样本之间的关系——不是单个样本的输出，而是一组样本之间的相对关系（距离、相似度等）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;1663-三种蒸馏方式&#34;&gt;16.6.3 三种蒸馏方式
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch16/ai_system.pdf-0624-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图16.6.6 三种蒸馏方式：离线/在线/自蒸馏&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图16.6.6：(a) 离线蒸馏（教师先训好）(b) 在线蒸馏（师生同步训练）(c) 自蒸馏（深层指导浅层，自己教自己）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;方式&lt;/th&gt;
+          &lt;th&gt;教师模型&lt;/th&gt;
+          &lt;th&gt;学生模型&lt;/th&gt;
+          &lt;th&gt;特点&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;离线蒸馏&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;预训练好，参数冻结&lt;/td&gt;
+          &lt;td&gt;从头训练&lt;/td&gt;
+          &lt;td&gt;最常用，灵活选择教师&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;在线蒸馏&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;与学生同步训练&lt;/td&gt;
+          &lt;td&gt;同步训练&lt;/td&gt;
+          &lt;td&gt;知识融合，适合多任务场景&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;自蒸馏&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;模型的深层部分&lt;/td&gt;
+          &lt;td&gt;模型的浅层部分&lt;/td&gt;
+          &lt;td&gt;无需外部教师，自己教自己&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;1664-hinton-经典算法解读&#34;&gt;16.6.4 Hinton 经典算法解读
+&lt;/h3&gt;&lt;p&gt;Hinton 蒸馏算法的关键创新是&lt;strong&gt;温度系数 \(T\)&lt;/strong&gt;【Temperature】：&lt;/p&gt;
+\[
+q_i = \frac{\exp(z_i / T)}{\sum_j \exp(z_j / T)}
+\]&lt;ul&gt;
+&lt;li&gt;\(T = 1\)：标准 softmax&lt;/li&gt;
+&lt;li&gt;\(T &gt; 1\)：概率分布更&amp;quot;软&amp;quot;、熵更大，负标签携带的信息被放大&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Hinton 的经典例子：一张宝马的图片，被预测为&amp;quot;垃圾箱&amp;quot;的概率虽然极低（\(10^{-9}\)），但被预测为&amp;quot;胡萝卜&amp;quot;的概率更低（\(10^{-12}\)）。这微小的概率差异意味着宝马和垃圾箱&amp;quot;好歹都是人造物体&amp;quot;，这种&amp;quot;暗知识&amp;quot;正是蒸馏要提取的。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;损失函数&lt;/strong&gt;：&lt;/p&gt;
+\[
+\mathcal{L} = \alpha \cdot \mathcal{L}_{\text{soft}}(p^T, q^T) + (1-\alpha) \cdot \mathcal{L}_{\text{hard}}(y, q)
+\]&lt;ul&gt;
+&lt;li&gt;\(\mathcal{L}_{\text{soft}}\)：学生模仿教师（软目标）&lt;/li&gt;
+&lt;li&gt;\(\mathcal{L}_{\text{hard}}\)：学生逼近真实标签（硬目标）&lt;/li&gt;
+&lt;li&gt;\(\alpha\) 控制两者的权重&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;训练完成后将 \(T\) 调回 1，学生模型即可用于推理部署。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;小结与思考&#34;&gt;小结与思考
+&lt;/h2&gt;&lt;p&gt;第16章构建了模型压缩的完整知识体系，核心要点如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;量化&lt;/strong&gt;是当前落地最成熟的方案——INT8 量化几乎成为推理标配，QAT 追求精度极限，PTQ 追求&amp;quot;快&amp;quot;和&amp;quot;省&amp;quot;。理解对称/非对称量化、饱和/非饱和阈值选择是掌握量化的关键。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;剪枝&lt;/strong&gt;从&amp;quot;删参数&amp;quot;的角度做减法——结构化剪枝更适合通用硬件加速，训练后剪枝（PAT）是最主流的流程。一个好的剪枝策略需要在&amp;quot;剪什么、剪多少、何时剪&amp;quot;三者之间做权衡。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;知识蒸馏&lt;/strong&gt;是最优雅的方案——它不是简单地&amp;quot;削参数&amp;quot;，而是让大模型把学到的&amp;quot;暗知识&amp;quot;传递给小模型。Hinton 的温度系数 \(T\) 是点睛之笔。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;三种方法可以组合使用&lt;/strong&gt;：先剪枝 → 再量化 → 最后蒸馏微调，叠加使用往往能获得更好的压缩效果。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;模型压缩的本质是一场&lt;strong&gt;信息压缩的艺术&lt;/strong&gt;——如何在用更少的比特（量化）、更少的连接（剪枝）、更小的网络（蒸馏）表达相同的&amp;quot;智能&amp;quot;，是这个领域永恒的主题。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;em&gt;下一篇预告：第17章将深入模型转换——如何让不同框架训练的模型顺利流转到推理引擎，包括 ONNX 标准格式、算子映射和计算图优化。&lt;/em&gt;&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>AI系统：第1章 AI系统概述</title>
         <link>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/</link>
         <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
