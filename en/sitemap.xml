@@ -256,6 +256,8 @@
   </url><url>
     <loc>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC16%E7%AB%A0-%E6%A8%A1%E5%9E%8B%E8%BD%BB%E9%87%8F%E5%8C%96/</loc>
   </url><url>
+    <loc>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC17%E7%AB%A0-%E6%A8%A1%E5%9E%8B%E8%BD%AC%E6%8D%A2/</loc>
+  </url><url>
     <loc>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC1%E7%AB%A0-ai%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC2%E7%AB%A0-ai%E8%AE%A1%E7%AE%97%E4%BD%93%E7%B3%BB/</loc>
@@ -299,6 +301,8 @@
     <loc>https://Salmooo.github.io/tags/deep-learning/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/dsa/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/flatbuffers/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/categories/formal/</loc>
   </url><url>
@@ -368,17 +372,25 @@
   </url><url>
     <loc>https://Salmooo.github.io/tags/model-compression/</loc>
   </url><url>
+    <loc>https://Salmooo.github.io/tags/model-conversion/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/model-serialization/</loc>
+  </url><url>
     <loc>https://Salmooo.github.io/tags/npu/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/nvidia/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/nvlink/</loc>
   </url><url>
+    <loc>https://Salmooo.github.io/tags/onnx/</loc>
+  </url><url>
     <loc>https://Salmooo.github.io/tags/operator/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/operator-fusion/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/parallel-computing/</loc>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/protobuf/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/tags/pruning/</loc>
   </url><url>

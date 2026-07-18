@@ -256,6 +256,14 @@
         <description></description>
         </item>
         <item>
+        <title>FlatBuffers</title>
+        <link>https://Salmooo.github.io/tags/flatbuffers/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/flatbuffers/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>Formal Verification</title>
         <link>https://Salmooo.github.io/tags/formal-verification/</link>
         <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -432,6 +440,22 @@
         <description></description>
         </item>
         <item>
+        <title>Model Conversion</title>
+        <link>https://Salmooo.github.io/tags/model-conversion/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/model-conversion/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Model Serialization</title>
+        <link>https://Salmooo.github.io/tags/model-serialization/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/model-serialization/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>NPU</title>
         <link>https://Salmooo.github.io/tags/npu/</link>
         <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -456,6 +480,14 @@
         <description></description>
         </item>
         <item>
+        <title>ONNX</title>
+        <link>https://Salmooo.github.io/tags/onnx/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/onnx/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>Operator</title>
         <link>https://Salmooo.github.io/tags/operator/</link>
         <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -477,6 +509,14 @@
         <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
         
         <guid>https://Salmooo.github.io/tags/parallel-computing/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Protobuf</title>
+        <link>https://Salmooo.github.io/tags/protobuf/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/protobuf/</guid>
         <description></description>
         </item>
         <item>
