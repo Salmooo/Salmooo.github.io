@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="IP 核与高速接口在 FPGA 原型中的处理：五种 IP 交付格式的适配策略、软 IP 的三种替换路径（实例化/推断/合成算子）、外设 IP 的三种使用模式、速率适配器的设计方法、外部硬 IP 的集成考量、以及加密 FPGA 位流的 AES-256 安全机制。">
+<title>第10章: IP and High Speed Interfaces</title>
+
+<link rel='canonical' href='http://localhost:1313/p/%E7%AC%AC10%E7%AB%A0-ip-and-high-speed-interfaces/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="第10章: IP and High Speed Interfaces">
+<meta property='og:description' content="IP 核与高速接口在 FPGA 原型中的处理：五种 IP 交付格式的适配策略、软 IP 的三种替换路径（实例化/推断/合成算子）、外设 IP 的三种使用模式、速率适配器的设计方法、外部硬 IP 的集成考量、以及加密 FPGA 位流的 AES-256 安全机制。">
+<meta property='og:url' content='http://localhost:1313/p/%E7%AC%AC10%E7%AB%A0-ip-and-high-speed-interfaces/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='FPGA' /><meta property='article:tag' content='Prototyping' /><meta property='article:tag' content='IP Core' /><meta property='article:tag' content='Soft IP' /><meta property='article:tag' content='Hard IP' /><meta property='article:tag' content='DesignWare' /><meta property='article:tag' content='Peripheral IP' /><meta property='article:tag' content='Rate Adapter' /><meta property='article:tag' content='Test Chip' /><meta property='article:tag' content='PCIe' /><meta property='article:tag' content='SATA' /><meta property='article:published_time' content='2026-06-06T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-06-06T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="第10章: IP and High Speed Interfaces">
+<meta name="twitter:description" content="IP 核与高速接口在 FPGA 原型中的处理：五种 IP 交付格式的适配策略、软 IP 的三种替换路径（实例化/推断/合成算子）、外设 IP 的三种使用模式、速率适配器的设计方法、外部硬 IP 的集成考量、以及加密 FPGA 位流的 AES-256 安全机制。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="http://localhost:1313/" selected>English</option>
+                                
+                                    <option value="http://localhost:1313/zh-cn/" >中文</option>
+                                
+                                    <option value="http://localhost:1313/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#章节概览">章节概览</a></li>
+    <li><a href="#核心知识点">核心知识点</a></li>
+    <li><a href="#详细笔记">详细笔记</a>
+      <ol>
+        <li><a href="#101-ip-与原型验证">10.1 IP 与原型验证</a></li>
+        <li><a href="#102-ip-的多种形式">10.2 IP 的多种形式</a>
+          <ol>
+            <li><a href="#1021-rtl-源码-ip">10.2.1 RTL 源码 IP</a></li>
+            <li><a href="#1022-rtl-不可得时">10.2.2 RTL 不可得时</a></li>
+            <li><a href="#1023-加密源码">10.2.3 加密源码</a></li>
+            <li><a href="#1024-加密-fpga-网表">10.2.4 加密 FPGA 网表</a></li>
+            <li><a href="#1025-加密-fpga-位流最安全的fpga-ip交付方式">10.2.5 加密 FPGA 位流（最安全的FPGA IP交付方式）</a></li>
+            <li><a href="#1026-测试芯片">10.2.6 测试芯片</a></li>
+          </ol>
+        </li>
+        <li><a href="#103-软-ip以-designware-为例">10.3 软 IP（以 DesignWare 为例）</a>
+          <ol>
+            <li><a href="#soc-设计中使用软-ip-的三种方式">SoC 设计中使用软 IP 的三种方式</a></li>
+            <li><a href="#1031-替换实例化的软-ip">10.3.1 替换实例化的软 IP</a></li>
+            <li><a href="#1032-替换推断的软-ip">10.3.2 替换推断的软 IP</a></li>
+            <li><a href="#1033-替换合成软-ip">10.3.3 替换合成软 IP</a></li>
+          </ol>
+        </li>
+        <li><a href="#104-外设-ip">10.4 外设 IP</a>
+          <ol>
+            <li><a href="#三种使用模式table-28">三种使用模式（Table 28）</a></li>
+            <li><a href="#1041-模式一验证-ip-本身">10.4.1 模式一：验证 IP 本身</a></li>
+            <li><a href="#heading"></a></li>
+            <li><a href="#1043-模式三为软件验证原型化-ip">10.4.3 模式三：为软件验证原型化 IP</a></li>
+          </ol>
+        </li>
+        <li><a href="#105-在原型中使用外部硬-ip">10.5 在原型中使用外部硬 IP</a></li>
+        <li><a href="#106-用-fpga-ip-替换缺失的结构">10.6 用 FPGA IP 替换缺失的结构</a>
+          <ol>
+            <li><a href="#1061-外设-ip-实例pcie-to-sata-bridge">10.6.1 外设 IP 实例：PCIe-to-SATA Bridge</a></li>
+            <li><a href="#1062-速度问题最低速度限制">10.6.2 速度问题：最低速度限制</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#关键图示解读">关键图示解读</a></li>
+    <li><a href="#个人总结">个人总结</a></li>
+    <li><a href="#实践思考">实践思考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/fpga%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" >
+                FPGA学习笔记
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E7%AC%AC10%E7%AB%A0-ip-and-high-speed-interfaces/">第10章: IP and High Speed Interfaces</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jun 06, 2026</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    5 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="章节概览">章节概览
+</h2><p>现代 SoC 中 IP 块占比已超过 50%（见第1章）。第10章专门讨论<strong>如何在 FPGA 原型中处理这些来自&quot;外部&quot;的设计块</strong>——无论它们是以 RTL 源码、加密网表、加密位流、还是物理测试芯片的形式交付。</p>
+<p>章节结构从抽象到具体：IP 交付格式的五种分类 → 每种格式的 FPGA 适配策略 → 软 IP（DesignWare 为例）的三种替换路径 → 外设 IP 的三种使用模式 → 速率适配器的设计 → 外部硬 IP 的集成考量 → FPGA 原生 IP 作为替代的三种包含方式。</p>
+<p>一个贯穿始终的主题：<strong>IP 在原型中的目的不是验证 IP 本身（那应该由 IP 供应商保证），而是不在设计中留下空洞——让硬件和软件的其余部分能在 IP 存在的条件下得到验证</strong>。</p>
+<hr>
+<h2 id="核心知识点">核心知识点
+</h2><ul>
+<li><strong>五种 IP 交付格式</strong>（Table 25）：RTL 源码 / 加密源码 / 软 IP（中间形式）/ 网表 / 物理 IP（硬 IP，已由晶圆厂完成版图）</li>
+<li><strong>非 RTL 交付格式的优劣对比</strong>（Table 26）：模型（仿真好但不可用于原型）&lt; 加密 FPGA 网表（灵活性低）&lt; 加密 FPGA 位流（AES-256，非常安全）&lt; 测试芯片（最高性能、最低灵活性）</li>
+<li><strong>ARM SMM（Software Macro Model）</strong>：加密 FPGA 映像的典型代表——故意省略 MMCM 等时钟基础设施 → 允许低于最低锁定频率的慢速时钟 + 单步调试</li>
+<li><strong>AES-256 双密钥方案</strong>：电池后备密钥（最安全，断电即丢失，无已知提取方法）vs 多晶 eFUSE 密钥（安全性较低，破坏性拆解可读——但有 3 倍冗余位混淆）</li>
+<li><strong>软 IP 三种包含方式</strong>：实例化（最直接）→ 推断（通过函数调用或运算符）→ 合成算子（综合工具将语言运算符映射到优化模块）</li>
+<li><strong>外设 IP 三种使用模式</strong>（Table 28）：验证 IP 自身（最高速度+周期精确）→ IP 作为 SoC 的组成部分（缩放速度+周期精确）→ 软件验证（&ldquo;足够快&rdquo;+功能等价即可）</li>
+<li><strong>速率适配器的两种方案</strong>：FIFO 吸收全速突发数据→降速转发；移位寄存器 FIFO 缓冲突发→全部接收后再降速传出。连续数据流会溢出，只适用于突发数据</li>
+<li><strong>FPGA IP 包含的三种方式</strong>：Plain Text Netlist（综合读取+优化+含入）→ White Box（仅读取时序信息，不优化逻辑）→ Black Box（占位符，P&amp;R 阶段才填入预生成的网表）</li>
+<li><strong>PLL/MMCM 的最低频率限制是硬性约束</strong>：试图在低于规范的最低频率下运行&quot;即使在实验室似乎能工作也很冒险&quot;</li>
+</ul>
+<hr>
+<h2 id="详细笔记">详细笔记
+</h2><h3 id="101-ip-与原型验证">10.1 IP 与原型验证
+</h3><p><strong>本书对 IP 的定义</strong>：不是项目内部产生的，而是从&quot;外部&quot;引入的设计块。仅讨论数字 IP——模拟或混合信号 IP 显然不能在 FPGA 中工作。</p>
+<p><strong>原型验证中 IP 的特殊角色</strong>：</p>
+<ul>
+<li>IP 组件是预测试过的→应该按规范工作 → 原型任务简化</li>
+<li>但 SoC 设计很可能是<strong>特定 IP 组合首次被放在同一平台中</strong></li>
+<li><strong>IP 供应商应该愿意并能够支持其 IP 在 FPGA 原型环境中的建模</strong> → SoC 团队在选择 IP 时就应该询问供应商&quot;你们对原型团队有什么支持？&quot;</li>
+</ul>
+<h3 id="102-ip-的多种形式">10.2 IP 的多种形式
+</h3><p><strong>Table 25：五种交付格式</strong></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>格式</th>
+          <th>描述</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>RTL 源码</strong></td>
+          <td>完整的 Verilog/VHDL，供应商授权或开源</td>
+      </tr>
+      <tr>
+          <td><strong>加密源码</strong></td>
+          <td>RTL 受保护，需显式或工具流内自动解密</td>
+      </tr>
+      <tr>
+          <td><strong>软 IP</strong></td>
+          <td>中间形式交付（可能加密），需要后端处理</td>
+      </tr>
+      <tr>
+          <td><strong>网表</strong></td>
+          <td>预综合的 SoC 库单元或通用门级元素（如 GTECH）</td>
+      </tr>
+      <tr>
+          <td><strong>物理 IP（硬 IP）</strong></td>
+          <td>晶圆厂预布局；原型中以模型或测试芯片呈现</td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="1021-rtl-源码-ip">10.2.1 RTL 源码 IP
+</h4><ul>
+<li>与 SoC 设计中其他 RTL 没有本质区别——但<strong>许可证可能禁止修改 RTL</strong></li>
+<li>供应商可能已有 FPGA-ready 版本（可能需要额外许可证和费用）</li>
+<li>即使功能完全等价，为前沿 SoC 工艺优化过的 RTL <strong>在最快 FPGA 上也会慢得多</strong></li>
+</ul>
+<h4 id="1022-rtl-不可得时">10.2.2 RTL 不可得时
+</h4><p><strong>IP 污染</strong>：在公司内部或向第三方开发者大范围分发 RTL→意外（甚至蓄意）修改→许可和支持纠纷。</p>
+<p><strong>IP 防盗</strong>：无需解释。</p>
+<p><strong>四种替代 RTL 的交付格式对比</strong>（Table 26）：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>格式</th>
+          <th>优势</th>
+          <th>局限</th>
+          <th>安全性</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>模型</strong></td>
+          <td>仿真极好</td>
+          <td>性能限于仿真器；不能用于原型</td>
+          <td>&ldquo;安全&rdquo;——因为不是真实 IP</td>
+      </tr>
+      <tr>
+          <td><strong>加密 FPGA 网表</strong></td>
+          <td>比 RTL 难逆向</td>
+          <td>仿真无可见性</td>
+          <td>仅与加密一样安全</td>
+      </tr>
+      <tr>
+          <td><strong>加密 FPGA 位流</strong></td>
+          <td>比仿真快</td>
+          <td>灵活性低、可能需妥协</td>
+          <td><strong>非常安全</strong></td>
+      </tr>
+      <tr>
+          <td><strong>测试芯片</strong></td>
+          <td><strong>最高性能</strong></td>
+          <td><strong>最低灵活性</strong>；开发周期长</td>
+          <td><strong>非常安全</strong></td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>关于模型的关键说明</strong>：模型不是用来综合的——它是用来在失去 RTL/测试芯片可见性时恢复部分可见性的。<strong>一个好的 IP 供应商应该随 IP 提供丰富的补充模型支持</strong>。CPU IP 还提供指令集仿真器（ISS）——对周期精度几乎无知但极快——最适合早期软件开发（第13章讨论 SCE-MI 接口将 ISS 模型与真实 RTL 桥接）。</p>
+<h4 id="1023-加密源码">10.2.3 加密源码
+</h4><ul>
+<li>如果加密仅用于安全运输 → 解密后拥有 RTL → 完全可按正常流程原型化</li>
+<li>如果 RTL 在工具流中始终加密（&ldquo;On-the-Fly&quot;解密）→ 需要每个工具内置支持解密和密钥</li>
+<li>两个常见例子：Synopsys 的 synenc 加密流、Xilinx 的加密 .ngc 文件</li>
+<li><strong>行业将最终走向 IEEE 标准的 IP 加密和封装</strong></li>
+</ul>
+<h4 id="1024-加密-fpga-网表">10.2.4 加密 FPGA 网表
+</h4><ul>
+<li>交付给公司纳入自己的 FPGA 设计，但安全级别低——因为必然在流程中被解密</li>
+<li>最终映像文件会再次加密，确保只能在目标 FPGA 硬件中以确定性方式使用</li>
+<li>部分 IP 有限时使用限制 + 需要特定下载/调试硬件</li>
+</ul>
+<h4 id="1025-加密-fpga-位流最安全的fpga-ip交付方式">10.2.5 加密 FPGA 位流（最安全的FPGA IP交付方式）
+</h4><p><strong>双密钥方案</strong>：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>方案</th>
+          <th>机制</th>
+          <th>安全性</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>电池后备密钥</strong></td>
+          <td>密钥存储在电池供电的 key memory</td>
+          <td><strong>最高</strong>——无已知方法提取；断电即永久丢失</td>
+      </tr>
+      <tr>
+          <td><strong>多晶 eFUSE</strong></td>
+          <td>密钥熔断到物理熔丝</td>
+          <td>较低——破坏性拆解可读，但有 3× 冗余位混淆</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>工作方式</strong>：FPGA 内部完成全部解密，只有加密的 FPGA 映像在外部可见——<strong>供应商交付高价值 IP 的极佳方式</strong>。</p>
+<p><strong>ARM SMM（Software Macro Model）的关键特性</strong>：</p>
+<ul>
+<li>FPGA 映像复制了 IP 块设计的集成（顶层）级别（图123）</li>
+<li><strong>故意不包含 MMCM 等时钟基础设施</strong> → 时钟速度可低于通常的最低锁定频率 → 支持时钟停止和单步调试</li>
+<li>用户需自行为 FPGA 内部逻辑的不同时钟域提供时钟和引脚复用</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0319-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 123: Top-level of IP used as encrypted FPGA image (source: ARM Ltd.)"
+	
+	
+></p>
+<h4 id="1026-测试芯片">10.2.6 测试芯片
+</h4><p><strong>最安全但也最昂贵的交付方式</strong>。通常仅适用于广泛使用的高价值 IP（如 ARM CPU 核）。</p>
+<p><strong>测试芯片的妥协清单</strong>：</p>
+<ul>
+<li>预定义接口和配置选项 → 限制使用方式</li>
+<li>存储映射或中断结构可能与最终 SoC 使用不匹配</li>
+<li>选择性遵循周期精度</li>
+<li>FPGA 和测试芯片间使用异步桥接 → 引入延迟</li>
+<li>信号复用以适应连接器引脚限制</li>
+<li>功能限制（禁用测试模式、减少中断、片上合并总线）</li>
+</ul>
+<blockquote>
+<p>软件或系统设置必须<strong>适应测试芯片的能力，而非相反</strong>。</p>
+</blockquote>
+<p><strong>测试芯片的最佳用途</strong>：支持 OS 开发、基准测试、通过 AXI 总线连接的扩展 IP 块开发（以 ARM 为例）。</p>
+<p><strong>宽总线的挑战</strong>：SoC 和测试芯片间需引脚复用 → 引入 IO pad 和板级延迟 → 降低系统速度 → 可用高速串行信令 + HSTDM 缓解（第8章）。</p>
+<hr>
+<h3 id="103-软-ip以-designware-为例">10.3 软 IP（以 DesignWare 为例）
+</h3><p><strong>软 IP 定义</strong>：物理实现由终端用户决定的任何形式的 IP。包括 RTL、网表、二进制形式、预编译中间库。通常用于性能和面积目标相对容易实现的较低价值 IP。</p>
+<h4 id="soc-设计中使用软-ip-的三种方式">SoC 设计中使用软 IP 的三种方式
+</h4><p><strong>一：实例化（Instantiation）</strong>（图127）</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-verilog" data-lang="verilog"><span class="line"><span class="cl"><span class="n">DW02_mac</span> <span class="p">#(</span><span class="n">A_width</span><span class="p">,</span> <span class="n">B_width</span><span class="p">)</span> <span class="n">U1</span> <span class="p">(...)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>→ FPGA 合成中的黑盒 → 需&quot;填充&quot;黑盒</p>
+<p><strong>二：推断（Inference）</strong>（图128）</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-verilog" data-lang="verilog"><span class="line"><span class="cl"><span class="no">`include</span> <span class="s">&#34;DW02_mac_function.inc&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="k">assign</span> <span class="n">MAC_func</span> <span class="o">=</span> <span class="p">(</span><span class="n">func_TC</span><span class="p">)</span> <span class="o">?</span> <span class="n">DWF_mac_tc</span><span class="p">(...)</span> <span class="o">:</span> <span class="n">DWF_mac_uns</span><span class="p">(...);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>→ 综合工具的搜索路径指向等效的功能定义</p>
+<p><strong>三：合成算子（Synthetic Operators）</strong>（Table 27）</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-verilog" data-lang="verilog"><span class="line"><span class="cl"><span class="n">c</span> <span class="o">&lt;=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>→ 综合工具识别 <code>*</code> → 绑定到合成算子 → 执行算术和资源共享优化 → 映射到 FPGA 的 DSP 资源</p>
+<blockquote>
+<p>&ldquo;因为这种自动化和简单性，SoC 团队应<strong>尽可能使用合成算子</strong>而非直接实例化软 IP。&rdquo;</p>
+</blockquote>
+<h4 id="1031-替换实例化的软-ip">10.3.1 替换实例化的软 IP
+</h4><p><strong>最佳实践</strong>：</p>
+<ol>
+<li>选择 IP 时就确保有<strong>已验证的 FPGA 等价物</strong></li>
+<li>在原始设计中用 `ifdef 在两种实例化间分支</li>
+<li><strong>更理想的做法</strong>：单一实例化同时服务两个目标——工具在不同流程中提供适当内容 → SoC 设计师无需做任何特殊安排</li>
+</ol>
+<p><strong>Synopsys 的内部实践</strong>：在班加罗尔，曾将所有 DesignWare 构建块逐一分析并创建功能等价的 RTL——任何正确实例化的 DesignWare 元素都会被自动解释（而非黑盒）。</p>
+<p><strong>最新进展</strong>：Synopsys 修改了 FPGA 合成工具允许原生使用 DesignWare 块；DesignWare 开发者本身也对部分块做了 FPGA 优化。</p>
+<h4 id="1032-替换推断的软-ip">10.3.2 替换推断的软 IP
+</h4><p>与实例化的类似，但问题不是&quot;填充黑盒&quot;而是<strong>让 FPGA 工具从给定的 RTL 中推断出与原始 SoC 综合相同的功能</strong>。</p>
+<p>关键操作：将 SoC 综合工具（Design Compiler）的搜索路径中指向的 DesignWare 功能集，在 FPGA 工具中替换为等效路径或本地 include 文件。</p>
+<h4 id="1033-替换合成软-ip">10.3.3 替换合成软 IP
+</h4><p><strong>FPGA 原型中最简单的场景</strong>：</p>
+<p>SoC 综合中 <code>a * b</code> 通过 pragma <code>map_to_operator</code> 绑定到 <code>dw02_mult</code> → FPGA 综合中相同的 <code>*</code> 被自然地推断为乘法器 → 自动映射到 FPGA 的 DSP48 专用资源。</p>
+<p><strong>Table 27</strong>：列出了 Design Compiler 标准合成库中映射到合成算子的 HDL 运算符（<code>+</code>、<code>-</code>、<code>*</code>、<code>&lt;</code>、<code>&gt;</code>、<code>&lt;=</code>、<code>&gt;=</code>、<code>==</code> 等）。</p>
+<hr>
+<h3 id="104-外设-ip">10.4 外设 IP
+</h3><h4 id="三种使用模式table-28">三种使用模式（Table 28）
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>模式</th>
+          <th>速度需求</th>
+          <th>精度需求</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>验证 IP 本身</strong></td>
+          <td><strong>最高速度</strong>（达最终芯片速度）</td>
+          <td><strong>周期精确</strong></td>
+      </tr>
+      <tr>
+          <td><strong>IP 作为 SoC 组成部分</strong></td>
+          <td>缩放速度</td>
+          <td>周期精确</td>
+      </tr>
+      <tr>
+          <td><strong>软件验证</strong></td>
+          <td>&ldquo;足够快&rdquo;</td>
+          <td><strong>功能等价</strong></td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="1041-模式一验证-ip-本身">10.4.1 模式一：验证 IP 本身
+</h4><p>本质上是<strong>小型 SoC 原型项目</strong>的子集——许多 IP 设计能放入 <strong>单一 FPGA</strong>（避免了分区！）。如第2章介绍的 Synopsys 波尔图 IP 团队的 HDMI 原型（图130）：FPGA 内一部分是待验证 IP，另一部分是从 Xilinx IP 库中组装出的验证环境基础设施。</p>
+<h4 id="heading">
+</h4><p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0330-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 130: FPGA IP augmenting a test rig for SoC IP"
+	
+	
+>
+10.4.2 模式二：IP 作为更大 SoC 的组成部分</p>
+<p>系统整体速度很可能受限于 SoC RTL 映射到 FPGA 的性能 → 挑战变为<strong>将外设 IP 的速度与 SoC 核心的速度进行缩放匹配</strong>。</p>
+<h5 id="10421-核心与外设-io-之间的速率适配">10.4.2.1 核心与外设 IO 之间的速率适配
+</h5><p><strong>问题</strong>：外设数据到达速度超过 FPGA 能处理的速度。</p>
+<p><strong>方案一：FIFO 作为速率适配器</strong></p>
+<p>工作方式：以全速（或标准允许的最低速率）吸收外部刺激 → 仅处理子集 → 以降速时钟驱动到 FPGA 内部。</p>
+<p><strong>原则</strong>：如果原型跑 SoC 真实速度的 1/3 → 应只接收 1/3 的刺激量。</p>
+<p><strong>方案二：移位寄存器 FIFO 缓冲</strong>（图131）</p>
+<p>工作方式</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0332-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 131: Rate adapter concept for 10x USB reduction"
+	
+	
+>
+：</p>
+<ol>
+<li>预测突发中会到达的最大数据量</li>
+<li>以全速率接收全量数据到移位寄存器 FIFO</li>
+<li>全部接收后以降速传给 FPGA 原型</li>
+</ol>
+<p><strong>相同方法用于反向</strong>——从 FPGA 降速 → 加速到外部接口。</p>
+<p><strong>速率适配的局限</strong>：</p>
+<ul>
+<li>对规则的突发数据包效果极好</li>
+<li>能处理深数据（只要有足够 FIFO 存储器）</li>
+<li><strong>连续数据流会溢出</strong> → 数据包丢失或需在原型准备好前丢弃</li>
+<li><strong>但在许多设计中这种方法极其成功</strong></li>
+</ul>
+<p><strong>图131 的特定例子</strong>：两个外部 USB 2.0 通道 125MHz → 异步 FIFO 缓冲 → &ldquo;嗅探器&quot;电路识别完整数据包 → 以 1/10 速度读入原型。</p>
+<blockquote>
+<p>&ldquo;考虑内外数据流间缓冲的最佳时机是<strong>SoC 最初被设计时</strong>。让原型团队在早期参与 → 速率缩放设计按时完成 → 软件团队预判必要的缩放代码变更。&rdquo;</p>
+</blockquote>
+<h4 id="1043-模式三为软件验证原型化-ip">10.4.3 模式三：为软件验证原型化 IP
+</h4><p>软件不需要周期精度，只要 <strong>&ldquo;足够快&rdquo;</strong> + <strong>功能近似</strong> + <strong>通道同步</strong> 即可。</p>
+<p>极端情况：<strong>完全替换</strong> SoC IP 为 FPGA 版本。甚至可以替换为 transactor（事务处理器）——执行相同功能的更高层抽象（第13章将详细讨论）。</p>
+<hr>
+<h3 id="105-在原型中使用外部硬-ip">10.5 在原型中使用外部硬 IP
+</h3><p><strong>最常见的硬 IP 块</strong>：CPU 核心 + 标准总线接口 PHY（Ethernet、USB、PCI/PCI-X/PCIe、DDR2）。</p>
+<p><strong>使用外部硬 IP 的副产品优势</strong>：<strong>释放 FPGA 资源</strong>——大型 IP 块（DSP、处理器子系统）很容易消耗整颗甚至多颗 FPGA。如果 IP 需要在多 FPGA 间拆分，成本 + 性能代价可能太高（尤其没有 IP 内部可见性时）→ 此时使用外部测试芯片是最优选择，即使接受其局限性。</p>
+<hr>
+<h3 id="106-用-fpga-ip-替换缺失的结构">10.6 用 FPGA IP 替换缺失的结构
+</h3><p>FPGA 供应商（如 Xilinx）提供广泛的 IP 核——<strong>但不能在 SoC 中使用</strong>（Xilinx 仅许可在其自家器件中使用）。</p>
+<p><strong>FPGA IP 的三种包含方式</strong>：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>方式</th>
+          <th>综合行为</th>
+          <th>优化</th>
+          <th>适用场景</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Plain Text Netlist</strong></td>
+          <td>读取核的 FPGA 级网表 → 根据需要优化 → 包含进输出网表 + 传递时序约束</td>
+          <td><strong>完全优化</strong></td>
+          <td>非加密 IP</td>
+      </tr>
+      <tr>
+          <td><strong>White Box</strong></td>
+          <td>仅读取核的边界时序信息 → <strong>不优化核的逻辑</strong></td>
+          <td>仅边界信息</td>
+          <td>安全的加密 IP</td>
+      </tr>
+      <tr>
+          <td><strong>Black Box</strong></td>
+          <td>完全忽略核的网表 → 仅留&quot;占位符&rdquo; → <strong>P&amp;R 阶段才用预生成网表填充</strong></td>
+          <td>完全不优化</td>
+          <td>最安全的加密 IP</td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="1061-外设-ip-实例pcie-to-sata-bridge">10.6.1 外设 IP 实例：PCIe-to-SATA Bridge
+</h4><p>Synopsys 都柏林 IP 实验室在 HAPS-51 + 单颗 Virtex-5 LX330 上实现了<strong>完整的 PCIe 和 SATA 接口以及桥接逻辑</strong>。</p>
+<p>FPGA 特定修改：<code>pipe2v5gtp</code> 和 <code>sata2v5gtp</code>——将标准 Pipe 接口（PCIe PHY 与逻辑间的中间接口）适配到 Virtex-5 GTX 收发器物理层。</p>
+<blockquote>
+<p>&ldquo;这是对现代 FPGA 器件规模的又一证明。&rdquo;</p>
+</blockquote>
+<h4 id="1062-速度问题最低速度限制">10.6.2 速度问题：最低速度限制
+</h4><p><strong>PLL/MMCM 的最低工作频率是硬性约束</strong>：</p>
+<blockquote>
+<p>&ldquo;在实验室里低于规范运行似乎能工作——<strong>但这是危险的</strong>。&rdquo;</p>
+</blockquote>
+<p>SoC PLL 和 FPGA PLL 可能有不同的抖动、占空比、频率、漂移和精度 → 必须确认 MMCM 或其他时钟电路的精度足够接近 SoC 基础设施以产生有意义的结果。</p>
+<hr>
+<h2 id="关键图示解读">关键图示解读
+</h2><p><strong>Table 25：五种 IP 交付格式</strong></p>
+<ul>
+<li>从&quot;最容易适配&quot;到&quot;最安全但最不灵活&quot;的谱系：RTL 源码 → 加密源码 → 软 IP → 网表 → 物理 IP</li>
+</ul>
+<p><strong>Table 26：非 RTL 交付格式的优劣对比</strong></p>
+<ul>
+<li>在&quot;可用性&quot;和&quot;安全性&quot;之间找到一个可在原型中使用的格式是选 IP 时就要考虑的问题</li>
+</ul>
+<p><strong>图123：ARM SMM 顶层接口</strong></p>
+<ul>
+<li>加密 FPGA 映像暴露的顶层接口 = 硅供应商提供硬化宏时暴露的相同接口——SMM 模拟了硬 IP 的用户体验</li>
+</ul>
+<p><strong>图124：ARM 测试芯片</strong></p>
+<ul>
+<li>展示了 SMC（启动存储）+ DMC（运行存储）的完整测试芯片架构——比 SMM 多了完整外部存储接口但也多了限制</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0321-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 124: Top-level of test chip equivalent to Figure 123 (source: ARM Ltd.)"
+	
+	
+></p>
+<p><strong>图130：HDMI IP 验证环境</strong></p>
+<ul>
+<li>FPGA 一半是待验证 IP，另一半是从 Xilinx IP 库组装的验证环境——IP 验证自身使用模式的经典架构</li>
+</ul>
+<p><strong>图131：速率适配器概念图（10× USB 降速）</strong></p>
+<ul>
+<li>两个异步 FIFO + 嗅探器 = 将 125MHz 的 USB 数据降到内部逻辑可处理的 1/10 速度</li>
+<li>全书中与外设接口的最实用架构</li>
+</ul>
+<p><strong>Table 28：外设 IP 三种使用模式的需求差异</strong></p>
+<ul>
+<li>&ldquo;验证 IP 自身&rdquo; 需要最高速度+周期精确；&ldquo;软件验证&rdquo; 只需要&quot;足够快&rdquo;+功能等价——不要为软件验证追求不必要的周期精度</li>
+</ul>
+<hr>
+<h2 id="个人总结">个人总结
+</h2><p>第10章是一章关于&quot;如何应对&rsquo;不知道里面是什么&rsquo;的设计块&quot;的操作指南。它与第7章（处理你知道里面是什么的设计块）形成互补——第7章教你修改 RTL，第10章教你处理没有 RTL 的情况。</p>
+<p>最有价值的观点是 <strong>&ldquo;IP 存在的目的是不在设计中留洞&rdquo;</strong>。原型团队不需要验证 IP——那是 IP 供应商的职责——但原型团队需要 IP 以某种形式存在，以便周围的硬件和软件能在完整系统上下文中得到验证。这个视角转移意味着我们在选择 IP 替代方案时，功能等价性优先于性能，可用性优先于完美匹配。</p>
+<p><strong>速率适配器是连接&quot;高速外设世界&quot;和&quot;降速原型内部世界&quot;的桥梁</strong>。它并非 SoC 设计的一部分，而是纯粹的原型工程创造——这正是本章标题中&quot;额外工程&quot;的含义。这种工程的价值需要架构预判（第9章的 DFP 原则）——如果在 SoC 架构设计阶段就考虑速率适配，可以避免后期被迫在缺乏缓冲机制的情况下重新设计接口。</p>
+<p><strong>加密位流 + AES-256 是 IP 供应商和原型工程之间建立信任的技术基础</strong>——供应商放心交付高价值 IP，原型团队获得接近完整功能的 FPGA 实现。</p>
+<hr>
+<h2 id="实践思考">实践思考
+</h2><ul>
+<li><strong>&ldquo;选择 IP 时就应该问供应商对原型有什么支持&rdquo;</strong>——这应该成为 SoC 项目 IP 选型决策的一个正式评估维度。一个有 FPGA 版本或测试芯片的 IP 比&quot;仅 RTL&quot;的 IP 能为项目节省数周甚至数月的原型移植时间</li>
+<li><strong>合成算子（Synthetic Operator）是最优的软 IP 包含方式</strong>——<code>c &lt;= a * b</code> 自动映射到 FPGA DSP48，而不需要在 RTL 中做任何 IP 实例化。在产品编码标准中应该鼓励使用语言内置运算符而非直接例化 IP 模块</li>
+<li><strong>速率适配器的 FIFO 深度计算</strong>：最大突发长度 × (接口速率/原型速率) × 数据宽度——如果这个值超出可用 BlockRAM，则需要降速、降突发、或接受数据丢失</li>
+<li><strong>White Box 是加密 IP 的最佳折中</strong>——既保护了 IP 内部逻辑的机密性，又给综合工具足够的边界时序信息来优化周围逻辑</li>
+<li><strong>PLL 最低频率约束可能导致原型无法做慢速单步调试</strong>——这就是 ARM SMM 故意省略 MMCM 的原因。在自己的原型中如果也需要单步调试，可以采用类似架构</li>
+<li><strong>测试芯片和 FPGA 之间的宽总线复用几乎总是必要的</strong>——在规划平台互联时就要考虑为测试芯片预留足够的 LVDS 差分对或高速串行通道</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0323-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 126: Example of soft IP: datasheet of a MAC from a DesignWare library"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0327-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 129: Logic automatically included for DW02_MAC functional inference"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0328-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Table 27: Synthetic soft IP mapped to operators"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0335-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 132: Top-level implementation of PCIe-to-SATA bridge design"
+	
+	
+></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/fpga/">FPGA</a>
+        
+            <a href="/tags/prototyping/">Prototyping</a>
+        
+            <a href="/tags/ip-core/">IP Core</a>
+        
+            <a href="/tags/soft-ip/">Soft IP</a>
+        
+            <a href="/tags/hard-ip/">Hard IP</a>
+        
+            <a href="/tags/designware/">DesignWare</a>
+        
+            <a href="/tags/peripheral-ip/">Peripheral IP</a>
+        
+            <a href="/tags/rate-adapter/">Rate Adapter</a>
+        
+            <a href="/tags/test-chip/">Test Chip</a>
+        
+            <a href="/tags/pcie/">PCIe</a>
+        
+            <a href="/tags/sata/">SATA</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC12%E7%AB%A0-breaking-out-of-the-lab-the-prototype-in-the-field/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第12章: Breaking Out of the Lab — The Prototype in the Field</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC13%E7%AB%A0-prototyping--verification-the-best-of-both-worlds/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第13章: Prototyping &#43; Verification = The Best of Both Worlds</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC14%E7%AB%A0-the-future-of-prototyping/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第14章: The Future of Prototyping</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC15%E7%AB%A0-conclusions-%E5%85%A8%E4%B9%A6%E6%80%BB%E7%BB%93%E4%B8%8E%E6%A0%B8%E5%BF%83%E8%A6%81%E7%82%B9%E5%9B%9E%E9%A1%BE/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第15章: Conclusions — 全书总结与核心要点回顾</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC11%E7%AB%A0-bring-up-and-debug-the-prototype-in-the-lab/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第11章: Bring Up and Debug — The Prototype in the Lab</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.524358946663b6a5f95fbef001d1c97000115552b473e36faad787d7b96c8241.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

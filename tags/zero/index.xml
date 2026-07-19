@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>ZeRO on SalmoneX Blog</title>
+        <link>http://localhost:1313/tags/zero/</link>
+        <description>Recent content in ZeRO on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright>
+        <lastBuildDate>Thu, 21 May 2026 23:55:00 +0800</lastBuildDate><atom:link href="http://localhost:1313/tags/zero/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>AI系统学习笔记：第23章 分布式并行</title>
+        <link>http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC23%E7%AB%A0-%E5%88%86%E5%B8%83%E5%BC%8F%E5%B9%B6%E8%A1%8C/</link>
+        <pubDate>Thu, 21 May 2026 23:55:00 +0800</pubDate>
+        
+        <guid>http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC23%E7%AB%A0-%E5%88%86%E5%B8%83%E5%BC%8F%E5%B9%B6%E8%A1%8C/</guid>
+        <description>&lt;h2 id=&#34;引言&#34;&gt;引言
+&lt;/h2&gt;&lt;p&gt;分布式训练将训练工作量分散到多个工作节点上，显著提高训练速度和模型准确性。PyTorch 2.0 提供了多种分布式训练方式：&lt;strong&gt;数据并行（DP）&lt;/strong&gt;、&lt;strong&gt;模型并行（MP）&lt;/strong&gt; 和 &lt;strong&gt;混合并行（Hybrid Parallel）&lt;/strong&gt;，配合设备网格（Device Mesh）、RPC 分布式训练等可扩展组件，满足不同规模模型的训练需求。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;三大核心组件：&lt;strong&gt;DDP&lt;/strong&gt;（分布式数据并行）、&lt;strong&gt;RPC&lt;/strong&gt;（通用分布式结构支持）、&lt;strong&gt;C10d&lt;/strong&gt;（细粒度通信控制）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;232-数据并行&#34;&gt;23.2 数据并行
+&lt;/h2&gt;&lt;h3 id=&#34;2321-dp-与-ddp&#34;&gt;23.2.1 DP 与 DDP
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;数据并行（DP）&lt;/strong&gt; 将数据集分割成若干子集分配到不同 NPU 节点，每个节点运行相同模型副本处理不同数据子集，每轮结束后汇总梯度更新参数。&lt;/p&gt;
+&lt;p&gt;但 DP 存在局限：Python GIL 限制多线程效率、全局梯度聚合在单一 NPU 造成资源浪费。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;分布式数据并行（DDP）&lt;/strong&gt; 是 DP 的高级形式，核心改进包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;多进程&lt;/strong&gt;实现方式，避免 GIL 限制&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Ring All-Reduce&lt;/strong&gt; 算法进行高效集合通信&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;延迟隐藏技术&lt;/strong&gt;：反向传播与梯度通信重叠&lt;/li&gt;
+&lt;li&gt;各 NPU 负载均衡&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;2322-ddp-实现分析&#34;&gt;23.2.2 DDP 实现分析
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;前向传播&lt;/strong&gt;：DDP 通过 &lt;code&gt;_sync_module_states&lt;/code&gt; 在每次传播前同步各进程的 &lt;code&gt;_parameters&lt;/code&gt; 和 &lt;code&gt;_buffers&lt;/code&gt;，确保模型一致性。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;计算通信重叠&lt;/strong&gt;：反向传播中，梯度一旦局部计算完成就立即进行通信（通过 autograd 钩子触发），无需等待全部计算完成。reducer 将参数梯度组织到多个桶（bucket）中分桶通信。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0834-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.2.1 DDP 计算与通信重叠&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;数据加载&lt;/strong&gt;：通过 &lt;code&gt;DistributedSampler&lt;/code&gt; 按 NPU 索引切分数据，配合 &lt;code&gt;DataLoader&lt;/code&gt; 多进程加载，&lt;code&gt;pin_memory=True&lt;/code&gt; 时将数据异步拷贝到 NPU 内存。&lt;/p&gt;
+&lt;h3 id=&#34;2323-异步数据并行&#34;&gt;23.2.3 异步数据并行
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;同步数据并行&lt;/strong&gt; 要求所有 NPU 每轮迭代后同步参数（图23.2.2），慢速 NPU 拖累整体效率。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0838-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.2.2 同步数据并行 All-Reduce&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;异步数据并行（ADP）&lt;/strong&gt; 各 NPU 独立计算和更新，快速 NPU 不受慢速 NPU 影响，但需解决梯度更新竞争和模型收敛性问题（图23.2.3）。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0839-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.2.3 异步数据并行流程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;2324-弹性数据并行&#34;&gt;23.2.4 弹性数据并行
+&lt;/h3&gt;&lt;p&gt;弹性训练通过动态资源分配应对节点故障。PyTorch 的 &lt;strong&gt;TorchElastic&lt;/strong&gt; 组件包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Elastic Agent&lt;/strong&gt;：管理本地工作进程，监控健康并故障恢复&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Rendezvous&lt;/strong&gt;：分布式同步原语 + 节点发现，支持 Barrier、排他性、一致性、故障恢复、共享键值存储&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0841-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.2.4 Elastic Agent 架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0843-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.2.5 Rendezvous 工作流程状态图&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;233-数据并行进阶fsdp&#34;&gt;23.3 数据并行进阶：FSDP
+&lt;/h2&gt;&lt;h3 id=&#34;2331-前置知识&#34;&gt;23.3.1 前置知识
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;混精度训练&lt;/strong&gt;：前向/反向使用 FP16 计算（速度快），参数更新使用 FP32（保证精度）。FSDP 中可通过 &lt;code&gt;MixedPrecision&lt;/code&gt; 配置。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0850-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;混精度训练内存模型&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;损失缩放&lt;/strong&gt;：动态调整缩放因子（如 2^24 起始），检测梯度溢出时减半，防止 FP16 下溢。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;内存消耗&lt;/strong&gt; = 模型状态（优化器 + 梯度 + 参数 = 16Ψ）+ 剩余状态（激活值 + 临时存储 + 碎片）。&lt;/p&gt;
+&lt;h3 id=&#34;2332-完全分片数据并行-fsdp&#34;&gt;23.3.2 完全分片数据并行 FSDP
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;FSDP&lt;/strong&gt; 基于微软的 &lt;strong&gt;ZeRO&lt;/strong&gt;（Zero Redundancy Optimizer）优化方案：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;ZeRO-DP&lt;/strong&gt; 对模型状态分片，三阶段渐进优化：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;阶段&lt;/th&gt;
+          &lt;th&gt;别名&lt;/th&gt;
+          &lt;th&gt;分片内容&lt;/th&gt;
+          &lt;th&gt;显存降低&lt;/th&gt;
+          &lt;th&gt;额外通信&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;阶段1&lt;/td&gt;
+          &lt;td&gt;ZeRO-1&lt;/td&gt;
+          &lt;td&gt;优化器状态&lt;/td&gt;
+          &lt;td&gt;→ 1/4&lt;/td&gt;
+          &lt;td&gt;无&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;阶段2&lt;/td&gt;
+          &lt;td&gt;ZeRO-2&lt;/td&gt;
+          &lt;td&gt;+ 梯度&lt;/td&gt;
+          &lt;td&gt;→ 1/8&lt;/td&gt;
+          &lt;td&gt;无&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;阶段3&lt;/td&gt;
+          &lt;td&gt;ZeRO-3&lt;/td&gt;
+          &lt;td&gt;+ 参数&lt;/td&gt;
+          &lt;td&gt;→ 1/Nd&lt;/td&gt;
+          &lt;td&gt;1.5×&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0849-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.3.1 ZeRO-DP 三阶段优化&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0851-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.3.4 ZeRO-3 参数分区示意&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;ZeRO-R&lt;/strong&gt; 优化剩余状态：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;分区激活检查点（按 Nm 分区，释放内存）&lt;/li&gt;
+&lt;li&gt;恒定大小缓冲区（避免临时缓冲区膨胀）&lt;/li&gt;
+&lt;li&gt;内存碎片整理&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;ZeRO-Infinity&lt;/strong&gt; 突破 NPU 内存壁垒，支持万亿参数训练，在 NPU/CPU/NVMe 间智能迁移参数。&lt;/p&gt;
+&lt;h3 id=&#34;2333-fsdp-实现示例&#34;&gt;23.3.3 FSDP 实现示例
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;torch.distributed.fsdp&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;FullyShardedDataParallel&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;as&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;FSDP&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;model&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;FSDP&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;model&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;auto_wrap_policy&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;t5_auto_wrap_policy&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;mixed_precision&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;bfSixteen&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;sharding_strategy&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ShardingStrategy&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;SHARD_GRAD_OP&lt;/span&gt;  &lt;span class=&#34;c1&#34;&gt;# Zero2&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;2334-zero-通信分析&#34;&gt;23.3.4 ZeRO 通信分析
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;ZeRO-2&lt;/strong&gt;：Reduce-Scatter(Ψ) + All-Gather(Ψ) = 2Ψ（与标准 DP 相同）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ZeRO-3&lt;/strong&gt;：前向 All-Gather(Ψ) + 反向 All-Gather(Ψ) + Reduce-Scatter(Ψ) = 3Ψ（标准 DP 的 1.5 倍）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ZeRO-R&lt;/strong&gt;：通信开销通常不到标准 MP 的 10%&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;234-张量并行&#34;&gt;23.4 张量并行
+&lt;/h2&gt;&lt;h3 id=&#34;2341-朴素张量并行&#34;&gt;23.4.1 朴素张量并行
+&lt;/h3&gt;&lt;p&gt;将模型层分配到不同设备，如 ResNet50 前半部分在 NPU:0，后半部分在 NPU:1。缺点是设备利用率低（同时仅一设备工作），比单 NPU 慢约 7%。&lt;/p&gt;
+&lt;h3 id=&#34;2342-高阶张量并行&#34;&gt;23.4.2 高阶张量并行
+&lt;/h3&gt;&lt;p&gt;更细粒度的模型并行，将单层内部参数拆分到不同设备：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;MatMul 并行&lt;/strong&gt;：矩阵按列/行切分并行计算（图23.4.1）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0858-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.4.1 MatMul 行/列切分并行&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Transformer 并行&lt;/strong&gt;：MLP 中 A 列切割、B 行切割，配合 All-Reduce 汇总；Self-Attention 中 Q/K/V 列切割，线性层 B 行切割&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0858-10.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.4.2 MLP 张量并行策略&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Embedding 并行&lt;/strong&gt;：表切分（每个设备存部分嵌入表）和列切分（每个设备存嵌入表部分列）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0859-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.4.3 Embedding 并行两种切分方式&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Cross Entropy Loss 并行&lt;/strong&gt;：在 vocab 维度分片计算，All-Reduce 取全局 max 和 sum，避免将完整 logits 聚集到单一设备&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0860-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.4.4 Cross Entropy Loss 并行过程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;2343-devicemesh-实现-tp&#34;&gt;23.4.3 DeviceMesh 实现 TP
+&lt;/h3&gt;&lt;p&gt;PyTorch 通过 &lt;code&gt;ColwiseParallel&lt;/code&gt;/&lt;code&gt;RowwiseParallel&lt;/code&gt;/&lt;code&gt;SequenceParallel&lt;/code&gt; 等 API 配合 &lt;code&gt;DeviceMesh&lt;/code&gt; 实现张量并行。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;235-流水并行&#34;&gt;23.5 流水并行
+&lt;/h2&gt;&lt;p&gt;将模型不同层按序分配到不同设备，输入数据切分为多个 Micro-Batch 实现流水线。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Gpipe 流水并行&lt;/strong&gt;（F-then-B 策略）：前向→反向→参数更新，存在&amp;quot;气泡&amp;quot;空闲时间，通过激活检查点节省内存。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;PipeDream 流水并行&lt;/strong&gt;（1F1B 策略）：完成一个 Micro-Batch 的前向传播后立即进行反向传播，最大化设备利用率。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0864-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.5.1 PipeDream 1F1B 策略&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;PipeDream 是&lt;strong&gt;异步&lt;/strong&gt;的，每个 Worker 使用对应的权重版本，需要管理权重一致性问题。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0864-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.5.2 PipeDream 权重版本管理&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;236-混合并行&#34;&gt;23.6 混合并行
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;3D 混合并行（DP+PP+TP）&lt;/strong&gt; 结合三种并行方式：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;内存效率&lt;/strong&gt;：流水线 + 模型并行双重减少内存消耗&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;计算效率&lt;/strong&gt;：ZeRO-DP 优化器状态分区 + 拓扑感知映射&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;通信优化&lt;/strong&gt;：张量并行（通信最大）优先放在同节点内，流水并行（通信最小）可跨节点&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0865-10.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.6.1 3D 混合并行示意图&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;237-昇思-mindspore-并行&#34;&gt;23.7 昇思 MindSpore 并行
+&lt;/h2&gt;&lt;p&gt;MindSpore 提供完整大模型训练方案：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;张量重排布（Tensor Redistribution）&lt;/strong&gt;：自动插入通信算子（如 All-Gather/Concat）解决设备间张量布局不一致。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;通信算子自动微分&lt;/strong&gt;：定义 All-Gather 的反向算子为 Reduce-Scatter，实现全图自动微分。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;并行搜索&lt;/strong&gt;：基于代价模型（同时考虑计算和通信开销），ResNet50 在 8 设备上搜索耗时 &amp;lt; 1s，训练时间减少 ~55%。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0869-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.7.1 MindSpore 子结构并行策略示例&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;函数式算子切分&lt;/strong&gt;：动态图下通过 &lt;code&gt;@jit&lt;/code&gt; 装饰符指定某段以图模式编译执行，支持算子级模型并行。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0870-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.7.2 函数式算子切分流程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;流水并行&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0871-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.7.3 流水并行 Stage 映射&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0871-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.7.4 Micro-Batch 流水线调度&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;MoE 并行&lt;/strong&gt;：Gate 计算并行化 + FFN 均分到各设备，All-to-All 通信路由数据，参数量扩展但计算量增加较少。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0872-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.7.5 MoE 内存优化调度&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0872-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.7.6 MoE 单设备单 FFN 执行&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;异构并行训练&lt;/strong&gt;：内存密集型算子→CPU，计算密集型算子→加速器，单机 8 卡可训练/推理千亿模型。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch23/0873-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图23.7.7 异构并行训练架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;本章小结&#34;&gt;本章小结
+&lt;/h2&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;并行策略&lt;/th&gt;
+          &lt;th&gt;核心思想&lt;/th&gt;
+          &lt;th&gt;优点&lt;/th&gt;
+          &lt;th&gt;适用场景&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;数据并行（DDP）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;数据分片，模型副本&lt;/td&gt;
+          &lt;td&gt;实现简单，扩展性好&lt;/td&gt;
+          &lt;td&gt;模型可放入单设备&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;FSDP/ZeRO&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;模型状态分片&lt;/td&gt;
+          &lt;td&gt;显著降低显存&lt;/td&gt;
+          &lt;td&gt;大模型训练&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;张量并行（TP）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;单层参数/计算切分&lt;/td&gt;
+          &lt;td&gt;细粒度并行&lt;/td&gt;
+          &lt;td&gt;超大单层参数&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;流水并行（PP）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;不同层分配到不同设备&lt;/td&gt;
+          &lt;td&gt;通信量小&lt;/td&gt;
+          &lt;td&gt;深层网络&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;混合并行（3D）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;DP+PP+TP 组合&lt;/td&gt;
+          &lt;td&gt;最大化资源利用&lt;/td&gt;
+          &lt;td&gt;万亿参数模型&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;本章系统介绍了从基础数据并行到 3D 混合并行的完整技术栈，以及 MindSpore 在大模型训练上的工程实践，为理解现代分布式训练框架的设计奠定了坚实基础。&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

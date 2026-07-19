@@ -1,0 +1,801 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Memory Layout on SalmoneX Blog</title>
+        <link>http://localhost:1313/tags/memory-layout/</link>
+        <description>Recent content in Memory Layout on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright><atom:link href="http://localhost:1313/tags/memory-layout/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>AI系统：第19章 Kernel 优化</title>
+        <link>http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC19%E7%AB%A0-kernel-%E4%BC%98%E5%8C%96/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC19%E7%AB%A0-kernel-%E4%BC%98%E5%8C%96/</guid>
+        <description>&lt;h2 id=&#34;本章概览&#34;&gt;本章概览
+&lt;/h2&gt;&lt;p&gt;如果说 Runtime 层是推理引擎的&amp;quot;总调度&amp;quot;，那么 &lt;strong&gt;Kernel 层&lt;/strong&gt;就是推理引擎的&amp;quot;肌肉&amp;quot;——所有底层数学运算（矩阵乘、卷积、激活函数等）最终都在这里执行。Kernel 层的性能直接决定了推理的速度和效率。&lt;/p&gt;
+&lt;p&gt;本章从五个维度系统讲解 Kernel 优化技术栈：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Kernel 层概述&lt;/strong&gt;：硬件平台优化（NEON/AVX/CUDA/OpenCL/Vulkan）+ 封装算子库（cuDNN/MKLDNN）+ 推理流程与开发范式&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;卷积计算原理&lt;/strong&gt;：数学定义 → 离散卷积 → CNN 卷积（Padding/Stride/Channel/Kernel）+ 时间复杂度/空间复杂度分析&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Im2Col 算法&lt;/strong&gt;：卷积转矩阵乘的核心思路，空间换时间，配合 GEMM 库加速&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Winograd 算法&lt;/strong&gt;：减少乘法次数（4 次乘法 replace 6 次），加减法换乘法，适用于小卷积核（3×3）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;QNNPACK 间接卷积&lt;/strong&gt;：消除 Im2Col 内存拷贝，通过间接缓冲区 + PDOT 微内核优化移动端量化推理&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;推理内存布局&lt;/strong&gt;：CPU/GPU 多级缓存架构，NCHWX 通道拆分与 SIMT 适配&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;一句话总结&lt;/strong&gt;：Kernel 优化的本质是&amp;quot;用空间换时间，用加法换乘法，用局部性换缓存命中&amp;quot;。从 Im2Col → Winograd → QNNPACK，每一次演进都在更精细地平衡这三者。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;191-kernel-层概述&#34;&gt;19.1 Kernel 层概述
+&lt;/h2&gt;&lt;h3 id=&#34;1911-kernel-层定义与定位&#34;&gt;19.1.1 Kernel 层定义与定位
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;Kernel 层&lt;/strong&gt;是推理引擎中执行底层数学运算的核心组件，负责将上层调度（Runtime）的指令翻译为具体硬件上的计算操作。推理引擎的整体架构中，Kernel 层处于最底层，直接与硬件打交道。&lt;/p&gt;
+&lt;h4 id=&#34;cpu-优化&#34;&gt;CPU 优化
+&lt;/h4&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;技术&lt;/th&gt;
+          &lt;th&gt;平台&lt;/th&gt;
+          &lt;th&gt;特点&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;NEON&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;ARM 架构&lt;/td&gt;
+          &lt;td&gt;SIMD 扩展，移动端/嵌入式设备推理优化&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;AVX / AVX2&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Intel x86&lt;/td&gt;
+          &lt;td&gt;高级向量扩展指令集，浮点/整数运算加速&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Metal&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Apple&lt;/td&gt;
+          &lt;td&gt;低级图形+计算 API，优化 Apple GPU 上的性能&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h4 id=&#34;gpu-优化&#34;&gt;GPU 优化
+&lt;/h4&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;技术&lt;/th&gt;
+          &lt;th&gt;平台&lt;/th&gt;
+          &lt;th&gt;特点&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;CUDA&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;NVIDIA&lt;/td&gt;
+          &lt;td&gt;并行计算平台，大规模矩阵运算和卷积&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;OpenCL&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;跨平台&lt;/td&gt;
+          &lt;td&gt;异构系统开放标准，CPU/GPU 通用&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Vulkan&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;跨平台&lt;/td&gt;
+          &lt;td&gt;新一代图形+计算 API，高性能计算场景&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h4 id=&#34;封装的高性能算子库&#34;&gt;封装的高性能算子库
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;cuDNN&lt;/strong&gt;：NVIDIA 为 GPU 优化的深度神经网络算子库（卷积、池化、归一化、激活函数）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;oneDNN（原 MKLDNN）&lt;/strong&gt;：Intel 为 CPU 优化的深度神经网络算子库，支持多种 Intel 处理器&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;实际应用中，开发者需要根据目标设备和性能要求选择最合适的优化策略组合。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;1912-kernel-层优化方法&#34;&gt;19.1.2 Kernel 层优化方法
+&lt;/h3&gt;&lt;p&gt;Kernel 层优化从四个维度展开：&lt;/p&gt;
+&lt;h4 id=&#34;1-算法优化&#34;&gt;1. 算法优化
+&lt;/h4&gt;&lt;p&gt;主要针对&lt;strong&gt;卷积算子&lt;/strong&gt;的计算优化，核心算法包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Im2Col + GEMM&lt;/strong&gt;：将卷积转化为矩阵乘法，利用高性能 BLAS 库加速&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Winograd&lt;/strong&gt;：通过数学变换减少乘法次数，用加法换乘法&lt;/li&gt;
+&lt;li&gt;这些算法通过特定的数学变换降低计算复杂度，提升推理速度&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;2-内存布局&#34;&gt;2. 内存布局
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;权重和输入数据重排&lt;/strong&gt;：使数据访问更连续，减少缓存缺失&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Channel First（NCHW）vs Channel Last（NHWC）&lt;/strong&gt;：根据硬件选择通道存储顺序&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;NC1HWC0 / NCHW4&lt;/strong&gt;：将 C 维度拆分（C1 分组数，C0 每组通道数），适配 SIMD 操作和 Winograd 算法，提高缓存利用率&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;3-汇编优化&#34;&gt;3. 汇编优化
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;指令优化&lt;/strong&gt;：针对特定 CPU 指令集（AVX、SSE 等）进行向量化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;循环优化&lt;/strong&gt;：减少循环开销，增加指令级并行性&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;存储优化&lt;/strong&gt;：优化内存访问模式，提高缓存命中率&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;4-调度优化&#34;&gt;4. 调度优化
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;并行计算&lt;/strong&gt;：根据操作间依赖关系合理调度任务&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;自动调优&lt;/strong&gt;：减少等待时间，提高资源利用率&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;192-卷积计算原理&#34;&gt;19.2 卷积计算原理
+&lt;/h2&gt;&lt;h3 id=&#34;1921-卷积的数学原理&#34;&gt;19.2.1 卷积的数学原理
+&lt;/h3&gt;&lt;p&gt;卷积是对两个实变函数的一种数学运算。在泛函分析中，通过函数 \(f\) 和 \(g\) 生成第三个函数的积分变换：&lt;/p&gt;
+\[
+(f * g)(x) = \int_{-\infty}^{\infty} f(\tau) g(x - \tau) d\tau
+\]&lt;p&gt;&lt;strong&gt;通俗理解&lt;/strong&gt;：卷积包含&amp;quot;卷&amp;quot;和&amp;quot;积&amp;quot;两步：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;卷&amp;rdquo;&lt;/strong&gt;：将函数 \(g\) 翻转并平移（\(x + y = t\) 约束）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;积&amp;rdquo;&lt;/strong&gt;：对重叠部分做乘积并积分&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;卷积的核心性质&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;交换律：\(f * g = g * f\)&lt;/li&gt;
+&lt;li&gt;结合律：\((f * g) * h = f * (g * h)\)&lt;/li&gt;
+&lt;li&gt;分配律：\(f * (g + h) = f * g + f * h\)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;物理意义&lt;/strong&gt;：在不同领域有不同解释：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;信号处理&lt;/strong&gt;：系统对输入信号的累积响应&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;图像处理&lt;/strong&gt;：滤波和特征提取（边缘检测等）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;概率论&lt;/strong&gt;：两个独立随机变量之和的概率密度函数&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;离散卷积&#34;&gt;离散卷积
+&lt;/h4&gt;\[
+S(i, j) = (K * I)(i, j) = \sum_{m}\sum_{n} I(i+m, j+n) K(m, n)
+\]&lt;p&gt;离散卷积可以看作矩阵乘法——输入矩阵的每一行与上一行对应位置平移一个单位的元素相同，这种矩阵称为 &lt;strong&gt;特普利茨（Toeplitz）矩阵&lt;/strong&gt;。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在 CNN 术语中，第一个参数叫 &lt;strong&gt;Input&lt;/strong&gt;，第二个叫 &lt;strong&gt;Kernel Function&lt;/strong&gt;，输出叫 &lt;strong&gt;Feature Map&lt;/strong&gt;。这些多维数组统称为&lt;strong&gt;张量（Tensor）&lt;/strong&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;1922-cnn-卷积计算&#34;&gt;19.2.2 CNN 卷积计算
+&lt;/h3&gt;&lt;p&gt;CNN 中的卷积通常指由多个并行卷积组成的计算——单个核只能提取一种特征，网络需要每层在多个位置提取多种类型的特征。&lt;/p&gt;
+&lt;h4 id=&#34;关键名词&#34;&gt;关键名词
+&lt;/h4&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;名词&lt;/th&gt;
+          &lt;th&gt;含义&lt;/th&gt;
+          &lt;th&gt;要点&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Padding&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;在输入周围添加行列（通常填 0）&lt;/td&gt;
+          &lt;td&gt;Valid（不填）/ Same（输出=输入尺寸）/ 自定义&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Stride&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;卷积核每次滑动的距离&lt;/td&gt;
+          &lt;td&gt;增大 stride 减小输出尺寸，加快计算，降低特征提取能力&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Channel&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;特征图数量 / 深度&lt;/td&gt;
+          &lt;td&gt;增加 channel 增强特征提取能力，但增加计算量&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Kernel&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;可学习的卷积核参数&lt;/td&gt;
+          &lt;td&gt;参数共享，在图像上滑动，每个 kernel 对应一张特征图&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h4 id=&#34;计算复杂度分析&#34;&gt;计算复杂度分析
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;时间复杂度&lt;/strong&gt;（单卷积层）：&lt;/p&gt;
+\[
+O(f_{in}^2 \times C_{in} \times C_{out} \times K^2)
+\]&lt;p&gt;&lt;strong&gt;空间复杂度&lt;/strong&gt;（访存量）：&lt;/p&gt;
+\[
+\text{总参数量} + \text{各层输出特征图大小} = \sum_{l=1}^{D} K_l^2 \cdot C_{l-1} \cdot C_l + \sum_{l=1}^{D} f_l^2 \cdot C_l
+\]&lt;h3 id=&#34;1923-卷积优化手段&#34;&gt;19.2.3 卷积优化手段
+&lt;/h3&gt;&lt;h4 id=&#34;tensor-运算&#34;&gt;Tensor 运算
+&lt;/h4&gt;&lt;p&gt;张量（Tensor）是机器学习的基础数据结构——0 维是标量、1 维是向量、2 维是矩阵、3 维是立方体。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0698-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.2.6 张量维度示意&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;张量计算 = 维度处理 + 数据处理，无副作用（函数式编程风格）。&lt;/p&gt;
+&lt;h4 id=&#34;tensor-内存布局&#34;&gt;Tensor 内存布局
+&lt;/h4&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;格式&lt;/th&gt;
+          &lt;th&gt;全称&lt;/th&gt;
+          &lt;th&gt;默认框架&lt;/th&gt;
+          &lt;th&gt;特点&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;NHWC&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;样本数-高-宽-通道&lt;/td&gt;
+          &lt;td&gt;TensorFlow / 多数推理引擎&lt;/td&gt;
+          &lt;td&gt;Channel 在最后&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;NCHW&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;样本数-通道-高-宽&lt;/td&gt;
+          &lt;td&gt;PyTorch&lt;/td&gt;
+          &lt;td&gt;Channel 在 H/W 之前&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;不同内存布局影响内存访问的连续性，进而影响缓存效率——这也是后续 Im2Col 等算法要解决的核心问题。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;193-im2col-算法&#34;&gt;19.3 Im2Col 算法
+&lt;/h2&gt;&lt;h3 id=&#34;1931-核心思想&#34;&gt;19.3.1 核心思想
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;Im2Col = Image to Column&lt;/strong&gt;，将三维张量转换为二维矩阵，使卷积操作等价于矩阵乘法，从而利用高度优化的 GEMM 库（BLAS、MKL）加速。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0699-14.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.3.1 Im2Col 处理流程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;核心原理&lt;/strong&gt;：用空间换时间 —— 将原本可复用的数据平坦地分布到矩阵中，增加了约 (KH×KW−1) 倍的内存占用，但换来了连续内存访问和高效矩阵乘法。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0700-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.3.2 窗口点乘等价&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;每个窗口的卷积 = 两个一维向量的点乘。将所有窗口展开成行向量，卷积核展开成列向量，卷积 → 矩阵乘。&lt;/p&gt;
+&lt;h3 id=&#34;1932-算法过程&#34;&gt;19.3.2 算法过程
+&lt;/h3&gt;&lt;p&gt;Im2Col + MatMul 的四个步骤：&lt;/p&gt;
+&lt;h4 id=&#34;步骤一input-重排&#34;&gt;步骤一：Input 重排
+&lt;/h4&gt;&lt;p&gt;将输入 \(N \times \text{IH} \times \text{IW} \times \text{IC}\) 展开为 \((\text{OH} \times \text{OW}) \times (N \times \text{KH} \times \text{KW} \times \text{IC})\) 二维矩阵。&lt;/p&gt;
+&lt;p&gt;每个行向量 = 一个卷积窗口覆盖的所有数据（先排第一个通道的 KH×KW，再排第二通道&amp;hellip;直到第 IC 通道）。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0701-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.3.3 Input Im2Col 展开&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h4 id=&#34;步骤二权重重排&#34;&gt;步骤二：权重重排
+&lt;/h4&gt;&lt;p&gt;将 \(N\) 个卷积核 OC×KH×KW×IC 展开为 OC × (KH×KW×IC) 的权重矩阵。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0702-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.3.5 三通道卷积示意图&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h4 id=&#34;步骤三矩阵乘法&#34;&gt;步骤三：矩阵乘法
+&lt;/h4&gt;&lt;p&gt;输入矩阵 \((\text{OH} \times \text{OW}) \times (\text{KH} \times \text{KW} \times \text{IC})\) × 权重矩阵 \((\text{KH} \times \text{KW} \times \text{IC}) \times \text{OC}\) = 输出矩阵 \((\text{OH} \times \text{OW}) \times \text{OC}\)。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0701-09.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.3.4 MatMul 得到卷积结果&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h4 id=&#34;步骤四col2im-还原&#34;&gt;步骤四：Col2Im 还原
+&lt;/h4&gt;&lt;p&gt;将输出矩阵还原为 \(N \times \text{OH} \times \text{OW} \times \text{OC}\) 三维张量。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0702-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.3.6 NHWC 格式卷积计算&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h4 id=&#34;im2col-优缺点总结&#34;&gt;Im2Col 优缺点总结
+&lt;/h4&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;优点&lt;/th&gt;
+          &lt;th&gt;缺点&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;充分利用 GEMM 库（BLAS/MKL）&lt;/td&gt;
+          &lt;td&gt;内存膨胀约 (KH×KW−1) 倍&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;连续内存 + 缓存友好&lt;/td&gt;
+          &lt;td&gt;大量数据复制开销&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;支持各种卷积参数&lt;/td&gt;
+          &lt;td&gt;朴素实现性能受限&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;可与其他优化方法互补&lt;/td&gt;
+          &lt;td&gt;大卷积核时内存消耗严重&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;1933-空间组合优化算法&#34;&gt;19.3.3 空间组合优化算法
+&lt;/h3&gt;&lt;p&gt;空间组合（Spatial Pack）是对 Im2Col 的进一步优化，通过分治法将大卷积拆分为多个小卷积。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0705-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.3.7 空间组合划分&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h4 id=&#34;常见优化方法&#34;&gt;常见优化方法
+&lt;/h4&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;方法&lt;/th&gt;
+          &lt;th&gt;原理&lt;/th&gt;
+          &lt;th&gt;适用场景&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;分块卷积&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;大卷积核分解为多个小卷积核&lt;/td&gt;
+          &lt;td&gt;大型图像/特征图&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;重叠数据块&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;通过重叠减少 Padding 需求&lt;/td&gt;
+          &lt;td&gt;减少边缘计算&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;稀疏卷积&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;只对非零值进行卷积&lt;/td&gt;
+          &lt;td&gt;稀疏特征图&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;权重共享&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;利用同一 Kernel 在不同位置复用&lt;/td&gt;
+          &lt;td&gt;通用优化&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;张量化（Tensorization）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;利用 SIMD 指令集&lt;/td&gt;
+          &lt;td&gt;GPU 等并行硬件&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;循环展开 + 软件流水线&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;编译器优化循环结构&lt;/td&gt;
+          &lt;td&gt;CPU 执行优化&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;内存复用&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;复用中间结果内存&lt;/td&gt;
+          &lt;td&gt;减少内存分配开销&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0706-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.3.8 分块卷积计算&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;关键注意点：分块时需要额外拷贝相邻小张量的边界数据（用于 Padding）。拆分越小，局部性越好，但 Padding 引起的额外内存消耗越大。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0707-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.3.9 Padding 边界处理&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;194-winograd-算法&#34;&gt;19.4 Winograd 算法
+&lt;/h2&gt;&lt;h3 id=&#34;1941-核心思想&#34;&gt;19.4.1 核心思想
+&lt;/h3&gt;&lt;p&gt;Winograd 算法的核心哲学：&lt;strong&gt;用更多的加法换更少的乘法&lt;/strong&gt;。由于乘法指令的延迟远高于加法，减少乘法次数就能直接加速推理。&lt;/p&gt;
+&lt;p&gt;CVPR 2016 上 Lavin &amp;amp; Gray 提出的论文使其在推理引擎中广泛流行（MindSpore Lite、MNN 等均采用）。&lt;/p&gt;
+&lt;h4 id=&#34;一维卷积加速示例&#34;&gt;一维卷积加速示例
+&lt;/h4&gt;&lt;p&gt;以 \(F(2,3)\) 为例：输入 \(d = [d_0, d_1, d_2, d_3]^T\)，卷积核 \(g = [g_0, g_1, g_2]^T\)。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;标准矩阵乘法&lt;/strong&gt;：6 次乘法 + 4 次加法&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Winograd 变换后&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;\(m_1 = (d_0 - d_2) g_0\)&lt;/li&gt;
+&lt;li&gt;\(m_2 = (d_1 + d_2) \frac{g_0 + g_1 + g_2}{2}\)&lt;/li&gt;
+&lt;li&gt;\(m_3 = (d_2 - d_1) \frac{g_0 - g_1 + g_2}{2}\)&lt;/li&gt;
+&lt;li&gt;\(m_4 = (d_1 - d_3) g_2\)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;4 次乘法 + 8 次加法&lt;/strong&gt;。\(g\) 相关的计算可以在推理前预先完成（推理时卷积核是固定的），所以额外加法开销可控。&lt;/p&gt;
+&lt;p&gt;推广到二维卷积 \(F(2 \times 2, 3 \times 3)\)：&lt;/p&gt;
+\[
+Y = A^T \left[ (G g G^T) \odot (B^T d B) \right] A
+\]&lt;p&gt;其中 \(G\) 为卷积核变换矩阵，\(B\) 为输入变换矩阵，\(A\) 为输出变换矩阵，\(\odot\) 表示 Hadamard 积。&lt;/p&gt;
+&lt;h3 id=&#34;1942-实现步骤&#34;&gt;19.4.2 实现步骤
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0712-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.4.2 Winograd 工作流程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h4 id=&#34;步骤一卷积核变换-u--g-g-gt&#34;&gt;步骤一：卷积核变换 \(U = G g G^T\)
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0712-13.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.4.3 卷积核 Winograd 变换&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;将 \(3 \times 3\) 卷积核 → 变换为 \(4 \times 4\) 矩阵 → 按位置重新排布 → 得到 16 个 IC×OC 的权重矩阵 \(U\)。&lt;/p&gt;
+&lt;h4 id=&#34;步骤二输入数据变换-v--bt-d-b&#34;&gt;步骤二：输入数据变换 \(V = B^T d B\)
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0713-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.4.4 输入数据 Winograd 变换&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;将输入切分为 \(4 \times 4\) 的小块（Tile） → \(B^T d B\) 变换 → 重新排布 → 得到 16 个 nr×IC 的输入矩阵 \(V\)。&lt;/p&gt;
+&lt;h4 id=&#34;步骤三中间矩阵计算-m--sum-u-odot-v&#34;&gt;步骤三：中间矩阵计算 \(M = \sum U \odot V\)
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0713-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.4.5 中间矩阵计算与输出还原&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;16 个 \(U \times V\) 矩阵乘 → 得到 16 个 nr×OC 的中间矩阵 \(M\) → 按位置重排为 \(4 \times 4\) 矩阵。&lt;/p&gt;
+&lt;h4 id=&#34;步骤四输出变换-y--at-m-a&#34;&gt;步骤四：输出变换 \(Y = A^T M A\)
+&lt;/h4&gt;&lt;p&gt;将 \(4 \times 4\) 矩阵变换为 \(2 \times 2\) 输出 → 写回输出矩阵。&lt;/p&gt;
+&lt;h3 id=&#34;1943-算法约束与缺点&#34;&gt;19.4.3 算法约束与缺点
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;优点&lt;/th&gt;
+          &lt;th&gt;局限性&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;减少乘法次数，加速显著&lt;/td&gt;
+          &lt;td&gt;仅适用于小卷积核（通常 3×3）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;权重的变换可预计算&lt;/td&gt;
+          &lt;td&gt;1×1、5×5、7×7 不使用&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;与分块策略可组合&lt;/td&gt;
+          &lt;td&gt;加法次数增加 + 转换开销&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;/td&gt;
+          &lt;td&gt;分块越大，转换矩阵越大，精度损失加剧&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;工程实践：Runtime 层需要根据卷积参数决策使用哪个 Kernel（Im2Col、Winograd 还是直接卷积）。通常所有可固定的数据在预编译阶段计算好，避免在线重复计算。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;195-qnnpack-算法&#34;&gt;19.5 QNNPACK 算法
+&lt;/h2&gt;&lt;h3 id=&#34;1951-前置知识回顾&#34;&gt;19.5.1 前置知识回顾
+&lt;/h3&gt;&lt;h4 id=&#34;im2col--gemm-的两个缺陷&#34;&gt;Im2Col + GEMM 的两个缺陷
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0715-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.5.1 Im2Col 矩阵乘法示意&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;传统 GEMM 方法在 \(K\) 维度上拆分，每次计算核都需要加载和存储输出部分和：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0716-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.5.2 GEMM 分块计算&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0716-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.5.3 K 维度拆分累加&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Im2Col 空间消耗大&lt;/strong&gt;：输入图像和卷积核展开为二维矩阵，大量内存浪费&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;GEMM 需要缓存大量行数据&lt;/strong&gt;：大卷积核时即使分割也难避免&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&#34;神经网络量化&#34;&gt;神经网络量化
+&lt;/h4&gt;&lt;p&gt;QNNPACK 最初为量化推理设计——将 FP32 转换为低精度整数（FP16/INT8），提升计算速度和内存效率。但其核心算法（间接卷积）在非量化场景同样高效。&lt;/p&gt;
+&lt;h3 id=&#34;1952-间接卷积算法&#34;&gt;19.5.2 间接卷积算法
+&lt;/h3&gt;&lt;p&gt;Marat Dukhan（Meta → Google）2019 年发表 &lt;em&gt;The Indirect Convolution Algorithm&lt;/em&gt;，揭秘了 QNNPACK 的核心。&lt;/p&gt;
+&lt;h4 id=&#34;设计哲学&#34;&gt;设计哲学
+&lt;/h4&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;传统 GEMM&lt;/th&gt;
+          &lt;th&gt;QNNPACK&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;重新打包 A/B 矩阵以利用缓存层次&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;消除所有非计算必需的内存转换&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;面向科学计算（双精度大矩阵）&lt;/td&gt;
+          &lt;td&gt;面向移动端量化推理（小矩阵适配 L1 缓存）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;MR/NR 可达很大值&lt;/td&gt;
+          &lt;td&gt;MR/NR ≤ 8（移动架构约束）&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0717-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.5.4 QNNPACK 不拆分 K 维度&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;关键差异：QNNPACK 将整个 \(K\) 维在计算 Kernel 中处理完，消除了输出部分和的访存。&lt;/p&gt;
+&lt;h4 id=&#34;间接缓冲区indirection-buffer&#34;&gt;间接缓冲区（Indirection Buffer）
+&lt;/h4&gt;&lt;p&gt;这是 QNNPACK 最精妙的设计——不复制输入数据到 Im2Col 缓冲区，而是&lt;strong&gt;建立一个指针数组&lt;/strong&gt;指向输入行：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0721-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.5.5 间接缓冲区工作流程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;每个输出像素位置 + 每个 Kernel 元素 → 一个指向输入行的指针&lt;/li&gt;
+&lt;li&gt;超出输入范围的指针 → 指向显式零向量（处理 Padding）&lt;/li&gt;
+&lt;li&gt;如果输入张量地址不变，间接缓冲区只需初始化一次，多次推理复用&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;间接缓冲区布局&#34;&gt;间接缓冲区布局
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0721-11.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.5.6 间接缓冲区布局详解&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;间接缓冲区 = KH × KW × \(M\) 个指针，其中 \(M\) = OH × OW。计算时，\(M\) 个指针同时扫描输入，每次取出 \(M \times \text{IC}\) 的输入内存，配合权重完成 GEMM。&lt;/p&gt;
+&lt;p&gt;伪代码逻辑：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;for kh in 0..KH:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  for kw in 0..KW:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    从间接缓冲区取 M 个指针
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    for ic in 0..IC:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      每个指针指向的数据 × 权重 → 累加到 M×N 输出块
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;1953-与-im2col-算法对比&#34;&gt;19.5.3 与 Im2Col 算法对比
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;维度&lt;/th&gt;
+          &lt;th&gt;Im2Col + GEMM&lt;/th&gt;
+          &lt;th&gt;QNNPACK 间接卷积&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;内存拷贝&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;需要将输入复制到 Im2Col 缓冲区&lt;/td&gt;
+          &lt;td&gt;不需要，用指针索引&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;缓存效率&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;大卷积核缓存命中率低&lt;/td&gt;
+          &lt;td&gt;间接缓冲区小，输入行可重用&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;额外开销&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Im2Col 变换本身&lt;/td&gt;
+          &lt;td&gt;加载指针的微弱开销&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;循环效率&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;单循环（KH×KW×IC 次）&lt;/td&gt;
+          &lt;td&gt;双循环（略低于单循环）&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;QNNPACK 解决了卷积计算的三个问题：空间向量化、地址计算复杂、内存拷贝。代价是需要建立间接缓冲区和权重 Repacking。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;196-推理内存布局&#34;&gt;19.6 推理内存布局
+&lt;/h2&gt;&lt;h3 id=&#34;1961-cpu-与-gpu-内存架构&#34;&gt;19.6.1 CPU 与 GPU 内存架构
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0724-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.6.1 CPU 多级缓存架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;CPU 内存架构&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;多级缓存（L1 → L2 → L3），容量递增、速度递减&lt;/li&gt;
+&lt;li&gt;数据从主存加载到 Cache 时，邻近数据一并加载（空间局部性）&lt;/li&gt;
+&lt;li&gt;缓存未命中时需等待主存操作完成&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0725-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.6.2 GPU 内存架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;GPU 内存架构&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;同样多级缓存，以 SM（Streaming Multiprocessor）为单位&lt;/li&gt;
+&lt;li&gt;SM 内包含 Warp Scheduler、寄存器、L1 缓存、共享内存&lt;/li&gt;
+&lt;li&gt;SIMT 模式：一个 Warp 抓一把线程扔进 Core 计算&lt;/li&gt;
+&lt;li&gt;GPU 间通过 PCIe 桥或 NVLink 高速通道传输数据&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;1962-nchwx-内存格式&#34;&gt;19.6.2 NCHWX 内存格式
+&lt;/h3&gt;&lt;p&gt;随着网络层数加深，特征图的 H/W 减小但 C（通道数）急剧增大（128、256 甚至更多）。为了充分利用矩阵计算单元，需要进行&lt;strong&gt;通道维度拆分&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch19/ai_system.pdf-0726-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图19.6.3 NCHWX 物理存储结构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;格式&lt;/th&gt;
+          &lt;th&gt;拆分粒度&lt;/th&gt;
+          &lt;th&gt;典型场景&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;NCHW4&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Channel / 4&lt;/td&gt;
+          &lt;td&gt;ARM 处理器 4 通道 SIMD&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;NCHW32&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Channel / 32&lt;/td&gt;
+          &lt;td&gt;特定 AI 加速器&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;NCHW64&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Channel / 64&lt;/td&gt;
+          &lt;td&gt;高并行度 DSA 芯片&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;NCHWX 优势&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;适配 SIMT/SIMD，充分利用向量化指令&lt;/li&gt;
+&lt;li&gt;对 Cache 更友好，减少缓存未命中&lt;/li&gt;
+&lt;li&gt;Kernel 层面易进行 Padding，减少边界分支判断&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;小结&#34;&gt;小结
+&lt;/h2&gt;&lt;p&gt;第 19 章构建了推理引擎 Kernel 层优化的完整知识体系：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;知识模块&lt;/th&gt;
+          &lt;th&gt;核心要点&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Kernel 层概述&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;CPU（NEON/AVX/Metal）+ GPU（CUDA/OpenCL/Vulkan）+ 算子库（cuDNN/oneDNN）；四大优化方向：算法、内存布局、汇编、调度&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;卷积计算原理&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;连续卷积 → 离散卷积（Toeplitz 矩阵）→ CNN 卷积（Padding/Stride/Channel/Kernel）；时间/空间复杂度公式&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Im2Col 算法&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;卷积 → 矩阵乘，空间换时间，内存膨胀 (KH×KW−1) 倍；Spatial Pack 分治优化&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Winograd 算法&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;加法换乘法（6→4 次），\(Y = A^T[(GgG^T) \odot (B^TdB)]A\)；仅适用小卷积核（3×3）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;QNNPACK&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;间接缓冲区替换 Im2Col 拷贝，PDOT 微内核，适配 L1 缓存的轻量设计&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;内存布局&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;NCHW vs NHWC vs NCHWX，通道拆分适配硬件并行度&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;核心启示&lt;/strong&gt;：Kernel 优化的演进史本质上是对&amp;quot;计算 vs 访存 vs 空间&amp;quot;三元悖论的持续平衡。从 Im2Col（牺牲空间换访存便利）到 Winograd（牺牲通用性换计算减少）再到 QNNPACK（牺牲灵活性换零拷贝），每一代算法都在寻找更优的平衡点。理解这些算法的设计取舍，才能真正领会推理引擎 Kernel 层的设计精髓。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;em&gt;本文是《AI系统：原理与架构》第19章的学习笔记，内容有精简和重组。建议配合原书阅读以获取更完整的知识体系。&lt;/em&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

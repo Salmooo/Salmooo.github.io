@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="《AI系统：原理与架构》学习笔记 — 深入理解AI框架的作用、发展历程、编程范式及昇思MindSpore关键特性">
+<title>AI系统：第20章 AI 框架基础</title>
+
+<link rel='canonical' href='http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC20%E7%AB%A0-ai-%E6%A1%86%E6%9E%B6%E5%9F%BA%E7%A1%80/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="AI系统：第20章 AI 框架基础">
+<meta property='og:description' content="《AI系统：原理与架构》学习笔记 — 深入理解AI框架的作用、发展历程、编程范式及昇思MindSpore关键特性">
+<meta property='og:url' content='http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC20%E7%AB%A0-ai-%E6%A1%86%E6%9E%B6%E5%9F%BA%E7%A1%80/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='AI System' /><meta property='article:tag' content='AI Framework' /><meta property='article:tag' content='PyTorch' /><meta property='article:tag' content='TensorFlow' /><meta property='article:tag' content='MindSpore' /><meta property='article:tag' content='Programming Paradigm' /><meta property='article:tag' content='Deep Learning' />
+<meta name="twitter:title" content="AI系统：第20章 AI 框架基础">
+<meta name="twitter:description" content="《AI系统：原理与架构》学习笔记 — 深入理解AI框架的作用、发展历程、编程范式及昇思MindSpore关键特性">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="http://localhost:1313/" selected>English</option>
+                                
+                                    <option value="http://localhost:1313/zh-cn/" >中文</option>
+                                
+                                    <option value="http://localhost:1313/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#本章概览">本章概览</a></li>
+    <li><a href="#201-引言">20.1 引言</a></li>
+    <li><a href="#202-ai-框架作用">20.2 AI 框架作用</a>
+      <ol>
+        <li><a href="#2021-深度学习原理">20.2.1 深度学习原理</a>
+          <ol>
+            <li><a href="#1-神经网络">1. 神经网络</a></li>
+            <li><a href="#2-函数逼近">2. 函数逼近</a></li>
+            <li><a href="#3-反向求导">3. 反向求导</a></li>
+          </ol>
+        </li>
+        <li><a href="#2022-ai-框架作用详情">20.2.2 AI 框架作用详情</a>
+          <ol>
+            <li><a href="#1-ai-框架与微分关系">1. AI 框架与微分关系</a></li>
+            <li><a href="#2-ai-框架与程序结合">2. AI 框架与程序结合</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#203-ai-框架之争">20.3 AI 框架之争</a>
+      <ol>
+        <li><a href="#2031-构建-ai-框架的目的">20.3.1 构建 AI 框架的目的</a></li>
+        <li><a href="#2032-ai-框架的发展">20.3.2 AI 框架的发展</a>
+          <ol>
+            <li><a href="#1-时间维度四个阶段">1. 时间维度：四个阶段</a></li>
+            <li><a href="#2-技术维度三代架构">2. 技术维度：三代架构</a></li>
+          </ol>
+        </li>
+        <li><a href="#2033-ai-框架的未来">20.3.3 AI 框架的未来</a></li>
+      </ol>
+    </li>
+    <li><a href="#204-ai-框架的编程范式">20.4 AI 框架的编程范式</a>
+      <ol>
+        <li><a href="#2041-程序开发的编程范式">20.4.1 程序开发的编程范式</a></li>
+        <li><a href="#2042-ai-框架的编程范式详情">20.4.2 AI 框架的编程范式详情</a>
+          <ol>
+            <li><a href="#1-命令式编程动态图--define-by-run">1. 命令式编程（动态图 / define-by-run）</a></li>
+            <li><a href="#2-声明式编程静态图--define-and-run">2. 声明式编程（静态图 / define-and-run）</a></li>
+            <li><a href="#3-函数式编程">3. 函数式编程</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#205-昇思-mindspore-关键特性">20.5 昇思 MindSpore 关键特性</a>
+      <ol>
+        <li><a href="#2051-mindspore-基本介绍">20.5.1 MindSpore 基本介绍</a></li>
+        <li><a href="#2052-昇思-mindspore-特性">20.5.2 昇思 MindSpore 特性</a>
+          <ol>
+            <li><a href="#1-前端编程三种范式融合">1. 前端编程：三种范式融合</a></li>
+            <li><a href="#2-动静统一">2. 动静统一</a></li>
+            <li><a href="#3-端边云全场景">3. 端边云全场景</a></li>
+            <li><a href="#4-极致性能图算融合">4. 极致性能：图算融合</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#-学完这章我的几点感悟">🤔 学完这章，我的几点感悟</a></li>
+    <li><a href="#小结">小结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/ai/" >
+                AI
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC20%E7%AB%A0-ai-%E6%A1%86%E6%9E%B6%E5%9F%BA%E7%A1%80/">AI系统：第20章 AI 框架基础</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            《AI系统：原理与架构》学习笔记 — 深入理解AI框架的作用、发展历程、编程范式及昇思MindSpore关键特性
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    3 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="本章概览">本章概览
+</h2><p>前面十几章我们深入了芯片、编译器、推理引擎和 Kernel 优化的细节，到了第 20 章，该回过头来看看<strong>AI 框架本身</strong>了——这个把算法、芯片、训练、推理全部串起来的&quot;操作系统&quot;。</p>
+<p>这一章的核心主题其实是两个词：<strong>作用和演进</strong>。AI 框架为什么要存在？它解决了什么问题？从 Theano 到 PyTorch 再到 MindSpore，框架是怎么一步步演化的？</p>
+<p>本章要回答的核心问题：</p>
+<ul>
+<li>深度学习的数学原理是什么？为什么需要 AI 框架？</li>
+<li>AI 框架最核心的功能是什么？自动微分凭什么这么重要？</li>
+<li>AI 框架经历了哪四个发展阶段？每一代架构的特点是什么？</li>
+<li>声明式编程 vs 命令式编程 vs 函数式编程——三种范式各自解决了什么问题？</li>
+<li>华为昇思 MindSpore 有哪些关键特性？动静统一、图算融合具体怎么实现？</li>
+</ul>
+<blockquote>
+<p><strong>一句话总结</strong>：AI 框架是 AI 时代的&quot;操作系统&quot;，理解框架的演进逻辑，才能看清整个 AI 技术栈的脉络。</p>
+</blockquote>
+<hr>
+<h2 id="201-引言">20.1 引言
+</h2><p>深度学习通过<strong>函数逼近</strong>来解析神经网络的数学原理，通过<strong>反向求导算法</strong>来求解神经网络中参数的偏导，从而迭代地求解神经网络中的最优值。</p>
+<p>AI 框架的核心定位：<strong>作为 AI 算法（深度学习算法）的模型设计、训练和验证的一套标准接口、特性库和工具包</strong>，集成了算法的封装、数据的调用以及计算资源的使用，同时面向开发者提供了开发界面和高效的执行平台。</p>
+<p>截至目前，国际主流的 AI 框架（PyTorch、TensorFlow 等）基本已经实现<strong>动态图开发、静态图部署</strong>的编程范式，具备动静态图转换的能力。国内厂商也在加速自研：华为昇腾构建 MindSpore、百度打造飞桨 PaddlePaddle、之江实验室联合一流科技开发 OneFlow 等。</p>
+<hr>
+<h2 id="202-ai-框架作用">20.2 AI 框架作用
+</h2><h3 id="2021-深度学习原理">20.2.1 深度学习原理
+</h3><h4 id="1-神经网络">1. 神经网络
+</h4><p>从两个角度看神经网络：</p>
+<ul>
+<li><strong>通用概念</strong>：模拟人脑工作机制，神经元与神经突触之间连接产生不同的信号传递</li>
+<li><strong>统计学角度</strong>：预测数据分布，从数据中学得一个模型，再通过模型预测新数据</li>
+</ul>
+<p>数学上简单地理解：单个神经元就是 <strong>X · W</strong> 的矩阵乘，加上激活函数 fun(X · W)。通过复合函数组合神经元，变成神经网络的一层。</p>
+<p><img src="/images/ai_system/ch20/ai_system.pdf-0729-13.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图20.2.1 神经网络可通过逻辑函数组合模拟任意函数"
+	
+	
+></p>
+<h4 id="2-函数逼近">2. 函数逼近
+</h4><p>神经网络的数学理论基础是<strong>通用逼近定理（Universal Approximation Theorem）</strong>：</p>
+<blockquote>
+<p>只要神经网络规模经过巧妙设计，使用非线性函数进行组合，它可以以任意精度逼近任意一个在闭集里的连续函数。</p>
+</blockquote>
+<p>函数逼近的数学形式为：<strong>Loss(w) = f(w) − g</strong>，通过求解损失函数的最小值来确定网络参数 w。</p>
+<h4 id="3-反向求导">3. 反向求导
+</h4><p>深度学习一般流程：</p>
+<ol>
+<li>构建神经网络模型</li>
+<li>定义损失函数和优化器</li>
+<li>开始训练（计算梯度并更新权重参数）</li>
+<li>验证精度</li>
+</ol>
+<p><img src="/images/ai_system/ch20/ai_system.pdf-0731-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图20.2.2 深度学习完整流程：构建网络→定义损失→训练→验证"
+	
+	
+></p>
+<p>训练的本质就是<strong>反向求导 + 迭代逼近</strong>。导数是函数的局部性质，如果把神经网络看作一个高维复杂函数，训练的过程就是对损失函数求导，利用导数的性质找到损失函数的变化趋势，一步步逼近最优参数。</p>
+<h3 id="2022-ai-框架作用详情">20.2.2 AI 框架作用详情
+</h3><h4 id="1-ai-框架与微分关系">1. AI 框架与微分关系
+</h4><p>AI 框架最核心和基础的功能是<strong>自动微分（AutoGrad）</strong>。</p>
+<p>假设神经网络是一个复合函数，求导使用链式法则。每一次导数的计算都可以<strong>重用前一次的计算结果</strong>——这就是反向传播算法的核心。</p>
+<p><img src="/images/ai_system/ch20/ai_system.pdf-0732-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图20.2.3 反向传播示意图：每次求导复用前次计算结果"
+	
+	
+></p>
+<p>图中的反向箭头意味着：每次对损失函数中的参数求导，都会复用前一次的计算结果和与其对称的原公式中的变量，从而高效地对复合函数求导。</p>
+<h4 id="2-ai-框架与程序结合">2. AI 框架与程序结合
+</h4><p>AI 框架的核心工作流程：</p>
+<ul>
+<li>为开发者提供构建神经网络的数学操作（API）</li>
+<li>把复杂的数学表达转换成计算机可识别的<strong>计算图</strong></li>
+<li>自动对损失函数求导（即对网络中各个参数求偏导）</li>
+<li>在原始计算图基础上构建<strong>对称的反向计算图</strong></li>
+</ul>
+<p><img src="/images/ai_system/ch20/ai_system.pdf-0733-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图20.2.4 AI框架：将数学表达式映射为计算机可执行的计算图"
+	
+	
+></p>
+<p><img src="/images/ai_system/ch20/ai_system.pdf-0733-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图20.2.5 反向计算图：正向图的对称结构，表示偏导数传播路径"
+	
+	
+></p>
+<blockquote>
+<p><strong>总结</strong>：AI 框架最核心的作用是提供开发者构建神经网络的接口（数学操作），自动对神经网络训练（进行反向求导，逼近求解最优值），得到一个神经网络模型用于解决分类、回归、拟合问题。</p>
+</blockquote>
+<hr>
+<h2 id="203-ai-框架之争">20.3 AI 框架之争
+</h2><p>除了数学表示原理外，AI 框架还需要解决：多线程算子加速、跨设备执行（GPU/NPU）、代码编译优化等系统工程问题。</p>
+<p>一个完整商用的 AI 框架需要系统性梳理五层问题：</p>
+<ul>
+<li><strong>前端（面向用户）</strong>：如何灵活地表达神经网络模型？</li>
+<li><strong>算子（执行计算）</strong>：如何保证每个算子的执行性能和泛化性？</li>
+<li><strong>微分（更新参数）</strong>：如何自动、高效地提供求导运算？</li>
+<li><strong>后端（系统相关）</strong>：如何将同一个算子跑在不同的加速设备上？</li>
+<li><strong>运行时</strong>：如何自动优化和调度网络模型进行计算？</li>
+</ul>
+<h3 id="2031-构建-ai-框架的目的">20.3.1 构建 AI 框架的目的
+</h3><p>AI 框架是为在计算加速硬件（GPU/NPU）和 AI 集群上高效训练深度神经网络而设计的可编程系统，需要同时兼顾：</p>
+<p><strong>（1）灵活的编程模型和编程接口</strong></p>
+<ul>
+<li>自动推导计算图，转换为计算机可执行的表示</li>
+<li>良好的生态融合能力（PyTorch 对外提供超过 2000+ API）</li>
+<li>直观的模型构建方式和简洁的神经网络编程语言</li>
+</ul>
+<p><strong>（2）高效和可扩展的计算能力</strong></p>
+<ul>
+<li>自动编译优化：子表达式消除、内核融合、内存优化</li>
+<li>自动并行化：针对 GPU/NPU/TPU 等异构硬件深度优化</li>
+<li>降低新模型开发成本和硬件接入成本</li>
+</ul>
+<h3 id="2032-ai-框架的发展">20.3.2 AI 框架的发展
+</h3><h4 id="1-时间维度四个阶段">1. 时间维度：四个阶段
+</h4><p><img src="/images/ai_system/ch20/ai_system.pdf-0736-11.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图20.3.2 AI框架发展四阶段：萌芽→成长→爆发→深化"
+	
+	
+></p>
+<p><strong>（1）萌芽阶段（2000年代初期）</strong></p>
+<p>受限于早期计算能力，以 Matlab 的神经网络库为代表。缺点是需手写反向传播、搭建网络结构、自行设计优化器，且不支持 GPU/NPU 异构加速。</p>
+<p><img src="/images/ai_system/ch20/ai_system.pdf-0737-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图20.3.3 Matlab神经网络库：早期AI框架雏形"
+	
+	
+></p>
+<p><strong>（2）成长阶段（2012~2014）</strong></p>
+<p>AlexNet 引爆深度神经网络热潮。出现 <strong>Caffe、Chainer、Theano</strong> 等代表性框架，支持多 GPU 训练，声明式与命令式两种编程范式开始分化。</p>
+<p><strong>（3）爆发阶段（2015~2019）</strong></p>
+<p>ResNet 再次突破边界。TensorFlow（2016）、PyTorch（2016）、CNTK、MXNet、PaddlePaddle 百花齐放。激烈竞争后形成 <strong>TensorFlow 和 PyTorch 双头垄断</strong>格局。</p>
+<p><strong>（4）深化阶段（2020年以后）</strong></p>
+<p>GPT 系列超大模型出现，对全场景、异构算力提出更高要求。2020 年华为推出<strong>昇思 MindSpore</strong>（全场景协同 + 可信赖），旷视推出天元 MegEngine，PyTorch 走向 PyTorch 2.X。AI 框架向着全场景、大模型、分布式、安全可信方向深化。</p>
+<h4 id="2-技术维度三代架构">2. 技术维度：三代架构
+</h4><p><img src="/images/ai_system/ch20/ai_system.pdf-0738-11.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图20.3.4 AI框架三代架构的技术演进路径"
+	
+	
+></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>代际</th>
+          <th>特征</th>
+          <th>代表作品</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>第一代</strong></td>
+          <td>库方式 + Layer Base 驱动；灵活性不足</td>
+          <td>MATLAB、SciPy、Torch、Theano</td>
+      </tr>
+      <tr>
+          <td><strong>第二代</strong></td>
+          <td>基于数据流图的计算框架</td>
+          <td>TensorFlow、PyTorch</td>
+      </tr>
+      <tr>
+          <td><strong>第三代</strong></td>
+          <td>面向 DSL + 编译期优化 + 兼顾灵活与性能</td>
+          <td>JAX、Taichi、MindSpore</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><img src="/images/ai_system/ch20/ai_system.pdf-0739-07.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图20.3.5 GAN、深度强化学习等新结构推动框架向灵活编程演进"
+	
+	
+></p>
+<h3 id="2033-ai-框架的未来">20.3.3 AI 框架的未来
+</h3><p>四大技术趋势：</p>
+<ol>
+<li><strong>全场景</strong>：支持端边云全场景跨平台设备部署，解决训练和推理框架碎片化问题</li>
+<li><strong>易用性</strong>：前端便捷性与后端高效性统一，动态图开发 + 静态图部署深度融合</li>
+<li><strong>大规模分布式</strong>：支持超大规模 AI（GPT-4 参数量已达 GPT-3 的 10 倍以上），解决内存、算力、通信、调优四大挑战</li>
+<li><strong>科学计算</strong>：AI 框架与科学计算深度融合——AI 建模替代传统数值模型、AI 求解科学计算方程、AI 框架加速方程求解</li>
+</ol>
+<hr>
+<h2 id="204-ai-框架的编程范式">20.4 AI 框架的编程范式
+</h2><h3 id="2041-程序开发的编程范式">20.4.1 程序开发的编程范式
+</h3><p>两大核心编程范式：</p>
+<p><img src="/images/ai_system/ch20/ai_system.pdf-0742-11.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图20.4.1 声明式编程 vs 命令式编程：两种根本不同的思维方式"
+	
+	
+></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>范式</th>
+          <th>核心理念</th>
+          <th>代表框架</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>命令式（Imperative）</strong></td>
+          <td>详细命令机器<strong>怎么（How）<strong>做以达到</strong>结果（What）</strong></td>
+          <td>PyTorch</td>
+      </tr>
+      <tr>
+          <td><strong>声明式（Declarative）</strong></td>
+          <td>只告诉机器想要的<strong>结果（What）</strong>，机器自己摸索<strong>过程（How）</strong></td>
+          <td>TensorFlow 1.X</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>命令式编程</strong>：把计算机看成一个善始善终服从命令的装置，每一步都要明确交代。如 PyTorch 的 define-by-run 模式——代码写一行执行一行。</p>
+<p><strong>声明式编程</strong>：描述目标性质，让计算机明白目标而非流程。如 SQL 查询：<code>SELECT * FROM collection WHERE num &gt; 5</code>。</p>
+<p><strong>函数式编程</strong>是声明式的一种特殊范型，强调：不使用可变状态、避免副作用、函数结果仅取决于参数。JAX 和 MindSpore 均采用此范式。</p>
+<h3 id="2042-ai-框架的编程范式详情">20.4.2 AI 框架的编程范式详情
+</h3><h4 id="1-命令式编程动态图--define-by-run">1. 命令式编程（动态图 / define-by-run）
+</h4><ul>
+<li>前端 Python 直接驱动后端算子执行</li>
+<li>表达式立即被求值</li>
+<li><strong>优点</strong>：方便调试、灵活性高</li>
+<li><strong>缺点</strong>：执行前无法获得完整计算图描述，缺乏编译期优化</li>
+</ul>
+<p>PyTorch 示例：每一行代码都立即执行，模型定义和执行混合进行。</p>
+<h4 id="2-声明式编程静态图--define-and-run">2. 声明式编程（静态图 / define-and-run）
+</h4><ul>
+<li>先构建完整前向计算图，经优化后再执行</li>
+<li>前端表达不直接执行</li>
+<li><strong>优点</strong>：极致性能优化、编译期全局优化</li>
+<li><strong>缺点</strong>：数据类型和控制流受 API 约束、不方便调试、灵活性低</li>
+</ul>
+<p>TensorFlow 1.X 示例：先定义计算图（placeholder + Variable），再通过 Session 执行。参数的更新也是计算图的一部分。</p>
+<h4 id="3-函数式编程">3. 函数式编程
+</h4><p>JAX 和 MindSpore 采用函数式编程范式，核心优势：</p>
+<ul>
+<li>无副作用：函数结果仅取决于输入</li>
+<li>可组合：小功能以模块化方式组合</li>
+<li>支持高阶函数变换（微分、向量化、并行）</li>
+</ul>
+<p>三种范式的对比：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>维度</th>
+          <th>命令式（PyTorch）</th>
+          <th>声明式（TF 1.X）</th>
+          <th>函数式（JAX/MindSpore）</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>执行方式</td>
+          <td>写一行跑一行</td>
+          <td>先构图再执行</td>
+          <td>函数变换 + 即时编译</td>
+      </tr>
+      <tr>
+          <td>灵活性</td>
+          <td>⭐⭐⭐</td>
+          <td>⭐</td>
+          <td>⭐⭐</td>
+      </tr>
+      <tr>
+          <td>性能优化</td>
+          <td>⭐</td>
+          <td>⭐⭐⭐</td>
+          <td>⭐⭐⭐</td>
+      </tr>
+      <tr>
+          <td>调试难度</td>
+          <td>⭐⭐⭐（简单）</td>
+          <td>⭐（困难）</td>
+          <td>⭐⭐</td>
+      </tr>
+  </tbody>
+</table></div>
+<hr>
+<h2 id="205-昇思-mindspore-关键特性">20.5 昇思 MindSpore 关键特性
+</h2><h3 id="2051-mindspore-基本介绍">20.5.1 MindSpore 基本介绍
+</h3><p>昇思 MindSpore 是华为面向<strong>端边云全场景</strong>设计的 AI 计算框架，三大价值主张：全场景协同、全流程极简、全架构统一。</p>
+<p><img src="/images/ai_system/ch20/ai_system.pdf-0749-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图20.5.1 昇思MindSpore定位：向上使能AI模型创新，向下兼容多样性算力"
+	
+	
+></p>
+<p><strong>四层架构</strong>：</p>
+<p><img src="/images/ai_system/ch20/ai_system.pdf-0750-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图20.5.2 MindSpore四层架构：模型层→表达层→编译优化层→运行时层"
+	
+	
+></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>层级</th>
+          <th>功能</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>模型层</strong></td>
+          <td>预置模型、开发套件、GNN/深度概率编程等拓展库</td>
+      </tr>
+      <tr>
+          <td><strong>表达层（MindExpression）</strong></td>
+          <td>原生 Python 开发调试、动静统一、全场景 C++ 接口</td>
+      </tr>
+      <tr>
+          <td><strong>编译优化层（MindCompiler）</strong></td>
+          <td>MindIR 统一中间表示、自动微分、图算融合、算子生成</td>
+      </tr>
+      <tr>
+          <td><strong>运行时层（MindRT）</strong></td>
+          <td>端边云统一运行时架构、联邦学习协同</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="2052-昇思-mindspore-特性">20.5.2 昇思 MindSpore 特性
+</h3><h4 id="1-前端编程三种范式融合">1. 前端编程：三种范式融合
+</h4><p>MindSpore 独特地支持三种编程范式的融合：</p>
+<ul>
+<li><strong>面向对象编程</strong>：通过 nn.Cell 类构建神经网络层</li>
+<li><strong>函数式编程</strong>：通过函数变换（grad、vmap、jit 等）实现自动微分和加速</li>
+<li><strong>融合编程</strong>：用类构建网络 + 函数变换实现训练，兼顾易用性和灵活性</li>
+</ul>
+<p>这是 MindSpore 相比 PyTorch 和 TensorFlow 最独特的设计——<strong>类构建网络 + 函数驱动训练</strong>。</p>
+<h4 id="2-动静统一">2. 动静统一
+</h4><blockquote>
+<p>MindSpore 基于<strong>源码转换机制</strong>构建神经网络的图结构，相比传统静态图有更易用的表达能力。</p>
+</blockquote>
+<p><strong>JIT Fallback 机制</strong>：检测图模式不支持的 Python 语法 → 生成解释节点 → 编译时或运行时执行解释节点。</p>
+<p><img src="/images/ai_system/ch20/ai_system.pdf-0755-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图20.5.4 JIT Fallback：将纯算子执行和Python代码交替混合执行"
+	
+	
+></p>
+<p>MindSpore 的动态图模式称为 <strong>PyNative 模式</strong>，因为是 Python 解释器在执行。静态图通过 MindCompiler 将 AST 转换到 ANF 范式的 MindIR。</p>
+<h4 id="3-端边云全场景">3. 端边云全场景
+</h4><p>两大关键能力：</p>
+<ul>
+<li><strong>轻量化推理</strong>：训练模型 → 持久化 → 模型优化（算子融合、常量折叠）→ 适配不同硬件约束 → 软硬协同优化</li>
+<li><strong>联邦学习（MindSpore Federated）</strong>：支持千万级无状态终端设备商用化部署，数据留存在本地、共建 AI 模型</li>
+</ul>
+<h4 id="4-极致性能图算融合">4. 极致性能：图算融合
+</h4><p>传统 AI 框架的算子定义从开发者易用角度出发，但<strong>从硬件执行角度看并不高效</strong>：</p>
+<ul>
+<li>算量过大的算子 → 难以生成高性能切分</li>
+<li>算量过小的算子 → 计算无法隐藏数据搬移开销</li>
+<li>算子 Shape 小 → 部分核空闲</li>
+</ul>
+<p>MindSpore 采用<strong>图算融合</strong>技术，打通图层（High-Level IR）和算子层（Low-Level IR）的协同优化壁垒。</p>
+<p><strong>Ascend 加速</strong>：昇腾硬件（AICORE + AICPU + CPU）支持整图下沉，减少 Host-Device 交互，结合循环下沉实现多 Step 下沉。</p>
+<p><strong>梯度累积</strong>：将大 Batch Size 拆分为小 Batch，按顺序计算后再统一更新参数。解决内存不足以支撑大 Batch 训练的难题。</p>
+<p><img src="/images/ai_system/ch20/ai_system.pdf-0758-12.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图20.5.5 梯度累积：将大Batch拆成小Batch顺序计算后统一更新"
+	
+	
+></p>
+<p><strong>自适应梯度求和（Adasum）</strong>：考虑到梯度方向——网络初期梯度基本平行，后期趋于正交，且不同层的正交性差异大。混合 Adasum 和传统 ReduceSum 优化分布式训练通信开销。</p>
+<p><img src="/images/ai_system/ch20/ai_system.pdf-0759-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图20.5.6 自适应梯度求和：根据梯度方向正交性动态选择聚合策略"
+	
+	
+></p>
+<hr>
+<h2 id="-学完这章我的几点感悟">🤔 学完这章，我的几点感悟
+</h2><ol>
+<li>
+<p><strong>AI 框架 = AI 时代的操作系统</strong>。就像 Windows/Linux 对 PC 一样，AI 框架屏蔽了底层硬件（GPU/NPU）的复杂性，让算法工程师专注于模型设计而非算子实现。</p>
+</li>
+<li>
+<p><strong>自动微分是 AI 框架的灵魂</strong>。没有自动微分，就没有现代深度学习。理解了链式法则 + 计算图 + 反向传播，就理解了 AI 框架最核心的&quot;魔法&quot;。</p>
+</li>
+<li>
+<p><strong>编程范式的演进史就是框架的进化史</strong>。从命令式（PyTorch 灵活但优化难）到声明式（TF 1.X 性能好但调试难）再到函数式+融合（MindSpore 兼顾两者），这本质上是在<strong>灵活性和性能之间寻找最优平衡点</strong>。</p>
+</li>
+<li>
+<p><strong>MindSpore 走了一条独特的路径</strong>。源码转换 + 动静统一 + 图算融合 + 函数式编程——这些组合让它在全场景（端边云）部署上具有天然优势。它不是 PyTorch 或 TensorFlow 的跟随者，而是一个全新的架构设计。</p>
+</li>
+<li>
+<p><strong>AI 框架的未来是&quot;重型基础设施&quot;的竞争</strong>。大模型时代，光有前端易用性还不够——分布式并行、通信压缩、内存优化、科学计算融合这些&quot;硬核&quot;能力才是决胜点。这也是为什么国内厂商纷纷自研框架的根本原因。</p>
+</li>
+</ol>
+<hr>
+<h2 id="小结">小结
+</h2><p>第 20 章帮我们建立了 AI 框架的完整认知：</p>
+<ul>
+<li><strong>AI 框架核心作用</strong>：封装深度学习训练流程，提供自动微分、计算图构建、算子加速等功能</li>
+<li><strong>数学基础</strong>：函数逼近 + 链式求导 + 反向传播 → 自动微分</li>
+<li><strong>发展四阶段</strong>：萌芽（MATLAB）→ 成长（Caffe/Theano）→ 爆发（TF/PyTorch 双头垄断）→ 深化（全场景/大模型/安全可信）</li>
+<li><strong>三代架构</strong>：库/Layer Base → 数据流图 → DSL + 编译优化</li>
+<li><strong>三种编程范式</strong>：命令式（define-by-run）、声明式（define-and-run）、函数式（函数变换）</li>
+<li><strong>MindSpore 特性</strong>：动静统一（源码转换 + JIT Fallback）、图算融合、Ascend 加速、联邦学习、自适应梯度求和</li>
+</ul>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>对比维度</th>
+          <th>PyTorch</th>
+          <th>TensorFlow 1.X</th>
+          <th>MindSpore</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>编程范式</td>
+          <td>命令式（动态图）</td>
+          <td>声明式（静态图）</td>
+          <td>融合式（OO + 函数式）</td>
+      </tr>
+      <tr>
+          <td>易用性</td>
+          <td>⭐⭐⭐</td>
+          <td>⭐⭐</td>
+          <td>⭐⭐⭐</td>
+      </tr>
+      <tr>
+          <td>性能优化</td>
+          <td>⭐⭐</td>
+          <td>⭐⭐⭐</td>
+          <td>⭐⭐⭐</td>
+      </tr>
+      <tr>
+          <td>动静统一</td>
+          <td>PyTorch 2.0 引入</td>
+          <td>TF 2.0 默认 Eager</td>
+          <td><strong>原生支持，源码转换</strong></td>
+      </tr>
+      <tr>
+          <td>全场景支持</td>
+          <td>较弱</td>
+          <td>较弱</td>
+          <td><strong>端边云统一架构</strong></td>
+      </tr>
+      <tr>
+          <td>硬件适配</td>
+          <td>CUDA 为主</td>
+          <td>多平台</td>
+          <td><strong>NPU/GPU/CPU</strong></td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p><strong>核心启示</strong>：AI 框架的本质是&quot;用什么样的抽象让算法工程师舒服，同时用什么样的编译优化让硬件高效运行&quot;。从第一代到第三代，从命令式到融合式，AI 框架的每一次重大变革，都在回答这个问题。</p>
+</blockquote>
+<hr>
+<p><em>下一篇预告：第 21 章将深入探讨自动微分的原理与实现——前向微分 vs 反向微分、雅可比矩阵、表达式/操作符重载/源码转换三种实现方式，以及自动微分的未来挑战。敬请期待！</em></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ai-system/">AI System</a>
+        
+            <a href="/tags/ai-framework/">AI Framework</a>
+        
+            <a href="/tags/pytorch/">PyTorch</a>
+        
+            <a href="/tags/tensorflow/">TensorFlow</a>
+        
+            <a href="/tags/mindspore/">MindSpore</a>
+        
+            <a href="/tags/programming-paradigm/">Programming Paradigm</a>
+        
+            <a href="/tags/deep-learning/">Deep Learning</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC10%E7%AB%A0-%E5%89%8D%E7%AB%AF%E4%BC%98%E5%8C%96/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第10章 前端优化</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC11%E7%AB%A0-%E5%90%8E%E7%AB%AF%E4%BC%98%E5%8C%96/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第11章 后端优化</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC13%E7%AB%A0-cann-ascend-c-%E8%AE%A1%E7%AE%97%E6%9E%B6%E6%9E%84/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第13章 CANN &amp; Ascend C 计算架构</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC14%E7%AB%A0-%E6%8E%A8%E7%90%86%E7%B3%BB%E7%BB%9F/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第14章 推理系统</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC15%E7%AB%A0-%E6%A8%A1%E5%9E%8B%E5%B0%8F%E5%9E%8B%E5%8C%96/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第15章 模型小型化</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.524358946663b6a5f95fbef001d1c97000115552b473e36faad787d7b96c8241.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

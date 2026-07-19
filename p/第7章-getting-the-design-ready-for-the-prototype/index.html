@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="SoC 设计移植到 FPGA 的完整操作手册：门控时钟转化、IO Pad 处理、黑盒与 stub 技术、存储器 wrapper 方法论（从基础到自检）、复杂 RAM 实现技巧、SDC 约束复用、功耗建模边界——应对原型第三定律的实战工具箱。">
+<title>第7章: Getting the Design Ready for the Prototype</title>
+
+<link rel='canonical' href='http://localhost:1313/p/%E7%AC%AC7%E7%AB%A0-getting-the-design-ready-for-the-prototype/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="第7章: Getting the Design Ready for the Prototype">
+<meta property='og:description' content="SoC 设计移植到 FPGA 的完整操作手册：门控时钟转化、IO Pad 处理、黑盒与 stub 技术、存储器 wrapper 方法论（从基础到自检）、复杂 RAM 实现技巧、SDC 约束复用、功耗建模边界——应对原型第三定律的实战工具箱。">
+<meta property='og:url' content='http://localhost:1313/p/%E7%AC%AC7%E7%AB%A0-getting-the-design-ready-for-the-prototype/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='FPGA' /><meta property='article:tag' content='Prototyping' /><meta property='article:tag' content='RTL Modification' /><meta property='article:tag' content='Clock Gating' /><meta property='article:tag' content='Memory Wrapper' /><meta property='article:tag' content='Black Box' /><meta property='article:tag' content='SDC' /><meta property='article:tag' content='Synthesis Constraints' /><meta property='article:tag' content='BlockRAM' /><meta property='article:tag' content='Design-for-Prototyping' /><meta property='article:published_time' content='2026-06-05T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-06-05T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="第7章: Getting the Design Ready for the Prototype">
+<meta name="twitter:description" content="SoC 设计移植到 FPGA 的完整操作手册：门控时钟转化、IO Pad 处理、黑盒与 stub 技术、存储器 wrapper 方法论（从基础到自检）、复杂 RAM 实现技巧、SDC 约束复用、功耗建模边界——应对原型第三定律的实战工具箱。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="http://localhost:1313/" selected>English</option>
+                                
+                                    <option value="http://localhost:1313/zh-cn/" >中文</option>
+                                
+                                    <option value="http://localhost:1313/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#章节概览">章节概览</a></li>
+    <li><a href="#核心知识点">核心知识点</a></li>
+    <li><a href="#详细笔记">详细笔记</a>
+      <ol>
+        <li><a href="#71-为什么需要让设计准备好">7.1 为什么需要&quot;让设计准备好&quot;？</a></li>
+        <li><a href="#72-改造设计顶层">7.2 改造设计顶层</a>
+          <ol>
+            <li><a href="#721-处理-io-pad">7.2.1 处理 IO Pad</a></li>
+            <li><a href="#722-处理顶层-chip-support">7.2.2 处理顶层 Chip Support</a></li>
+          </ol>
+        </li>
+        <li><a href="#73-门控时钟">7.3 门控时钟</a>
+          <ol>
+            <li><a href="#soc-中门控时钟的两个层级">SoC 中门控时钟的两个层级</a></li>
+          </ol>
+        </li>
+        <li><a href="#heading"></a></li>
+      </ol>
+    </li>
+  </ol>
+
+  <ol>
+    <li>
+      <ol>
+        <li><a href="#74-自动门控时钟转化">7.4 自动门控时钟转化</a>
+          <ol>
+            <li><a href="#741-处理不可自动转化的门控逻辑">7.4.1 处理不可自动转化的门控逻辑</a></li>
+          </ol>
+        </li>
+        <li><a href="#75-为原型选择设计子集">7.5 为原型选择设计子集</a>
+          <ol>
+            <li><a href="#751-block-removal-及其涟漪效应">7.5.1 Block Removal 及其涟漪效应</a></li>
+            <li><a href="#752-用-stub-处理-soc-元素">7.5.2 用 Stub 处理 SoC 元素</a></li>
+            <li><a href="#753-最小化和局部化-rtl-变更">7.5.3 最小化和局部化 RTL 变更</a></li>
+            <li><a href="#754-用等效-rtl-替换-soc-元素">7.5.4 用等效 RTL 替换 SoC 元素</a></li>
+          </ol>
+        </li>
+        <li><a href="#heading-1"></a></li>
+      </ol>
+    </li>
+  </ol>
+
+  <ol>
+    <li>
+      <ol>
+        <li>
+          <ol>
+            <li><a href="#756-用实例化替换核心serdesddrfifo">7.5.6 用实例化替换（核心：SERDES、DDR、FIFO）</a></li>
+            <li><a href="#757-用指令控制推断">7.5.7 用指令控制推断</a></li>
+          </ol>
+        </li>
+        <li><a href="#76-78-处理存储器全章最长且最重要的小节">7.6-7.8 处理存储器（全章最长且最重要的小节）</a>
+          <ol>
+            <li><a href="#soc-ram-的多样性table-16">SoC RAM 的多样性（Table 16）</a></li>
+            <li><a href="#virtex-6-ram-速览">Virtex-6 RAM 速览</a></li>
+            <li><a href="#wrapper-方法论全书最重要的设计模式">Wrapper 方法论（全书最重要的设计模式）</a></li>
+          </ol>
+        </li>
+        <li><a href="#heading-2"></a></li>
+      </ol>
+    </li>
+  </ol>
+
+  <ol>
+    <li>
+      <ol>
+        <li>
+          <ol>
+            <li><a href="#78-实现复杂-ram-的技巧">7.8 实现复杂 RAM 的技巧</a></li>
+          </ol>
+        </li>
+        <li><a href="#79-fpga-实现约束">7.9 FPGA 实现约束</a>
+          <ol>
+            <li><a href="#791-复用-soc-的-sdc-约束">7.9.1 复用 SoC 的 SDC 约束</a></li>
+            <li><a href="#792-调优约束">7.9.2 调优约束</a></li>
+          </ol>
+        </li>
+        <li><a href="#710-功耗节省功能的原型建模">7.10 功耗节省功能的原型建模</a></li>
+        <li><a href="#711-pr-关键报告">7.11 P&amp;R 关键报告</a></li>
+        <li><a href="#712-版本控制">7.12 版本控制</a></li>
+      </ol>
+    </li>
+    <li><a href="#关键图示解读">关键图示解读</a></li>
+    <li><a href="#个人总结">个人总结</a></li>
+    <li><a href="#实践思考">实践思考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/fpga%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" >
+                FPGA学习笔记
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E7%AC%AC7%E7%AB%A0-getting-the-design-ready-for-the-prototype/">第7章: Getting the Design Ready for the Prototype</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jun 05, 2026</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    7 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="章节概览">章节概览
+</h2><p>第7章是全书最核心的&quot;实战操作手册&quot;——它系统性地解决<strong>原型第三定律</strong>（SoC 设计对 FPGA 不友好）带来的每一个具体技术问题。</p>
+<p>章节主线是一个完整的 SoC→FPGA 移植工作流程：(1) 评估哪些设计元素需要修改 → (2) 处理顶层 IO Pad 和芯片支持逻辑 → (3) 转化门控时钟（最重要的单一任务）→ (4) 选择/移除/替换/包装不适用的设计块 → (5) 用 wrapper 方法论处理各类存储器 → (6) 施加 FPGA 实现约束 → (7) 版本控制和团队协作。</p>
+<p>全章多处展示具体代码——<code>ifdef 分支、wrapper VHDL 实例、参数化 RAM 模型、SDC 约束列表、合成指令</code>——使这一章不仅是理论指南，更是可直接参考的实现模板。</p>
+<hr>
+<h2 id="核心知识点">核心知识点
+</h2><ul>
+<li><strong>9 类必须修改的 SoC 设计元素</strong>（Table 15）：顶层 IO Pad、门级网表、SoC 库单元、SoC 存储器、SoC 专用 IP、BIST、门控时钟、复杂生成时钟、以及其他原因（测试点、未用输入、FPGA 特定时钟实例化）</li>
+<li><strong>门控时钟的 FPGA 问题</strong>：SoC 中插入物理门到时钟路径由 clock tree synthesis 补偿偏斜→FPGA 没有 clock tree synthesis→需要将所有门控时钟转化为时钟使能</li>
+<li><strong>门控时钟转化三条件</strong>：门控信号存在使时钟输出的组合 → 输出跟随基时钟或反相 → 只基于一个基时钟。AND 门可转化，XOR 不可转化，MUX（多基时钟）不可自动转化</li>
+<li><strong>不可转化时钟的高级处理</strong>：在时钟生成逻辑输出点定义基时钟；插入 feed-through LUT/clock buffer 手动平衡路径；使用 10× 快时钟 + 上升沿检测器驱动所有使能</li>
+<li><strong>Block Removal 的涟漪效应</strong>：移除一个模块 → 上游独有逻辑被修剪 → 下游无驱动模块被连带移除 → 未被驱动的 BlockRAM 输入在 P&amp;R 时可能导致失败</li>
+<li><strong>Wrapper 三层架构</strong>：接口与 SoC RAM 例化匹配 → 内部包含 FPGA/外部等效实现 → `ifdef 分支选择 SoC 或 FPGA 版本</li>
+<li><strong>自检 Wrapper</strong>：同时例化 SoC 和 FPGA 内存模型 → 断言比较输出 → 在仿真阶段就发现 SoC/FPGA 内存模型假设不一致</li>
+<li><strong>多端口 RAM 的三种实现</strong>：4×BlockRAM 并行（资源换简单性）→ 单 BlockRAM + 4× 快时钟 + MUX（资源最优）→ 双沿时钟（上升沿读/下降沿写）</li>
+<li><strong>SDC 复用</strong>：FPGA 合成工具支持 <code>create_clock</code>, <code>set_input_delay</code>, <code>set_multicycle_path</code> 等常见 SDC 命令——SoC 的顶层时序约束可直接复用到 FPGA</li>
+<li><strong>版本控制铁律</strong>：原型期间的 RTL 改动分为&quot;仅原型所需&quot;和&quot;发现的设计 bug&quot;两类——前者不进主线代码库，后者必须合入；只有好的版本控制能区分二者</li>
+</ul>
+<hr>
+<h2 id="详细笔记">详细笔记
+</h2><h3 id="71-为什么需要让设计准备好">7.1 为什么需要&quot;让设计准备好&quot;？
+</h3><p>核心矛盾：目标是原封不动地用原始 SoC RTL，但现实是 SoC 技术库中大量元素在 FPGA 中不存在或不适用。</p>
+<p><strong>Table 15：需要 RTL 变更的 9 类 SoC 设计元素</strong></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>元素</th>
+          <th>问题</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>顶层 IO Pad</strong></td>
+          <td>SoC Pad 例化不被 FPGA 工具流理解</td>
+      </tr>
+      <tr>
+          <td><strong>门级网表</strong></td>
+          <td>SoC 库单元映射成的网表不被 FPGA 工具理解</td>
+      </tr>
+      <tr>
+          <td><strong>SoC 库单元例化</strong></td>
+          <td>叶子单元直接写在 RTL 中→FPGA 工具不识</td>
+      </tr>
+      <tr>
+          <td><strong>SoC 存储器</strong></td>
+          <td>例化的 SoC 存储器不被 FPGA 工具理解</td>
+      </tr>
+      <tr>
+          <td><strong>SoC 专用 IP</strong></td>
+          <td>DesignWare 宏到完整 CPU 子系统→无源码可用</td>
+      </tr>
+      <tr>
+          <td><strong>BIST</strong></td>
+          <td>原型中不需要，工具可能不理解</td>
+      </tr>
+      <tr>
+          <td><strong>门控时钟</strong></td>
+          <td>溢出 FPGA 时钟资源</td>
+      </tr>
+      <tr>
+          <td><strong>复杂生成时钟</strong></td>
+          <td>需要简化才能在 FPGA 中适配</td>
+      </tr>
+      <tr>
+          <td><strong>其他</strong></td>
+          <td>测试点插入、未用输入 tie-off、FPGA 特定时钟等</td>
+      </tr>
+  </tbody>
+</table></div>
+<hr>
+<h3 id="72-改造设计顶层">7.2 改造设计顶层
+</h3><p>图66：SoC 顶层 = <strong>Chip Support</strong>（时钟生成/分发、复位控制/同步、电源门控、测试/调试控制）+ <strong>Core</strong>（其余设计层级）。</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0192-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 66: Simplified view of SoC top-level"
+	
+	
+></p>
+<h4 id="721-处理-io-pad">7.2.1 处理 IO Pad
+</h4><p>FPGA 综合<strong>不需要</strong> RTL 中有 IO Pad 例化——它能推断 FPGA Pad 甚至配置它。两种方案：</p>
+<ol>
+<li><strong>直接移除 Pad</strong>，将悬空连线 tie-off 到无效态或顶层边界</li>
+<li><strong>保留 Pad 环</strong>，将每个 IO Pad 替换为 FPGA 等效的可综合模型</li>
+</ol>
+<p>SoC 的典型 IO Pad 有 20+ 个连接（主 IO + 电压/斜率控制 + 扫描测试等）。原型只需要<strong>从 Core 到外部世界的逻辑连接</strong>——更简单的 Pad 模型即可。</p>
+<p>关键洞察：<strong>全芯片可能有上千个 Pad，但只有 10 种左右不同类型</strong>。替换每种类型的工作量远小于逐个替换每个 Pad 实例——可以建立一个小型等效库跨项目复用。</p>
+<h4 id="722-处理顶层-chip-support">7.2.2 处理顶层 Chip Support
+</h4><p>推荐方案：<strong>用一个新的、更简单的、处理 FPGA 所需元素的块替换 Chip Support</strong>。</p>
+<p>新顶层结构（图67）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">时钟生成与同步电路（顶层）
+</span></span><span class="line"><span class="cl">    ↓ 提供基时钟
+</span></span><span class="line"><span class="cl">现有设计 Core（不变）
+</span></span><span class="line"><span class="cl">    ↓ 输出
+</span></span><span class="line"><span class="cl">FPGA IO 边界
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0194-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 67: New design top-level for prototype"
+	
+	
+></p>
+<p>新的 FPGA Chip Support 包含：分频器 + 时钟缓冲器 + 同步器——一个相对简单的 FPGA 设计任务（图68）。</p>
+<blockquote>
+<p>注</p>
+</blockquote>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0195-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 68: Simple illustration of top-level chip support block for FPGA implementation"
+	
+	
+>
+意：多 FPGA 原型中 FPGA 时钟网络的使用变得更加复杂→第8章将重新讨论。</p>
+<hr>
+<h3 id="73-门控时钟">7.3 门控时钟
+</h3><h4 id="soc-中门控时钟的两个层级">SoC 中门控时钟的两个层级
+</h4><ol>
+<li><strong>RTL 级门控</strong>：设计在架构中编码——用 AND 门 + 控制信号关断不活跃模块的时钟。大块逻辑不翻转多周期→节省大量动态功耗</li>
+<li><strong>综合推断门控</strong>：工具识别共用使能的 FF 组→自动插入时钟门控</li>
+</ol>
+<p><strong>为什么 SoC 可以而 FPGA 不可以</strong>：</p>
+<ul>
+<li>SoC: 物理门插入时钟路径 → 由 clock tree synthesis 和布局工具在多阶段补偿偏斜</li>
+<li>FPGA: <strong>没有 clock tree synthesis</strong> → 物理门在时钟路径上 → 全局时钟线无法自然容纳 → 强制 P&amp;R 工具使用通用布线资源 → <strong>产生巨大时钟偏斜</strong></li>
+</ul>
+<p><strong>例外</strong>：粗粒度架构级时钟开关（整个模块的 on-off）可以尝试用 Virtex-6 CMT/MMCM 的时钟输出控制功能来模拟。</p>
+<p><strong>门控时钟的竞争条件</strong>（图70）：源 FF 和目的 FF 如果由不同相关时钟驱动（基时钟 vs 插入物理门的衍生门控时钟），数据可能比门控时钟更快/更慢到达→时序违规。</p>
+<h3 id="heading">
+</h3><p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0198-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 70: Gated clock conversion and how it eliminates clock skew"
+	
+	
+></p>
+<h1 id="732-门控时钟转化">7.3.2 门控时钟转化
+</h1><p><strong>核心思想</strong>：将基时钟与门控信号分离 → 基时钟路由到 FF 的时钟输入 + 门控信号路由到<strong>时钟使能（Clock Enable）引脚</strong>。</p>
+<p><strong>效果</strong>：原来分散在多个小门控时钟域上的负载 → 共享一条全局时钟线 → 功能等价 + 消除时钟偏斜（图70）。</p>
+<blockquote>
+<p>手工转化门控时钟困难且易出错——尤其当时钟门控散落在设计各处而非集中在一个层级时。</p>
+</blockquote>
+<hr>
+<h3 id="74-自动门控时钟转化">7.4 自动门控时钟转化
+</h3><p><strong>操作指南</strong>：</p>
+<ol>
+<li><strong>识别基时钟</strong> → 给它们定义频率/周期约束</li>
+<li><strong>不要定义衍生门控时钟为时钟</strong> → 移除 SoC 流程中可能指定的约束</li>
+<li><strong>设置综合工具的时钟门控转化控制选项</strong></li>
+<li><strong>识别由门控时钟驱动的黑盒</strong> → 用工具指令标记黑盒的时钟和使能信号输入</li>
+<li><strong>打断组合逻辑环路</strong>（图71）：插入 feed-through 黑盒（一进一出）→ 在 P&amp;R 时提供输出直连输入的网表</li>
+</ol>
+<p>**门</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0200-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 71: Interrupting combinatorial loops to enable clock gating"
+	
+	
+>
+控时钟可自动转化的三个充要条件**：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>条件</th>
+          <th>AND 门</th>
+          <th>XOR 门</th>
+          <th>MUX</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>输出可被禁用</td>
+          <td>✓（Gate=0→输出=0）</td>
+          <td>✗（无法禁用）</td>
+          <td>✓</td>
+      </tr>
+      <tr>
+          <td>输出=基时钟或反相</td>
+          <td>✓（Gate=1→跟随）</td>
+          <td>N/A</td>
+          <td>✓</td>
+      </tr>
+      <tr>
+          <td>仅基于一个基时钟</td>
+          <td>✓</td>
+          <td>✓</td>
+          <td><strong>✗（两个基时钟）</strong></td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="741-处理不可自动转化的门控逻辑">7.4.1 处理不可自动转化的门控逻辑
+</h4><p><strong>三条路径并行使用</strong>：</p>
+<p><strong>方法一</strong>：重新定义基时钟的识别点（图73）</p>
+<ul>
+<li>在复杂时钟生成逻辑的输出点定义基时钟</li>
+<li>这样该输出驱动的所有下游门控逻辑都变得可转化</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0202-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 73: Handling complex clock gating"
+	
+	
+></p>
+<p><strong>方法二</strong>：手动平衡不可转化门控路径</p>
+<ul>
+<li>Feed-through LUT / 时钟缓冲器 / PLL / 数字时钟管理器</li>
+<li>在两条时钟路径之一插入延迟，平衡偏斜</li>
+</ul>
+<p><strong>方法三</strong>：全局快时钟 + 上升沿检测器（图74、图75）</p>
+<ul>
+<li>整颗 FPGA 用单一路更快时钟驱动（~10× 最快设计时钟）</li>
+<li>设计所有门控时钟→双寄存器同步到快时钟→上升沿检测（<code>NOT(clk_reg2) AND clk_reg1</code>）</li>
+<li>检测器输出 → 连接到原门控时钟驱动的所有 FF 的时钟使能</li>
+<li>需要下降沿检测器（如果原始设计用下降沿）</li>
+<li><strong>注意</strong>：双寄存器路径必须小心布局避免差分延迟</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0204-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 75: Handling complex clock gating with global clock"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0203-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 74: Rising edge detector"
+	
+	
+></p>
+<hr>
+<h3 id="75-为原型选择设计子集">7.5 为原型选择设计子集
+</h3><h4 id="751-block-removal-及其涟漪效应">7.5.1 Block Removal 及其涟漪效应
+</h4><p>移除一个模块的上下游影响（图77→图78）：</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0207-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 78: Effect of removing Block A from Figure 77 and resultant pruning"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0206-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 77: Typical excerpt of logic before block removal"
+	
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">移除 Block A
+</span></span><span class="line"><span class="cl">    ↓
+</span></span><span class="line"><span class="cl">上游：独有逻辑 → 修剪至与其他逻辑共享的驱动点（ AND 门）
+</span></span><span class="line"><span class="cl">下游：
+</span></span><span class="line"><span class="cl">  → Block B（仅被 Block A 驱动）→ 完全移除 → 级联修剪
+</span></span><span class="line"><span class="cl">  → Block C（部分输入来自 Block A）→ 部分内部逻辑被修剪
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>两个关键警告：</p>
+<ol>
+<li><strong>黑盒可能不会被默认移除</strong> → 下游逻辑残留 → P&amp;R 时无驱动输入导致失败（如 BlockRAM 输入未连接 → 意外值 → 仍在电路中）</li>
+<li><strong>不同工具默认行为不同</strong>——Synplify Pro 有 <code>syn_noprune</code> 指令防止修剪；但 P&amp;R 工具可能有自己的默认行为覆盖设置</li>
+</ol>
+<p><strong>结论</strong>：Block Removal 快速强大，但结果不可预测。更好的方案是用<strong>恒定值 stub</strong>替换块（下一节）。</p>
+<h4 id="752-用-stub-处理-soc-元素">7.5.2 用 Stub 处理 SoC 元素
+</h4><p><strong><code>ifdef FPGA</code> 条件分支替换方案</strong>（图79）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-verilog" data-lang="verilog"><span class="line"><span class="cl"><span class="cp">`define FPGA;
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="no">`ifdef</span> <span class="n">FPGA</span>
+</span></span><span class="line"><span class="cl">    <span class="n">SoC_block</span> <span class="n">SoC_block1_stub</span> <span class="p">(</span><span class="n">signals</span><span class="p">...);</span>  <span class="c1">// stub 版本
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="no">`else</span>
+</span></span><span class="line"><span class="cl">    <span class="n">SoC_block</span> <span class="n">SoC_block1</span> <span class="p">(</span><span class="n">signals</span><span class="p">...);</span>       <span class="c1">// 原始版本
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="no">`endif</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>Stub 的优势</strong>：</p>
+<ul>
+<li>输出 tie-off 到特定值 → 下游修剪可控</li>
+<li>上游修剪正常发生</li>
+<li>可选：虚拟寄存器或其他逻辑吸收输入信号，或通过全局信号引到外部测试点</li>
+<li><strong>仿真器对 RTL 完整性要求严格——stub 让设计在仿真器中也能工作</strong></li>
+</ul>
+<h4 id="753-最小化和局部化-rtl-变更">7.5.3 最小化和局部化 RTL 变更
+</h4><p><strong>多种策略的对比</strong>：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>策略</th>
+          <th>优点</th>
+          <th>缺点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>`ifdef 内联</strong></td>
+          <td>简单直接</td>
+          <td>污染原始 RTL</td>
+      </tr>
+      <tr>
+          <td><strong>目标专用库</strong>（文件列表分离）</td>
+          <td>数据库差异一眼可见</td>
+          <td>需要维护两套代码</td>
+      </tr>
+      <tr>
+          <td><strong>XMR/Global Signal</strong>（图80）</td>
+          <td>仅需改 3 个文件</td>
+          <td>Verilog/VHDL 语言依赖</td>
+      </tr>
+      <tr>
+          <td><strong>网表编辑</strong></td>
+          <td>不碰原始 RTL</td>
+          <td>工具依赖，需脚本</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>VHDL Global Signal 示例</strong>（图80）：将深层次信号提取到顶层测试引脚——只改动 package 文件 + 低层 architecture + 顶层 architecture。</p>
+<p><strong>最佳实践</strong>：目标专用代码紧密绑定到局部——&ldquo;让影响靠近原因，避免扩散&rdquo;。</p>
+<h4 id="754-用等效-rtl-替换-soc-元素">7.5.4 用等效 RTL 替换 SoC 元素
+</h4><p>直接将 SoC 基本单元例化替换为行为级 RTL（图81：<code>SoC_mux</code> → <code>assign mux_out = sel ? in1 : in2</code>）。</p>
+<p><strong>.lib 文件的妙用</strong>：Liberty 格式包含了每个叶子单元的逻辑功能方程（图82：<code>function : &quot;(!((A0 A1) | (B0 B1)))&quot;</code>）→ 可直接转化为等效 RTL。Synopsys FPGA 综合工具能<strong>直接读取 .lib 文件</strong>，自动提取功能并映射到 FPGA 资源（图83）。</p>
+<h3 id="heading-1">
+</h3><p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0214-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 83: Excerpt of graphical view of SoC gate-level netlist"
+	
+	
+></p>
+<h1 id="755-用推断替换核心存储器">7.5.5 用推断替换（核心：存储器）
+</h1><p><strong>不直接替换为 FPGA 基本单元</strong>，而是替换为行为 RTL 描述 → 让综合工具推断 FPGA 资源（图84：SoC RAM → <code>reg [3:0] mem [7:0]</code>）。</p>
+<h4 id="756-用实例化替换核心serdesddrfifo">7.5.6 用实例化替换（核心：SERDES、DDR、FIFO）
+</h4><p>部分 FPGA 专用块<strong>不能推断</strong>，必须通过<strong>IP 核生成 + 手动实例化</strong>：</p>
+<p><strong>流程</strong>：</p>
+<ol>
+<li>CORE Generator 选择核类型、目标工艺、参数 → 生成 FPGA 网表 + 初始化文件 + <strong>实例化模板</strong>（图85）</li>
+<li>将模板文件实例化到设计中（图86：FIFO 替换）</li>
+</ol>
+<p><strong>Gray Box</strong>：FPGA 网表加入综合过程→允许进一步优化→称为&quot;灰盒&quot;。</p>
+<h4 id="757-用指令控制推断">7.5.7 用指令控制推断
+</h4><p><strong><code>syn_dspstyle</code> 属性</strong>（图87）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-verilog" data-lang="verilog"><span class="line"><span class="cl"><span class="kt">wire</span> <span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">mult_out1</span> <span class="cm">/* synthesis syn_dspstyle = &#34;dsp48&#34; */</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">wire</span> <span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">mult_out2</span> <span class="cm">/* synthesis syn_dspstyle = &#34;logic&#34; */</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>当 DSP 资源被特定实例用完或路由延迟超过 DSP 收益时，需要手动控制。工具也可以<strong>自动计数 DSP/RAM 使用量</strong> → 达到目标器件上限时自动将溢出部分映射到逻辑资源——时序驱动的推断 + 资源感知。</p>
+<hr>
+<h3 id="76-78-处理存储器全章最长且最重要的小节">7.6-7.8 处理存储器（全章最长且最重要的小节）
+</h3><h4 id="soc-ram-的多样性table-16">SoC RAM 的多样性（Table 16）
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>类型</th>
+          <th>配置</th>
+          <th>端口</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>同步 SRAM</td>
+          <td>单端口 / 双端口</td>
+          <td>1RW / 2RW</td>
+      </tr>
+      <tr>
+          <td>同步寄存器文件 SRAM</td>
+          <td>单 / 双 / 多端口</td>
+          <td>1RW / 1R+1W / nR+mW</td>
+      </tr>
+      <tr>
+          <td>异步 SRAM</td>
+          <td>单端口 / 双端口</td>
+          <td>1RW / 2RW</td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="virtex-6-ram-速览">Virtex-6 RAM 速览
+</h4><ul>
+<li><strong>BlockRAM</strong>：36Kb，可配为 2×18Kb 或 1×36Kb。双端口对称独立。支持 single-port / simple dual-port / true dual-port。内置 FIFO + 数据宽度转换器</li>
+<li><strong>分布式 RAM</strong>：LUT 配置为小型 RAM。适用于不兼容 BlockRAM 的拓扑（4 端口、位寻址）或小尺寸（16×8, 36×2）</li>
+<li><strong>外部 RAM 接口</strong>：SoC 中数 MB 的大 RAM 需映射到板级外部存储器。FPGA 通过快速 IO 连接外部 DDR2/DDR3</li>
+</ul>
+<h4 id="wrapper-方法论全书最重要的设计模式">Wrapper 方法论（全书最重要的设计模式）
+</h4><p><strong>核心原理</strong>（图88）：Wrapper = 一个小型 RTL 模块，顶层边界与 SoC RTL 中的例化匹配，内部包含 FPGA/外部等效实现。</p>
+<p>**创</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0222-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 88: Basic concept of a wrapper for memory"
+	
+	
+>
+建方法**：复制 SoC RTL 中的组件/模块声明→粘贴到新 RTL 文件→在模块体内放入 FPGA 实现。</p>
+<p><strong>Wrapper 的三种用法</strong>：</p>
+<p><strong>用法一：实例化等效 FPGA RAM</strong>（图89）</p>
+<ul>
+<li>Wrapper 内部直接例化 Xilinx RAM 宏或外部存储器黑盒</li>
+<li>端口名称匹配有助于 Certify 分区工具将黑盒引脚与板级描述的存储器引脚关联</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0223-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 89: Typical wrapper for instantiate FPGA RAM as seen in Synplify[®] RTL View"
+	
+	
+></p>
+<p><strong>用法二：实例化外部存储器</strong>（图90 + 图91，代码量最大的示例）</p>
+<ul>
+<li>SoC 1M×32 RAM → Wrapper 合并输入输出总线 → 双向总线连接 → 板级外部 SRAM</li>
+<li>关键：Wrapper 顶层端口匹配 SoC 例化，底层引脚名匹配板级描述的外部 RAM 引脚</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0224-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 90: Wrapper merging SoC RAM data ports onto bidir port on external RAM"
+	
+	
+></p>
+<p><strong>用法三：推断参数化 RAM</strong>（图93 + 图94）</p>
+<ul>
+<li><code>gen_ram #(D_WIDTH=8, A_WIDTH=10, NUM_RDPORTS=2)</code> → 综合自动推断为 FPGA 存储器结构</li>
+<li>参数化允许一个 wrapper 覆盖大量不同配置的 SoC RAM</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0229-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 94: RAM structure inferred by RTL in Figure 93"
+	
+	
+></p>
+<p><strong>工具支持</strong>：</p>
+<ul>
+<li><strong>Xilinx CORE Generator</strong>：生成实现专用的黑盒网表（.ngc 格式，可能加密）</li>
+<li><strong>Synopsys SYNCore</strong>：生成<strong>可读 Verilog RTL</strong> → 综合和 P&amp;R 各阶段完全可用（图92）</li>
+</ul>
+<h3 id="heading-2">
+</h3><p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0226-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 92: Synopsys SYNCore memory compiler"
+	
+	
+></p>
+<h1 id="高级封装自检-wrapper图97">高级封装：自检 Wrapper（图97）
+</h1><p>**全</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0231-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 97: Self-checking RAM model"
+	
+	
+>
+书最优雅的设计模式**：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Wrapper
+</span></span><span class="line"><span class="cl">├── SoC RAM 实例（活跃，结果送下游逻辑）
+</span></span><span class="line"><span class="cl">├── FPGA 等效 RAM 实例（影子运行）
+</span></span><span class="line"><span class="cl">└── 断言比较二者输出
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>通过宏选择将哪个实现连接到下游——但两个实现<strong>都在仿真中运行</strong>。</p>
+<p><strong>价值</strong>：<strong>SoC RAM 和 FPGA RAM 的建模假设差异在仿真阶段就被发现，远在接触原型硬件之前</strong>。</p>
+<p><strong>推广</strong>：可以在公司级建立<strong>通用存储器库</strong>——每个 SoC 存储器的单一文件，同时包含 ASIC 库版本 + FPGA 等效 + 等价性检查。</p>
+<h4 id="78-实现复杂-ram-的技巧">7.8 实现复杂 RAM 的技巧
+</h4><p><strong>例一：四端口（1W 4R）寄存器文件</strong> — 三种实现：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>方案</th>
+          <th>资源</th>
+          <th>时钟</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>4×BlockRAM 并行</td>
+          <td>4×36Kb + 解码/MUX 逻辑</td>
+          <td>系统时钟</td>
+      </tr>
+      <tr>
+          <td>单 BlockRAM + 4× 快时钟 + 输入/输出 MUX</td>
+          <td><strong>1×36Kb</strong> + 少量 MUX 逻辑 + 地址选择生成</td>
+          <td><strong>4× 系统时钟</strong></td>
+      </tr>
+      <tr>
+          <td>双沿时钟</td>
+          <td>BlockRAM</td>
+          <td>下降沿读 / 上升沿写</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>单 BlockRAM 方案以时钟换资源——当逻辑资源比 BlockRAM 更稀缺时最优。</p>
+<p><strong>例二：位使能 RAM</strong> — 参数化模型 + write-enable 门控（图100、图101、图102）</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-verilog" data-lang="verilog"><span class="line"><span class="cl"><span class="n">mem_sp_wren</span> <span class="p">#(.</span><span class="n">MEM_SIZE</span><span class="p">(</span><span class="mh">256</span><span class="p">),</span> <span class="p">.</span><span class="n">DATA_WIDTH</span><span class="p">(</span><span class="mh">10</span><span class="p">),</span> <span class="p">.</span><span class="n">WR_SIZE</span><span class="p">(</span><span class="mh">1</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 内部: for (i=0; i&lt;DATA_WIDTH/WR_SIZE; i++)
+</span></span></span><span class="line"><span class="cl"><span class="c1">//   if (a_wr_en[i]) mem[a_addr][(i*WR_SIZE)+:WR_SIZE] &lt;= a_din[...]
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>参数从 SoC 存储器命名中提取（如 M256X10H1M8S10 → 256 deep × 10 wide, 1-port bit-enabled）。</p>
+<p><strong>位使能双端口 RAM 的变体</strong>（图103）：用快时钟在上升沿写，在重写周期前先读回旧数据→根据位写掩码混合新旧数据→写回。</p>
+<hr>
+<h3 id="79-fpga-实现约束">7.9 FPGA 实现约束
+</h3><p><strong>四类核心约束</strong>：</p>
+<ol>
+<li><strong>器件属性</strong>：FPGA 家族/型号/速度等级/封装</li>
+<li><strong>引脚位置和属性</strong>：逻辑 IO → 物理引脚映射（不锁定则每次综合结果不同→设计在板上不能工作）、信令电平/斜率/驱动强度</li>
+<li><strong>时序约束</strong>：最关键的约束。时钟周期、from/to 延迟、多周期路径</li>
+<li><strong>其他</strong>：综合风格、状态机实现风格等</li>
+</ol>
+<h4 id="791-复用-soc-的-sdc-约束">7.9.1 复用 SoC 的 SDC 约束
+</h4><p><strong>Synopsys FPGA 综合支持的 SDC 命令</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-tcl" data-lang="tcl"><span class="line"><span class="cl"><span class="nv">create_clock</span>
+</span></span><span class="line"><span class="cl"><span class="nv">create_generated_clock</span>
+</span></span><span class="line"><span class="cl"><span class="nv">set_clock_groups</span>
+</span></span><span class="line"><span class="cl"><span class="nv">set_input_delay</span>
+</span></span><span class="line"><span class="cl"><span class="nv">set_output_delay</span>
+</span></span><span class="line"><span class="cl"><span class="nv">set_false_path</span>
+</span></span><span class="line"><span class="cl"><span class="nv">set_multicycle_path</span>
+</span></span><span class="line"><span class="cl"><span class="nv">set_max_delay</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>关键注意事项</strong>：</p>
+<ul>
+<li><strong>命名规则不匹配</strong>是常见问题——层级分隔符、总线信号命名、多维数组、记录、生成标识符 → 在 SDC 文件开头显式指定命名约定命令</li>
+<li>report 生成命令通常不直接支持或有不同语法→需用 FPGA 时序分析器手动生成等效报告</li>
+</ul>
+<h4 id="792-调优约束">7.9.2 调优约束
+</h4><p><strong>Constraint Checker</strong>：快速分析约束覆盖度和合法性，在真正跑综合/P&amp;R 之前发现问题→大幅缩短迭代时间。</p>
+<p><strong>合成后报告分析</strong>：综合完成后重点关注——跨 FPGA 关键路径、意外利用率、缺失组件。可以脚本自动化分析。</p>
+<hr>
+<h3 id="710-功耗节省功能的原型建模">7.10 功耗节省功能的原型建模
+</h3><p><strong>核心原则</strong>：</p>
+<blockquote>
+<p>原型验证最适合处理在功耗优化操作之前的纯功能 RTL。</p>
+</blockquote>
+<p><strong>FPGA 能建模的</strong>：</p>
+<ul>
+<li>时钟门控的综合推断</li>
+<li>PLL 的频率缩放</li>
+</ul>
+<p><strong>FPGA 不能/不该建模的</strong>：</p>
+<ul>
+<li>物理电源开关（FPGA 芯片不能部分断电）</li>
+<li>FPGA 核心供电的功耗监测（不代表 SoC 功耗，甚至会误导）</li>
+<li>FPGA 寄存器断电后保持有效值→掩盖 SoC 中寄存器随机化的问题</li>
+</ul>
+<p><strong>对电源控制软件验证的价值</strong>：创建额外的 RTL 欺骗电源管理软件，模拟电压变化响应和模块关断效果——但复杂度增长可能远超收益。</p>
+<hr>
+<h3 id="711-pr-关键报告">7.11 P&amp;R 关键报告
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>报告</th>
+          <th>时机</th>
+          <th>检查重点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>映射和利用率</strong></td>
+          <td>P&amp;R 初期</td>
+          <td>逻辑是否意外移除？黑盒是否正确包含？级联效应？</td>
+      </tr>
+      <tr>
+          <td><strong>初步时序报告</strong></td>
+          <td>全 P&amp;R 前</td>
+          <td>组合逻辑级数是否使最小延迟超过时钟周期？→可能停止处理</td>
+      </tr>
+      <tr>
+          <td><strong>最终时序报告</strong></td>
+          <td>P&amp;R 完成后</td>
+          <td>是否满足时序？每条 FPGA 独立——外部板级时序需额外分析</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>在 FPGA IO 处插入 FF 可以显著优化和简化板级时序计算。</p>
+</blockquote>
+<hr>
+<h3 id="712-版本控制">7.12 版本控制
+</h3><p>两个关键分支场景：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>改动类型</th>
+          <th>处理</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>仅原型需要的改动</strong>（如替换 SoC Pad 为 FPGA Pad）</td>
+          <td><strong>不进</strong> SoC 主线代码库</td>
+      </tr>
+      <tr>
+          <td><strong>在原型中发现的设计 bug</strong></td>
+          <td><strong>必须合入</strong> SoC 主线代码库</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>&ldquo;我们必须抵制在原型中做出&rsquo;快速临时&rsquo;改动的诱惑。任何我们做的事都可能影响最终芯片——即使我们不在主线代码上工作。&rdquo;</p>
+</blockquote>
+<p>软件方面同样需要版本控制：为适应原型较慢时钟而修改的时间常数 → 只能用于特定原型构建。</p>
+<hr>
+<h2 id="关键图示解读">关键图示解读
+</h2><p><strong>图70：门控时钟转化消除时钟偏斜</strong></p>
+<ul>
+<li>全书最重要的单一概念图示——将门控从时钟路径移到数据路径（时钟使能）= 消除偏斜的物理根源</li>
+</ul>
+<p><strong>图72：可转化与不可转化门控</strong></p>
+<ul>
+<li>AND → 可，XOR → 不可（不能禁用输出），MUX → 不可（两个基时钟）</li>
+<li>三张图比一千字的文字描述更清晰</li>
+</ul>
+<p><strong>图75：全局快时钟 + 上升沿检测器</strong></p>
+<ul>
+<li>处理最复杂门控时钟场景的最后手段——整颗 FPGA 由单一时钟驱动 → 零偏斜</li>
+</ul>
+<p><strong>图77→图78：Block Removal 的涟漪效应</strong></p>
+<ul>
+<li>移除一个块的上下游级联修剪——理解这个才能安全地裁剪设计</li>
+</ul>
+<p><strong>图83：门级网表在 FPGA 综合中的可视化</strong></p>
+<ul>
+<li>来自 SoC 库的叶子单元 → 综合工具直接从 .lib 文件解析功能 → 映射到 FPGA 资源</li>
+</ul>
+<p><strong>图88：Memory Wrapper 基本概念</strong></p>
+<ul>
+<li>Wrapper = 接口匹配 SoC 例化 + 内部 FPGA/外部等效——全书最重要、复用性最强的设计模式</li>
+</ul>
+<p><strong>图97：自检 Wrapper</strong></p>
+<ul>
+<li>SoC 和 FPGA 两个内存模型同时仿真 + 断言比较——在接触硬件前就发现建模差异</li>
+</ul>
+<p><strong>图99：单 BlockRAM 实现四端口寄存器文件</strong></p>
+<ul>
+<li>4× 快时钟 + MUX → 以时钟速度换资源效率的典型工程权衡</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0233-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 99: Single BlockRAM used to implement a quad-port register file"
+	
+	
+></p>
+<hr>
+<h2 id="个人总结">个人总结
+</h2><p>第7章在全书中的独特地位：它是从&quot;知道为什么&quot;和&quot;知道是什么&quot;到&quot;知道怎么做&quot;的关键转折。</p>
+<p>本章最核心的工程原则是**&ldquo;最小化 RTL 变更的扩散半径&rdquo;**。无论是用 XMR/Global Signal 将改动限制在 3 个文件，还是用 Wrapper 将修改封装在新增层级而非修改原有代码，还是用 `ifdef 将两条路径并存在同一文件——所有技术的共同目标都是：<strong>让原型专用的改动可控、可追溯、可回退</strong>。</p>
+<p>Wrapper 方法论是全书最具复用价值的设计模式。一旦理解了&quot;顶层端口匹配 SoC 例化 + 内部 FPGA/外部实现 + `ifdef 双路径&quot;这个框架，它就适用于几乎所有需要替换的设计元素——不仅仅是存储器，还包括 IO Pad、时钟生成器、IP 核、甚至整个子系统。</p>
+<p>自检 Wrapper 是另一个让我印象深刻的概念——它把&quot;FPGA 原型中可能出现的不匹配&quot;提前到了仿真阶段发现。在 SoC 验证本来就跑大量仿真回归的前提下，同时验证 FPGA 等效实现几乎没有额外成本，但收益是原型 bring-up 时少一个&quot;我的 RAM 模型到底对不对&quot;的变量。</p>
+<p>最后，关于门控时钟转化：<strong>自动转化能处理 90% 的场景</strong>（单基时钟 + AND 门），剩下的 10%（多时钟 MUX、XOR、复杂生成逻辑）需要手动应对——全局快时钟方案是最后的底牌。</p>
+<hr>
+<h2 id="实践思考">实践思考
+</h2><ul>
+<li><strong>建立公司级的 Wrapper 库</strong>是 ROI 最高的基础设施建设之一。每个 SoC 项目中遇到的存储器类型都可以积累，到第三个项目时 wrapper 库已经覆盖了大多数常见场景</li>
+<li><strong><code>syn_noprune</code> 和 P&amp;R 工具的默认修剪行为的冲突</strong>是一个在真实项目中容易被忽视的坑——在流程早期用一个极简测试设计验证从综合到 P&amp;R 的完整工具链行为</li>
+<li><strong>不要低估 .lib 文件的实用性</strong>——如果 SoC 团队能提供 .lib 文件，FPGA 综合工具可以直接解析它，省去手工创建等效 RTL 的工作量</li>
+<li>**门控时钟转化的三条准则（AND→可，XOR→不可，MUX→不可）**值得背下来——在检查综合报告中的非转化时钟列表时，这三条可以快速判断哪些需要手工处理</li>
+<li><strong>P&amp;R 的三个关键报告</strong>应该被纳入自动化脚本——映射/利用率报告在 P&amp;R 开始后 15 分钟内就能产生，如果发现逻辑被意外移除，立即中止比等数小时到失败要好</li>
+<li><strong>版本控制的&quot;两类改动&quot;区分原则</strong>——在每次 RTL 修改时明确标记属于&quot;prototype-only&quot;还是&quot;design-bug-fix&quot;——事后区分几乎不可能</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0196-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 69: RTL clock gating in SoC to reduce dynamic power"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0230-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 96: Preferred wrapper in SoC design using Design-for-Prototyping"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0230-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 95: Switching between wrappers using `define fpga macro"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0232-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 98: Four BlockRAMs used to implement a quad-port register file"
+	
+	
+></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/fpga/">FPGA</a>
+        
+            <a href="/tags/prototyping/">Prototyping</a>
+        
+            <a href="/tags/rtl-modification/">RTL Modification</a>
+        
+            <a href="/tags/clock-gating/">Clock Gating</a>
+        
+            <a href="/tags/memory-wrapper/">Memory Wrapper</a>
+        
+            <a href="/tags/black-box/">Black Box</a>
+        
+            <a href="/tags/sdc/">SDC</a>
+        
+            <a href="/tags/synthesis-constraints/">Synthesis Constraints</a>
+        
+            <a href="/tags/blockram/">BlockRAM</a>
+        
+            <a href="/tags/design-for-prototyping/">Design-for-Prototyping</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC15%E7%AB%A0-conclusions-%E5%85%A8%E4%B9%A6%E6%80%BB%E7%BB%93%E4%B8%8E%E6%A0%B8%E5%BF%83%E8%A6%81%E7%82%B9%E5%9B%9E%E9%A1%BE/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第15章: Conclusions — 全书总结与核心要点回顾</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC3%E7%AB%A0-fpga-technology-today-chips-and-tools/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第3章: FPGA Technology Today — Chips and Tools</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC12%E7%AB%A0-breaking-out-of-the-lab-the-prototype-in-the-field/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第12章: Breaking Out of the Lab — The Prototype in the Field</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC13%E7%AB%A0-prototyping--verification-the-best-of-both-worlds/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第13章: Prototyping &#43; Verification = The Best of Both Worlds</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC14%E7%AB%A0-the-future-of-prototyping/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第14章: The Future of Prototyping</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.524358946663b6a5f95fbef001d1c97000115552b473e36faad787d7b96c8241.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

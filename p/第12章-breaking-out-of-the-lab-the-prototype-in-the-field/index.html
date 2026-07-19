@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="将 FPGA 原型从实验室带到现场：六大现场使用场景、从主板刚度到机箱散热到连接器加固的物理设计全维度考量——一份让原型成为&rsquo;可携带产品&rsquo;而非&rsquo;实验台上的蜘蛛网&rsquo;的实践指南。">
+<title>第12章: Breaking Out of the Lab — The Prototype in the Field</title>
+
+<link rel='canonical' href='http://localhost:1313/p/%E7%AC%AC12%E7%AB%A0-breaking-out-of-the-lab-the-prototype-in-the-field/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="第12章: Breaking Out of the Lab — The Prototype in the Field">
+<meta property='og:description' content="将 FPGA 原型从实验室带到现场：六大现场使用场景、从主板刚度到机箱散热到连接器加固的物理设计全维度考量——一份让原型成为&rsquo;可携带产品&rsquo;而非&rsquo;实验台上的蜘蛛网&rsquo;的实践指南。">
+<meta property='og:url' content='http://localhost:1313/p/%E7%AC%AC12%E7%AB%A0-breaking-out-of-the-lab-the-prototype-in-the-field/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='FPGA' /><meta property='article:tag' content='Prototyping' /><meta property='article:tag' content='Portability' /><meta property='article:tag' content='Field Test' /><meta property='article:tag' content='Mechanical Design' /><meta property='article:tag' content='Enclosure' /><meta property='article:tag' content='Plug-Fest' /><meta property='article:tag' content='Reliability' /><meta property='article:published_time' content='2026-06-11T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-06-11T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="第12章: Breaking Out of the Lab — The Prototype in the Field">
+<meta name="twitter:description" content="将 FPGA 原型从实验室带到现场：六大现场使用场景、从主板刚度到机箱散热到连接器加固的物理设计全维度考量——一份让原型成为&rsquo;可携带产品&rsquo;而非&rsquo;实验台上的蜘蛛网&rsquo;的实践指南。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="http://localhost:1313/" selected>English</option>
+                                
+                                    <option value="http://localhost:1313/zh-cn/" >中文</option>
+                                
+                                    <option value="http://localhost:1313/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#章节概览">章节概览</a></li>
+    <li><a href="#核心知识点">核心知识点</a></li>
+    <li><a href="#详细笔记">详细笔记</a>
+      <ol>
+        <li><a href="#121-便携原型的六大使用场景">12.1 便携原型的六大使用场景</a></li>
+        <li><a href="#122-可搬运性的规划">12.2 可搬运性的规划</a>
+          <ol>
+            <li><a href="#1221-主板物理刚度">12.2.1 主板物理刚度</a></li>
+            <li><a href="#1222-子板安装">12.2.2 子板安装</a></li>
+            <li><a href="#1223-安装孔">12.2.3 安装孔</a></li>
+            <li><a href="#1224-主板连接器">12.2.4 主板连接器</a></li>
+            <li><a href="#1225-机箱">12.2.5 机箱</a></li>
+            <li><a href="#1226-散热">12.2.6 散热</a></li>
+            <li><a href="#1227-外观和手感">12.2.7 外观和手感</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#个人总结">个人总结</a></li>
+    <li><a href="#实践思考">实践思考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/fpga%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" >
+                FPGA学习笔记
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E7%AC%AC12%E7%AB%A0-breaking-out-of-the-lab-the-prototype-in-the-field/">第12章: Breaking Out of the Lab — The Prototype in the Field</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jun 11, 2026</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    2 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="章节概览">章节概览
+</h2><p>第11章讲了在实验室中 bring-up 和调试；第12章讨论的是<strong>当原型工作后，如何让它走出实验室</strong>。</p>
+<p>这是全书最短的章节之一，但回答了一个关键问题：<strong>如果原型在设计验证之外还能做什么？</strong> 答案是——现场测试、标准合规测试、客户演示、合作伙伴协同开发、展会亮相、投资者演示。每一种用途都可能对 SoC 项目的商业成功产生决定性影响。</p>
+<p>作者坦诚地指出，大多数实验台上的原型看起来像&quot;勉强受控的混沌&quot;（图147）。本章系统性地给出了将这个混沌变为可靠的、可携带的、甚至外形专业的现场设备的物理设计考量。</p>
+<hr>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0381-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 147: A typical bench-bound prototype!"
+	
+	
+></p>
+<h2 id="核心知识点">核心知识点
+</h2><ul>
+<li><strong>六大现场使用场景</strong>：现场测试（真实环境）→ 本地合规测试（不同地区的不同无线标准）→ 客户早期演示 → 合作伙伴协同开发 → 展会展示 → 投资者进度审核</li>
+<li><strong>PCIe Gen3 案例</strong>：Synopsys 团队将原型打包带到展会——最关键的是<strong>在现场与行业领导者进行早期互操作测试</strong>，在 PCIe Gen3 规范甚至尚未最终定稿时就已经在真实硬件上验证了兼容性</li>
+<li><strong>DS2 的可用性要求</strong>：现场试验由不同学科的工程师（协议专家、软件工程师）而非硬件专家执行——不能指望他们在板子坏了时现场维修 → <strong>FPGA 板和整个原型必须高质量+高机械可靠性</strong></li>
+<li><strong>主板刚度</strong>：BGA 封装的焊球连接在板子任何方向弯曲下都可能断裂。20+ 层的高引脚数 FPGA 原型板本身很硬——但仍需预留加强筋空间或安装在刚性框架中</li>
+<li><strong>子板两种配置</strong>：堆叠（Stacked—小面积但限制探针访问和气流）vs 并排（Lateral—不限制主板访问但不那么坚固）。选型 = 体积 vs 鲁棒性的权衡</li>
+<li><strong>安装孔 ≤10cm 间距</strong>：任何方向不超过 10cm——特别是连接器插入区域。安装柱应吸收插拔力（垂直于板面方向的力），避免力传递到 PCB</li>
+<li><strong>连接器是可靠性故障的第一高频点</strong>：扭转或歪斜的拔插会永久损坏连接器。<strong>许多连接器方案有自带的保留夹——不默认安装是&quot;假节约&quot;</strong></li>
+<li><strong>机箱散热的关键</strong>：封闭后温度迅速上升。排气扇和冷空气进气孔必须在机箱的相对面 → 形成单向气流经过所有热点（FPGA、电源电路）。<strong>避免进气孔靠近排气扇 → 气流短路</strong></li>
+<li><strong>CHIPit Iridium 的&quot;专业外观&quot;策略</strong>：装上侧板 = 像成品，拆下侧板 = 原型可见——&ldquo;这个简单的技巧在演示场景中意义重大&rdquo;</li>
+<li><strong>Plug-Fest 是便携性的终极考验</strong>：把原型带到标准组织的插拔测试聚会 → 现场与其他团队的硬件互操作 → <strong>&ldquo;即使不能马上工作，在这里发现问题远比产品发布后发现好&rdquo;</strong></li>
+</ul>
+<hr>
+<h2 id="详细笔记">详细笔记
+</h2><h3 id="121-便携原型的六大使用场景">12.1 便携原型的六大使用场景
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>场景</th>
+          <th>特点</th>
+          <th>谁操作用？</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>现场测试</strong></td>
+          <td>移动无线电在多样真实环境条件下与基站通信</td>
+          <td>测试工程师</td>
+      </tr>
+      <tr>
+          <td><strong>本地合规测试</strong></td>
+          <td>不同地区的不同无线标准、空口测试必须在当地做</td>
+          <td>合规工程师</td>
+      </tr>
+      <tr>
+          <td><strong>早期客户演示</strong></td>
+          <td>潜在客户现场，未流片就展示产品能力</td>
+          <td>销售/FAE</td>
+      </tr>
+      <tr>
+          <td><strong>合作伙伴协同开发</strong></td>
+          <td>多公司、跨地域、预芯片的协同开发和测试</td>
+          <td>合作伙伴工程师</td>
+      </tr>
+      <tr>
+          <td><strong>展会演示</strong></td>
+          <td>首个展示新功能或新标准实现 → 市场势头</td>
+          <td>市场/FAE/原型工程师</td>
+      </tr>
+      <tr>
+          <td><strong>投资者进度审核</strong></td>
+          <td>在董事会或投资者面前做现场演示 → 快速有效评估进度</td>
+          <td>管理层/原型工程师</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>Synopsys PCIe Gen3 的真实案例</strong>：</p>
+<blockquote>
+<p>Torrey Lewis（Synopsys IP 开发者，俄勒冈州希尔斯伯勒）：
+&ldquo;能够带着原型出差绝对是一个优势。对我们的 PCIe Gen3 来说，我们得以出差到一些会议，在 Synopsys 展位展示。<strong>PCIe Gen3 规范甚至还没有最终定稿</strong>，所以作为工程师更令我感兴趣的是<strong>有机会在现场与行业领导者进行早期测试</strong>。这对所有相关方都是互利的。&rdquo;</p>
+</blockquote>
+<blockquote>
+<p>DS2 的 Javier Jimenez：
+&ldquo;我们的一些现场试验由不同学科的工程师执行——协议专家或软件工程师。<strong>他们不是硬件专家，不能指望他们做现场维修来绕过板子故障</strong>。因此 FPGA 板和整个原型必须是高质量的、有高度的机械可靠性。&rdquo;</p>
+</blockquote>
+<h3 id="122-可搬运性的规划">12.2 可搬运性的规划
+</h3><h4 id="1221-主板物理刚度">12.2.1 主板物理刚度
+</h4><p>这是可搬运性的物理基础：</p>
+<p><strong>BGA 焊球的脆弱性</strong>：今天的 FPGA 是 BGA 封装 → BGA 焊球连接对 PCB 弯曲极其敏感 → <strong>板子任何方向的弯曲都可能导致焊球断裂</strong>。</p>
+<p><strong>20+ 层板天然较硬</strong>：多层 PCB 本身就有相当的刚度——但仅靠层数不够。</p>
+<p><strong>加强策略</strong>：</p>
+<ul>
+<li>在板子的长度和宽度方向预留加强筋安装空间</li>
+<li>更简单但效果较差的方案：板子滑入一个在边缘支撑的框架</li>
+</ul>
+<h4 id="1222-子板安装">12.2.2 子板安装
+</h4><p><strong>两种配置对比</strong>：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>配置</th>
+          <th>空间</th>
+          <th>探针访问</th>
+          <th>散热</th>
+          <th>鲁棒性</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>堆叠（上方）</strong></td>
+          <td>小</td>
+          <td>主板受限 + 气流受阻</td>
+          <td>差</td>
+          <td>需固体安装</td>
+      </tr>
+      <tr>
+          <td><strong>并排（侧面）</strong></td>
+          <td>大</td>
+          <td>不受限</td>
+          <td>好</td>
+          <td>相对较弱</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>并排配置的典型场景</strong>：第三方 IP 供应商提供的子板——其机械尺寸与主板无关。</p>
+<h4 id="1223-安装孔">12.2.3 安装孔
+</h4><p><strong>间距规则</strong>：任何方向不超过 <strong>10cm</strong>（约 4 英寸）。</p>
+<p><strong>连接器区域特殊要求</strong>：安装柱应<strong>吸收垂直于板面的插拔力</strong>——避免力传递到 PCB 本身。</p>
+<p><strong>子板叠加的额外需求</strong>：预留子板→主板的固定空间。</p>
+<h4 id="1224-主板连接器">12.2.4 主板连接器
+</h4><p><strong>连接器是实验室中期原型故障最常见的点</strong>——磨损 + 不当的插拔。</p>
+<p><strong>核心问题</strong>：连接器设计为<strong>仅在一个轴上</strong>配合。扭转或歪斜的拔插 = 永久损坏。</p>
+<p><strong>两大对策</strong>：</p>
+<ol>
+<li><strong>加装保留夹</strong>：许多连接器方案已有选项——但不默认安装是&quot;假节约&quot;</li>
+<li><strong>外部线缆固定到机箱而非仅靠连接器</strong>：线缆的张力不应传递到连接器——由机箱吸收</li>
+</ol>
+<h4 id="1225-机箱">12.2.5 机箱
+</h4><p>八项考量组成一个完整的机械设计清单：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>考量</th>
+          <th>建议</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>机械配置</strong></td>
+          <td>选择行业标准尺寸（即使仅放台面）→ 未来可机架安装</td>
+      </tr>
+      <tr>
+          <td><strong>主板固定</strong></td>
+          <td>尽可能多的螺丝/隔柱（越多越好）</td>
+      </tr>
+      <tr>
+          <td><strong>子板固定</strong></td>
+          <td>堆叠→固定于主板；并排→固定于机箱，主板与子板间无机械应力</td>
+      </tr>
+      <tr>
+          <td><strong>电源</strong></td>
+          <td>远离主板→留出线缆和冷却空间；多国出差→多电压电源；自带排气扇→不阻挡冷空气流入</td>
+      </tr>
+      <tr>
+          <td><strong>内部线缆</strong></td>
+          <td>固定到各自连接的板上</td>
+      </tr>
+      <tr>
+          <td><strong>外部线缆</strong></td>
+          <td>固定到机箱（非仅依赖连接器）</td>
+      </tr>
+      <tr>
+          <td><strong>调试访问</strong></td>
+          <td>关键信号引出到机箱壁上的调试连接器→<strong>打开机箱不需要</strong></td>
+      </tr>
+      <tr>
+          <td><strong>杂项</strong></td>
+          <td>FPGA 下载模块、调试器模块也固定到机箱</td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="1226-散热">12.2.6 散热
+</h4><p><strong>封闭机箱的核心挑战</strong>：实验台上可能不需额外散热（有环境空气流动），但<strong>封闭后温度迅速攀升</strong>。</p>
+<p><strong>散热设计三要素</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">冷空气进气孔（机箱一侧）
+</span></span><span class="line"><span class="cl">    ↓ 空气被拉过
+</span></span><span class="line"><span class="cl">FPGA（散热片+风扇）、电源电路（热点）
+</span></span><span class="line"><span class="cl">    ↓ 热空气
+</span></span><span class="line"><span class="cl">排气扇（机箱对侧）
+</span></span><span class="line"><span class="cl">    → 排出
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>关键规则</strong>：</p>
+<ul>
+<li>排气扇和进气孔必须在<strong>机箱的对侧</strong>——确保空气流过所有热点</li>
+<li><strong>阻塞进气孔靠近排气扇的任何开口</strong>——防止气流&quot;短路&quot;（冷空气直接从进气孔到排气扇，绕过热点）</li>
+<li>即使有机箱级散热，每个 FPGA 仍需要自己的散热片+风扇</li>
+<li>FPGA 的系统监控器可以驱动风扇的反馈控制——只在需要时开启</li>
+</ul>
+<h4 id="1227-外观和手感">12.2.7 外观和手感
+</h4><blockquote>
+<p>&ldquo;让原型看起来不那么像学校的科学实验，更像一个成品。&rdquo;</p>
+</blockquote>
+<p><strong>CHIPit Iridium 的聪明设计</strong>（图148）：</p>
+<ul>
+<li>透明侧板可以看到板子和芯片——明显地&quot;这是一个原型平台&quot;</li>
+<li>装上侧板 → 看起来像成品</li>
+<li>&ldquo;这个简单的技巧在演示场景中意义重大&rdquo;</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0386-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 148: CHIPit[®] Iridium, an encased prototyping system"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0386-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 148: CHIPit[®] Iridium, an encased prototyping system"
+	
+	
+></p>
+<p><strong>Plug-Fest 文化</strong>（图149）：</p>
+<ul>
+<li>特殊兴趣小组（通常是新互连或图形标准）组织的多团队硬件互插活动</li>
+<li>所有团队已按标准规范工作——但&quot;只有亲眼看到<strong>自己的 pre-silicon 原型与另一个团队的原型实际工作在一起</strong>，才能真正带来信心&quot;</li>
+<li>即使不能马上工作 — <strong>在这里发现问题远比产品发布后发现好</strong></li>
+<li>Plug-Fest 成功的关键：<strong>设备的可靠性</strong>。带着&quot;蜘蛛网般的不可靠板子&quot;参加 plug-fest 不是在充分利用机会</li>
+</ul>
+<hr>
+<h2 id="个人总结">个人总结
+</h2><p>第12章是一章关于工程实用主义的短章。在学术上它可能看起来不如前几章&quot;深奥&quot;——没有公式、没有代码、没有时序图——但在实际项目中，<strong>原型是否能被带到客户现场、在展会上保持稳定、在 Plug-Fest 上经得起数小时的连续插拔测试，往往比实验室中的峰值性能更能决定一个 SoC 项目的商业命运</strong>。</p>
+<p>本章最值得反思的部分是 <strong>PCIe Gen3 团队在规范未定稿时就带着原型出差做现场互操作测试</strong>。这意味着 FPGA 原型的价值不仅在于验证自己的设计——它还能在标准最终确定之前就为整个行业建立信心和发现互操作性问题。这个价值远远超出了单个公司的 SoC 项目范围。</p>
+<p>DS2 的观点同样尖锐：<strong>&ldquo;协议专家和软件工程师不是硬件专家&rdquo;</strong>。这句话揭示了便携性设计的用户画像——原型离开实验室后，它的用户不再是创建它的硬件工程师，而是软件开发者、合规测试员、销售工程师。这要求原型从&quot;只有创造者才能操作的工具&quot;转变为&quot;任何人插上电源就能工作的产品&quot;。</p>
+<hr>
+<h2 id="实践思考">实践思考
+</h2><ul>
+<li><strong>&ldquo;原型不是为了方便硬件工程师在实验室调 bug 而存在的&rdquo;</strong>——从项目一开始就考虑谁会是原型的终端用户、在什么环境中使用 → 这些问题的答案直接决定机械/电气/热设计的规格</li>
+<li><strong>连接器的保留夹是一个几美分的保险</strong>——在插件面板上省下几块钱，可能换来展会演示当天因为你唯一的工作原型因连接器接触不良而无法启动</li>
+<li><strong>安装孔 ≤10cm 间距</strong>值得加入公司自建板的 PCB 设计规范——这是一个可以机械执行的设计规则，不需要对每个新项目重新判断</li>
+<li><strong>&ldquo;打开机箱不需要&quot;的调试访问</strong>——将 JTAG、关键复位、状态 LED 引出到机箱壁——这是&quot;可维护性&quot;和&quot;密封性&quot;之间最实际的折中</li>
+<li><strong>Plug-Fest 的策略价值</strong>：如果你是标准制定参与者或早期采用者，<strong>提前规划将原型带到 Plug-Fest</strong>。这不仅是技术验证——它会让你的团队在标准生态中建立起专业声誉和早期互操作性的可信度</li>
+<li><strong>CHIPit Iridium 的&quot;可切换外观&quot;是一个值得借鉴的理念</strong>——透明侧板用于内部调试和信心建立，不透明侧板用于对外演示。两块侧板，两种完全不同的使用场景</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/fpga/">FPGA</a>
+        
+            <a href="/tags/prototyping/">Prototyping</a>
+        
+            <a href="/tags/portability/">Portability</a>
+        
+            <a href="/tags/field-test/">Field Test</a>
+        
+            <a href="/tags/mechanical-design/">Mechanical Design</a>
+        
+            <a href="/tags/enclosure/">Enclosure</a>
+        
+            <a href="/tags/plug-fest/">Plug-Fest</a>
+        
+            <a href="/tags/reliability/">Reliability</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC13%E7%AB%A0-prototyping--verification-the-best-of-both-worlds/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第13章: Prototyping &#43; Verification = The Best of Both Worlds</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC14%E7%AB%A0-the-future-of-prototyping/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第14章: The Future of Prototyping</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC15%E7%AB%A0-conclusions-%E5%85%A8%E4%B9%A6%E6%80%BB%E7%BB%93%E4%B8%8E%E6%A0%B8%E5%BF%83%E8%A6%81%E7%82%B9%E5%9B%9E%E9%A1%BE/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第15章: Conclusions — 全书总结与核心要点回顾</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC10%E7%AB%A0-ip-and-high-speed-interfaces/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第10章: IP and High Speed Interfaces</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC11%E7%AB%A0-bring-up-and-debug-the-prototype-in-the-lab/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第11章: Bring Up and Debug — The Prototype in the Lab</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.524358946663b6a5f95fbef001d1c97000115552b473e36faad787d7b96c8241.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

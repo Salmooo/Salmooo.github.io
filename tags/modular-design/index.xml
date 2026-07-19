@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Modular Design on SalmoneX Blog</title>
+        <link>http://localhost:1313/tags/modular-design/</link>
+        <description>Recent content in Modular Design on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright>
+        <lastBuildDate>Fri, 05 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/modular-design/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>第9章: Design for Prototyping</title>
+        <link>http://localhost:1313/p/%E7%AC%AC9%E7%AB%A0-design-for-prototyping/</link>
+        <pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/p/%E7%AC%AC9%E7%AB%A0-design-for-prototyping/</guid>
+        <description>&lt;h2 id=&#34;章节概览&#34;&gt;章节概览
+&lt;/h2&gt;&lt;p&gt;前八章都在讲&amp;quot;如何应对&amp;quot;原型三定律带来的问题。第9章换个角度：&lt;strong&gt;如何从根本上避免这些问题&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;Design-for-Prototyping (DFP) 的核心理念是：&lt;strong&gt;与其事后花费大量精力将 SoC 设计改造为 FPGA 兼容，不如在设计阶段就遵守一套使 RTL 双目标兼容的规则&lt;/strong&gt;。本章以&amp;quot;宣言&amp;quot;形式汇总了全书散布的各种建议，分为两大维度——程序性指南（组织和流程，Table 22）和技术性指南（代码和架构，Table 24）。&lt;/p&gt;
+&lt;p&gt;作者的核心论点是：&lt;strong&gt;对 FPGA 好的设计实践，几乎总是对 SoC 也好&lt;/strong&gt;——干净架构、模块化、同步设计、FF 在模块边界——这些不是额外的负担，而是工程纪律的回归。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;核心知识点&#34;&gt;核心知识点
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;DFP 的定义&lt;/strong&gt;：在设计初期就考虑原型验证需求，建立使原型开发与所有其他项目目标协同的程序性和技术性方法&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;7 条程序性指南&lt;/strong&gt;（Table 22）：RTL 与原型团队整合、原型团队服务软件团队、原型进度纳入验证计划、保持可原型化仿真环境、文档化+统一版本控制、公司级硬件标准、DFP 纳入 RTL 编码规范&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;16 条技术性建议&lt;/strong&gt;（Table 24）：避免锁存器、避免组合环路、用 `define 预判 RTL 修改、低影响源码修改（Wrapper）、纯 RTL 编码、隔离 RTL 修改、复用文件列表/脚本、存储器兼容、PHY 兼容、同步设计、避免长组合路径、隔离时钟源、同步复位、同步块边界、文档化设计怪癖、保持仿真环境&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;FPGA 配置天然初始化所有元素&lt;/strong&gt;：BlockRAM/Distributed RAM/SRL/FF 即使未指定复位也处于已定义状态——而 SoC 必须显式复位。这个差异对复位策略设计有重要影响&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;纯 RTL 原则&lt;/strong&gt;：RTL 不应包含任何低层技术库原语——时钟门控、扫描测试、低功耗缓解应由 SoC 工具流推断而非直接写入 RTL&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Wrapper 是目标隔离的核心机制&lt;/strong&gt;：每一个技术相关元素（RAM、IO、时钟生成器）都应被 Wrapper 封装 → 替代实现只在 Wrapper 内部变化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;慢速运行&amp;quot;需要架构层面的预判&lt;/strong&gt;：多 FPGA 原型速度远低于 SoC 目标速度 → 需在架构设计阶段就规划速率适配器、跨时钟域 FIFO、核心与外设异步运行的方案&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;原型不是一次性&amp;quot;扔掉&amp;quot;的中间产物&lt;/strong&gt;——它应该被视为可复用的工程资产，甚至可成为衍生产品的参考设计&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;详细笔记&#34;&gt;详细笔记
+&lt;/h2&gt;&lt;h3 id=&#34;91-什么是-design-for-prototyping&#34;&gt;9.1 什么是 Design-for-Prototyping？
+&lt;/h3&gt;&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;Design-for-Prototyping 是一门在设计流程早期就考虑原型验证需求的艺术——建立程序性和设计特定技术来使原型开发与所有其他项目目标协同进行。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;核心观点&lt;/strong&gt;：采用 FPGA 原型验证不应是&amp;quot;栓接式&amp;quot;的并行步骤，而是一个&lt;strong&gt;改变先前实践的工程决策&lt;/strong&gt;。它应该影响所有团队——SoC 设计师、验证工程师、软件开发团队、FPGA 平台专家。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;把 DFP 看作为了实现 FPGA 原型收益而做的&lt;strong&gt;前期投资&lt;/strong&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;911-对-fpga-好的通常对-soc-也好&#34;&gt;9.1.1 对 FPGA 好的，通常对 SoC 也好
+&lt;/h4&gt;&lt;p&gt;FPGA 设计天然需要干净的架构和通用逻辑才能有效合成和映射。SoC 设计流程允许更自由随意的风格——这种自由度有时会被不当使用，给后期重构带来困难。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;双目标需求驱动纪律&lt;/strong&gt;：需要同一份 RTL 同时支持 FPGA 和 SoC → 驱使设计师遵循更干净的设计风格 → 这个副产品使 SoC 的长期维护也受益。&lt;/p&gt;
+&lt;p&gt;关键成功因素：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;通过正式设计评审和非正式组织行为强化编程风格&lt;/li&gt;
+&lt;li&gt;管理层和资深成员的全力支持&lt;/li&gt;
+&lt;li&gt;&amp;ldquo;栓接式&amp;quot;原型（没有真正集成到 SoC 设计流）→ 投资回报大打折扣&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;92-程序性指南table-22&#34;&gt;9.2 程序性指南（Table 22）
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;建议&lt;/th&gt;
+          &lt;th&gt;说明&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;RTL 团队与原型团队整合&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;原型团队作为 RTL 设计团队的一部分，使用相同工具、相同编码标准、相同验证套件&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;原型团队服务软件团队&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;软件工程师是工作原型的最常见终端用户——两者必须有良好工作关系&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;原型进度纳入验证计划&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;在预先约定的里程碑分支 RTL，避免频繁增量 RTL 交付给原型设计师&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;保持可原型化仿真环境&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;项目关键节点将原型行为与原始 SoC 仿真比较&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;清晰文档 + 统一版本控制&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;在同一个源码控制系统中追踪软件和 RTL 变更&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;公司级硬件标准&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;通用硬件方法避免浪费，鼓励复用&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;DFP 纳入 RTL 编码标准&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;大多数使原型容易的 RTL 风格变更对 SoC 设计也是好的&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h4 id=&#34;921-rtl-团队与原型团队整合&#34;&gt;9.2.1 RTL 团队与原型团队整合
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;核心理念&lt;/strong&gt;：一个设计，两个目标技术。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;作者知道的某些设计团队——&lt;strong&gt;每个 SoC 设计师负责将自己模块重新目标化到 FPGA&lt;/strong&gt;。这是确保那些模块打破第三定律的最可靠方式。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;管理必须营造共享责任感&lt;/strong&gt;——避免&amp;quot;在里程碑把设计扔过墙&amp;quot;的行为。&lt;/p&gt;
+&lt;h5 id=&#34;9211-soc-rtl-团队的-fpga-教育&#34;&gt;9.2.1.1 SoC RTL 团队的 FPGA 教育
+&lt;/h5&gt;&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;如果管理层认为设计团队无法承担初始原型实现，管理层应该努力&lt;strong&gt;交叉培训设计工程师理解 SoC 和 FPGA 两种技术&lt;/strong&gt;。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;当必须使用技术特定编码时 → &lt;strong&gt;提前计划，而非事后重做&lt;/strong&gt;。&lt;/p&gt;
+&lt;h4 id=&#34;922-定义原型团队交付物清单&#34;&gt;9.2.2 定义原型团队交付物清单
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;Table 23&lt;/strong&gt;（图）：一份来自某大型半导体原型实验室的真实交接检查清单——包含 RTL 文件清单、SDC 约束、库文件、存储器和 IP 配置与版本、验证环境、软件工具链。&lt;/p&gt;
+&lt;h5 id=&#34;9221-复用文件列表和脚本&#34;&gt;9.2.2.1 复用文件列表和脚本
+&lt;/h5&gt;&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;所有脚本和文件列表应作为项目源码控制的一部分。捕获的不仅仅是 RTL 代码——这样其他人将来可以重新创建构建过程。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;最佳方案&lt;/strong&gt;：创建 SoC 和 FPGA 通用的项目 Makefile，用&lt;strong&gt;宏驱动分支&lt;/strong&gt;处理不同目标。&lt;/p&gt;
+&lt;p&gt;关键点：一份 RTL 描述，两种目标技术实现。&lt;strong&gt;必须有意识地将技术特定细节与功能定义分离&lt;/strong&gt;。&lt;/p&gt;
+&lt;h4 id=&#34;923-原型团队服务软件团队&#34;&gt;9.2.3 原型团队服务软件团队
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;由于原型速度低于最终 SoC，某些软件需要重写才能在 FPGA 原型上正确运行&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;设计师需要与软件开发者协商建立：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;软件设计上的额外需求（速率适配、更深的缓冲）&lt;/li&gt;
+&lt;li&gt;原型设计上的额外需求（额外的探针点、复位、软件调试辅助）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;原型芯片到达后数小时内软件就跑起来——这个结果取决于&lt;strong&gt;早期两组人之间的互动质量&lt;/strong&gt;。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;93-将原型整合到验证计划中&#34;&gt;9.3 将原型整合到验证计划中
+&lt;/h3&gt;&lt;h4 id=&#34;9311-优化原型开发排程&#34;&gt;9.3.1.1 优化原型开发排程
+&lt;/h4&gt;&lt;p&gt;重申第4章的关键点：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;原型不是 RTL 调试工具——那是软件仿真器的角色。应等待 RTL 达到预约定成熟度后才开始原型开发。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;同步点&lt;/strong&gt;：RTL 在仿真器中发出&amp;quot;hello world&amp;rdquo; → 通常与&amp;quot;试实现（trial implementation）&amp;ldquo;里程碑重合 → &lt;strong&gt;以此 RTL 里程碑为基础开发原型&lt;/strong&gt; → 最小化 RTL 调试变更对原型工作的干扰。&lt;/p&gt;
+&lt;h4 id=&#34;9312-保留仿真脚本&#34;&gt;9.3.1.2 保留仿真脚本
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;SoC 设计和 FPGA 原型朝不同方向演化 → 保留工作仿真模型&lt;/li&gt;
+&lt;li&gt;Bring-up 和调试时用&amp;quot;金质测试平台&amp;quot;检查异常行为&lt;/li&gt;
+&lt;li&gt;验证团队可能已经发现了原型中看到的同一故障（甚至已在 RTL 中修复）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;建议定期比较原型与 SoC 仿真结果&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;932-文档化--版本控制&#34;&gt;9.3.2 文档化 + 版本控制
+&lt;/h4&gt;&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;我们应该避免原型团队看起来像&amp;rsquo;那些拿着板子的黑客&amp;rsquo;——原型团队的所有改动应记录在与项目其他部分相同的版本控制系统中。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;933-公司级硬件标准&#34;&gt;9.3.3 公司级硬件标准
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;板子从库存中可获得或标准供应商快速提供 → 板子损坏时可快速更换&lt;/li&gt;
+&lt;li&gt;跨实验室和站点的兼容板卡 → 围绕选定平台积累公司级知识库和专业技能&lt;/li&gt;
+&lt;li&gt;子板可在项目间复用&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;最坏情况&lt;/strong&gt;：每个团队为每个原型项目获得或制造一块新的不兼容的板子——高风险 + 高开发成本。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;934-将-dfp-纳入-rtl-编码标准&#34;&gt;9.3.4 将 DFP 纳入 RTL 编码标准
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;多数 DFP 规则本身就是好的编码实践——现在有了&amp;quot;双目标映射&amp;quot;这个硬性需求，多了执行这些已有规范的理由&lt;/li&gt;
+&lt;li&gt;命名标准：目标特定设计元素（时钟生成、时钟、存储器、模拟块）&lt;/li&gt;
+&lt;li&gt;检入回归 + Linting 要求&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;原型不是&amp;quot;可丢弃的&amp;rdquo;——如果现场发现重大问题，原型可以再次用于完全验证引起问题的工程变更（EC）&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;94-设计指南table-24--全书-rtl-编码规范总汇&#34;&gt;9.4 设计指南（Table 24 — 全书 RTL 编码规范总汇）
+&lt;/h3&gt;&lt;h4 id=&#34;上半部分&#34;&gt;上半部分：
+&lt;/h4&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;建议&lt;/th&gt;
+          &lt;th&gt;说明&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;避免锁存器&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;可实现但效率低、时序分析复杂。基于锁存器的设计降低 SoC 功耗但 FPGA 综合不建模省电行为&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;避免组合环路&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;可能因自底向上流程直到全芯片组装才暴露→而第一次全芯片组装恰恰发生在原型项目启动时&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;用 `define 预判 RTL 修改&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;单一宏切换所有原型改动。标准宏名纳入公司源码风格指南。用于隔离 BIST、存储器例化等&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;低影响源码修改&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;始终使用 Wrapper：替换文件而非编辑文件；将修改回注到真实源码&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;写纯 RTL&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;不直接在 RTL 中例化 SoC 库原语。让工具流推断时钟门控、插入测试、应用低功耗&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;隔离 RTL 修改&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;在库元素内部做改动（RAM、IO 库等），而非在 RTL 结构的外部——提高可移植性&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;复用文件列表/脚本&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;SoC 和 FPGA 通用 makefile + 宏分支&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h4 id=&#34;下半部分&#34;&gt;下半部分：
+&lt;/h4&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;建议&lt;/th&gt;
+          &lt;th&gt;说明&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;存储器兼容&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;每创建一个新的 SoC 存储器，同时生成 FPGA 兼容版本。技术选项通过 `define 并列选择&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;PHY 兼容&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;SoC 的 PHY 块在 FPGA 中需建模或用片外测试芯片。选择 SoC 的 PHY 组件时就要考虑这一点&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;同步设计&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;避免异步环路、双沿时钟等不映射到 FPGA 的结构。隔离这些电路到独立块→FPGA 等价功能替换&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;避免长组合路径&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;30+ 逻辑级在 SoC 中可能没问题（近距离放置+低延迟），但在 FPGA 中需 10+ LUT→互连延迟难以控制。用流水线打破长路径&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;隔离时钟源&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;将时钟门控和切换放在独立块中（最好在顶层）→允许用 FPGA 等价结构完整替换&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;同步复位&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;在每个时钟域边界重新同步复位→避免分区后时钟和复位之间的竞争条件&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;简化时钟网络&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;SoC 时钟网络非常复杂→如果可能，只为原型实现完整时钟选项的子集。ATPG 逻辑在 FPGA 中几乎永远不需要→`ifdef 移除&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;同步块边界&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;FF 在所有块的输入和输出——增加延迟但极大简化时序约束、提高性能、辅助芯片布局&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;文档化设计怪癖&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;几行行内注释解释好奇心驱动的设计元素——对晚期设计修正尤其关键&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;保持仿真环境可用&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;块级测试平台检查 RTL 修改 → &amp;ldquo;金质测试平台&amp;quot;建立信心&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;架构层面考虑慢速运行&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;核心和外设可以不同速率运行；慢速 FPGA 和全速外部数据间需深度缓冲&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;考虑 NoC 而非宽总线&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;行业趋势：&amp;ldquo;局部同步、全局异步&amp;rdquo;→更好分区——对原型有帮助&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h4 id=&#34;各条的具体展开&#34;&gt;各条的具体展开
+&lt;/h4&gt;&lt;h4 id=&#34;943-避免锁存器&#34;&gt;9.4.3 避免锁存器
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;解决方案&lt;/strong&gt;：可以在基于 FF 的门级网表合成后，&lt;strong&gt;自动将需要锁存器的特定块进行锁存器转换&lt;/strong&gt;。如果在设计阶段就将这些时序元素隔离或标记，可使转换更容易。&lt;/p&gt;
+&lt;h4 id=&#34;944-避免长组合路径&#34;&gt;9.4.4 避免长组合路径
+&lt;/h4&gt;&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;在最新工艺库中，SoC 设计可能有 30+ 级逻辑在组合路径上。这在 SoC 中可以接受——近距离放置 + 低本征延迟。但在 FPGA 中，同样路径需要 10+ LUT，而 LUT 之间的&lt;strong&gt;互连延迟&lt;/strong&gt;——而不是 LUT 本身的延迟——才是真正的问题，尤其当利用率高时。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;解决&lt;/strong&gt;：流水线。需要重新调度。&lt;/p&gt;
+&lt;h4 id=&#34;945-避免组合环路&#34;&gt;9.4.5 避免组合环路
+&lt;/h4&gt;&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;组合环路有时在 SoC RTL 中看不到——因为自底向上的设计流，&lt;strong&gt;环路只在全芯片自上而下组装后才完整&lt;/strong&gt;。而这个第一次全芯片组装可能恰恰发生在原型项目启动时。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;（注意：同步块边界可以消除这个问题和许多其他隐患。）&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;95-目标特定性隔离指南&#34;&gt;9.5 目标特定性隔离指南
+&lt;/h3&gt;&lt;h4 id=&#34;951-写纯-rtl-代码&#34;&gt;9.5.1 写纯 RTL 代码
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;现实中的恶化过程&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;设计开始时是干净的通用 RTL&lt;/li&gt;
+&lt;li&gt;随着反复细化实现，技术特定细节逐步渗透 → RTL 不再&amp;quot;纯&amp;rdquo;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;传到原型团队手中的 RTL 已混有大量低层工艺库原语&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;这种实践不必要地复杂化了 FPGA 原型，并导致潜在错误。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;建议&lt;/strong&gt;：保持参考 RTL 设计为纯的，仅在叶子级小心引入技术特定细节 → 替代的 FPGA 和 SoC 定义可以在设计数据库中共存。&lt;/p&gt;
+&lt;h4 id=&#34;952-使源码变更的影响尽可能低&#34;&gt;9.5.2 使源码变更的影响尽可能低
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;始终使用 Wrapper——在 Wrapper &lt;strong&gt;内部&lt;/strong&gt;修改&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;替换文件&lt;/strong&gt;而非编辑文件&lt;/li&gt;
+&lt;li&gt;将修改&lt;strong&gt;回注&lt;/strong&gt;到真实源码文件&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;在库元素内部（RAM、IO 库等）而非在 RTL 结构的外部做修改&lt;/strong&gt; → 原型代码靠近它所替换的原始代码。&lt;/p&gt;
+&lt;h4 id=&#34;953-维护存储器兼容性&#34;&gt;9.5.3 维护存储器兼容性
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;文件覆盖法&lt;/strong&gt;：创建带有 &lt;code&gt;_fpga&lt;/code&gt; 前缀的特殊目标目录，放与原始文件同名的文件 → 将其添加到文件列表末尾 → 覆盖上面文件列表中更高层的原始 RTL。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Synopsys 提供帮助自动化文件列表管理的脚本。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;9551-phy-兼容性&#34;&gt;9.5.5.1 PHY 兼容性
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;选择 SoC 的 PHY 组件时就要考虑原型验证需求&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;有测试芯片可用 → 连接到原型板作为外部插件 → RTL 写入片外连接&lt;/li&gt;
+&lt;li&gt;无测试芯片 → PHY 需要用通用 RTL 功能定义来建模映射到 FPGA&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;96-时钟和架构指南&#34;&gt;9.6 时钟和架构指南
+&lt;/h3&gt;&lt;h4 id=&#34;961-保持时钟逻辑在独立的顶层块中&#34;&gt;9.6.1 保持时钟逻辑在独立的顶层块中
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;如果时钟生成逻辑与设计其他部分独立 → 适应性更强&lt;/li&gt;
+&lt;li&gt;往往时钟生成逻辑中有远超 FPGA 需要的选项 → 独立后可直接替换为只驱动几个常量频率的块&lt;/li&gt;
+&lt;li&gt;对导入的 IP 内部的时钟结构也可选择性地硬编码或简化&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;962-简化时钟网络&#34;&gt;9.6.2 简化时钟网络
+&lt;/h4&gt;&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;时钟复杂度最大的贡献者之一是什么？测试逻辑。ATPG 电路插入逻辑来复用时钟。注意——&lt;strong&gt;FPGA 是可重编程的，出厂时已经过充分测试。几乎永远没有理由在 FPGA 原型中包含 ATPG 逻辑。&lt;/strong&gt; 包含了它只会引入不必要的复杂度。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;处理测试逻辑&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;将测试逻辑分为&amp;quot;仅 SoC 需要&amp;quot;和&amp;quot;FPGA 也需要&amp;quot;两类&lt;/li&gt;
+&lt;li&gt;至少用注释标明哪是哪，以及如何 tie-off 信号来禁用 FPGA 不需要的测试逻辑&lt;/li&gt;
+&lt;li&gt;理想情况：用 &lt;code&gt;ifdef FPGA&lt;/code&gt; → 将不需要的测试逻辑输入 tie-off 到禁用值 → FPGA 综合自动修剪&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;963-同步设计&#34;&gt;9.6.3 同步设计
+&lt;/h4&gt;&lt;blockquote&gt;
+&lt;p&gt;最小化在外部接口所需时钟上运行的设计部分；&lt;strong&gt;尽可能使用异步 FIFO 将数据从这些接口传输到系统时钟域&lt;/strong&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;964-同步复位&#34;&gt;9.6.4 同步复位
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;FPGA 与 SoC 的关键差异&lt;/strong&gt;：FPGA 的配置过程初始化每个 BlockRAM、分布式 RAM、SRL 和 FF 到已定义状态——&lt;strong&gt;即使 RTL 中没有指定复位，FPGA 也能启动，SoC 则不能&lt;/strong&gt;。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;关键是花更多时间在前端考虑复位策略，并以简单、一致、灵活的方式编写复位逻辑。如果 FPGA 的这些考虑能被容纳，它将开启许多创造性解决方案。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;965-同步块边界&#34;&gt;9.6.5 同步块边界
+&lt;/h4&gt;&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;在每个设计者的块边界放置 FF——这个简单实践如果被遵守，则在分区间找到 FF 的可能性就大大增加。如果遵循同步边界的实践，在约束 FPGA 原型时应该只有极少数例外需处理。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;附益&lt;/strong&gt;：辅助芯片布局和 FPGA 分区。时钟域交叉处本来就应该有同步器。&lt;/p&gt;
+&lt;h4 id=&#34;966-考虑设计在慢速时钟下的运行方式&#34;&gt;9.6.6 考虑设计在慢速时钟下的运行方式
+&lt;/h4&gt;&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;如果在架构层面处理，SoC 与原型实现间预期的速度差异可以被干净地隔离和适当管理。例如，在很多情况下 FPGA 原型需要速率适配器。但如果在架构早期就考虑这一点，主要功能模块的总线接口往往可以设计得不需速率桥接。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;附益&lt;/strong&gt;：这种架构风格带来的独立性使设计本身也更鲁棒、适应性更强、可读性更好。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;97-总结dfp-宣言的核心主张&#34;&gt;9.7 总结：DFP 宣言的核心主张
+&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;FPGA 原型开发是整个 SoC 设计项目的关键元素&lt;/strong&gt; → 需要纳入计划和排程&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;RTL 设计需遵循鲁棒的编码风格&lt;/strong&gt; → 有效表示 FPGA 和 SoC 两种技术。RTL 定义质量的提升在设计的整个生命周期中都会产生回报&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;使用模块化编码风格&lt;/strong&gt; → 原型特定组件的干净分离、独立数据流、时钟域隔离&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;扩展设计文档&lt;/strong&gt; → 尽早识别设计的挑战性部分并通报原型团队&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;SoC 团队可能需要轻度重新对齐&lt;/strong&gt; → 将原型验证整合到流程和人员技能中&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;最终结果：FPGA 原型收益更早到达 → 更早的软件验证 → 更早的芯片前集成。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;关键图表解读&#34;&gt;关键图表解读
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;Table 22：7 条程序性建议&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;不仅仅是&amp;quot;建议&amp;rdquo;——每条都是针对一个常见组织失效模式的对抗措施：&amp;ldquo;扔过墙&amp;quot;式交接 → 整合团队；没有 RTL 准入标准 → 纳入验证计划里程碑；原型团队被隔离 → 纳入统一版本控制&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Table 24：16 条技术性建议&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;全书 RTL 编码规范的汇总版。可以打印成海报贴在 SoC 设计团队的办公区——每一条在前八章都有详细展开，这张表是&amp;quot;索引&amp;rdquo;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Table 23：原型项目启动前的设计交接检查清单&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;真实来源于某大型半导体实验室——说明这些规则已经过工业验证而不是纯理论&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;个人总结&#34;&gt;个人总结
+&lt;/h2&gt;&lt;p&gt;第9章在整个书的结构中扮演了&amp;quot;方法论转折&amp;quot;的角色。前八章是&amp;quot;把事情做对&amp;quot;（do things right），第9章是&amp;quot;做对的事情&amp;quot;（do the right things）——它提出了一个根本性的命题：&lt;strong&gt;不要在河下游捞尸体，去上游修桥&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;本章最有价值的洞见之一是**&amp;ldquo;对 FPGA 好的对 SoC 也好&amp;quot;这个互惠原则**。很多工程师可能认为 DFP 是在为原型团队做额外工作；本章论证了 DFP 的规则本身就是好的工程实践——干净的模块化、同步边界、隔离的时钟管理、纯 RTL——只是 SoC 流程的宽松自由度使这些纪律有时被忽视了。有了 FPGA 原型这个&amp;quot;第二消费者&amp;rdquo;，才重新获得了遵循这些纪律的动力。&lt;/p&gt;
+&lt;p&gt;另一个深层观点是&lt;strong&gt;原型不应被视为一次性产物&lt;/strong&gt;。&amp;ldquo;出了问题可以再拿原型来验证 EC&amp;rdquo;——这意味着原型不仅在 pre-silicon 阶段有价值，在 post-silicon 阶段也是重要的工程资产。这个认知会改变我们分配原型质量的资源投入方式。&lt;/p&gt;
+&lt;p&gt;最后，&lt;strong&gt;程序性指南（Table 22）可能是全书 ROI 最高的单一变革&lt;/strong&gt;。技术技巧可以通过实践积累，但&amp;quot;原型团队坐在验证团队旁边、使用同一版本控制、RTL 交付纳入正式里程碑&amp;quot;——这些组织层面的决策，一旦做对，比任何技术技巧都能更根本地提高原型验证的效率和成功率。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;实践思考&#34;&gt;实践思考
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;DFP 的投资回报需要管理层理解&lt;/strong&gt;。如果管理层认为原型是&amp;quot;额外负担&amp;quot;而非&amp;quot;风险降低投资&amp;quot;，DFP 的任何建议都无法执行。本章可以作为向管理层推销 DFP 价值的参考材料&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;每个 SoC 设计师负责自己模块的 FPGA 重新目标化&amp;rdquo;&lt;/strong&gt; 这个模式值得深思——它消除了&amp;quot;移交&amp;quot;产生的信息损耗，但也要求 SoC 团队具备 FPGA 技能。这本质上是一个 build-vs-buy 问题：是培训内部团队还是雇佣专门的原型工程师&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ATPG 逻辑在 FPGA 中几乎永远不需要&lt;/strong&gt;——但如何识别和移除它？需要 SoC 验证团队在设计阶段就将 ATPG 逻辑与功能逻辑分离，用 `ifdef 标记或者至少清晰注释&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;FF 在块边界&lt;/strong&gt;——这条规则执行成本最低但收益最高。在代码审查中检查这条规则，比事后在分区时为几百条组合路径写 IO 时序约束要容易得多&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;公司级标准平台 + 子板生态&lt;/strong&gt;——如果组织打算做第三次或更多 FPGA 原型项目，投资建立标准化平台（而不是每个项目自由选择）的 ROI 远超直觉估计&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;保持原型兼容的仿真环境&lt;/strong&gt;——这条建议可能是最容易被忽视的。一旦 RTL 为原型做了修改，原始仿真测试平台可能不再能直接运行。维护两套可互相参照的环境需要纪律，但在调试阶段价值巨大&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0296-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Table 23: Example of design hand-over checklist before prototyping project starts&#34;
+	
+	
+&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

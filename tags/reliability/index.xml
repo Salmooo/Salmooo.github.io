@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Reliability on SalmoneX Blog</title>
+        <link>http://localhost:1313/tags/reliability/</link>
+        <description>Recent content in Reliability on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright>
+        <lastBuildDate>Thu, 11 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/reliability/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>第12章: Breaking Out of the Lab — The Prototype in the Field</title>
+        <link>http://localhost:1313/p/%E7%AC%AC12%E7%AB%A0-breaking-out-of-the-lab-the-prototype-in-the-field/</link>
+        <pubDate>Thu, 11 Jun 2026 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/p/%E7%AC%AC12%E7%AB%A0-breaking-out-of-the-lab-the-prototype-in-the-field/</guid>
+        <description>&lt;h2 id=&#34;章节概览&#34;&gt;章节概览
+&lt;/h2&gt;&lt;p&gt;第11章讲了在实验室中 bring-up 和调试；第12章讨论的是&lt;strong&gt;当原型工作后，如何让它走出实验室&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;这是全书最短的章节之一，但回答了一个关键问题：&lt;strong&gt;如果原型在设计验证之外还能做什么？&lt;/strong&gt; 答案是——现场测试、标准合规测试、客户演示、合作伙伴协同开发、展会亮相、投资者演示。每一种用途都可能对 SoC 项目的商业成功产生决定性影响。&lt;/p&gt;
+&lt;p&gt;作者坦诚地指出，大多数实验台上的原型看起来像&amp;quot;勉强受控的混沌&amp;quot;（图147）。本章系统性地给出了将这个混沌变为可靠的、可携带的、甚至外形专业的现场设备的物理设计考量。&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0381-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 147: A typical bench-bound prototype!&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h2 id=&#34;核心知识点&#34;&gt;核心知识点
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;六大现场使用场景&lt;/strong&gt;：现场测试（真实环境）→ 本地合规测试（不同地区的不同无线标准）→ 客户早期演示 → 合作伙伴协同开发 → 展会展示 → 投资者进度审核&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;PCIe Gen3 案例&lt;/strong&gt;：Synopsys 团队将原型打包带到展会——最关键的是&lt;strong&gt;在现场与行业领导者进行早期互操作测试&lt;/strong&gt;，在 PCIe Gen3 规范甚至尚未最终定稿时就已经在真实硬件上验证了兼容性&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;DS2 的可用性要求&lt;/strong&gt;：现场试验由不同学科的工程师（协议专家、软件工程师）而非硬件专家执行——不能指望他们在板子坏了时现场维修 → &lt;strong&gt;FPGA 板和整个原型必须高质量+高机械可靠性&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;主板刚度&lt;/strong&gt;：BGA 封装的焊球连接在板子任何方向弯曲下都可能断裂。20+ 层的高引脚数 FPGA 原型板本身很硬——但仍需预留加强筋空间或安装在刚性框架中&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;子板两种配置&lt;/strong&gt;：堆叠（Stacked—小面积但限制探针访问和气流）vs 并排（Lateral—不限制主板访问但不那么坚固）。选型 = 体积 vs 鲁棒性的权衡&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;安装孔 ≤10cm 间距&lt;/strong&gt;：任何方向不超过 10cm——特别是连接器插入区域。安装柱应吸收插拔力（垂直于板面方向的力），避免力传递到 PCB&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;连接器是可靠性故障的第一高频点&lt;/strong&gt;：扭转或歪斜的拔插会永久损坏连接器。&lt;strong&gt;许多连接器方案有自带的保留夹——不默认安装是&amp;quot;假节约&amp;quot;&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;机箱散热的关键&lt;/strong&gt;：封闭后温度迅速上升。排气扇和冷空气进气孔必须在机箱的相对面 → 形成单向气流经过所有热点（FPGA、电源电路）。&lt;strong&gt;避免进气孔靠近排气扇 → 气流短路&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;CHIPit Iridium 的&amp;quot;专业外观&amp;quot;策略&lt;/strong&gt;：装上侧板 = 像成品，拆下侧板 = 原型可见——&amp;ldquo;这个简单的技巧在演示场景中意义重大&amp;rdquo;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Plug-Fest 是便携性的终极考验&lt;/strong&gt;：把原型带到标准组织的插拔测试聚会 → 现场与其他团队的硬件互操作 → &lt;strong&gt;&amp;ldquo;即使不能马上工作，在这里发现问题远比产品发布后发现好&amp;rdquo;&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;详细笔记&#34;&gt;详细笔记
+&lt;/h2&gt;&lt;h3 id=&#34;121-便携原型的六大使用场景&#34;&gt;12.1 便携原型的六大使用场景
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;场景&lt;/th&gt;
+          &lt;th&gt;特点&lt;/th&gt;
+          &lt;th&gt;谁操作用？&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;现场测试&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;移动无线电在多样真实环境条件下与基站通信&lt;/td&gt;
+          &lt;td&gt;测试工程师&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;本地合规测试&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;不同地区的不同无线标准、空口测试必须在当地做&lt;/td&gt;
+          &lt;td&gt;合规工程师&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;早期客户演示&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;潜在客户现场，未流片就展示产品能力&lt;/td&gt;
+          &lt;td&gt;销售/FAE&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;合作伙伴协同开发&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;多公司、跨地域、预芯片的协同开发和测试&lt;/td&gt;
+          &lt;td&gt;合作伙伴工程师&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;展会演示&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;首个展示新功能或新标准实现 → 市场势头&lt;/td&gt;
+          &lt;td&gt;市场/FAE/原型工程师&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;投资者进度审核&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;在董事会或投资者面前做现场演示 → 快速有效评估进度&lt;/td&gt;
+          &lt;td&gt;管理层/原型工程师&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;Synopsys PCIe Gen3 的真实案例&lt;/strong&gt;：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Torrey Lewis（Synopsys IP 开发者，俄勒冈州希尔斯伯勒）：
+&amp;ldquo;能够带着原型出差绝对是一个优势。对我们的 PCIe Gen3 来说，我们得以出差到一些会议，在 Synopsys 展位展示。&lt;strong&gt;PCIe Gen3 规范甚至还没有最终定稿&lt;/strong&gt;，所以作为工程师更令我感兴趣的是&lt;strong&gt;有机会在现场与行业领导者进行早期测试&lt;/strong&gt;。这对所有相关方都是互利的。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;DS2 的 Javier Jimenez：
+&amp;ldquo;我们的一些现场试验由不同学科的工程师执行——协议专家或软件工程师。&lt;strong&gt;他们不是硬件专家，不能指望他们做现场维修来绕过板子故障&lt;/strong&gt;。因此 FPGA 板和整个原型必须是高质量的、有高度的机械可靠性。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;122-可搬运性的规划&#34;&gt;12.2 可搬运性的规划
+&lt;/h3&gt;&lt;h4 id=&#34;1221-主板物理刚度&#34;&gt;12.2.1 主板物理刚度
+&lt;/h4&gt;&lt;p&gt;这是可搬运性的物理基础：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;BGA 焊球的脆弱性&lt;/strong&gt;：今天的 FPGA 是 BGA 封装 → BGA 焊球连接对 PCB 弯曲极其敏感 → &lt;strong&gt;板子任何方向的弯曲都可能导致焊球断裂&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;20+ 层板天然较硬&lt;/strong&gt;：多层 PCB 本身就有相当的刚度——但仅靠层数不够。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;加强策略&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在板子的长度和宽度方向预留加强筋安装空间&lt;/li&gt;
+&lt;li&gt;更简单但效果较差的方案：板子滑入一个在边缘支撑的框架&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;1222-子板安装&#34;&gt;12.2.2 子板安装
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;两种配置对比&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;配置&lt;/th&gt;
+          &lt;th&gt;空间&lt;/th&gt;
+          &lt;th&gt;探针访问&lt;/th&gt;
+          &lt;th&gt;散热&lt;/th&gt;
+          &lt;th&gt;鲁棒性&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;堆叠（上方）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;小&lt;/td&gt;
+          &lt;td&gt;主板受限 + 气流受阻&lt;/td&gt;
+          &lt;td&gt;差&lt;/td&gt;
+          &lt;td&gt;需固体安装&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;并排（侧面）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;大&lt;/td&gt;
+          &lt;td&gt;不受限&lt;/td&gt;
+          &lt;td&gt;好&lt;/td&gt;
+          &lt;td&gt;相对较弱&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;并排配置的典型场景&lt;/strong&gt;：第三方 IP 供应商提供的子板——其机械尺寸与主板无关。&lt;/p&gt;
+&lt;h4 id=&#34;1223-安装孔&#34;&gt;12.2.3 安装孔
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;间距规则&lt;/strong&gt;：任何方向不超过 &lt;strong&gt;10cm&lt;/strong&gt;（约 4 英寸）。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;连接器区域特殊要求&lt;/strong&gt;：安装柱应&lt;strong&gt;吸收垂直于板面的插拔力&lt;/strong&gt;——避免力传递到 PCB 本身。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;子板叠加的额外需求&lt;/strong&gt;：预留子板→主板的固定空间。&lt;/p&gt;
+&lt;h4 id=&#34;1224-主板连接器&#34;&gt;12.2.4 主板连接器
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;连接器是实验室中期原型故障最常见的点&lt;/strong&gt;——磨损 + 不当的插拔。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;核心问题&lt;/strong&gt;：连接器设计为&lt;strong&gt;仅在一个轴上&lt;/strong&gt;配合。扭转或歪斜的拔插 = 永久损坏。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;两大对策&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;加装保留夹&lt;/strong&gt;：许多连接器方案已有选项——但不默认安装是&amp;quot;假节约&amp;quot;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;外部线缆固定到机箱而非仅靠连接器&lt;/strong&gt;：线缆的张力不应传递到连接器——由机箱吸收&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&#34;1225-机箱&#34;&gt;12.2.5 机箱
+&lt;/h4&gt;&lt;p&gt;八项考量组成一个完整的机械设计清单：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;考量&lt;/th&gt;
+          &lt;th&gt;建议&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;机械配置&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;选择行业标准尺寸（即使仅放台面）→ 未来可机架安装&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;主板固定&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;尽可能多的螺丝/隔柱（越多越好）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;子板固定&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;堆叠→固定于主板；并排→固定于机箱，主板与子板间无机械应力&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;电源&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;远离主板→留出线缆和冷却空间；多国出差→多电压电源；自带排气扇→不阻挡冷空气流入&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;内部线缆&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;固定到各自连接的板上&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;外部线缆&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;固定到机箱（非仅依赖连接器）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;调试访问&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;关键信号引出到机箱壁上的调试连接器→&lt;strong&gt;打开机箱不需要&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;杂项&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;FPGA 下载模块、调试器模块也固定到机箱&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h4 id=&#34;1226-散热&#34;&gt;12.2.6 散热
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;封闭机箱的核心挑战&lt;/strong&gt;：实验台上可能不需额外散热（有环境空气流动），但&lt;strong&gt;封闭后温度迅速攀升&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;散热设计三要素&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;冷空气进气孔（机箱一侧）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    ↓ 空气被拉过
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;FPGA（散热片+风扇）、电源电路（热点）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    ↓ 热空气
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;排气扇（机箱对侧）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    → 排出
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;关键规则&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;排气扇和进气孔必须在&lt;strong&gt;机箱的对侧&lt;/strong&gt;——确保空气流过所有热点&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;阻塞进气孔靠近排气扇的任何开口&lt;/strong&gt;——防止气流&amp;quot;短路&amp;quot;（冷空气直接从进气孔到排气扇，绕过热点）&lt;/li&gt;
+&lt;li&gt;即使有机箱级散热，每个 FPGA 仍需要自己的散热片+风扇&lt;/li&gt;
+&lt;li&gt;FPGA 的系统监控器可以驱动风扇的反馈控制——只在需要时开启&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;1227-外观和手感&#34;&gt;12.2.7 外观和手感
+&lt;/h4&gt;&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;让原型看起来不那么像学校的科学实验，更像一个成品。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;CHIPit Iridium 的聪明设计&lt;/strong&gt;（图148）：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;透明侧板可以看到板子和芯片——明显地&amp;quot;这是一个原型平台&amp;quot;&lt;/li&gt;
+&lt;li&gt;装上侧板 → 看起来像成品&lt;/li&gt;
+&lt;li&gt;&amp;ldquo;这个简单的技巧在演示场景中意义重大&amp;rdquo;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0386-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 148: CHIPit[®] Iridium, an encased prototyping system&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0386-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 148: CHIPit[®] Iridium, an encased prototyping system&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Plug-Fest 文化&lt;/strong&gt;（图149）：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;特殊兴趣小组（通常是新互连或图形标准）组织的多团队硬件互插活动&lt;/li&gt;
+&lt;li&gt;所有团队已按标准规范工作——但&amp;quot;只有亲眼看到&lt;strong&gt;自己的 pre-silicon 原型与另一个团队的原型实际工作在一起&lt;/strong&gt;，才能真正带来信心&amp;quot;&lt;/li&gt;
+&lt;li&gt;即使不能马上工作 — &lt;strong&gt;在这里发现问题远比产品发布后发现好&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Plug-Fest 成功的关键：&lt;strong&gt;设备的可靠性&lt;/strong&gt;。带着&amp;quot;蜘蛛网般的不可靠板子&amp;quot;参加 plug-fest 不是在充分利用机会&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;个人总结&#34;&gt;个人总结
+&lt;/h2&gt;&lt;p&gt;第12章是一章关于工程实用主义的短章。在学术上它可能看起来不如前几章&amp;quot;深奥&amp;quot;——没有公式、没有代码、没有时序图——但在实际项目中，&lt;strong&gt;原型是否能被带到客户现场、在展会上保持稳定、在 Plug-Fest 上经得起数小时的连续插拔测试，往往比实验室中的峰值性能更能决定一个 SoC 项目的商业命运&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;本章最值得反思的部分是 &lt;strong&gt;PCIe Gen3 团队在规范未定稿时就带着原型出差做现场互操作测试&lt;/strong&gt;。这意味着 FPGA 原型的价值不仅在于验证自己的设计——它还能在标准最终确定之前就为整个行业建立信心和发现互操作性问题。这个价值远远超出了单个公司的 SoC 项目范围。&lt;/p&gt;
+&lt;p&gt;DS2 的观点同样尖锐：&lt;strong&gt;&amp;ldquo;协议专家和软件工程师不是硬件专家&amp;rdquo;&lt;/strong&gt;。这句话揭示了便携性设计的用户画像——原型离开实验室后，它的用户不再是创建它的硬件工程师，而是软件开发者、合规测试员、销售工程师。这要求原型从&amp;quot;只有创造者才能操作的工具&amp;quot;转变为&amp;quot;任何人插上电源就能工作的产品&amp;quot;。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;实践思考&#34;&gt;实践思考
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;原型不是为了方便硬件工程师在实验室调 bug 而存在的&amp;rdquo;&lt;/strong&gt;——从项目一开始就考虑谁会是原型的终端用户、在什么环境中使用 → 这些问题的答案直接决定机械/电气/热设计的规格&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;连接器的保留夹是一个几美分的保险&lt;/strong&gt;——在插件面板上省下几块钱，可能换来展会演示当天因为你唯一的工作原型因连接器接触不良而无法启动&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;安装孔 ≤10cm 间距&lt;/strong&gt;值得加入公司自建板的 PCB 设计规范——这是一个可以机械执行的设计规则，不需要对每个新项目重新判断&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;打开机箱不需要&amp;quot;的调试访问&lt;/strong&gt;——将 JTAG、关键复位、状态 LED 引出到机箱壁——这是&amp;quot;可维护性&amp;quot;和&amp;quot;密封性&amp;quot;之间最实际的折中&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Plug-Fest 的策略价值&lt;/strong&gt;：如果你是标准制定参与者或早期采用者，&lt;strong&gt;提前规划将原型带到 Plug-Fest&lt;/strong&gt;。这不仅是技术验证——它会让你的团队在标准生态中建立起专业声誉和早期互操作性的可信度&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;CHIPit Iridium 的&amp;quot;可切换外观&amp;quot;是一个值得借鉴的理念&lt;/strong&gt;——透明侧板用于内部调试和信心建立，不透明侧板用于对外演示。两块侧板，两种完全不同的使用场景&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

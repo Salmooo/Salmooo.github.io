@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="《AI系统：原理与架构》学习笔记 — 深入推理引擎 Kernel 层优化，涵盖卷积计算原理、Im2Col 算法、Winograd 算法、QNNPACK 间接卷积与推理内存布局">
+<title>AI系统：第19章 Kernel 优化</title>
+
+<link rel='canonical' href='http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC19%E7%AB%A0-kernel-%E4%BC%98%E5%8C%96/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="AI系统：第19章 Kernel 优化">
+<meta property='og:description' content="《AI系统：原理与架构》学习笔记 — 深入推理引擎 Kernel 层优化，涵盖卷积计算原理、Im2Col 算法、Winograd 算法、QNNPACK 间接卷积与推理内存布局">
+<meta property='og:url' content='http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC19%E7%AB%A0-kernel-%E4%BC%98%E5%8C%96/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='AI System' /><meta property='article:tag' content='Deep Learning' /><meta property='article:tag' content='AI Infra' /><meta property='article:tag' content='Kernel Optimization' /><meta property='article:tag' content='Im2Col' /><meta property='article:tag' content='Winograd' /><meta property='article:tag' content='QNNPACK' /><meta property='article:tag' content='Convolution' /><meta property='article:tag' content='Memory Layout' /><meta property='article:tag' content='推理引擎' />
+<meta name="twitter:title" content="AI系统：第19章 Kernel 优化">
+<meta name="twitter:description" content="《AI系统：原理与架构》学习笔记 — 深入推理引擎 Kernel 层优化，涵盖卷积计算原理、Im2Col 算法、Winograd 算法、QNNPACK 间接卷积与推理内存布局">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="http://localhost:1313/" selected>English</option>
+                                
+                                    <option value="http://localhost:1313/zh-cn/" >中文</option>
+                                
+                                    <option value="http://localhost:1313/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#本章概览">本章概览</a></li>
+    <li><a href="#191-kernel-层概述">19.1 Kernel 层概述</a>
+      <ol>
+        <li><a href="#1911-kernel-层定义与定位">19.1.1 Kernel 层定义与定位</a>
+          <ol>
+            <li><a href="#cpu-优化">CPU 优化</a></li>
+            <li><a href="#gpu-优化">GPU 优化</a></li>
+            <li><a href="#封装的高性能算子库">封装的高性能算子库</a></li>
+          </ol>
+        </li>
+        <li><a href="#1912-kernel-层优化方法">19.1.2 Kernel 层优化方法</a>
+          <ol>
+            <li><a href="#1-算法优化">1. 算法优化</a></li>
+            <li><a href="#2-内存布局">2. 内存布局</a></li>
+            <li><a href="#3-汇编优化">3. 汇编优化</a></li>
+            <li><a href="#4-调度优化">4. 调度优化</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#192-卷积计算原理">19.2 卷积计算原理</a>
+      <ol>
+        <li><a href="#1921-卷积的数学原理">19.2.1 卷积的数学原理</a>
+          <ol>
+            <li><a href="#离散卷积">离散卷积</a></li>
+          </ol>
+        </li>
+        <li><a href="#1922-cnn-卷积计算">19.2.2 CNN 卷积计算</a>
+          <ol>
+            <li><a href="#关键名词">关键名词</a></li>
+            <li><a href="#计算复杂度分析">计算复杂度分析</a></li>
+          </ol>
+        </li>
+        <li><a href="#1923-卷积优化手段">19.2.3 卷积优化手段</a>
+          <ol>
+            <li><a href="#tensor-运算">Tensor 运算</a></li>
+            <li><a href="#tensor-内存布局">Tensor 内存布局</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#193-im2col-算法">19.3 Im2Col 算法</a>
+      <ol>
+        <li><a href="#1931-核心思想">19.3.1 核心思想</a></li>
+        <li><a href="#1932-算法过程">19.3.2 算法过程</a>
+          <ol>
+            <li><a href="#步骤一input-重排">步骤一：Input 重排</a></li>
+            <li><a href="#步骤二权重重排">步骤二：权重重排</a></li>
+            <li><a href="#步骤三矩阵乘法">步骤三：矩阵乘法</a></li>
+            <li><a href="#步骤四col2im-还原">步骤四：Col2Im 还原</a></li>
+            <li><a href="#im2col-优缺点总结">Im2Col 优缺点总结</a></li>
+          </ol>
+        </li>
+        <li><a href="#1933-空间组合优化算法">19.3.3 空间组合优化算法</a>
+          <ol>
+            <li><a href="#常见优化方法">常见优化方法</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#194-winograd-算法">19.4 Winograd 算法</a>
+      <ol>
+        <li><a href="#1941-核心思想">19.4.1 核心思想</a>
+          <ol>
+            <li><a href="#一维卷积加速示例">一维卷积加速示例</a></li>
+          </ol>
+        </li>
+        <li><a href="#1942-实现步骤">19.4.2 实现步骤</a>
+          <ol>
+            <li><a href="#步骤一卷积核变换-u--g-g-gt">步骤一：卷积核变换 </a></li>
+            <li><a href="#步骤二输入数据变换-v--bt-d-b">步骤二：输入数据变换 </a></li>
+            <li><a href="#步骤三中间矩阵计算-m--sum-u-odot-v">步骤三：中间矩阵计算 </a></li>
+            <li><a href="#步骤四输出变换-y--at-m-a">步骤四：输出变换 </a></li>
+          </ol>
+        </li>
+        <li><a href="#1943-算法约束与缺点">19.4.3 算法约束与缺点</a></li>
+      </ol>
+    </li>
+    <li><a href="#195-qnnpack-算法">19.5 QNNPACK 算法</a>
+      <ol>
+        <li><a href="#1951-前置知识回顾">19.5.1 前置知识回顾</a>
+          <ol>
+            <li><a href="#im2col--gemm-的两个缺陷">Im2Col + GEMM 的两个缺陷</a></li>
+            <li><a href="#神经网络量化">神经网络量化</a></li>
+          </ol>
+        </li>
+        <li><a href="#1952-间接卷积算法">19.5.2 间接卷积算法</a>
+          <ol>
+            <li><a href="#设计哲学">设计哲学</a></li>
+            <li><a href="#间接缓冲区indirection-buffer">间接缓冲区（Indirection Buffer）</a></li>
+            <li><a href="#间接缓冲区布局">间接缓冲区布局</a></li>
+          </ol>
+        </li>
+        <li><a href="#1953-与-im2col-算法对比">19.5.3 与 Im2Col 算法对比</a></li>
+      </ol>
+    </li>
+    <li><a href="#196-推理内存布局">19.6 推理内存布局</a>
+      <ol>
+        <li><a href="#1961-cpu-与-gpu-内存架构">19.6.1 CPU 与 GPU 内存架构</a></li>
+        <li><a href="#1962-nchwx-内存格式">19.6.2 NCHWX 内存格式</a></li>
+      </ol>
+    </li>
+    <li><a href="#小结">小结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/ai/" >
+                AI
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC19%E7%AB%A0-kernel-%E4%BC%98%E5%8C%96/">AI系统：第19章 Kernel 优化</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            《AI系统：原理与架构》学习笔记 — 深入推理引擎 Kernel 层优化，涵盖卷积计算原理、Im2Col 算法、Winograd 算法、QNNPACK 间接卷积与推理内存布局
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    5 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="本章概览">本章概览
+</h2><p>如果说 Runtime 层是推理引擎的&quot;总调度&quot;，那么 <strong>Kernel 层</strong>就是推理引擎的&quot;肌肉&quot;——所有底层数学运算（矩阵乘、卷积、激活函数等）最终都在这里执行。Kernel 层的性能直接决定了推理的速度和效率。</p>
+<p>本章从五个维度系统讲解 Kernel 优化技术栈：</p>
+<ol>
+<li><strong>Kernel 层概述</strong>：硬件平台优化（NEON/AVX/CUDA/OpenCL/Vulkan）+ 封装算子库（cuDNN/MKLDNN）+ 推理流程与开发范式</li>
+<li><strong>卷积计算原理</strong>：数学定义 → 离散卷积 → CNN 卷积（Padding/Stride/Channel/Kernel）+ 时间复杂度/空间复杂度分析</li>
+<li><strong>Im2Col 算法</strong>：卷积转矩阵乘的核心思路，空间换时间，配合 GEMM 库加速</li>
+<li><strong>Winograd 算法</strong>：减少乘法次数（4 次乘法 replace 6 次），加减法换乘法，适用于小卷积核（3×3）</li>
+<li><strong>QNNPACK 间接卷积</strong>：消除 Im2Col 内存拷贝，通过间接缓冲区 + PDOT 微内核优化移动端量化推理</li>
+<li><strong>推理内存布局</strong>：CPU/GPU 多级缓存架构，NCHWX 通道拆分与 SIMT 适配</li>
+</ol>
+<blockquote>
+<p><strong>一句话总结</strong>：Kernel 优化的本质是&quot;用空间换时间，用加法换乘法，用局部性换缓存命中&quot;。从 Im2Col → Winograd → QNNPACK，每一次演进都在更精细地平衡这三者。</p>
+</blockquote>
+<hr>
+<h2 id="191-kernel-层概述">19.1 Kernel 层概述
+</h2><h3 id="1911-kernel-层定义与定位">19.1.1 Kernel 层定义与定位
+</h3><p><strong>Kernel 层</strong>是推理引擎中执行底层数学运算的核心组件，负责将上层调度（Runtime）的指令翻译为具体硬件上的计算操作。推理引擎的整体架构中，Kernel 层处于最底层，直接与硬件打交道。</p>
+<h4 id="cpu-优化">CPU 优化
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>技术</th>
+          <th>平台</th>
+          <th>特点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>NEON</strong></td>
+          <td>ARM 架构</td>
+          <td>SIMD 扩展，移动端/嵌入式设备推理优化</td>
+      </tr>
+      <tr>
+          <td><strong>AVX / AVX2</strong></td>
+          <td>Intel x86</td>
+          <td>高级向量扩展指令集，浮点/整数运算加速</td>
+      </tr>
+      <tr>
+          <td><strong>Metal</strong></td>
+          <td>Apple</td>
+          <td>低级图形+计算 API，优化 Apple GPU 上的性能</td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="gpu-优化">GPU 优化
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>技术</th>
+          <th>平台</th>
+          <th>特点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>CUDA</strong></td>
+          <td>NVIDIA</td>
+          <td>并行计算平台，大规模矩阵运算和卷积</td>
+      </tr>
+      <tr>
+          <td><strong>OpenCL</strong></td>
+          <td>跨平台</td>
+          <td>异构系统开放标准，CPU/GPU 通用</td>
+      </tr>
+      <tr>
+          <td><strong>Vulkan</strong></td>
+          <td>跨平台</td>
+          <td>新一代图形+计算 API，高性能计算场景</td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="封装的高性能算子库">封装的高性能算子库
+</h4><ul>
+<li><strong>cuDNN</strong>：NVIDIA 为 GPU 优化的深度神经网络算子库（卷积、池化、归一化、激活函数）</li>
+<li><strong>oneDNN（原 MKLDNN）</strong>：Intel 为 CPU 优化的深度神经网络算子库，支持多种 Intel 处理器</li>
+</ul>
+<blockquote>
+<p>实际应用中，开发者需要根据目标设备和性能要求选择最合适的优化策略组合。</p>
+</blockquote>
+<h3 id="1912-kernel-层优化方法">19.1.2 Kernel 层优化方法
+</h3><p>Kernel 层优化从四个维度展开：</p>
+<h4 id="1-算法优化">1. 算法优化
+</h4><p>主要针对<strong>卷积算子</strong>的计算优化，核心算法包括：</p>
+<ul>
+<li><strong>Im2Col + GEMM</strong>：将卷积转化为矩阵乘法，利用高性能 BLAS 库加速</li>
+<li><strong>Winograd</strong>：通过数学变换减少乘法次数，用加法换乘法</li>
+<li>这些算法通过特定的数学变换降低计算复杂度，提升推理速度</li>
+</ul>
+<h4 id="2-内存布局">2. 内存布局
+</h4><ul>
+<li><strong>权重和输入数据重排</strong>：使数据访问更连续，减少缓存缺失</li>
+<li><strong>Channel First（NCHW）vs Channel Last（NHWC）</strong>：根据硬件选择通道存储顺序</li>
+<li><strong>NC1HWC0 / NCHW4</strong>：将 C 维度拆分（C1 分组数，C0 每组通道数），适配 SIMD 操作和 Winograd 算法，提高缓存利用率</li>
+</ul>
+<h4 id="3-汇编优化">3. 汇编优化
+</h4><ul>
+<li><strong>指令优化</strong>：针对特定 CPU 指令集（AVX、SSE 等）进行向量化</li>
+<li><strong>循环优化</strong>：减少循环开销，增加指令级并行性</li>
+<li><strong>存储优化</strong>：优化内存访问模式，提高缓存命中率</li>
+</ul>
+<h4 id="4-调度优化">4. 调度优化
+</h4><ul>
+<li><strong>并行计算</strong>：根据操作间依赖关系合理调度任务</li>
+<li><strong>自动调优</strong>：减少等待时间，提高资源利用率</li>
+</ul>
+<hr>
+<h2 id="192-卷积计算原理">19.2 卷积计算原理
+</h2><h3 id="1921-卷积的数学原理">19.2.1 卷积的数学原理
+</h3><p>卷积是对两个实变函数的一种数学运算。在泛函分析中，通过函数 \(f\) 和 \(g\) 生成第三个函数的积分变换：</p>
+\[
+(f * g)(x) = \int_{-\infty}^{\infty} f(\tau) g(x - \tau) d\tau
+\]<p><strong>通俗理解</strong>：卷积包含&quot;卷&quot;和&quot;积&quot;两步：</p>
+<ul>
+<li><strong>&ldquo;卷&rdquo;</strong>：将函数 \(g\) 翻转并平移（\(x + y = t\) 约束）</li>
+<li><strong>&ldquo;积&rdquo;</strong>：对重叠部分做乘积并积分</li>
+</ul>
+<p><strong>卷积的核心性质</strong>：</p>
+<ul>
+<li>交换律：\(f * g = g * f\)</li>
+<li>结合律：\((f * g) * h = f * (g * h)\)</li>
+<li>分配律：\(f * (g + h) = f * g + f * h\)</li>
+</ul>
+<p><strong>物理意义</strong>：在不同领域有不同解释：</p>
+<ul>
+<li><strong>信号处理</strong>：系统对输入信号的累积响应</li>
+<li><strong>图像处理</strong>：滤波和特征提取（边缘检测等）</li>
+<li><strong>概率论</strong>：两个独立随机变量之和的概率密度函数</li>
+</ul>
+<h4 id="离散卷积">离散卷积
+</h4>\[
+S(i, j) = (K * I)(i, j) = \sum_{m}\sum_{n} I(i+m, j+n) K(m, n)
+\]<p>离散卷积可以看作矩阵乘法——输入矩阵的每一行与上一行对应位置平移一个单位的元素相同，这种矩阵称为 <strong>特普利茨（Toeplitz）矩阵</strong>。</p>
+<blockquote>
+<p>在 CNN 术语中，第一个参数叫 <strong>Input</strong>，第二个叫 <strong>Kernel Function</strong>，输出叫 <strong>Feature Map</strong>。这些多维数组统称为<strong>张量（Tensor）</strong>。</p>
+</blockquote>
+<h3 id="1922-cnn-卷积计算">19.2.2 CNN 卷积计算
+</h3><p>CNN 中的卷积通常指由多个并行卷积组成的计算——单个核只能提取一种特征，网络需要每层在多个位置提取多种类型的特征。</p>
+<h4 id="关键名词">关键名词
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>名词</th>
+          <th>含义</th>
+          <th>要点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Padding</strong></td>
+          <td>在输入周围添加行列（通常填 0）</td>
+          <td>Valid（不填）/ Same（输出=输入尺寸）/ 自定义</td>
+      </tr>
+      <tr>
+          <td><strong>Stride</strong></td>
+          <td>卷积核每次滑动的距离</td>
+          <td>增大 stride 减小输出尺寸，加快计算，降低特征提取能力</td>
+      </tr>
+      <tr>
+          <td><strong>Channel</strong></td>
+          <td>特征图数量 / 深度</td>
+          <td>增加 channel 增强特征提取能力，但增加计算量</td>
+      </tr>
+      <tr>
+          <td><strong>Kernel</strong></td>
+          <td>可学习的卷积核参数</td>
+          <td>参数共享，在图像上滑动，每个 kernel 对应一张特征图</td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="计算复杂度分析">计算复杂度分析
+</h4><p><strong>时间复杂度</strong>（单卷积层）：</p>
+\[
+O(f_{in}^2 \times C_{in} \times C_{out} \times K^2)
+\]<p><strong>空间复杂度</strong>（访存量）：</p>
+\[
+\text{总参数量} + \text{各层输出特征图大小} = \sum_{l=1}^{D} K_l^2 \cdot C_{l-1} \cdot C_l + \sum_{l=1}^{D} f_l^2 \cdot C_l
+\]<h3 id="1923-卷积优化手段">19.2.3 卷积优化手段
+</h3><h4 id="tensor-运算">Tensor 运算
+</h4><p>张量（Tensor）是机器学习的基础数据结构——0 维是标量、1 维是向量、2 维是矩阵、3 维是立方体。</p>
+<p><img src="/images/ai_system/ch19/ai_system.pdf-0698-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.2.6 张量维度示意"
+	
+	
+></p>
+<p>张量计算 = 维度处理 + 数据处理，无副作用（函数式编程风格）。</p>
+<h4 id="tensor-内存布局">Tensor 内存布局
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>格式</th>
+          <th>全称</th>
+          <th>默认框架</th>
+          <th>特点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>NHWC</strong></td>
+          <td>样本数-高-宽-通道</td>
+          <td>TensorFlow / 多数推理引擎</td>
+          <td>Channel 在最后</td>
+      </tr>
+      <tr>
+          <td><strong>NCHW</strong></td>
+          <td>样本数-通道-高-宽</td>
+          <td>PyTorch</td>
+          <td>Channel 在 H/W 之前</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>不同内存布局影响内存访问的连续性，进而影响缓存效率——这也是后续 Im2Col 等算法要解决的核心问题。</p>
+<hr>
+<h2 id="193-im2col-算法">19.3 Im2Col 算法
+</h2><h3 id="1931-核心思想">19.3.1 核心思想
+</h3><p><strong>Im2Col = Image to Column</strong>，将三维张量转换为二维矩阵，使卷积操作等价于矩阵乘法，从而利用高度优化的 GEMM 库（BLAS、MKL）加速。</p>
+<p><img src="/images/ai_system/ch19/ai_system.pdf-0699-14.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.3.1 Im2Col 处理流程"
+	
+	
+></p>
+<p><strong>核心原理</strong>：用空间换时间 —— 将原本可复用的数据平坦地分布到矩阵中，增加了约 (KH×KW−1) 倍的内存占用，但换来了连续内存访问和高效矩阵乘法。</p>
+<p><img src="/images/ai_system/ch19/ai_system.pdf-0700-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.3.2 窗口点乘等价"
+	
+	
+></p>
+<p>每个窗口的卷积 = 两个一维向量的点乘。将所有窗口展开成行向量，卷积核展开成列向量，卷积 → 矩阵乘。</p>
+<h3 id="1932-算法过程">19.3.2 算法过程
+</h3><p>Im2Col + MatMul 的四个步骤：</p>
+<h4 id="步骤一input-重排">步骤一：Input 重排
+</h4><p>将输入 \(N \times \text{IH} \times \text{IW} \times \text{IC}\) 展开为 \((\text{OH} \times \text{OW}) \times (N \times \text{KH} \times \text{KW} \times \text{IC})\) 二维矩阵。</p>
+<p>每个行向量 = 一个卷积窗口覆盖的所有数据（先排第一个通道的 KH×KW，再排第二通道&hellip;直到第 IC 通道）。</p>
+<p><img src="/images/ai_system/ch19/ai_system.pdf-0701-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.3.3 Input Im2Col 展开"
+	
+	
+></p>
+<h4 id="步骤二权重重排">步骤二：权重重排
+</h4><p>将 \(N\) 个卷积核 OC×KH×KW×IC 展开为 OC × (KH×KW×IC) 的权重矩阵。</p>
+<p><img src="/images/ai_system/ch19/ai_system.pdf-0702-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.3.5 三通道卷积示意图"
+	
+	
+></p>
+<h4 id="步骤三矩阵乘法">步骤三：矩阵乘法
+</h4><p>输入矩阵 \((\text{OH} \times \text{OW}) \times (\text{KH} \times \text{KW} \times \text{IC})\) × 权重矩阵 \((\text{KH} \times \text{KW} \times \text{IC}) \times \text{OC}\) = 输出矩阵 \((\text{OH} \times \text{OW}) \times \text{OC}\)。</p>
+<p><img src="/images/ai_system/ch19/ai_system.pdf-0701-09.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.3.4 MatMul 得到卷积结果"
+	
+	
+></p>
+<h4 id="步骤四col2im-还原">步骤四：Col2Im 还原
+</h4><p>将输出矩阵还原为 \(N \times \text{OH} \times \text{OW} \times \text{OC}\) 三维张量。</p>
+<p><img src="/images/ai_system/ch19/ai_system.pdf-0702-07.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.3.6 NHWC 格式卷积计算"
+	
+	
+></p>
+<h4 id="im2col-优缺点总结">Im2Col 优缺点总结
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>优点</th>
+          <th>缺点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>充分利用 GEMM 库（BLAS/MKL）</td>
+          <td>内存膨胀约 (KH×KW−1) 倍</td>
+      </tr>
+      <tr>
+          <td>连续内存 + 缓存友好</td>
+          <td>大量数据复制开销</td>
+      </tr>
+      <tr>
+          <td>支持各种卷积参数</td>
+          <td>朴素实现性能受限</td>
+      </tr>
+      <tr>
+          <td>可与其他优化方法互补</td>
+          <td>大卷积核时内存消耗严重</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="1933-空间组合优化算法">19.3.3 空间组合优化算法
+</h3><p>空间组合（Spatial Pack）是对 Im2Col 的进一步优化，通过分治法将大卷积拆分为多个小卷积。</p>
+<p><img src="/images/ai_system/ch19/ai_system.pdf-0705-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.3.7 空间组合划分"
+	
+	
+></p>
+<h4 id="常见优化方法">常见优化方法
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>方法</th>
+          <th>原理</th>
+          <th>适用场景</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>分块卷积</strong></td>
+          <td>大卷积核分解为多个小卷积核</td>
+          <td>大型图像/特征图</td>
+      </tr>
+      <tr>
+          <td><strong>重叠数据块</strong></td>
+          <td>通过重叠减少 Padding 需求</td>
+          <td>减少边缘计算</td>
+      </tr>
+      <tr>
+          <td><strong>稀疏卷积</strong></td>
+          <td>只对非零值进行卷积</td>
+          <td>稀疏特征图</td>
+      </tr>
+      <tr>
+          <td><strong>权重共享</strong></td>
+          <td>利用同一 Kernel 在不同位置复用</td>
+          <td>通用优化</td>
+      </tr>
+      <tr>
+          <td><strong>张量化（Tensorization）</strong></td>
+          <td>利用 SIMD 指令集</td>
+          <td>GPU 等并行硬件</td>
+      </tr>
+      <tr>
+          <td><strong>循环展开 + 软件流水线</strong></td>
+          <td>编译器优化循环结构</td>
+          <td>CPU 执行优化</td>
+      </tr>
+      <tr>
+          <td><strong>内存复用</strong></td>
+          <td>复用中间结果内存</td>
+          <td>减少内存分配开销</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><img src="/images/ai_system/ch19/ai_system.pdf-0706-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.3.8 分块卷积计算"
+	
+	
+></p>
+<blockquote>
+<p>关键注意点：分块时需要额外拷贝相邻小张量的边界数据（用于 Padding）。拆分越小，局部性越好，但 Padding 引起的额外内存消耗越大。</p>
+</blockquote>
+<p><img src="/images/ai_system/ch19/ai_system.pdf-0707-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.3.9 Padding 边界处理"
+	
+	
+></p>
+<hr>
+<h2 id="194-winograd-算法">19.4 Winograd 算法
+</h2><h3 id="1941-核心思想">19.4.1 核心思想
+</h3><p>Winograd 算法的核心哲学：<strong>用更多的加法换更少的乘法</strong>。由于乘法指令的延迟远高于加法，减少乘法次数就能直接加速推理。</p>
+<p>CVPR 2016 上 Lavin &amp; Gray 提出的论文使其在推理引擎中广泛流行（MindSpore Lite、MNN 等均采用）。</p>
+<h4 id="一维卷积加速示例">一维卷积加速示例
+</h4><p>以 \(F(2,3)\) 为例：输入 \(d = [d_0, d_1, d_2, d_3]^T\)，卷积核 \(g = [g_0, g_1, g_2]^T\)。</p>
+<p><strong>标准矩阵乘法</strong>：6 次乘法 + 4 次加法</p>
+<p><strong>Winograd 变换后</strong>：</p>
+<ul>
+<li>\(m_1 = (d_0 - d_2) g_0\)</li>
+<li>\(m_2 = (d_1 + d_2) \frac{g_0 + g_1 + g_2}{2}\)</li>
+<li>\(m_3 = (d_2 - d_1) \frac{g_0 - g_1 + g_2}{2}\)</li>
+<li>\(m_4 = (d_1 - d_3) g_2\)</li>
+</ul>
+<p><strong>4 次乘法 + 8 次加法</strong>。\(g\) 相关的计算可以在推理前预先完成（推理时卷积核是固定的），所以额外加法开销可控。</p>
+<p>推广到二维卷积 \(F(2 \times 2, 3 \times 3)\)：</p>
+\[
+Y = A^T \left[ (G g G^T) \odot (B^T d B) \right] A
+\]<p>其中 \(G\) 为卷积核变换矩阵，\(B\) 为输入变换矩阵，\(A\) 为输出变换矩阵，\(\odot\) 表示 Hadamard 积。</p>
+<h3 id="1942-实现步骤">19.4.2 实现步骤
+</h3><p><img src="/images/ai_system/ch19/ai_system.pdf-0712-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.4.2 Winograd 工作流程"
+	
+	
+></p>
+<h4 id="步骤一卷积核变换-u--g-g-gt">步骤一：卷积核变换 \(U = G g G^T\)
+</h4><p><img src="/images/ai_system/ch19/ai_system.pdf-0712-13.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.4.3 卷积核 Winograd 变换"
+	
+	
+></p>
+<p>将 \(3 \times 3\) 卷积核 → 变换为 \(4 \times 4\) 矩阵 → 按位置重新排布 → 得到 16 个 IC×OC 的权重矩阵 \(U\)。</p>
+<h4 id="步骤二输入数据变换-v--bt-d-b">步骤二：输入数据变换 \(V = B^T d B\)
+</h4><p><img src="/images/ai_system/ch19/ai_system.pdf-0713-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.4.4 输入数据 Winograd 变换"
+	
+	
+></p>
+<p>将输入切分为 \(4 \times 4\) 的小块（Tile） → \(B^T d B\) 变换 → 重新排布 → 得到 16 个 nr×IC 的输入矩阵 \(V\)。</p>
+<h4 id="步骤三中间矩阵计算-m--sum-u-odot-v">步骤三：中间矩阵计算 \(M = \sum U \odot V\)
+</h4><p><img src="/images/ai_system/ch19/ai_system.pdf-0713-07.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.4.5 中间矩阵计算与输出还原"
+	
+	
+></p>
+<p>16 个 \(U \times V\) 矩阵乘 → 得到 16 个 nr×OC 的中间矩阵 \(M\) → 按位置重排为 \(4 \times 4\) 矩阵。</p>
+<h4 id="步骤四输出变换-y--at-m-a">步骤四：输出变换 \(Y = A^T M A\)
+</h4><p>将 \(4 \times 4\) 矩阵变换为 \(2 \times 2\) 输出 → 写回输出矩阵。</p>
+<h3 id="1943-算法约束与缺点">19.4.3 算法约束与缺点
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>优点</th>
+          <th>局限性</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>减少乘法次数，加速显著</td>
+          <td>仅适用于小卷积核（通常 3×3）</td>
+      </tr>
+      <tr>
+          <td>权重的变换可预计算</td>
+          <td>1×1、5×5、7×7 不使用</td>
+      </tr>
+      <tr>
+          <td>与分块策略可组合</td>
+          <td>加法次数增加 + 转换开销</td>
+      </tr>
+      <tr>
+          <td></td>
+          <td>分块越大，转换矩阵越大，精度损失加剧</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>工程实践：Runtime 层需要根据卷积参数决策使用哪个 Kernel（Im2Col、Winograd 还是直接卷积）。通常所有可固定的数据在预编译阶段计算好，避免在线重复计算。</p>
+</blockquote>
+<hr>
+<h2 id="195-qnnpack-算法">19.5 QNNPACK 算法
+</h2><h3 id="1951-前置知识回顾">19.5.1 前置知识回顾
+</h3><h4 id="im2col--gemm-的两个缺陷">Im2Col + GEMM 的两个缺陷
+</h4><p><img src="/images/ai_system/ch19/ai_system.pdf-0715-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.5.1 Im2Col 矩阵乘法示意"
+	
+	
+></p>
+<p>传统 GEMM 方法在 \(K\) 维度上拆分，每次计算核都需要加载和存储输出部分和：</p>
+<p><img src="/images/ai_system/ch19/ai_system.pdf-0716-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.5.2 GEMM 分块计算"
+	
+	
+></p>
+<p><img src="/images/ai_system/ch19/ai_system.pdf-0716-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.5.3 K 维度拆分累加"
+	
+	
+></p>
+<ol>
+<li><strong>Im2Col 空间消耗大</strong>：输入图像和卷积核展开为二维矩阵，大量内存浪费</li>
+<li><strong>GEMM 需要缓存大量行数据</strong>：大卷积核时即使分割也难避免</li>
+</ol>
+<h4 id="神经网络量化">神经网络量化
+</h4><p>QNNPACK 最初为量化推理设计——将 FP32 转换为低精度整数（FP16/INT8），提升计算速度和内存效率。但其核心算法（间接卷积）在非量化场景同样高效。</p>
+<h3 id="1952-间接卷积算法">19.5.2 间接卷积算法
+</h3><p>Marat Dukhan（Meta → Google）2019 年发表 <em>The Indirect Convolution Algorithm</em>，揭秘了 QNNPACK 的核心。</p>
+<h4 id="设计哲学">设计哲学
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>传统 GEMM</th>
+          <th>QNNPACK</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>重新打包 A/B 矩阵以利用缓存层次</td>
+          <td><strong>消除所有非计算必需的内存转换</strong></td>
+      </tr>
+      <tr>
+          <td>面向科学计算（双精度大矩阵）</td>
+          <td>面向移动端量化推理（小矩阵适配 L1 缓存）</td>
+      </tr>
+      <tr>
+          <td>MR/NR 可达很大值</td>
+          <td>MR/NR ≤ 8（移动架构约束）</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><img src="/images/ai_system/ch19/ai_system.pdf-0717-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.5.4 QNNPACK 不拆分 K 维度"
+	
+	
+></p>
+<p>关键差异：QNNPACK 将整个 \(K\) 维在计算 Kernel 中处理完，消除了输出部分和的访存。</p>
+<h4 id="间接缓冲区indirection-buffer">间接缓冲区（Indirection Buffer）
+</h4><p>这是 QNNPACK 最精妙的设计——不复制输入数据到 Im2Col 缓冲区，而是<strong>建立一个指针数组</strong>指向输入行：</p>
+<p><img src="/images/ai_system/ch19/ai_system.pdf-0721-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.5.5 间接缓冲区工作流程"
+	
+	
+></p>
+<ul>
+<li>每个输出像素位置 + 每个 Kernel 元素 → 一个指向输入行的指针</li>
+<li>超出输入范围的指针 → 指向显式零向量（处理 Padding）</li>
+<li>如果输入张量地址不变，间接缓冲区只需初始化一次，多次推理复用</li>
+</ul>
+<h4 id="间接缓冲区布局">间接缓冲区布局
+</h4><p><img src="/images/ai_system/ch19/ai_system.pdf-0721-11.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.5.6 间接缓冲区布局详解"
+	
+	
+></p>
+<p>间接缓冲区 = KH × KW × \(M\) 个指针，其中 \(M\) = OH × OW。计算时，\(M\) 个指针同时扫描输入，每次取出 \(M \times \text{IC}\) 的输入内存，配合权重完成 GEMM。</p>
+<p>伪代码逻辑：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">for kh in 0..KH:
+</span></span><span class="line"><span class="cl">  for kw in 0..KW:
+</span></span><span class="line"><span class="cl">    从间接缓冲区取 M 个指针
+</span></span><span class="line"><span class="cl">    for ic in 0..IC:
+</span></span><span class="line"><span class="cl">      每个指针指向的数据 × 权重 → 累加到 M×N 输出块
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="1953-与-im2col-算法对比">19.5.3 与 Im2Col 算法对比
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>维度</th>
+          <th>Im2Col + GEMM</th>
+          <th>QNNPACK 间接卷积</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>内存拷贝</strong></td>
+          <td>需要将输入复制到 Im2Col 缓冲区</td>
+          <td>不需要，用指针索引</td>
+      </tr>
+      <tr>
+          <td><strong>缓存效率</strong></td>
+          <td>大卷积核缓存命中率低</td>
+          <td>间接缓冲区小，输入行可重用</td>
+      </tr>
+      <tr>
+          <td><strong>额外开销</strong></td>
+          <td>Im2Col 变换本身</td>
+          <td>加载指针的微弱开销</td>
+      </tr>
+      <tr>
+          <td><strong>循环效率</strong></td>
+          <td>单循环（KH×KW×IC 次）</td>
+          <td>双循环（略低于单循环）</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>QNNPACK 解决了卷积计算的三个问题：空间向量化、地址计算复杂、内存拷贝。代价是需要建立间接缓冲区和权重 Repacking。</p>
+</blockquote>
+<hr>
+<h2 id="196-推理内存布局">19.6 推理内存布局
+</h2><h3 id="1961-cpu-与-gpu-内存架构">19.6.1 CPU 与 GPU 内存架构
+</h3><p><img src="/images/ai_system/ch19/ai_system.pdf-0724-07.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.6.1 CPU 多级缓存架构"
+	
+	
+></p>
+<p><strong>CPU 内存架构</strong>：</p>
+<ul>
+<li>多级缓存（L1 → L2 → L3），容量递增、速度递减</li>
+<li>数据从主存加载到 Cache 时，邻近数据一并加载（空间局部性）</li>
+<li>缓存未命中时需等待主存操作完成</li>
+</ul>
+<p><img src="/images/ai_system/ch19/ai_system.pdf-0725-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.6.2 GPU 内存架构"
+	
+	
+></p>
+<p><strong>GPU 内存架构</strong>：</p>
+<ul>
+<li>同样多级缓存，以 SM（Streaming Multiprocessor）为单位</li>
+<li>SM 内包含 Warp Scheduler、寄存器、L1 缓存、共享内存</li>
+<li>SIMT 模式：一个 Warp 抓一把线程扔进 Core 计算</li>
+<li>GPU 间通过 PCIe 桥或 NVLink 高速通道传输数据</li>
+</ul>
+<h3 id="1962-nchwx-内存格式">19.6.2 NCHWX 内存格式
+</h3><p>随着网络层数加深，特征图的 H/W 减小但 C（通道数）急剧增大（128、256 甚至更多）。为了充分利用矩阵计算单元，需要进行<strong>通道维度拆分</strong>。</p>
+<p><img src="/images/ai_system/ch19/ai_system.pdf-0726-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图19.6.3 NCHWX 物理存储结构"
+	
+	
+></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>格式</th>
+          <th>拆分粒度</th>
+          <th>典型场景</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>NCHW4</strong></td>
+          <td>Channel / 4</td>
+          <td>ARM 处理器 4 通道 SIMD</td>
+      </tr>
+      <tr>
+          <td><strong>NCHW32</strong></td>
+          <td>Channel / 32</td>
+          <td>特定 AI 加速器</td>
+      </tr>
+      <tr>
+          <td><strong>NCHW64</strong></td>
+          <td>Channel / 64</td>
+          <td>高并行度 DSA 芯片</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>NCHWX 优势</strong>：</p>
+<ul>
+<li>适配 SIMT/SIMD，充分利用向量化指令</li>
+<li>对 Cache 更友好，减少缓存未命中</li>
+<li>Kernel 层面易进行 Padding，减少边界分支判断</li>
+</ul>
+<hr>
+<h2 id="小结">小结
+</h2><p>第 19 章构建了推理引擎 Kernel 层优化的完整知识体系：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>知识模块</th>
+          <th>核心要点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Kernel 层概述</strong></td>
+          <td>CPU（NEON/AVX/Metal）+ GPU（CUDA/OpenCL/Vulkan）+ 算子库（cuDNN/oneDNN）；四大优化方向：算法、内存布局、汇编、调度</td>
+      </tr>
+      <tr>
+          <td><strong>卷积计算原理</strong></td>
+          <td>连续卷积 → 离散卷积（Toeplitz 矩阵）→ CNN 卷积（Padding/Stride/Channel/Kernel）；时间/空间复杂度公式</td>
+      </tr>
+      <tr>
+          <td><strong>Im2Col 算法</strong></td>
+          <td>卷积 → 矩阵乘，空间换时间，内存膨胀 (KH×KW−1) 倍；Spatial Pack 分治优化</td>
+      </tr>
+      <tr>
+          <td><strong>Winograd 算法</strong></td>
+          <td>加法换乘法（6→4 次），\(Y = A^T[(GgG^T) \odot (B^TdB)]A\)；仅适用小卷积核（3×3）</td>
+      </tr>
+      <tr>
+          <td><strong>QNNPACK</strong></td>
+          <td>间接缓冲区替换 Im2Col 拷贝，PDOT 微内核，适配 L1 缓存的轻量设计</td>
+      </tr>
+      <tr>
+          <td><strong>内存布局</strong></td>
+          <td>NCHW vs NHWC vs NCHWX，通道拆分适配硬件并行度</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p><strong>核心启示</strong>：Kernel 优化的演进史本质上是对&quot;计算 vs 访存 vs 空间&quot;三元悖论的持续平衡。从 Im2Col（牺牲空间换访存便利）到 Winograd（牺牲通用性换计算减少）再到 QNNPACK（牺牲灵活性换零拷贝），每一代算法都在寻找更优的平衡点。理解这些算法的设计取舍，才能真正领会推理引擎 Kernel 层的设计精髓。</p>
+</blockquote>
+<hr>
+<p><em>本文是《AI系统：原理与架构》第19章的学习笔记，内容有精简和重组。建议配合原书阅读以获取更完整的知识体系。</em></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ai-system/">AI System</a>
+        
+            <a href="/tags/deep-learning/">Deep Learning</a>
+        
+            <a href="/tags/ai-infra/">AI Infra</a>
+        
+            <a href="/tags/kernel-optimization/">Kernel Optimization</a>
+        
+            <a href="/tags/im2col/">Im2Col</a>
+        
+            <a href="/tags/winograd/">Winograd</a>
+        
+            <a href="/tags/qnnpack/">QNNPACK</a>
+        
+            <a href="/tags/convolution/">Convolution</a>
+        
+            <a href="/tags/memory-layout/">Memory Layout</a>
+        
+            <a href="/tags/%E6%8E%A8%E7%90%86%E5%BC%95%E6%93%8E/">推理引擎</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC14%E7%AB%A0-%E6%8E%A8%E7%90%86%E7%B3%BB%E7%BB%9F/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第14章 推理系统</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC10%E7%AB%A0-%E5%89%8D%E7%AB%AF%E4%BC%98%E5%8C%96/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第10章 前端优化</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC11%E7%AB%A0-%E5%90%8E%E7%AB%AF%E4%BC%98%E5%8C%96/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第11章 后端优化</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC13%E7%AB%A0-cann-ascend-c-%E8%AE%A1%E7%AE%97%E6%9E%B6%E6%9E%84/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第13章 CANN &amp; Ascend C 计算架构</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC15%E7%AB%A0-%E6%A8%A1%E5%9E%8B%E5%B0%8F%E5%9E%8B%E5%8C%96/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第15章 模型小型化</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.524358946663b6a5f95fbef001d1c97000115552b473e36faad787d7b96c8241.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

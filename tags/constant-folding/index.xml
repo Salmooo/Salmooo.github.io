@@ -1,0 +1,586 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Constant Folding on SalmoneX Blog</title>
+        <link>http://localhost:1313/tags/constant-folding/</link>
+        <description>Recent content in Constant Folding on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright><atom:link href="http://localhost:1313/tags/constant-folding/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>AI系统：第18章 计算图优化架构</title>
+        <link>http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC18%E7%AB%A0-%E8%AE%A1%E7%AE%97%E5%9B%BE%E4%BC%98%E5%8C%96%E6%9E%B6%E6%9E%84/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC18%E7%AB%A0-%E8%AE%A1%E7%AE%97%E5%9B%BE%E4%BC%98%E5%8C%96%E6%9E%B6%E6%9E%84/</guid>
+        <description>&lt;h2 id=&#34;本章概览&#34;&gt;本章概览
+&lt;/h2&gt;&lt;p&gt;如果说前面的章节介绍了推理引擎的整体架构，那么第 18 章则将焦点对准推理引擎中&lt;strong&gt;最核心的优化环节——计算图优化（Graph Optimization）&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;计算图是一种表示和执行数学运算的数据结构。在深度学习中，模型的训练和推理过程通常被表示成一个复杂的计算图，其中&lt;strong&gt;节点代表运算操作，边代表张量在操作之间的流动&lt;/strong&gt;。推理引擎中的图优化模块负责实现计算图中的各种优化操作，包括算子融合、布局转换、算子替换和内存优化等，目标是&lt;strong&gt;提高计算效率和减少内存占用&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;本章从离线优化模块面临的&lt;strong&gt;四类冗余&lt;/strong&gt;出发，系统梳理了&lt;strong&gt;基础优化与扩展优化&lt;/strong&gt;两大范式，然后深入到常量折叠、冗余节点消除、算子融合/替换/前移等具体技术，最后重点介绍了 &lt;strong&gt;FlashAttention&lt;/strong&gt;——一种在大模型时代至关重要的注意力计算优化算法。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;核心洞察：&lt;strong&gt;图优化的本质是对&amp;quot;冗余&amp;quot;的识别与消除&lt;/strong&gt;。无论是结构性冗余、精度冗余、算法冗余还是读写冗余，图优化模块都在做一件事——用更少的计算和更少的内存，完成同样的推理任务。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;181-引言挑战方案与优化方式&#34;&gt;18.1 引言：挑战、方案与优化方式
+&lt;/h2&gt;&lt;h3 id=&#34;1811-离线模块的四大挑战&#34;&gt;18.1.1 离线模块的四大挑战
+&lt;/h3&gt;&lt;p&gt;推理引擎的离线优化模块面临四种核心冗余：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;冗余类型&lt;/th&gt;
+          &lt;th&gt;说明&lt;/th&gt;
+          &lt;th&gt;优化方向&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;结构冗余&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;无效计算节点、重复计算子图、相同结构模块&lt;/td&gt;
+          &lt;td&gt;算子融合、算子替换、常量折叠&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;精度冗余&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;FP32 范围宽但存在冗余，可压缩到 FP16/INT8&lt;/td&gt;
+          &lt;td&gt;量化、稀疏化、低秩近似&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;算法冗余&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;算子/Kernel 实现算法本身存在计算冗余&lt;/td&gt;
+          &lt;td&gt;Kernel 泛化性提升、多尺度 Kernel&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;读写冗余&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;重复读写内存、内存访问不连续&lt;/td&gt;
+          &lt;td&gt;数据排布优化、内存池管理&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;1812-推理-vs-训练中的图优化差异&#34;&gt;18.1.2 推理 vs 训练中的图优化差异
+&lt;/h3&gt;&lt;p&gt;AI 编译器的前端优化已经在训练场景中广泛应用，但推理引擎的图优化有其独特之处：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;训练场景&lt;/strong&gt;：实验时间相对宽松，可引入较多 JIT 编译等高级手段&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;推理场景&lt;/strong&gt;：更多采用&lt;strong&gt;预先写好的模板&lt;/strong&gt;进行图转换，基于先验知识实现优化，追求极致的确定性和低延迟&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这种&amp;quot;模板驱动&amp;quot;的方式在特定场景能带来巨大计算收益，但缺点是需要根据先验知识手动设计优化规则。&lt;/p&gt;
+&lt;h3 id=&#34;1813-图优化的方式&#34;&gt;18.1.3 图优化的方式
+&lt;/h3&gt;&lt;p&gt;图优化分为**基础优化（Basic）&lt;strong&gt;和&lt;/strong&gt;扩展优化（Extended）**两大类：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;五大基础优化方式：&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;常量折叠（Constant Folding）&lt;/strong&gt;：编译时预先计算常量节点，替换为结果值&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;冗余节点消除（Redundant Node Elimination）&lt;/strong&gt;：删除不参与计算的算子&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;有限数量的算子融合（Operator Fusion）&lt;/strong&gt;：合并相邻算子减少访存&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;扩展优化（Extended）&lt;/strong&gt;：针对特定硬件（如 CUDA）的特殊优化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Layout &amp;amp; Memory 优化&lt;/strong&gt;：布局转换与内存分配优化&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;三个阶段的分工：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;预优化（Pre Optimize）&lt;/strong&gt;：Basic 优化方式&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;优化（Optimize）&lt;/strong&gt;：Basic + Extended 混合&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;后优化（Post Optimize）&lt;/strong&gt;：Extended 优化 + Layout &amp;amp; Memory&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;182-离线图优化技术&#34;&gt;18.2 离线图优化技术
+&lt;/h2&gt;&lt;h3 id=&#34;1821-常量折叠&#34;&gt;18.2.1 常量折叠
+&lt;/h3&gt;&lt;p&gt;常量折叠是编译器最经典的优化技术之一——在编译时计算出常量表达式的结果，消除运行时计算。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;基本原理：&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 优化前
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;x = 5
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;y = 10
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;z = x * y
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 常量折叠后
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;z = 50
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;三种具体折叠形式：&lt;/strong&gt;&lt;/p&gt;
+&lt;h4 id=&#34;1-const-折叠&#34;&gt;1. Const 折叠
+&lt;/h4&gt;&lt;p&gt;如果某 Op 的所有输入都是常量，先计算好结果替代该 Op，避免每次推理重复计算。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0661-11.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图18.2.1 Const折叠&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图18.2.1：Op1 的两个输入均为常量，离线阶段预先计算后作为新常量直接输入 Op2。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;2-expanddims-折叠&#34;&gt;2. ExpandDims 折叠
+&lt;/h4&gt;&lt;p&gt;当 ExpandDims 的指定维度输入是常量时，将该维度以参数形式折叠到算子内部，减少一个算子。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0661-12.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图18.2.2 ExpandDims折叠&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h4 id=&#34;3-binary-折叠&#34;&gt;3. Binary 折叠
+&lt;/h4&gt;&lt;p&gt;Binary Op 的第二个输入是标量常量时，将该标量以参数形式折叠到 Binary Op 的属性中。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0662-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图18.2.3 Binary折叠&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;1822-冗余节点消除&#34;&gt;18.2.2 冗余节点消除
+&lt;/h3&gt;&lt;p&gt;冗余节点消除在不改变图形结构的前提下删除无意义节点，分为&lt;strong&gt;五种形态&lt;/strong&gt;：&lt;/p&gt;
+&lt;h4 id=&#34;1-op-本身无意义&#34;&gt;1. Op 本身无意义
+&lt;/h4&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;消除情况&lt;/th&gt;
+          &lt;th&gt;具体描述&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;冗余算子删除&lt;/td&gt;
+          &lt;td&gt;去掉 Identity、NoOp、Print、Assert、StopGradient、Split 等&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Dropout 删除&lt;/td&gt;
+          &lt;td&gt;删除推理阶段不再需要的 Dropout 节点&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Cast 删除&lt;/td&gt;
+          &lt;td&gt;Cast 转换前后数据类型相同时删除&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Concat 删除&lt;/td&gt;
+          &lt;td&gt;Concat 只有一个输入 Tensor 时删除&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0663-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图18.2.4 冗余节点消除&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图18.2.4：冗余算子消除的三种情况——直接连接、切分为两个子图、轮循删除直到输入有意义为止。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;2-op-参数无意义&#34;&gt;2. Op 参数无意义
+&lt;/h4&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;场景&lt;/th&gt;
+          &lt;th&gt;消除条件&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Cast 消除&lt;/td&gt;
+          &lt;td&gt;参数 Src = Dst 时无意义&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Slice 消除&lt;/td&gt;
+          &lt;td&gt;index_start=0 或 index_end=channel-1 时无意义&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Expand 消除&lt;/td&gt;
+          &lt;td&gt;输出 Shape = 输入 Shape 时无意义&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Pooling 消除&lt;/td&gt;
+          &lt;td&gt;滑窗为 1×1 时无意义&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0664-09.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图18.2.5 Op参数无意义消除&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h4 id=&#34;3-op-位置无意义&#34;&gt;3. Op 位置无意义
+&lt;/h4&gt;&lt;p&gt;某些算子在计算图中特定位置会变得多余：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0665-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图18.2.6 Op位置无意义消除（一）&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图18.2.6：Remove Output Cast、UnSqueeze Elimination、Orphaned Elimination、Reshape after Global Pooling 等场景。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0666-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图18.2.7 Op位置无意义消除（二）&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图18.2.7：Flatten after Linear Elimination、重复的 Reshape 或 Cast 均可删除。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;4-op-前后反义&#34;&gt;4. Op 前后反义
+&lt;/h4&gt;&lt;p&gt;前后两个相邻 Op 语义相反时，两者均可删除：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Squeeze ↔ ExpandDims&lt;/strong&gt;：压缩与扩展维度互为逆向&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Inverse Cast&lt;/strong&gt;：A→B→A 等同于无操作&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Quant ↔ Dequant&lt;/strong&gt;：量化与反量化抵消&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Concat ↔ Slice&lt;/strong&gt;：合并后拆分可简化为直接索引&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0667-09.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图18.2.8 Op前后反义消除&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h4 id=&#34;5-公共子图优化cse&#34;&gt;5. 公共子图优化（CSE）
+&lt;/h4&gt;&lt;p&gt;当模型中出现类型、参数和输入均相同的公共子图时，只需计算一次，其他通过赋值复用结果。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0668-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图18.2.9 公共子图消除&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;实现思路：通过一个 MAP 表记录已处理过的同类型 Op，匹配到相同输入和参数的 Op 即为公共子表达式。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;1823-算子融合&#34;&gt;18.2.3 算子融合
+&lt;/h3&gt;&lt;p&gt;算子融合是深度学习中减少内存访问的核心技术。以 &lt;code&gt;y = ReLU(Conv(x))&lt;/code&gt; 为例，分开计算需要&lt;strong&gt;两次访存&lt;/strong&gt;（先写 Conv 结果，再读回做 ReLU），融合后只需&lt;strong&gt;一次访存&lt;/strong&gt;。&lt;/p&gt;
+&lt;h4 id=&#34;示例一以-conv-为中心的融合&#34;&gt;示例一：以 Conv 为中心的融合
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;1) Conv + BN + Act&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;将 BN 的 \( \gamma \) 和 \( \beta \) 参数融合到 Conv 的权重和偏置中：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0669-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Conv&amp;#43;BN融合公式&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;Python 示例：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;fuse_conv_bn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;conv&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;bn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;w&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;conv&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;weight&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;mean&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;bn&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;running_mean&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;var_sqrt&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;torch&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;sqrt&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;bn&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;running_var&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;bn&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;eps&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;gamma&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;bn&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;weight&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;beta&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;bn&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;bias&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;w_prime&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;gamma&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;/&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;var_sqrt&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;w&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;b_prime&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;beta&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;gamma&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;/&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;var_sqrt&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;mean&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;conv&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;weight&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;data&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;w_prime&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;conv&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;bias&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;data&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b_prime&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;conv&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;2) Conv + Bias + Add&lt;/strong&gt;：Add 的值直接合并到 Bias 中，&lt;code&gt;b&#39; = b + a&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3) Conv + Scale + Act&lt;/strong&gt;：Scale 参数 α 融合到权重，&lt;code&gt;W&#39; = αW&lt;/code&gt;, &lt;code&gt;b&#39; = αb&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;4) Conv + MatMul + Act&lt;/strong&gt;：与 Scale 融合原理相同&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0670-11.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图18.2.10 算子融合示例一&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h4 id=&#34;示例二更多融合模式&#34;&gt;示例二：更多融合模式
+&lt;/h4&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;融合模式&lt;/th&gt;
+          &lt;th&gt;优化方式&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;MatMul + Add&lt;/td&gt;
+          &lt;td&gt;使用 GEMM 替代&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;MatMul + Add/Scale/Div&lt;/td&gt;
+          &lt;td&gt;通过数学交换律持续向后融合（可能牺牲精度）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Mean + Add&lt;/td&gt;
+          &lt;td&gt;使用 Layer Norm 代替&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Batch Norm + Scale&lt;/td&gt;
+          &lt;td&gt;Scale 的 s 和 b 直接融入 BN&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;MatMul + Batch Norm&lt;/td&gt;
+          &lt;td&gt;类似 Conv + BN&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Conv + ReLU / ReLU6 / Act&lt;/td&gt;
+          &lt;td&gt;计算后立即激活，减少一次访存&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0672-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图18.2.11 算子融合示例二&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;注意：MatMul 融合虽然性能提升，但 Scale 通常 &amp;lt; 1，融合后权重数值进一步降低，可能导致&lt;strong&gt;精度下降&lt;/strong&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;1824-算子替换&#34;&gt;18.2.4 算子替换
+&lt;/h3&gt;&lt;p&gt;算子替换通过合并同类项、提取公因式等数学方法，将原算子替换为功能相同但更高效的算子。&lt;/p&gt;
+&lt;h4 id=&#34;一换一替换单一算子替换&#34;&gt;一换一替换（单一算子替换）
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;MatMul → Conv2D&lt;/strong&gt;：利用框架对 Conv 的深度优化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Linear → Conv2D&lt;/strong&gt;：全连接层转为 1×1 Conv&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Batch Normal → Scale&lt;/strong&gt;：等价转换，计算量更少&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;pReLU → Leaky ReLU&lt;/strong&gt;：不影响性能前提下聚焦有限算法&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Conv → Linear&lt;/strong&gt;（Global Pooling 之后）：简化后续处理&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0673-09.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图18.2.12 一换一算子替换&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h4 id=&#34;一换多替换组合算子替换&#34;&gt;一换多替换（组合算子替换）
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Shuffle Channel&lt;/strong&gt;：通过 Reshape + Permute 组合实现&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Pad Replace&lt;/strong&gt;：老版 ONNX pad-2 的参数转输入形式&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Group Conv&lt;/strong&gt;：通过 Slice + Conv 组合实现&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ShapeN&lt;/strong&gt;：通过多个 Shape 操作组合实现&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0675-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图18.2.13 一换多算子替换&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;1825-算子前移&#34;&gt;18.2.5 算子前移
+&lt;/h3&gt;&lt;p&gt;算子前移将固定不变的计算提前执行并保存结果，避免每次推理重复计算。典型应用：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Slice and Mul&lt;/strong&gt;：利用交换律调整算子顺序&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Bit shift and Reduce Sum&lt;/strong&gt;：通过算术简化减少数据传输&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0676-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图18.2.14 算子前移与算术简化&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;算子前移需要谨慎考虑计算顺序和数据依赖性，不能随意将计算提前。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;183-其他计算图优化&#34;&gt;18.3 其他计算图优化
+&lt;/h2&gt;&lt;h3 id=&#34;1831-融合算子替换&#34;&gt;18.3.1 融合算子替换
+&lt;/h3&gt;&lt;p&gt;某些复杂算子在框架中没有直接实现，而是通过基本算子组合实现，导致效率降低。融合算子替换将这些组合转为单一高效算子：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;融合类型&lt;/th&gt;
+          &lt;th&gt;说明&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Fuse Layer Norm&lt;/td&gt;
+          &lt;td&gt;组合实现的 Norm → 单一 Op&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Fuse PReLU&lt;/td&gt;
+          &lt;td&gt;组合实现的 PReLU → 单一 Op&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Fuse MatMul Transpose&lt;/td&gt;
+          &lt;td&gt;Transpose + MatMul → 带转置参数的 MatMul&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Fuse Binary Eltwise&lt;/td&gt;
+          &lt;td&gt;Add + Mul 融合为带系数的 Eltwise Sum&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Fuse Reduction → Global Pooling&lt;/td&gt;
+          &lt;td&gt;两次 reduction mean → 一次 global_mean_pooling&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0677-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图18.3.1 融合算子替换&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;1832-flashattention--改变游戏规则&#34;&gt;18.3.2 FlashAttention —— 改变游戏规则
+&lt;/h3&gt;&lt;p&gt;FlashAttention 是本章最具深度的小节，也是当前大模型时代最著名的系统优化技术之一。&lt;/p&gt;
+&lt;h4 id=&#34;问题背景&#34;&gt;问题背景
+&lt;/h4&gt;&lt;p&gt;Transformer 的核心是 Attention 机制，其计算复杂度为 \( O(N^2) \)，这导致：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;长序列无法处理&lt;/strong&gt;：早期 GPT 只支持 2k~4k token&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;二次方增长&lt;/strong&gt;：序列长度翻倍，资源消耗变为 4 倍&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;显存瓶颈&lt;/strong&gt;：\( S \) 和 \( P \) 矩阵需要 \( O(N^2) \) 的存储空间&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;gpu-存储架构的关键洞察&#34;&gt;GPU 存储架构的关键洞察
+&lt;/h4&gt;&lt;p&gt;A100 GPU 有两个存储层级：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;HBM&lt;/strong&gt;：40&lt;del&gt;80 GB，带宽 1.5&lt;/del&gt;2.0 TB/s（慢但大）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;SRAM&lt;/strong&gt;：每 108 个 SM 有 192 KB，带宽约 19 TB/s（快但小）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;SRAM 的访问速度是 HBM 的约 10 倍！标准 Attention 的问题在于：每个 Kernel 都从 HBM 读取数据、计算、再写回 HBM，产生了大量冗余的 HBM 访问。&lt;/p&gt;
+&lt;h4 id=&#34;flashattention-的两大核心技术&#34;&gt;FlashAttention 的两大核心技术
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0680-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图18.3.2 FlashAttention 算法&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;图18.3.2：FlashAttention 算法伪代码 — 核心在于 Tiling（分块计算）+ Recomputation（反向重算）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;1. Tiling（平铺）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;将 \( N \times N \) 的 softmax/scores 矩阵分块处理，每个 Block 在 SRAM 中完成计算：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;外循环：加载 \( K \)、\( V \) 的 Block 到 SRAM&lt;/li&gt;
+&lt;li&gt;内循环：加载 \( Q \) 的 Block 到 SRAM&lt;/li&gt;
+&lt;li&gt;在 SRAM 上完成 Block S 的计算&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;2. 分块 Safe Softmax&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;标准 Attention 需要全局最大值来稳定 softmax 计算，分块后无法拿到全局信息。FlashAttention 通过数学证明：&lt;strong&gt;分块 softmax 与全局 softmax 在数学上等价&lt;/strong&gt;，通过维护 \( m \)（行最大值）和 \( \ell \)（累积分母）的递推更新来实现。&lt;/p&gt;
+&lt;p&gt;关键公式（简化版）：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;计算当前块 \( S_{ij} \) → 块最大值 \( m_{ij} \) → 块 softmax 分子 \( P_{ij} \) → 块累积和 \( \ell_{ij} \)&lt;/li&gt;
+&lt;li&gt;与上一轮结果合并：\( m^{new} = \max(m, m_{ij}) \)，\( \ell^{new} = e^{m - m^{new}} \cdot \ell + e^{m_{ij} - m^{new}} \cdot \ell_{ij} \)&lt;/li&gt;
+&lt;li&gt;最终：\( O_i = \text{diag}(\ell^{new})^{-1} \cdot \left[ \text{diag}(\ell) \cdot e^{m - m^{new}} \cdot O_i + e^{m_{ij} - m^{new}} \cdot P_{ij} \cdot V_j \right] \)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;3. Recomputation（重计算）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;前向过程只保存 \( O \)、\( \ell \)、\( m \) 到 HBM，反向传播时重新计算 \( S \) 和 \( P \)，以计算换存储。&lt;/p&gt;
+&lt;h4 id=&#34;性能分析&#34;&gt;性能分析
+&lt;/h4&gt;&lt;p&gt;FlashAttention 的 HBM 访问次数从标准 Attention 的 \( O(N \times d + N^2) \) 降低到 \( O(N^2 \times d^2 / M) \)，其中 \( M \) 是 SRAM 大小。三个 Kernel 合并为一个，中间计算完全基于 SRAM。&lt;/p&gt;
+&lt;h3 id=&#34;1833-layout--memory-优化&#34;&gt;18.3.3 Layout &amp;amp; Memory 优化
+&lt;/h3&gt;&lt;p&gt;当上一层和下一层的算子输入输出格式不同时，需要插入特定算子进行数据节点转换。同时，内存优化通过以下策略减少内存占用：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0684-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图18.3.3 Layout &amp; Memory优化&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Inplace Operation（原地操作）&lt;/strong&gt;：如果一块内存不再需要，且下一个操作是 Element-Wise（如加法、乘法），直接在原内存上计算覆盖，节省内存分配和回收开销。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Memory Sharing（内存共享）&lt;/strong&gt;：当两个数据大小相同且前一个不再需要时，后一个直接覆盖前一个的内存。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;小结与思考&#34;&gt;小结与思考
+&lt;/h2&gt;&lt;p&gt;第 18 章构建了推理引擎图优化的完整知识体系：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;为什么需要图优化？&lt;/strong&gt; 神经网络模型存在结构、精度、算法和读写四类冗余。图优化通过自动化的方式消除这些冗余，降低运行成本和内存占用。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;图优化的核心手段有哪些？&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;常量折叠&lt;/strong&gt;：编译时计算，消除运行时开销&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;冗余节点消除&lt;/strong&gt;：五种形态（无意义 Op、无意义参数、无意义位置、前后反义、公共子图）精简图结构&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;算子融合&lt;/strong&gt;：将多个算子合并为一个，减少内存访问次数&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;算子替换&lt;/strong&gt;：用高效算子替代低效实现&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;算子前移&lt;/strong&gt;：将固定计算提前执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;FlashAttention 为什么重要？&lt;/strong&gt; 它完美诠释了&amp;quot;利用更高速的存储层减少低速存储访问&amp;quot;这一系统优化的核心思想。通过 Tiling + 分块 Softmax + Recomputation 三项技术，让 Attention 计算中的中间结果完全驻留在 SRAM 中，大幅降低了 HBM 访问次数。这是大模型能支持更长序列的关键技术突破。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;图优化三阶段&lt;/strong&gt;：预优化（Basic）→ 优化（Basic + Extended）→ 后优化（Extended + Layout/Memory），层层递进。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;如果说 Transformer 是 AI 的&amp;quot;发动机&amp;quot;，那 FlashAttention 就是让这个发动机能持续高速运转的&amp;quot;涡轮增压器&amp;quot;。而图优化整体，就像是对发动机的全面调校——从减少零件冗余（节点消除）、精简管道（算子融合）、到升级点火系统（常量折叠）——让每一滴燃油（计算资源）都发挥最大价值。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;em&gt;下一篇预告：第19章将深入推理引擎的 Kernel 优化，详解卷积算法的 Im2Col、Winograd 等方法，以及内存布局、汇编优化和调度优化等技术。&lt;/em&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

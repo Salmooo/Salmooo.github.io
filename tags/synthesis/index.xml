@@ -1,0 +1,890 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Synthesis on SalmoneX Blog</title>
+        <link>http://localhost:1313/tags/synthesis/</link>
+        <description>Recent content in Synthesis on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright>
+        <lastBuildDate>Thu, 04 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/synthesis/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>第3章: FPGA Technology Today — Chips and Tools</title>
+        <link>http://localhost:1313/p/%E7%AC%AC3%E7%AB%A0-fpga-technology-today-chips-and-tools/</link>
+        <pubDate>Thu, 04 Jun 2026 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/p/%E7%AC%AC3%E7%AB%A0-fpga-technology-today-chips-and-tools/</guid>
+        <description>&lt;h2 id=&#34;章节概览&#34;&gt;章节概览
+&lt;/h2&gt;&lt;p&gt;本章是全书的技术底座——系统阐述 FPGA 原型验证所依赖的两大支柱：&lt;strong&gt;FPGA 器件硬件&lt;/strong&gt;（以 Xilinx Virtex-6 为例）和 &lt;strong&gt;EDA 工具链&lt;/strong&gt;（综合 → 分区 → 布局布线 → 调试）。作者提出并围绕&amp;quot;原型三定律&amp;quot;组织全章：SoC 比 FPGA 大（需要分区）、SoC 比 FPGA 快（需要优化）、SoC 设计对 FPGA 不友好（需要 RTL 改造）。&lt;/p&gt;
+&lt;p&gt;本章信息密度极高，涵盖 10 种 FPGA 资源的原型效用评估、两种分区方法的对比、UCF 约束文件的实战示例，以及 4 种调试工具的横向对比。后续第7-11章将对本章提到的各项技术逐一深入。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;核心知识点&#34;&gt;核心知识点
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;原型三定律&lt;/strong&gt;：(1) SoC 比 FPGA 大 → 需分区 (2) SoC 比 FPGA 快 → 需优化 (3) SoC 设计 FPGA 不友好 → 需 RTL 改造&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;LUT 的本质&lt;/strong&gt;：6 输入 LUT = 64 位 RAM，通过合成填充内容来实现任意布尔函数。SLICEM 可做分布式 RAM/移位寄存器，SLICEL 仅组合逻辑&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Virtex-5 → Virtex-6 跨越&lt;/strong&gt;：逻辑单元 360K → 760K（翻倍），FF 数量 207K → 948K（&lt;strong&gt;翻 4 倍+&lt;/strong&gt;），BlockRAM 18MB → 38MB&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;时钟是限制性资源&lt;/strong&gt;：SoC 可任意定义时钟网络，FPGA 有严格数量限制——时钟资源往往是比逻辑容量更早触达的瓶颈&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;BlockRAM&lt;/strong&gt;：双端口、36Kb、可独立配置、内置 FIFO 逻辑和 ECC（64 位宽时可纠 1 位错检 2 位错）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;DSP48E1&lt;/strong&gt;：25×18 位乘法器 + 48 位累加器，600MHz，可动态旁路乘法器、支持 SIMD 运算&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;GTX 收发器&lt;/strong&gt;：155Mb/s ~ 6.5Gb/s，含 PMA 和 PCS 层，不同器件 8~36 路&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;两种分区流程对比&lt;/strong&gt;：Pre-synthesis（QoR 最佳，需增量流程加速） vs Post-synthesis（逐模块合成，自然块级复用）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;调试工具四象限&lt;/strong&gt;：实时探针（RTL/FPGA Editor）vs 非实时追踪（ChipScope 网表级 / Identify RTL 级）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;时钟门控转化&lt;/strong&gt;：综合工具将门控时钟自动转为时钟使能——保持逻辑等价的同时消除时钟偏移问题&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;详细笔记&#34;&gt;详细笔记
+&lt;/h2&gt;&lt;h3 id=&#34;31-fpga-器件技术概览&#34;&gt;3.1 FPGA 器件技术概览
+&lt;/h3&gt;&lt;p&gt;FPGA 处于 Moores Law 轨道上，且受益于代工厂通过生产超大 FPGA 芯片积累的经验。书中更透露：&lt;strong&gt;3D IC 技术正在使某些 FPGA 突破 Moores Law 的约束&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;311-virtex-6-家族&#34;&gt;3.1.1 Virtex-6 家族
+&lt;/h3&gt;&lt;p&gt;以 Xilinx Virtex-6 作为本书的参考器件（因其在原型验证领域的市场占有率最高）。&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;特性&lt;/th&gt;
+          &lt;th&gt;Virtex-5（最大）&lt;/th&gt;
+          &lt;th&gt;Virtex-6（最大）&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Logic Cells&lt;/td&gt;
+          &lt;td&gt;360,000&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;760,000&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Flip-Flops&lt;/td&gt;
+          &lt;td&gt;207,000&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;948,000&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;BlockRAM&lt;/td&gt;
+          &lt;td&gt;18 MB&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;38 MB&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;关键观察&lt;/strong&gt;：FF/逻辑比提升超过 2 倍 → 更好地支持流水线设计。&lt;/p&gt;
+&lt;h3 id=&#34;312-fpga-逻辑块lut--slice--clb&#34;&gt;3.1.2 FPGA 逻辑块（LUT / Slice / CLB）
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;LUT 的本质&lt;/strong&gt;（全书最精彩的底层解释之一）：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;4 输入 LUT 本质上是一块 &lt;strong&gt;16×1 的 RAM&lt;/strong&gt;。通过填充 16 位 RAM 的不同值，当地址（输入）变化时输出随之变化——这就是一个四输入单输出的逻辑函数。16 位 RAM 相当于一个 Karnaugh Map。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;现代 Virtex-6 使用 &lt;strong&gt;6 输入 LUT&lt;/strong&gt;（64 位 RAM），两个输出：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;第一输出：最多 6 输入任意布尔函数&lt;/li&gt;
+&lt;li&gt;第二输出：最多 5 输入布尔函数（共享输入）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;两种 Slice 类型&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;类型&lt;/th&gt;
+          &lt;th&gt;能力&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;SLICEM&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;LUT 可配置为组合逻辑 / 小型 RAM / 移位寄存器（SRL）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;SLICEL&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;LUT 仅用于组合逻辑&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;每个 Slice = 4 个 6 输入 LUT + 8 个存储单元（4 FF + 4 FF/Latch）+ 进位链。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;对原型工程师的启示&lt;/strong&gt;：如果 4 个 FF/Latch 被配置为锁存器，则另外 4 个 FF 不能用 → &lt;strong&gt;避免锁存器的设计与 FPGA 更友好&lt;/strong&gt;。此外，同一 Slice 内的寄存器共享控制信号，如果设计中有大量不同的不相关控制信号，打包会变得困难。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;作为原型工程师，我们通常不需要关心 Slice 内部的具体使用——实现工具应该自动选择合适配置来满足时序约束。但在极端情况下，这种级别的专业知识可能必要。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;313-fpga-存储器&#34;&gt;3.1.3 FPGA 存储器
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;分布式 LUT 存储器&lt;/strong&gt;：SLICEM 的 LUT 可作为 32 位宽的小型 RAM——对应 SoC 中随处可见的寄存器文件。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;BlockRAM&lt;/strong&gt;：每个 Virtex-6 器件有 &lt;strong&gt;156~1064 个&lt;/strong&gt; BlockRAM。&lt;/p&gt;
+&lt;p&gt;核心特性：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;可配置性&lt;/strong&gt;：36Kb 双端口同步 RAM，可配为 32K×1 到 512×72（或 64）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;独立配置&lt;/strong&gt;：每个端口可独立配置宽度&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;同步操作&lt;/strong&gt;：双端口 RAM 时每端口可有不同时钟&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;FIFO 逻辑&lt;/strong&gt;：专用（可配置），但读写端必须相同宽度&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ECC&lt;/strong&gt;：64 位宽时附加 8 位 Hamming 码，自动纠 1 位错检 2 位错，也可用于外部 64/72 位内存&lt;/li&gt;
+&lt;li&gt;BlockRAM 可级联为更深或更宽的存储器——综合工具自动完成&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;FIFO 逻辑不被综合工具自动推断&lt;/strong&gt;，需通过 IP 核实例化。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;314-dsp-资源dsp48e1&#34;&gt;3.1.4 DSP 资源（DSP48E1）
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;25×18 位乘法器 + 48 位累加器 @ 600MHz
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;核心能力：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;乘法器可动态旁路&lt;/li&gt;
+&lt;li&gt;SIMD 运算：双 24 位或四 12 位加法/减法/累加&lt;/li&gt;
+&lt;li&gt;10 种逻辑函数的逻辑单元&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;预加法器&lt;/strong&gt;（前加法器）：典型用于对称滤波器，减少前后级 Slice 消耗&lt;/li&gt;
+&lt;li&gt;广泛流水线和扩展能力：动态总线移位器、内存地址生成器、宽总线 MUX&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;除 pattern detect 外，大多数特性被综合工具自动推断。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;315-fpga-时钟资源&#34;&gt;3.1.5 FPGA 时钟资源
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;这是 SoC 与 FPGA 之间最显著的差异之一&lt;/strong&gt;：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;SoC 设计人员几乎可以自由定义任意数量的时钟网络，但 FPGA 中的时钟数量是有限且真实的。&lt;strong&gt;SoC 时钟到 FPGA 时钟资源的映射，如果处理不当，可能导致显著的项目延迟。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;FPGA 中的时钟瓶颈&lt;/strong&gt;：在某些设计中，&lt;strong&gt;时钟资源的数量才是真正的限制因素，而非器件容量或性能&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;解决方案&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;简化原始时钟网络（第9章：DFP 建议）&lt;/li&gt;
+&lt;li&gt;最大化利用可用 FPGA 时钟（第7章：设计移植）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&#34;时钟生成cmt-和-mmcm&#34;&gt;时钟生成：CMT 和 MMCM
+&lt;/h4&gt;&lt;p&gt;每个 CMT 含 2 个 MMCM——基于 PLL 的多输出频率合成器。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;VCO 范围：400MHz ~ 1600MHz&lt;/li&gt;
+&lt;li&gt;最小输入频率：10MHz&lt;/li&gt;
+&lt;li&gt;可编程分频器和相位选择（45° 间隔输出）&lt;/li&gt;
+&lt;li&gt;PLL 带宽可选&lt;/li&gt;
+&lt;li&gt;分数计数器（反馈路径或输出路径）&lt;/li&gt;
+&lt;li&gt;固定或动态相位微调&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;每个 FPGA 最多 9 个 CMT → 18 个 MMCM&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;原型效用：非常高。但许多时钟特性&lt;strong&gt;不能自动推断&lt;/strong&gt;，必须在 FPGA 版本的 RTL 中实例化。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;时钟分布&#34;&gt;时钟分布
+&lt;/h4&gt;&lt;p&gt;Virtex-6 提供 &lt;strong&gt;5 种不同类型的时钟线&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;类型&lt;/th&gt;
+          &lt;th&gt;数量&lt;/th&gt;
+          &lt;th&gt;覆盖范围&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Global Clock&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;32 条全局线（每区域 12 条）&lt;/td&gt;
+          &lt;td&gt;每个 FF/时钟使能/置位复位&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Regional Clock&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;每区域 6 条&lt;/td&gt;
+          &lt;td&gt;本区域 + 上下区域&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;IO Clock&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;专用高速&lt;/td&gt;
+          &lt;td&gt;仅 IO 逻辑和 SERDES&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;全局时钟&lt;/strong&gt;可直接由 CMT 驱动，完全消除基本时钟分布延迟。&lt;strong&gt;区域时钟&lt;/strong&gt;可由 4 个时钟能力输入引脚驱动，可作 1~8 整数分频。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;如果使用区域时钟，通常需要位置约束，将时钟负载关联到特定区域。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;316-fpga-io&#34;&gt;3.1.6 FPGA IO
+&lt;/h3&gt;&lt;p&gt;与时钟类似，&lt;strong&gt;IO 引脚数量往往是比器件容量和内部性能更早触达的瓶颈&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;Virtex-6：&lt;strong&gt;240~1200 个 IO 引脚&lt;/strong&gt;，支持 2.5V 以内多种 IO 标准。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;IO 分组&lt;/strong&gt;：每 Bank 40 引脚，共享一个 VCCO 电压&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;IODELAY&lt;/strong&gt;：每路输入/输出可延迟最多 32 级，每级 ~78ps，频率基准 200MHz → &lt;strong&gt;不受温度/电压/工艺影响&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;驱动电流&lt;/strong&gt;：2mA ~ 24mA 可选&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;差分支持&lt;/strong&gt;：LVDS、HT、RSDS、BLVDS、差分 SSTL/HSTL，可选 100Ω 内部终端&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ISERDES/OSERDES&lt;/strong&gt;：串行-并行转换，可编程宽度 2~10 位（SDR 或 DDR）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;第 8 章将展示 SERDES 如何用于 FPGA 间的时分复用信号传输——这是多 FPGA 原型的核心技术。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;317-gtx-吉比特收发器&#34;&gt;3.1.7 GTX 吉比特收发器
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;155 Mb/s ~ 6.5 Gb/s
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;独立发送/接收通道，各自使用独立 PLL
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;发送器&lt;/strong&gt;：并行-串行转换，比率 8/10/16/20/32/40，CML 差分输出&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;接收器&lt;/strong&gt;：串行-并行转换，可编程均衡器（补偿 PCB 和互连特性），使用 F_REF 启动时钟识别&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;注意&lt;/strong&gt;：最大器件 LX760 &lt;strong&gt;没有 GTX 能力&lt;/strong&gt;——如果需要原型验证高速串行 IP，需混合使用不同 FPGA 型号（第5章将讨论）。&lt;/p&gt;
+&lt;h3 id=&#34;318-内置-ipethernetpciecpu&#34;&gt;3.1.8 内置 IP（Ethernet、PCIe、CPU）
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Ethernet&lt;/strong&gt;：最多 4 路三模（10/100/1000 Mb/s）TEMAC，支持 2.5Gb/s&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;PCIe&lt;/strong&gt;：集成 PCIe 2.0 接口块，端点或根端口，1/2/4/8 通道，2.5Gbit/s 和 5.0Gbit/s&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;CPU 硬核&lt;/strong&gt;：FPGA 内置 ARM 核的速度通常是 SoC 等效 RTL 合成后的 &lt;strong&gt;10 倍&lt;/strong&gt;，但仅当 SoC 实际使用的 CPU 恰好与 FPGA 硬核匹配时才真正有用&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;CPU 的困境&lt;/strong&gt;：单个硬核限制多核 SoC 的分区方式——每颗 FPGA 只能放一个硬 CPU，分区必须将每个 CPU 隔离到不同 FPGA，这可能导致总线等共享资源的分割不理想。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;如果要用 FPGA 硬核做很大的妥协，不如用外部测试芯片或在 CPU 速度上妥协以换取功能正确性。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;319-系统监控器&#34;&gt;3.1.9 系统监控器
+&lt;/h3&gt;&lt;p&gt;每个 Virtex-6 内置：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;10 位 200k SPS ADC&lt;/strong&gt;：监控温度（±4°C）和电源（±1%）&lt;/li&gt;
+&lt;li&gt;17 路外部模拟输入通道&lt;/li&gt;
+&lt;li&gt;自动连续采样 + 最大/最小值寄存器&lt;/li&gt;
+&lt;li&gt;报警限制可触发自动断电（如 125°C）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;通过 JTAG 无需实例化即可访问&lt;/strong&gt;——甚至配置前和断电时都能读取&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;3110-资源类型总结&#34;&gt;3.1.10 资源类型总结
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;资源&lt;/th&gt;
+          &lt;th&gt;原型效用&lt;/th&gt;
+          &lt;th&gt;推断方式&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;逻辑块&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;极高，基本构建块&lt;/td&gt;
+          &lt;td&gt;始终自动&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;RAM 块&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;高，主要构建块&lt;/td&gt;
+          &lt;td&gt;通常自动&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;DSP 块&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;高，主要构建块&lt;/td&gt;
+          &lt;td&gt;通常自动（部分需 IP 实例化）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;时钟生成&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;极高，必需但受限&lt;/td&gt;
+          &lt;td&gt;通常自动（可能需要 RTL 改动）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;时钟分布&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;极高，全局网络是宝贵资源&lt;/td&gt;
+          &lt;td&gt;通常自动&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;通用 IO&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;极高，必需且宝贵&lt;/td&gt;
+          &lt;td&gt;始终自动（类型由属性选择）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;高速串行 IO&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;高，对标准 IP 有用&lt;/td&gt;
+          &lt;td&gt;极少自动（需 IP 实例化）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;硬 IP&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;非常强大，但依赖设计匹配度&lt;/td&gt;
+          &lt;td&gt;永不自动（需 IP 实例化）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;系统监控器&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;高，保护硬件投资&lt;/td&gt;
+          &lt;td&gt;永不自动（需设计引入）&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;32-fpga-原型流程概览&#34;&gt;3.2 FPGA 原型流程概览
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;SoC RTL → 设计适配 → 分区 → 综合 → 约束生成 → 布局布线 → FPGA Bitstream
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;五个关键步骤：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;设计适配&lt;/strong&gt;：移除不原型化的模块、替换 SoC 特定结构（时钟/IP）、调整存储器尺寸&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;分区&lt;/strong&gt;：将设计分配给多颗 FPGA（设计不超单颗容量时可跳过）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;综合&lt;/strong&gt;：RTL → FPGA 网表 + 实现约束&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;约束生成&lt;/strong&gt;：时序和引脚布局约束&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;布局布线&lt;/strong&gt;：网表 + 约束 → FPGA 位流&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;33-实现工具&#34;&gt;3.3 实现工具
+&lt;/h3&gt;&lt;h4 id=&#34;331-综合工具&#34;&gt;3.3.1 综合工具
+&lt;/h4&gt;&lt;p&gt;以 Synopsys Synplify Pro 为例，综合器自动完成：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;将 RTL 转换为 FPGA 网表&lt;/li&gt;
+&lt;li&gt;推断规律性结构（存储器、DSP、进位链）&lt;/li&gt;
+&lt;li&gt;优化并高效映射到 FPGA 资源&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;示例&lt;/strong&gt;：一个 ALU 的 RTL（含 MUX、运算逻辑、寄存器）被自动映射为：LUT（多路选择）+ DSP48（乘法）+ FF（寄存器）。&lt;strong&gt;如果不想浪费 DSP48 做简单乘法，可通过属性或约束文件覆盖默认映射。&lt;/strong&gt;&lt;/p&gt;
+&lt;h4 id=&#34;332-soc-设计元素到-fpga-的映射&#34;&gt;3.3.2 SoC 设计元素到 FPGA 的映射
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;逻辑映射&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;自动推断 LUT6（≤6 输入函数）→ 超出时级联或拆分&lt;/li&gt;
+&lt;li&gt;双 LUT5 自动推断（两函数共享 5 个公共输入时可占用同一 CLB）&lt;/li&gt;
+&lt;li&gt;SLICEM 存储器推断（分布式 RAM 和快速移位寄存器）&lt;/li&gt;
+&lt;li&gt;低扇出时钟使能可重连到 LUT 以最大化 Slice 利用率&lt;/li&gt;
+&lt;li&gt;同时触发 SET/RESET 时发出警告并生成等效异步复位逻辑&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;存储器映射&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;单/双端口存储器自动推断为 BlockRAM&lt;/li&gt;
+&lt;li&gt;流水线寄存器自动打包进 BlockRAM&lt;/li&gt;
+&lt;li&gt;支持 read-first / write-first / no-change 模式&lt;/li&gt;
+&lt;li&gt;超大存储器自动拆分并添加地址/数据拆分合并逻辑&lt;/li&gt;
+&lt;li&gt;拆分拓扑可控（优化速度 vs 优化面积）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;DSP 映射&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;加法器/减法器 → 进位链&lt;/li&gt;
+&lt;li&gt;乘法器/乘累加 → DSP48E1 自动推断&lt;/li&gt;
+&lt;li&gt;预加法器 → 自动推断到 DSP48 的前加法器&lt;/li&gt;
+&lt;li&gt;DSP 级联 → 多 DSP 块间使用专用级联互连&lt;/li&gt;
+&lt;li&gt;流水线寄存器 → 自动打包进 DSP 块&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;333-综合与原型三定律&#34;&gt;3.3.3 综合与&amp;quot;原型三定律&amp;quot;
+&lt;/h4&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;定律&lt;/th&gt;
+          &lt;th&gt;含义&lt;/th&gt;
+          &lt;th&gt;应对&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Law 1&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;SoC 比 FPGA 大&lt;/td&gt;
+          &lt;td&gt;需分区&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Law 2&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;SoC 比 FPGA 快&lt;/td&gt;
+          &lt;td&gt;性能优化&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Law 3&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;SoC 设计对 FPGA 不友好&lt;/td&gt;
+          &lt;td&gt;RTL 改造（第7章）&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;作者承认这些更准确说是&amp;quot;挑战&amp;quot;而非&amp;quot;定律&amp;quot;——有些 SoC 确实一片 FPGA 就够（打破第一定律）。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;关键综合特性&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;快速综合&lt;/strong&gt;：跳过某些优化机会，运行时间快 2-3 倍——适用于初期分区和实现试错&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;增量综合&lt;/strong&gt;：与增量 P&amp;amp;R 配合，仅对变更子模块重新综合，其余使用历史版本——显著减少设计变更到实现完成的周转时间&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;物理综合&lt;/strong&gt;：综合时考虑实际布线延迟，生成的逻辑布局约束供 P&amp;amp;R 使用——用于个别性能吃紧的 FPGA&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;334-门控时钟映射&#34;&gt;3.3.4 门控时钟映射
+&lt;/h4&gt;&lt;p&gt;这是综合工具&lt;strong&gt;不修改 RTL 即可化解 FPGA 时钟不兼容问题&lt;/strong&gt;的最重要能力：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;SoC 中普遍存在的时钟门控不适合 FPGA 的专用低偏斜时钟网络。Synplify 自动将门控组合逻辑从时钟线上移除，改为使用绝大多数 FPGA 时序元件的时钟使能引脚。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;产生&lt;strong&gt;逻辑等价&lt;/strong&gt;但资源效率更高的实现&lt;/li&gt;
+&lt;li&gt;几乎消除因低偏斜时钟分布导致的 setup/hold 时序违规&lt;/li&gt;
+&lt;li&gt;可控制哪些时钟保留、时序元件如何处理时钟使能、甚至黑盒的处理方式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;34-设计分区流程&#34;&gt;3.4 设计分区流程
+&lt;/h3&gt;&lt;p&gt;分区是应对&amp;quot;第一定律&amp;quot;的核心手段。两种主流方案 + 一种替代方案：&lt;/p&gt;
+&lt;h4 id=&#34;341-pre-synthesis-分区综合前分区&#34;&gt;3.4.1 Pre-Synthesis 分区（综合前分区）
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;流程&lt;/strong&gt;：完整 SoC RTL → 分区工具 → 多个 FPGA 级子设计 → 并行综合 → 并行 P&amp;amp;R&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;核心挑战&lt;/strong&gt;：正确地分区需要知道每个 RTL 模块的最终 FPGA 资源需求和时序信息——&lt;strong&gt;这只能来自综合（最好是 P&amp;amp;R）&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Certify 的解决方式&lt;/strong&gt;：先一轮快速自动综合（估计模式）→ 反馈结果给分区器 → 再正式分区。本质是&amp;quot;两遍流程&amp;quot;，但估计步骤很快。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;最大优势&lt;/strong&gt;：当&lt;strong&gt;跨 FPGA 性能关键时&lt;/strong&gt;最强大——可在系统级同时跨多个 FPGA 进行时序预算和约束，综合也可考虑板级延迟和引脚复用。&lt;/p&gt;
+&lt;h4 id=&#34;342-post-synthesis-分区综合后分区&#34;&gt;3.4.2 Post-Synthesis 分区（综合后分区）
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;流程&lt;/strong&gt;：逐模块独立综合 → 门级网表 → 合并/重组为 FPGA 规模的区块&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;优势&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;仅变更模块重新综合&lt;/strong&gt;，其余模块网表不变&lt;/li&gt;
+&lt;li&gt;分区结果通常可复用&lt;/li&gt;
+&lt;li&gt;天然是&amp;quot;块级&amp;quot;流程 → 自动化脚本容易&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;天然单遍流程&lt;/strong&gt;：到分区阶段时已是映射后的网表，时序信息精确&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;劣势&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;QoR 不如 Pre-synthesis（无法跨 FPGA 做系统级时序优化）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;对比维度&lt;/th&gt;
+          &lt;th&gt;Pre-Synthesis&lt;/th&gt;
+          &lt;th&gt;Post-Synthesis&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;QoR&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;最佳&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;次优&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;设置&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;自上而下&lt;/td&gt;
+          &lt;td&gt;更简单&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;周转时间&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;需要增量合成+P&amp;amp;R&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;天然块级复用&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;调试优势&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;多 FPGA 插桩 + 名称保持&lt;/td&gt;
+          &lt;td&gt;—&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;总运行时间&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;稍慢&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;稍快&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h4 id=&#34;343-替代方案网表级分区&#34;&gt;3.4.3 替代方案：网表级分区
+&lt;/h4&gt;&lt;p&gt;用标准 SoC 综合工具将设计综合为 ASIC 门级网表，然后逐单元替换为 FPGA 等价物。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;缺点&lt;/strong&gt;：性能更差、资源利用更低——因为低层次网表使 FPGA 综合无法推断高层次资源（DSP、SRL 等），大量优化机会丧失。&lt;/p&gt;
+&lt;h4 id=&#34;344-certify-分区工具&#34;&gt;3.4.4 Certify 分区工具
+&lt;/h4&gt;&lt;p&gt;Synopsys Certify 支持&lt;strong&gt;自动、交互（拖放）和脚本化&lt;/strong&gt;三种分区模式。&lt;/p&gt;
+&lt;p&gt;核心交互界面：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;中央面板&lt;/strong&gt;：RTL 顶层示意图&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;顶部面板&lt;/strong&gt;：板级资源表示（FPGA ×N、RAM、外部 IO、时钟源等）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;实时反馈&lt;/strong&gt;：每颗 FPGA 的逻辑/内存/IO 利用率直方图&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;连接矩阵&lt;/strong&gt;：模块间互连关系（本例中 core ↔ system interface 有 128 条连接）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;35-fpga-后端布局布线流程&#34;&gt;3.5 FPGA 后端（布局布线）流程
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;EDIF网表(.edn) + UCF约束(.ucf) → 重新映射 → 布局 → 布线 → 生成Bitstream → FPGA配置
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id=&#34;351-ucf-约束文件&#34;&gt;3.5.1 UCF 约束文件
+&lt;/h4&gt;&lt;p&gt;UCF 是综合和后端之间的&lt;strong&gt;桥梁&lt;/strong&gt;。两大作用：&lt;strong&gt;时序约束&lt;/strong&gt; + &lt;strong&gt;布局约束&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;实战片段：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 引脚位置 + IO 标准
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;NET &amp;#34;BIO1_WRITEDATA&amp;#34;  LOC=&amp;#34;T36&amp;#34; | IOSTANDARD = LVDCI_33 ;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;NET &amp;#34;BIO1_CLK&amp;#34;        LOC=&amp;#34;U33&amp;#34; | IOSTANDARD = LVDCI_33 ;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# DCM 相位偏移
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;INST &amp;#34;dcm_base_1&amp;#34; PHASE_SHIFT=&amp;#34;-40&amp;#34;;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 时钟约束：32MHz 输入时钟
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;NET &amp;#34;HCLK_BUFG&amp;#34; TNM_NET = &amp;#34;HCLK_intern&amp;#34;;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;TIMESPEC &amp;#34;TS_clk&amp;#34; = PERIOD &amp;#34;HCLK_intern&amp;#34; 31.000 ns HIGH 50.00%;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 跨时钟域不分析
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;TIMESPEC &amp;#34;TS_01&amp;#34; = FROM &amp;#34;cti_hclk&amp;#34; TO &amp;#34;fx_clk&amp;#34; TIG;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;TIMESPEC &amp;#34;TS_02&amp;#34; = FROM &amp;#34;fx_clk&amp;#34; TO &amp;#34;cti_hclk&amp;#34; TIG;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;常见错误&lt;/strong&gt;：给综合只有最基础的时钟约束，然后花大量时间在后端调整来满足时序。&lt;strong&gt;正确做法&lt;/strong&gt;：将 UCF 从综合传递到 P&amp;amp;R，确保两个工具为同一目标工作。&lt;/p&gt;
+&lt;h4 id=&#34;352-附加后端工具&#34;&gt;3.5.2 附加后端工具
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core Generator&lt;/strong&gt;：生成优化的 IP 核（第10章）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Floor Planning&lt;/strong&gt;：逻辑布局约束（IO 和关键路径逻辑）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;增量实现&lt;/strong&gt;：仅重新实现有改动的部分（第11章）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;FPGA Editor&lt;/strong&gt;：对已 P&amp;amp;R 的设计做低级修改（仅推荐专家使用）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;36-调试工具&#34;&gt;3.6 调试工具
+&lt;/h3&gt;&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;在原型 bring-up 过程中，设计往往不会立刻工作，需要诊断其状态并理解其行为。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;调试方法分类&#34;&gt;调试方法分类
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;实时 vs 非实时&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;方法&lt;/th&gt;
+          &lt;th&gt;时间性&lt;/th&gt;
+          &lt;th&gt;入口点&lt;/th&gt;
+          &lt;th&gt;捕获深度&lt;/th&gt;
+          &lt;th&gt;添加信号耗时&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;RTL 测试点&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;实时&lt;/td&gt;
+          &lt;td&gt;RTL 或 FPGA Editor&lt;/td&gt;
+          &lt;td&gt;即时（示波器显示）&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;长&lt;/strong&gt;（需重走全流程）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;非嵌入式调试端口&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;实时&lt;/td&gt;
+          &lt;td&gt;FPGA Editor 直接加端口&lt;/td&gt;
+          &lt;td&gt;即时&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;短&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;网表级信号追踪&lt;/strong&gt;（ChipScope）&lt;/td&gt;
+          &lt;td&gt;非实时&lt;/td&gt;
+          &lt;td&gt;网表插入&lt;/td&gt;
+          &lt;td&gt;数千个 128 样本&lt;/td&gt;
+          &lt;td&gt;中&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;RTL 级信号追踪&lt;/strong&gt;（Identify）&lt;/td&gt;
+          &lt;td&gt;非实时&lt;/td&gt;
+          &lt;td&gt;RTL 插入&lt;/td&gt;
+          &lt;td&gt;数千个 128 样本&lt;/td&gt;
+          &lt;td&gt;长（二次修改可增量）&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h4 id=&#34;362-实时信号探测&#34;&gt;3.6.2 实时信号探测
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;最简单的方法&lt;/strong&gt;：直接在 RTL 中把内部信号引出到 FPGA 引脚 → 用逻辑分析仪/示波器观察。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;节约引脚的方法（测试点复用）&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;8 信号宽 × 4 选 1 MUX → 8 个引脚探 32 路信号&lt;/li&gt;
+&lt;li&gt;第二组 MUX 可改为内部处理器/状态机控制 → 进一步节约控制引脚&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Synplify 的 &lt;code&gt;syn_probe&lt;/code&gt; 属性&lt;/strong&gt;：无需修改 RTL 就能定义测试点。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;FPGA Editor 方案&lt;/strong&gt;：在已实现的网表中添加信号连接——无需重新综合或 P&amp;amp;R，但需要非常熟悉 FPGA 资源。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;重要提醒：通过 FPGA Editor 长途连接的信号，其时序关系不一定反映信号源的真正时序关系。不过可以用 FPGA Editor 测量单路延迟，再用逻辑分析仪补偿。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;364-非实时信号追踪&#34;&gt;3.6.4 非实时信号追踪
+&lt;/h4&gt;&lt;p&gt;利用 &lt;strong&gt;JTAG 读回能力&lt;/strong&gt;（FPGA 中每个 FF 和嵌入式存储器均可通过 JTAG 读取）。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;工作流程&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;在设计中插入捕获逻辑（通信核 + 触发逻辑 + 采样缓冲）&lt;/li&gt;
+&lt;li&gt;通过 JTAG 配置触发条件&lt;/li&gt;
+&lt;li&gt;触发后用 JTAG（或更快的 SelectMap 并行配置通道）将捕获数据传回主机&lt;/li&gt;
+&lt;li&gt;在专用软件或波形查看器中显示&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&#34;365-chipscope网表级信号追踪&#34;&gt;3.6.5 ChipScope（网表级信号追踪）
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;Xilinx 官方 FPGA 调试工具&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;两种插入方式：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Core Generator 方式&lt;/strong&gt;：生成 ICON（通信核）+ ILA（逻辑分析核）→ 在 RTL 中实例化或在网表中合并 → 综合 + P&amp;amp;R&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Core Inserter 方式&lt;/strong&gt;：直接打开网表（edif 或 ngc）→ 选择时钟和信号 → 自动构建新网表 → 无需修改 RTL&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;关键特性：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ILA 可产生触发输出信号（到 FPGA 引脚触发其他仪器），延迟 10 个时钟&lt;/li&gt;
+&lt;li&gt;采样分辨率 = 捕获时钟周期——&lt;strong&gt;不是分析内部信号绝对时序的工具&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;支持 VCD、ASCII、Agilent FBDF 等格式导出&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;366-identifyrtl-级信号追踪&#34;&gt;3.6.6 Identify（RTL 级信号追踪）
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;Synopsys 的 RTL 级调试工具&lt;/strong&gt;，核心区别：&lt;strong&gt;插桩发生在 RTL 源码级别而非网表级&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;核心组件：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;IICE&lt;/strong&gt;（Intelligent In-Circuit Emulator）：包含探针逻辑、触发逻辑、追踪缓冲、JTAG 通信&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;RTL Instrumentor&lt;/strong&gt;：在源码中浏览并选择信号（可采样信号加下划线，已采样信号图标变色），支持断点&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;RTL Debugger&lt;/strong&gt;：在实验室中控制触发/捕获/断点，&lt;strong&gt;将捕获数据直接标注到源代码中&lt;/strong&gt;（类似软件调试器单步执行）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;两遍策略：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;第一遍&lt;/strong&gt;：插入 IICE → 综合 → P&amp;amp;R → 调试&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;第二遍&lt;/strong&gt;（增量修改信号列表/触发条件）：&lt;strong&gt;绕过综合和 P&amp;amp;R&lt;/strong&gt;，直接增量更新&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;多 IICE 可跨时钟域交叉触发，共享同一 JTAG 通信接口，触发信号可导出用于同步外部仪器。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;关键图示解读&#34;&gt;关键图示解读
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;图20：FPGA 技术演进&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;展示了 FPGA 容量沿 Moores Law 的持续增长&lt;/li&gt;
+&lt;li&gt;传达了关键信息：&lt;strong&gt;投资 FPGA 原型方法不会因 FPGA 技术缺乏而产生风险&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0067-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 20: The evolution of FPGA technology&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;图26：FPGA 原型基本流程&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;综合、设计适配、分区、约束生成、P&amp;amp;R 的全貌&lt;/li&gt;
+&lt;li&gt;在每一步都需要验证手段——建议尽可能复用现有 SoC 验证框架&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0083-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 26 Basic FPGA-based Prototyping flow&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;表3：FPGA 资源效用总结&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;每种资源的&amp;quot;自动推断程度&amp;quot;决定了 RTL 改造工作量&lt;/li&gt;
+&lt;li&gt;硬 IP 和高速串行 IO 几乎总需手动实例化&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;表5：分区流程对比&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;核心权衡：QoR 最佳（Pre-Synthesis） vs 周转更快/更易自动化（Post-Synthesis）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;图35：UCF 实例&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;实战感最强的部分——展示了引脚分配、IO 标准设置、时钟约束、TIG（时序忽略）跨域标记&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;表6：调试技术对比&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;四类方法在实时性、插入层级、捕获深度和信号添加耗时上的差异&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;个人总结&#34;&gt;个人总结
+&lt;/h2&gt;&lt;p&gt;第3章是全书信息密度最高的章节。它构建了 FPGA 原型验证的完整技术地图，后续所有章节都是对这幅地图中各个区域的深入巡游。&lt;/p&gt;
+&lt;p&gt;本章最重要的思维框架是 &lt;strong&gt;&amp;ldquo;原型三定律&amp;rdquo;&lt;/strong&gt; 和 &lt;strong&gt;&amp;ldquo;推断程度&amp;rdquo;&lt;/strong&gt; 的概念。原型三定律告诉我们接下来必然面对的三大挑战（分区、性能、RTL 改造）；而&amp;quot;推断程度&amp;quot;（表3 最右列）决定了每类 SoC 设计元素映射到 FPGA 时需要多少手动工作——&lt;strong&gt;Always → Usually → Often → Seldom → Never&lt;/strong&gt;，这个渐变本质上是原型工程的工作量预估。&lt;/p&gt;
+&lt;p&gt;另一个深刻的领会是：&lt;strong&gt;FPGA 的时钟和 IO 资源往往比逻辑容量更早成为瓶颈&lt;/strong&gt;。这意味着原型工程师不能只盯着&amp;quot;够不够大&amp;quot;，还要关心&amp;quot;够不够多&amp;quot;——时钟网络数、IO 引脚数，这些在设计早期就需要评估。&lt;/p&gt;
+&lt;p&gt;调试工具方面，ChipScope（网表级）和 Identify（RTL 级）代表了两种不同哲学：前者不需要改 RTL（适合 RTL 冻结后），后者将调试信息直接映射回源代码（适合 RTL 仍在活跃开发阶段）。两者都有增量模式来减少&amp;quot;添加信号 → 看到结果&amp;quot;的周转时间。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;实践思考&#34;&gt;实践思考
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;选 FPGA 时不要只看逻辑单元数&lt;/strong&gt;：时钟资源、IO 引脚、BlockRAM、DSP 块数、GTX 通道数——这些&amp;quot;其他&amp;quot;资源可能比逻辑容量更早成为瓶颈&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;综合工具不仅是&amp;quot;翻译器&amp;quot;&lt;/strong&gt;：它能自动完成门控时钟转化、超标量存储器拆分、DSP 推断——理解这些能力可以大幅减少手动 RTL 修改&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;分区流程的选择是一个战略决策&lt;/strong&gt;：Pre-synthesis 追求最佳 QoR（当跨 FPGA 性能关键时），Post-synthesis 追求快速周转（当 RTL 仍在频繁变更时）。大型项目中可能需要同时使用两种策略——关键路径用 Pre-synthesis，其余用 Post-synthesis&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;调试策略应在设计阶段就规划&lt;/strong&gt;：不要等 bring-up 遇到问题才开始想怎么插探针。预留在顶层的一组调试 MUX 比事后在 FPGA Editor 中&amp;quot;飞线&amp;quot;可靠得多&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;UCF 不是后端的独有领地&lt;/strong&gt;：综合阶段就应提供完整的时序约束——这在原型性能优化中可能是&amp;quot;花 10 分钟做约束，省 10 小时跑 P&amp;amp;R&amp;quot;的杠杆点&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0070-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 21: The Xilinx[®] Virtex[®] -6 SLICEM block diagram&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0071-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 22: Xilinx[®] Virtex[®] - 6 BlockRAM&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0073-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 23: Xilinx[®] Virtex[®] -6 DSP48E1 Slice&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0075-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 24: Xilinx[®] Virtex[®] -6 Clock Management Tile (CMT)&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0079-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 25: Xilinx[® ] Virtex[®] -6 GTX block schematic&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0085-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 27: Synplify Pro[®] FPGA synthesis screenshot&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0091-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 28: Examples of gated-clock removal performed by synthesis.&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0092-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 29: Pre-synthesis partitioning flow&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0094-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 30: Post-synthesis partitioning flow&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0096-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 31: Alternative SoC netlist-based flow&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0097-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 32: Screenshot of Certify partitioning environment&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0099-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 33: Xilinx place &amp; route tool flow&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0100-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 34: Xilinx[®] ISE[® ] tools screenshot&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0104-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 36: Test pin muxing&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0108-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 37: ChipScope tools design flow&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0109-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 38: ChipScope™ Pro system block diagram&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0110-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 39: Screenshot of ChipScope™ debug tool&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0111-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 40: Synopsys Identify[®] tool overview&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0112-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 41: Identify use model and flow&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0113-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 42: RTL Instrumentor source code view&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0114-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 43: RTL debugger source code view showing sampled data&#34;
+	
+	
+&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

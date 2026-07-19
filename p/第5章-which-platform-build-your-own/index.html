@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="自建 FPGA 原型平台从零到一的硬件设计指南：拓扑结构规划、母板-子板权衡、时钟延迟匹配、电源分配、热管理、配置方案和标准化平台管理——一份面向团队决策者的完整 checklist。">
+<title>第5章: Which Platform? — Build Your Own</title>
+
+<link rel='canonical' href='http://localhost:1313/p/%E7%AC%AC5%E7%AB%A0-which-platform-build-your-own/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="第5章: Which Platform? — Build Your Own">
+<meta property='og:description' content="自建 FPGA 原型平台从零到一的硬件设计指南：拓扑结构规划、母板-子板权衡、时钟延迟匹配、电源分配、热管理、配置方案和标准化平台管理——一份面向团队决策者的完整 checklist。">
+<meta property='og:url' content='http://localhost:1313/p/%E7%AC%AC5%E7%AB%A0-which-platform-build-your-own/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='FPGA' /><meta property='article:tag' content='Prototyping' /><meta property='article:tag' content='Hardware Platform' /><meta property='article:tag' content='PCB Design' /><meta property='article:tag' content='Power Distribution' /><meta property='article:tag' content='Clock Management' /><meta property='article:tag' content='Signal Integrity' /><meta property='article:tag' content='Thermal Management' /><meta property='article:tag' content='In-House Platform' /><meta property='article:tag' content='System ACE' /><meta property='article:published_time' content='2026-06-05T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-06-05T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="第5章: Which Platform? — Build Your Own">
+<meta name="twitter:description" content="自建 FPGA 原型平台从零到一的硬件设计指南：拓扑结构规划、母板-子板权衡、时钟延迟匹配、电源分配、热管理、配置方案和标准化平台管理——一份面向团队决策者的完整 checklist。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="http://localhost:1313/" selected>English</option>
+                                
+                                    <option value="http://localhost:1313/zh-cn/" >中文</option>
+                                
+                                    <option value="http://localhost:1313/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#章节概览">章节概览</a></li>
+    <li><a href="#核心知识点">核心知识点</a></li>
+    <li><a href="#详细笔记">详细笔记</a>
+      <ol>
+        <li><a href="#51-平台的最佳形态">5.1 平台的最佳形态</a>
+          <ol>
+            <li><a href="#511-尺寸和外形">5.1.1 尺寸和外形</a></li>
+            <li><a href="#512-模块化">5.1.2 模块化</a></li>
+            <li><a href="#5121-母板子卡-vs-全部上板">5.1.2.1 母板+子卡 vs &ldquo;全部上板&rdquo;</a></li>
+            <li><a href="#513-互联">5.1.3 互联</a></li>
+            <li><a href="#514-灵活性">5.1.4 灵活性</a></li>
+          </ol>
+        </li>
+        <li><a href="#52-可测试性">5.2 可测试性</a></li>
+        <li><a href="#53-板级时钟资源">5.3 板级时钟资源</a>
+          <ol>
+            <li><a href="#核心概念super-fpga">核心概念：&ldquo;Super-FPGA&rdquo;</a></li>
+            <li><a href="#531-板内外时钟延迟匹配haps-的量化模型">5.3.1 板内外时钟延迟匹配——HAPS 的量化模型</a></li>
+            <li><a href="#532-pll锁相环">5.3.2 PLL（锁相环）</a></li>
+            <li><a href="#533-系统时钟生成清单">5.3.3 系统时钟生成清单</a></li>
+          </ol>
+        </li>
+        <li><a href="#54-时钟控制与配置">5.4 时钟控制与配置</a></li>
+        <li><a href="#55-板级电压域">5.5 板级电压域</a></li>
+        <li><a href="#56-电源供给与分配">5.6 电源供给与分配</a>
+          <ol>
+            <li><a href="#核心原则每个板独立供电">核心原则：&ldquo;每个板独立供电&rdquo;</a></li>
+            <li><a href="#561-板级电源分配">5.6.1 板级电源分配</a></li>
+            <li><a href="#562-电源分配的物理设计">5.6.2 电源分配的物理设计</a></li>
+          </ol>
+        </li>
+        <li><a href="#57-系统可靠性管理">5.7 系统可靠性管理</a>
+          <ol>
+            <li><a href="#571-电源监控">5.7.1 电源监控</a></li>
+            <li><a href="#572-温度监控与管理">5.7.2 温度监控与管理</a></li>
+            <li><a href="#573-fpga-散热">5.7.3 FPGA 散热</a></li>
+          </ol>
+        </li>
+        <li><a href="#58-fpga-配置">5.8 FPGA 配置</a></li>
+        <li><a href="#59-信号完整性">5.9 信号完整性</a></li>
+        <li><a href="#510-全局启动与复位">5.10 全局启动与复位</a></li>
+        <li><a href="#511-鲁棒性robustness">5.11 鲁棒性（Robustness）</a></li>
+        <li><a href="#512-建立内部标准化平台">5.12 建立内部标准化平台</a></li>
+      </ol>
+    </li>
+    <li><a href="#关键图示解读">关键图示解读</a></li>
+    <li><a href="#个人总结">个人总结</a></li>
+    <li><a href="#实践思考">实践思考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/fpga%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" >
+                FPGA学习笔记
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E7%AC%AC5%E7%AB%A0-which-platform-build-your-own/">第5章: Which Platform? — Build Your Own</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jun 05, 2026</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    4 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="章节概览">章节概览
+</h2><p>第4章告诉我们&quot;需要什么资源&quot;；第5章回答&quot;如何自己造出承载这些资源的硬件平台&quot;。</p>
+<p>本章是全书硬件工程味道最浓的一章——从 PCB 拓扑、连接器选型、时钟延迟匹配（精确到 0.44ns）、电源树设计、地弹抑制、散热方案到 FPGA 配置机制和信号完整性，全面覆盖自建原型平台的每一个工程决策。</p>
+<p>核心张力贯穿全文：<strong>为目标项目定制的专用性 vs 为未来项目预留的通用灵活性</strong>。作者坦率指出：&ldquo;在作者的经验中，大多数自建平台从未被复用于后续项目&rdquo;——不是因为不想，而是因为时钟资源、互联和电压域的灵活性不足以适配新设计。本章最后探讨了如何在组织层面建立标准化平台生态体系来打破这个困境。</p>
+<hr>
+<h2 id="核心知识点">核心知识点
+</h2><ul>
+<li><strong>&ldquo;Pins-in / Pins-out&rdquo; 拓扑</strong>：在 SoC 引脚处做物理分界，初版芯片到达后可直插替换 FPGA 板——软件在数小时内即可跑起来</li>
+<li><strong>母板固定资源 + 子板项目专用外设</strong> = 复用性与性能之间的最佳折中。固定外设会永久占用 FPGA IO 引脚（最宝贵的资源），即使不使用也无法释放</li>
+<li><strong>互联是比逻辑更稀缺的资源</strong>：64 位 AHB 总线实际需要 200+ 引脚（地址+写数据+读数据+控制信号），即使复用也需 130+ 引脚</li>
+<li><strong>关键教训</strong>：如果一颗 FPGA 不需要连接该总线，其 130+ IO 引脚只能设为高阻态——<strong>永久浪费</strong></li>
+<li><strong>HAPS 时钟延迟匹配的量化模型</strong>：定义两个延迟量子 X（stub 延迟，0.44ns）和 Y（标准同轴电缆延迟，1.45ns），任意 FPGA 时钟输入延迟 = 2X+Y = 2.33ns</li>
+<li><strong>电源分配的核心原则</strong>：每个子板独立供电，不要从主板&quot;借电&quot;——Piggy-Back 供电是灾难的来源</li>
+<li><strong>地弹（Ground Bounce）机制</strong>：大量 IO 同步翻转 → 大地电流经地引脚回流 → 地参考瞬时抬升 → 输入引脚误判逻辑电平。应对：低阻抗地平面 + 默认最小驱动电流而非 24mA</li>
+<li><strong>散热不可忽视</strong>：高利用率 + 高时钟 + 封闭机箱 = 芯片损坏。FPGA 内置系统监控器（温度 ±4°C，电压 ±1%）是免费的保护机制</li>
+<li><strong>System ACE + CompactFLASH</strong>：最流行的非专家友好配置方案——CF 卡可存多个配置+文档，终端用户通过开关或远程选择加载哪个</li>
+<li><strong>自建标准化平台需要组织级投入</strong>：开发协调、库存管理、文档、培训、技术支持——本质上是一项&quot;公司内部的小生意&quot;</li>
+</ul>
+<hr>
+<h2 id="详细笔记">详细笔记
+</h2><h3 id="51-平台的最佳形态">5.1 平台的最佳形态
+</h3><p>四个维度评估平台拓扑：<strong>尺寸/外形、模块化、互联、灵活性</strong>。</p>
+<h4 id="511-尺寸和外形">5.1.1 尺寸和外形
+</h4><p><strong>脐带线缆（Umbilical Cable）拓扑</strong>：FPGA 平台通过线缆连接到目标系统的 SoC 插座。优势：易于向外部合作伙伴演示。但需要考虑 FPGA IO 引脚是否有足够的电流驱动能力来驱动线缆负载。</p>
+<p><strong>更常见的反向做法</strong>：初版芯片插接到 FPGA 原型平台预先准备好的位置——这需要一种关键的物理拓扑：</p>
+<p><strong>Pins-In / Pins-Out 分区</strong>（图47）：</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0141-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 47: FPGA-based Prototyping platform employing a personality board"
+	
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">SoC RTL 内部逻辑（Pins-In）        外部系统接口（Pins-Out）
+</span></span><span class="line"><span class="cl">        ↓                                  ↓
+</span></span><span class="line"><span class="cl">    FPGA 板                             个性板（Personality Board）
+</span></span><span class="line"><span class="cl">                                        （外设、目标产品接口等）
+</span></span><span class="line"><span class="cl">        ↓                                  ↓
+</span></span><span class="line"><span class="cl">    通过接头连接 ←→ 
+</span></span><span class="line"><span class="cl">        ↓
+</span></span><span class="line"><span class="cl">  [初版芯片到达后] 芯片安装在基板上，替换掉 FPGA 板的位置
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>&ldquo;当初版芯片以这种方式接入之前已经在原型平台中验证过的系统时，软件在数小时内就能跑起来。&rdquo;</p>
+</blockquote>
+<p>这种预规划使芯片回片后集成时间减少了几个数量级。</p>
+<h4 id="512-模块化">5.1.2 模块化
+</h4><p><strong>核心权衡</strong>：全部元件放一块板（性能更好）vs 不同元件分板放置（灵活性更好）。</p>
+<p><strong>母板+子板 折中方案</strong>：</p>
+<ul>
+<li>母板：FPGA + 全局资源（每个项目必用）</li>
+<li>子板：项目专用外设（随项目更换）</li>
+<li>后续项目只需重新设计 1-2 块子板，而非整个平台</li>
+</ul>
+<h4 id="5121-母板子卡-vs-全部上板">5.1.2.1 母板+子卡 vs &ldquo;全部上板&rdquo;
+</h4><p>一个关键的陷阱示例（图48）：</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0143-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 48: Inefficient use of FPGA IO pins owing to dedicated peripherals"
+	
+	
+></p>
+<blockquote>
+<p>外设在母板上直接连接到 FPGA 引脚。如果某个设计不用该外设，这些 IO 引脚仍然被占用——无法作任何其他用途。<strong>&ldquo;如果不确定是否需要的，就放上去&rdquo;——这种态度会严重限制母板上最宝贵的资源：FPGA 的 IO 引脚。</strong></p>
+</blockquote>
+<p><strong>解决方案</strong>：外设放在独立子卡上，需要时接入，不需要时移除。</p>
+<h4 id="513-互联">5.1.3 互联
+</h4><p><strong>总线宽度陷阱</strong>：64 位 AHB 总线实际包含：</p>
+<ul>
+<li>64 位地址</li>
+<li>64 位写数据</li>
+<li>64 位读数据</li>
+<li>10-20+ 控制和状态信号</li>
+<li><strong>合计：200+ 连接</strong></li>
+</ul>
+<p>即使地址和数据复用，仍需要 130+ 全局引脚和走线。</p>
+<p><strong>固定全局总线的浪费</strong>（图49、图50）：一个 4 FPGA 系统中，只有 3 颗需要连接 AHB 总线，但第 4 颗 FPGA 的 130+ 引脚被硬连线到总线走线上——<strong>只能设高阻态，永久无法作其他用途</strong>。</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0145-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 49 : Multiplexed address-data bus before partitioning (compare with Figure 50 )"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0146-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 50: Multiplexed address-data bus from Figure 49 after partitioning"
+	
+	
+></p>
+<p><strong>两条路</strong>：</p>
+<ul>
+<li><strong>专用互联</strong>（匹配 SoC 顶层互联 → 分区容易 → 后续项目复用困难）</li>
+<li><strong>通用互联</strong>（设计无关 → 复用性好 → 分区时需要更多规划）</li>
+</ul>
+<p><strong>建议</strong>：用线缆或开关矩阵而非固定 PCB 走线来增加互联灵活性。</p>
+<h4 id="514-灵活性">5.1.4 灵活性
+</h4><p><strong>一个刺眼的行业事实</strong>：</p>
+<blockquote>
+<p>&ldquo;在作者的经验中，大多数自建平台从未被复用于后续项目。不仅因为复用本就不是初衷，而且即使有复用意图，板子本身的资源或互联也无法支持。&rdquo;</p>
+</blockquote>
+<p><strong>五大灵活性维度</strong>：</p>
+<ol>
+<li><strong>FPGA 资源总量</strong> — 能否扩展</li>
+<li><strong>外设选择</strong> — 是否模块化</li>
+<li><strong>互联</strong> — 是否固定</li>
+<li><strong>板级时钟资源</strong> — 最常导致不可复用的元凶</li>
+<li><strong>电压域</strong> — 新项目的 IO 电压需求可能完全不同</li>
+</ol>
+<hr>
+<h3 id="52-可测试性">5.2 可测试性
+</h3><p>板级可测试性 ≠ FPGA 内部设计插桩（第11章）。</p>
+<p>自建平台必须能测试：</p>
+<ul>
+<li>所有互联的连续性（尤其是多连接器的模块化系统）</li>
+<li>FPGA 引脚烧毁的诊断</li>
+<li><strong>可测试性投入在平台故障时多次回报</strong></li>
+</ul>
+<hr>
+<h3 id="53-板级时钟资源">5.3 板级时钟资源
+</h3><h4 id="核心概念super-fpga">核心概念：&ldquo;Super-FPGA&rdquo;
+</h4><blockquote>
+<p>把整个板级系统看作一个&quot;超级 FPGA&quot;——各颗 FPGA 器件 + 连接它们的顶层资源。SoC 的时钟网络层级需要用板级资源来承载顶层。</p>
+</blockquote>
+<p><strong>&ldquo;Super-FPGA&rdquo; 需要复制的板级资源</strong>：</p>
+<ul>
+<li>板级 PLL / 时钟复用器 / 时钟分频器 / 倍频器 / 时钟同步电路</li>
+</ul>
+<p><strong>简化策略</strong>：用工具自动将 SoC 的门控时钟转为等效的全局 FPGA 时钟 + 时钟使能（第7章详述），减少时钟域总数。</p>
+<p><strong>时钟灵活性不足是第一大复用杀手</strong>：</p>
+<blockquote>
+<p>&ldquo;在作者的经验中，顶层时钟资源的限制是自建板在后续项目中不能被复用的最常见原因。&rdquo;</p>
+</blockquote>
+<h4 id="531-板内外时钟延迟匹配haps-的量化模型">5.3.1 板内外时钟延迟匹配——HAPS 的量化模型
+</h4><p>这是本章最精彩的技术细节。</p>
+<p>定义两个基本延迟量子：</p>
+$$
+X = \text{stub delay（FPGA 引脚到附近连接器的延迟）} = 0.44\text{ns}
+$$$$
+Y = \text{标准同轴电缆 delay（特定长度 + 高质量屏蔽 + 同轴连接器）} = 1.45\text{ns}
+$$<p><strong>关键设计原则</strong>：</p>
+<ul>
+<li>所有同轴电缆统一类型和长度 → Y 值恒定</li>
+<li>PCB 走线按规定长度做延迟匹配（可能需要蛇形走线，增加 PCB 层数）</li>
+<li>同一板族中 X 和 Y 值保持不变 → 允许新旧板混合使用</li>
+</ul>
+<p><strong>时钟源到任意 FPGA 时钟引脚的总延迟</strong>：= 2X + Y = 2.33ns</p>
+<p><strong>注意</strong>：收到的各 FPGA 时钟虽然互相同步，但与主时钟输入 F 不同步——需要 PLL 来补偿。</p>
+<h4 id="532-pll锁相环">5.3.2 PLL（锁相环）
+</h4><p><strong>板级 PLL 的作用</strong>：</p>
+<ul>
+<li>消除跨板时钟网络中的插入延迟</li>
+<li>减少系统不同部分之间的时钟偏斜</li>
+</ul>
+<p><strong>关键要求</strong>：PLL 输出到各 FPGA 的 stub 长度和电缆长度严格匹配。</p>
+<h4 id="533-系统时钟生成清单">5.3.3 系统时钟生成清单
+</h4><p><strong>五大考量</strong>：</p>
+<ol>
+<li><strong>时钟来源</strong>：本地板上生成 / 外部输入 / FPGA 内部生成</li>
+<li><strong>时钟频率</strong>：估计 FPGA 时钟频率范围，支持精细粒度任意频率生成</li>
+<li><strong>容忍偏斜</strong>：FPGA 间同步——所有 FPGA 在可接受偏斜范围内收到时钟</li>
+<li><strong>板间同步</strong>：大型多板系统——所有时钟到达所有 FPGA 的偏斜可接受</li>
+<li><strong>高速时钟</strong>：引脚复用需要的高速时钟两端必须同步（CPM 工具支持）</li>
+</ol>
+<p><strong>自建板应包含的时钟要素</strong>：</p>
+<ul>
+<li><strong>板级时钟合成器</strong>：PLL + 晶体振荡器（可插拔）→ 多时钟系统需多路独立的合成器</li>
+<li><strong>输入时钟源选择器</strong>：本地/外部/FPGA 产生的多路选择 MUX → 手动开关或软件控制</li>
+<li><strong>时钟分配网络</strong>：板上和板间延迟均衡化</li>
+<li><strong>外部时钟源</strong>：板间传播延迟需通过相位偏移补偿 → 多级 PLL 级联可能导致不稳定和失锁</li>
+<li><strong>高速多路复用时钟</strong>：信号复用到单引脚需要的高速同步时钟</li>
+<li><strong>时钟缩放</strong>：分频器（FPGA 内部）+ PLL（板级）</li>
+</ul>
+<hr>
+<h3 id="54-时钟控制与配置">5.4 时钟控制与配置
+</h3><p>复杂的多 FPGA 板可能需要大量开关来覆盖所有时钟选项。替代方案：<strong>可编程开关</strong>由板载微控制器或外部主机控制（第6章详述商业平台的软件控制方案）。</p>
+<hr>
+<h3 id="55-板级电压域">5.5 板级电压域
+</h3><p><strong>SoC 的内部电压岛</strong>（通过 UPF 文件描述，由 EDA 工具推断）一般不出现在 RTL 中，不会被映射到 FPGA 原型中。如果 RTL 中包含了电压控制逻辑和 retention 寄存器，需要将其<strong>固定到非活跃状态</strong>（第7章）。</p>
+<p><strong>外部电压需求必须正确处理</strong>：FPGA IO 引脚按 Bank 分组，共享不同电压阈值，由不同电压环供电。</p>
+<p><strong>电压不灵活的代价</strong>：电压而非性能或互联成为分区决策的支配因素 → 其他优先级被妥协。新的电压需求是已有板子不能复用的另一大原因。</p>
+<p><strong>HAPS-64 的电压配置工具</strong>（图53）：将 FPGA 引脚和子卡连接器分组到不同区域，每个区域通过下拉菜单设置电压（包括&quot;OFF&quot;选项），配置工具控制板上的可编程开关设置参考电压和轨电压。</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0154-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 53: On-board IO voltage configuration"
+	
+	
+></p>
+<hr>
+<h3 id="56-电源供给与分配">5.6 电源供给与分配
+</h3><h4 id="核心原则每个板独立供电">核心原则：&ldquo;每个板独立供电&rdquo;
+</h4><p>如图54（反例）：子板从主板取电→子板合并电流超过主板供电能力→烧毁主板供电电路和走线。</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0155-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 54: Example of non-recommended power distribution"
+	
+	
+></p>
+<p>如图55（正例）：一个公共外部电源为所有板供电→各板独立取电。</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0155-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 55: Example of centralized power distribution"
+	
+	
+></p>
+<p><strong>关键警告</strong>：</p>
+<blockquote>
+<p>&ldquo;即使是安装了自己 FPGA 的主要子系统板，从主板供电也是坏实践。FPGA 上电和配置时期（甚至 live reset 期间）的瞬时大电流，可能超出板间连接器的承载能力。&lsquo;瞬间低压掉电&rsquo;（Momentary Brown-Out）是原型项目后期最难诊断的问题之一。&rdquo;</p>
+</blockquote>
+<p><strong>保护措施</strong>：每个电源出口处加可复位保险丝（Resettable Fuse），连接器引脚根据预期电流适当选择规格。</p>
+<h4 id="561-板级电源分配">5.6.1 板级电源分配
+</h4><p><strong>三种电压需求</strong>：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>电压类型</th>
+          <th>用途</th>
+          <th>特点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Core Voltage</strong></td>
+          <td>FPGA 内部逻辑</td>
+          <td>最低，制造商决定</td>
+      </tr>
+      <tr>
+          <td><strong>IO Voltage</strong></td>
+          <td>FPGA 引脚</td>
+          <td>按 Bank 分组，可变；多 IO 电压 = 多&quot;功率岛&quot;（Power Island）→ 复杂化 PCB 布局</td>
+      </tr>
+      <tr>
+          <td><strong>IO Current</strong></td>
+          <td>外部设备驱动</td>
+          <td>超出 24mA 需加外置缓冲器（放在子卡上）</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>功耗估算</strong>：取决于切换速率和 FF 使用量 → 统计性估算 → 保守为好。供应商提供功耗估算工具。</p>
+<p><strong>电源监控</strong>：由于核心和部分 IO 电压显著低于过去器件，变化容限比例缩小。强烈推荐电源监控电路。</p>
+<p><strong>附加参考电压</strong>：为外部 ADC/DAC 等模拟电路预留可编程参考电压供电。</p>
+<h4 id="562-电源分配的物理设计">5.6.2 电源分配的物理设计
+</h4><p><strong>FPGA 的电流尖峰问题</strong>：</p>
+<blockquote>
+<p>高速时钟 + 大量 FF 同步翻转 → 时钟边沿产生巨大电流尖峰 → 如果供电不足 → 电源电平下降或电源线上噪声 → 不可靠运行。</p>
+</blockquote>
+<p><strong>设计规范</strong>：</p>
+<ul>
+<li>低阻抗电源平面 + 连续充足铜箔</li>
+<li>低阻抗地回路同样重要</li>
+<li><strong>大容量电容（100μF）</strong>：平滑慢速电流浪涌</li>
+<li><strong>高频小电容（0.1μF）</strong>：平滑快速电流尖峰</li>
+<li>两种电容都尽可能靠近 FPGA 电源引脚</li>
+</ul>
+<p><strong>地弹（Ground Bounce）机制与对策</strong>：</p>
+<ul>
+<li>每 N 个 IO 引脚共享一个地引脚（N 取决于 FPGA 型号）</li>
+<li>大量 IO 同时同向翻转 → 大回流电流 → 地参考瞬时抬升 → 输入引脚误判逻辑</li>
+<li><strong>对策</strong>：给 IO 间的地引脚提供低阻抗接地 + <strong>默认使用最小驱动电流而非全 24mA</strong>，在保证信号质量的同时减少回流</li>
+</ul>
+<hr>
+<h3 id="57-系统可靠性管理">5.7 系统可靠性管理
+</h3><h4 id="571-电源监控">5.7.1 电源监控
+</h4><p>每路供电电路持续监测电压 → 超出范围时以下动作可选其一或多选：</p>
+<ol>
+<li>可见指示（LED），大系统需链接到主机监控程序（尤其远程或封闭安装时）</li>
+<li>触发全局复位减少工作电流</li>
+<li><strong>取消所有 FPGA 配置</strong>→ 最小电流消耗 + 远程用户可见的故障信号</li>
+</ol>
+<h4 id="572-温度监控与管理">5.7.2 温度监控与管理
+</h4><p><strong>热问题三要素</strong>：大 FPGA + 高利用率 + 高时钟 + 封闭机箱 = <strong>过热损坏风险</strong>。</p>
+<p><strong>FPGA 系统监控器</strong>（免费且强大的内置保护机制）：</p>
+<ul>
+<li>监测芯片平均结温（±4°C 精度）</li>
+<li>JTAG 端口可读取（无需实例化）或通过设计内部实例化模块访问</li>
+<li>可设温度报警 → 超出阈值时的自动操作</li>
+</ul>
+<p><strong>过热响应链</strong>：</p>
+<ol>
+<li>可见报警（LED）</li>
+<li>开启风扇</li>
+<li>系统进入复位状态</li>
+<li><strong>取消所有 FPGA 配置</strong>（最小化功耗）</li>
+</ol>
+<p><strong>CONFPRO 工具</strong>（图57）：运行在 HAPS 板 MicroBlaze CPU 上的监控程序 → 读取 6 颗 Virtex-6 的系统监控器 → 控制各 FPGA 风扇。同一微控制器还控制 FPGA 时钟、复位和配置。</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0161-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 57: monitor in CONFPRO"
+	
+	
+></p>
+<p><strong>板级温度传感器</strong>（在靠近 FPGA 等热区放置）→ 可编程报警输出 → 与片上传感器组合 → 建立完整监控系统。</p>
+<h4 id="573-fpga-散热">5.7.3 FPGA 散热
+</h4><ul>
+<li><strong>散热片</strong>：每颗 FPGA 标配，自粘式 → 简单易装</li>
+<li><strong>风扇</strong>：散热片不够时加装（+ 散热片组合更好）→ 板上预留风扇电源和连接器</li>
+<li>风扇不需常开 → 用 FPGA 温度监控器的闭环控制</li>
+</ul>
+<blockquote>
+<p>&ldquo;长期无散热片/无风扇运行的 FPGA 板会受到温度应力，可靠性降低。&rdquo;</p>
+</blockquote>
+<hr>
+<h3 id="58-fpga-配置">5.8 FPGA 配置
+</h3><p>FPGA 是 SRAM 易失性器件 → <strong>每次上电必须重新配置</strong>。</p>
+<p><strong>配置模式</strong>：并行/串行、主/从、JTAG。</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>模式</th>
+          <th>特点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Master</strong></td>
+          <td>FPGA 控制配置过程（上电或触发引脚触发）</td>
+      </tr>
+      <tr>
+          <td><strong>Slave</strong></td>
+          <td>外部设备控制配置接口</td>
+      </tr>
+      <tr>
+          <td><strong>Serial</strong></td>
+          <td>比并行慢但占用信号少</td>
+      </tr>
+      <tr>
+          <td><strong>JTAG</strong></td>
+          <td>覆盖所有其他模式——最常见的调试下载方式</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>System ACE + CompactFLASH 方案</strong>（推荐给非专家用户，图58）：</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0163-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 58: CompactFLASH™ based configuration via System ACE™ technology"
+	
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">CF 卡（存多个配置 + 文档）
+</span></span><span class="line"><span class="cl">    ↓
+</span></span><span class="line"><span class="cl">System ACE 控制器（运行在独立小 FPGA 中）
+</span></span><span class="line"><span class="cl">    ↓ 模拟 JTAG 接口
+</span></span><span class="line"><span class="cl">FPGA1 → FPGA2 → ... → FPGAn（菊花链配置）
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>优势</strong>：</p>
+<ul>
+<li>CF 卡容量足够存最大 FPGA 的配置数据（几十 Mbits）</li>
+<li>多配置共存同卡</li>
+<li>终端用户通过开关或远程选择加载哪个配置</li>
+<li>可拆卸 CF → 便于将配置运送到远程场地</li>
+<li>&ldquo;深受那些需要复制多份原型平台分发给远程终端用户的团队欢迎&rdquo;</li>
+</ul>
+<hr>
+<h3 id="59-信号完整性">5.9 信号完整性
+</h3><p>时钟偏斜的两大来源：<strong>源信号抖动</strong> + <strong>噪声电源和信号环境</strong>。</p>
+<p><strong>最小化负面影响的要点</strong>：</p>
+<ul>
+<li>所有时钟信号阻抗一致性 — <strong>关键</strong></li>
+<li>合理布线减少串扰</li>
+<li>良好稳压电源 + 低阻抗路径</li>
+<li>并行数据和时钟路径的走线长度和延迟匹配</li>
+</ul>
+<hr>
+<h3 id="510-全局启动与复位">5.10 全局启动与复位
+</h3><p><strong>多 FPGA 原型的核心要求</strong>：所有 FPGA 必须在同一时钟边沿退出复位。</p>
+<p><strong>PLL 锁定等待</strong>：系统启动必须延迟到所有时序电路（板级 PLL + FPGA 内部 PLL）稳定锁定后。</p>
+<p><strong>全局复位电路</strong>：在全部 PLL 锁定之前保持整个系统在复位状态。板级设计时应确保外部 PLL 的锁定和复位信号能被至少一个 FPGA 的引脚访问。</p>
+<hr>
+<h3 id="511-鲁棒性robustness">5.11 鲁棒性（Robustness）
+</h3><p>为原型走出实验室的物理保障（第12章深入讨论）：</p>
+<ul>
+<li>加强支撑结构（支柱/间隔柱/螺丝固定子卡）</li>
+<li>坚固外壳或机架安装</li>
+<li>外壳需保留测试点、扩展卡插槽、外设端口</li>
+<li>外壳需满足现场使用的电源和散热需求</li>
+</ul>
+<hr>
+<h3 id="512-建立内部标准化平台">5.12 建立内部标准化平台
+</h3><p><strong>Tile-Based 方法</strong>：大公司多站点间的标准化实践——统一外形、统一连接器、统一引脚定义。</p>
+<p><strong>标准化的代价</strong>：</p>
+<ul>
+<li>需要大量协调和管理</li>
+<li>新板开发面临&quot;留在标准内 vs 为满足当前需要而打破标准&quot;的抉择</li>
+<li>技术换代时（如总线加宽超出标准连接器容量），遗留体系成为障碍</li>
+<li><strong>连接器是关键</strong>：不仅信号数要够，电气特性要好，质量要高，物理上要坚固——&ldquo;选连接器看价格是长期的假节约&rdquo;</li>
+</ul>
+<p><strong>标准化平台四大基础设施</strong>：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>维度</th>
+          <th>内容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>开发</strong></td>
+          <td>协调多站点原型专家、维护可用板卡目录、规范/文档/路线图</td>
+      </tr>
+      <tr>
+          <td><strong>分配</strong></td>
+          <td>快速从现有板卡组装平台、制造团队需要看到未来项目预测</td>
+      </tr>
+      <tr>
+          <td><strong>文档</strong></td>
+          <td>标准本身的规范文档、合规认证、每块板的完整使用文档、培训材料/参考设计</td>
+      </tr>
+      <tr>
+          <td><strong>支持</strong></td>
+          <td>多站点多项目并行支持、现场人员、集中化实验室外包原型服务</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>一个有趣的现象</strong>：有些集中化的原型设计服务团队不自己造板，而是从商业供应商处组装平台。——引出第6章：Ready-Made 平台。</p>
+<hr>
+<h2 id="关键图示解读">关键图示解读
+</h2><p><strong>图47：Pins-In / Pins-Out 分区</strong></p>
+<ul>
+<li>最值得采纳的设计思想之一：在 SoC 边界做物理划分</li>
+<li>芯片到达后直接替换 → 数小时内部署已验证的软件 → ROI 暴增</li>
+</ul>
+<p><strong>图48：固定外设浪费 FPGA IO 的经典陷阱</strong></p>
+<ul>
+<li>不用的外设仍物理连接到 FPGA 引脚 → 永久不可用</li>
+<li>所以&quot;把外设放子卡&quot;是最佳实践</li>
+</ul>
+<p><strong>图51：HAPS 延迟匹配模型</strong></p>
+<ul>
+<li>X=0.44ns, Y=1.45ns——这是工程精确到皮秒级别的硬件设计</li>
+<li>理解了这个模型，就理解了为什么 HAPS 可以实现大规模多板系统的时钟一致性</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0149-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 51: Delay matching on and off board"
+	
+	
+></p>
+<p><strong>图54 vs 图55：电源分布正反例</strong></p>
+<ul>
+<li>54（反例）：子板从主板取电 → 烧主板</li>
+<li>55（正例）：公共电源线 → 各板独立</li>
+</ul>
+<p><strong>图58：System ACE + CompactFLASH 配置架构</strong></p>
+<ul>
+<li>最优雅的非专家方案——甚至可以在 CF 卡里存使用文档</li>
+</ul>
+<hr>
+<h2 id="个人总结">个人总结
+</h2><p>这一章读下来最大的感受是：<strong>FPGA 原型验证不仅需要 SoC/RTL 知识，还需要一个真正硬件工程师的全部技能</strong>。</p>
+<p>本章暴露了一个在许多 EDA/软件背景读者可能没有预料到的现实：原型平台的硬件设计复杂性不亚于原型验证本身的工程工作量。从时钟延迟匹配到纳秒级，到地弹机制的理解和抑制，到每颗 FPGA 旁边放两个特定值的电容器——这些都是通过痛苦经验积累的工程准则。</p>
+<p>关于平台复用性的行业坦白也值得深思。作者直言&quot;大多数自建平台从未被复用&quot;——这对管理者而言是一个关键的采购决策信号。如果你只做一次原型，自建可能是对的。但如果有第二个项目甚至更多，第6章的商业平台就值得认真考虑。</p>
+<p>最后，<strong>&ldquo;Super-FPGA&rdquo;</strong> 的思维模型很有启发。将整个板级系统视为一颗巨大的 FPGA，迫使你重新审视什么资源必须在芯片外（时钟树顶层、电源、互联），什么可以在芯片内（逻辑、本地存储器、DSP）。</p>
+<hr>
+<h2 id="实践思考">实践思考
+</h2><ul>
+<li><strong>Pins-In/Pins-Out 分区可能是全书 ROI 最高的单一设计决策</strong>。芯片回片后数小时跑起已验证的软件——这个速度取决于一个在平台设计阶段做出的架构选择</li>
+<li><strong>时钟灵活性是自建平台复用的第一杀手</strong>——如果你的板子只打算用一次，没问题；如果管理层指望多次使用，请投入不成比例的精力在可配置时钟资源上</li>
+<li><strong>地弹和电源噪声是最难诊断的原型问题</strong>——在原理图阶段花额外一周做电源完整性规划，比在 bring-up 阶段花一个月追踪&quot;偶发性不可靠&quot;值得</li>
+<li><strong>散热不可事后补救</strong>——散热片+风扇+温度监控应该在管脚分配和电压域规划同时进行，不是&quot;等发现烫了再加&quot;</li>
+<li><strong>System ACE + CF 卡的配置方案</strong>对团队协作特别有价值：硬件工程师做好 bitstream → 拷贝到 CF 卡 → 软件工程师插卡即用——不需要他们了解 JTAG 或下载线缆</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0150-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 52: PLL used to re-align FPGA clocks"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0160-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 56: FPGA System Monitor"
+	
+	
+></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/fpga/">FPGA</a>
+        
+            <a href="/tags/prototyping/">Prototyping</a>
+        
+            <a href="/tags/hardware-platform/">Hardware Platform</a>
+        
+            <a href="/tags/pcb-design/">PCB Design</a>
+        
+            <a href="/tags/power-distribution/">Power Distribution</a>
+        
+            <a href="/tags/clock-management/">Clock Management</a>
+        
+            <a href="/tags/signal-integrity/">Signal Integrity</a>
+        
+            <a href="/tags/thermal-management/">Thermal Management</a>
+        
+            <a href="/tags/in-house-platform/">In-House Platform</a>
+        
+            <a href="/tags/system-ace/">System ACE</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC9%E7%AB%A0-design-for-prototyping/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第9章: Design for Prototyping</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC12%E7%AB%A0-breaking-out-of-the-lab-the-prototype-in-the-field/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第12章: Breaking Out of the Lab — The Prototype in the Field</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC13%E7%AB%A0-prototyping--verification-the-best-of-both-worlds/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第13章: Prototyping &#43; Verification = The Best of Both Worlds</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC14%E7%AB%A0-the-future-of-prototyping/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第14章: The Future of Prototyping</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC15%E7%AB%A0-conclusions-%E5%85%A8%E4%B9%A6%E6%80%BB%E7%BB%93%E4%B8%8E%E6%A0%B8%E5%BF%83%E8%A6%81%E7%82%B9%E5%9B%9E%E9%A1%BE/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第15章: Conclusions — 全书总结与核心要点回顾</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.524358946663b6a5f95fbef001d1c97000115552b473e36faad787d7b96c8241.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

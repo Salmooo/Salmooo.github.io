@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Software Validation on SalmoneX Blog</title>
+        <link>https://Salmooo.github.io/tags/software-validation/</link>
+        <description>Recent content in Software Validation on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright>
+        <lastBuildDate>Thu, 04 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://Salmooo.github.io/tags/software-validation/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>第2章: What Can FPGA-Based Prototyping Do For Us?</title>
+        <link>https://Salmooo.github.io/p/%E7%AC%AC2%E7%AB%A0-what-can-fpga-based-prototyping-do-for-us/</link>
+        <pubDate>Thu, 04 Jun 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/%E7%AC%AC2%E7%AB%A0-what-can-fpga-based-prototyping-do-for-us/</guid>
+        <description>&lt;h2 id=&#34;章节概览&#34;&gt;章节概览
+&lt;/h2&gt;&lt;p&gt;第1章建立了&amp;quot;为什么需要原型验证&amp;quot;的商业论证；第2章则聚焦于&amp;quot;FPGA 原型具体能做什么（以及不能做什么）&amp;quot;。&lt;/p&gt;
+&lt;p&gt;本章的核心信息是：&lt;strong&gt;FPGA 原型是唯一能同时提供 RTL 精度和接近实时速度的方法&lt;/strong&gt;。这打破了其他建模方法中精度与速度的反比关系。通过三个详实的案例（Freescale 3G 协议测试、DS2 电力线通信、BBC DVB-T2 数字电视），本章展示了 FPGA 原型在真实项目中的关键价值。同时，作者也坦诚地讨论了 FPGA 原型的局限性——它不是仿真器，不是 ESL 工具，不同验证方法之间需要保持连续性。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;核心知识点&#34;&gt;核心知识点
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Table 1 项目目标分组&lt;/strong&gt;：三大类原因驱动 FPGA 原型——高性能与精度（含实时数据流、软硬件集成、软件验证）、真实世界接口（真实数据测试、人机交互、罕见数据依赖）、实验室外使用（可行性验证、算法测试、展览/投资者演示）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;精度-速度的反比关系&lt;/strong&gt;：虚拟平台速度快但精度低，RTL 仿真精度高但速度慢——只有 FPGA 原型同时打破二者&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;软件栈的分层精度需求&lt;/strong&gt;：底层（BSP/驱动）需要周期精度和完全硬件可见性，顶层应用只需&amp;quot;刚好够骗过应用&amp;quot;的模型精度&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Freescale 案例&lt;/strong&gt;：FPGA 原型使 3G 协议测试从仿真器的&amp;quot;几周&amp;quot;或纯 RTL 仿真的&amp;quot;几年&amp;quot;缩短到一天，产品周期加速 6 个月以上&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;DS2 案例&lt;/strong&gt;：FPGA 原型是唯一能拿到真实家庭/工业电力线环境中进行现场测试的方案——仿真器太贵且不可搬运&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;BBC 案例&lt;/strong&gt;：DVB-T2 标准发布同日即实现世界首次直播传输，三个月后完成端到端演示——FPGA 的灵活性和独立运行能力是关键&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;三个&amp;quot;不是&amp;quot;&lt;/strong&gt;：FPGA 原型不是 RTL 仿真器（调试可见性远不如），不是 ESL 工具（不能在架构层面探索），需要在 RTL 稳定后才能移交&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;详细笔记&#34;&gt;详细笔记
+&lt;/h2&gt;&lt;h3 id=&#34;21-fpga-原型的不同目标&#34;&gt;2.1 FPGA 原型的不同目标
+&lt;/h3&gt;&lt;h4 id=&#34;table-1项目目标分类&#34;&gt;Table 1：项目目标分类
+&lt;/h4&gt;&lt;p&gt;本书作者通过多年与原型工程师的交流，将使用 FPGA 原型的理由归纳为三类：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;项目目标&lt;/th&gt;
+          &lt;th&gt;为什么用原型？&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;测试实时数据流&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;高性能与精度&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;早期软硬件集成&lt;/td&gt;
+          &lt;td&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;早期软件验证&lt;/td&gt;
+          &lt;td&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;测试真实世界数据效应&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;真实世界接口&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;测试实时人机接口&lt;/td&gt;
+          &lt;td&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;调试罕见数据依赖&lt;/td&gt;
+          &lt;td&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;可行性验证（概念证明）&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;实验室内使用&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;算法测试&lt;/td&gt;
+          &lt;td&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;公开展览&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;实验室外演示&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;吸引投资者&lt;/td&gt;
+          &lt;td&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;扩展 RTL 测试与调试&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;其他目标&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h4 id=&#34;211-高性能与精度&#34;&gt;2.1.1 高性能与精度
+&lt;/h4&gt;&lt;blockquote&gt;
+&lt;p&gt;这是所有 FPGA 原型项目最底层的共同原因。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;即使团队对外声称的目标是&amp;quot;验证嵌入式软件&amp;quot;，真正驱使他们选择 FPGA 而非虚拟平台的根本原因仍然是：&lt;strong&gt;他们需要 RTL 精度的同时还需要接近实时的速度&lt;/strong&gt;。&lt;/p&gt;
+&lt;h4 id=&#34;212-实时数据流hdmi-原型案例&#34;&gt;2.1.2 实时数据流：HDMI 原型案例
+&lt;/h4&gt;&lt;p&gt;Synopsys IP 团队（葡萄牙波尔图）的 HDMI 原型项目展示了实时数据流的价值：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;高清媒体数据流从外部接收器 → 原型处理器核心 → HDMI PHY → 外部显示器&lt;/li&gt;
+&lt;li&gt;包含 MicroBlaze CPU + 外设 + 存储器，是一个完整的 SoC 结构&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;只有 FPGA 原型能做到：立即看到和听到不同高清数据对设计的影响&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这个案例的关键洞察是：SoC 的状态取决于当前状态 + 输入序列 + 系统反馈——只有实时运行才能观察到这些动态交互。&lt;/p&gt;
+&lt;h4 id=&#34;213-软硬件集成&#34;&gt;2.1.3 软硬件集成
+&lt;/h4&gt;&lt;p&gt;软件开发已主导 SoC 开发工作量，处于项目关键路径上。&lt;strong&gt;软件开发和验证决定了 SoC 能否按时进入量产。&lt;/strong&gt;&lt;/p&gt;
+&lt;h4 id=&#34;214-为软件开发建模-soc&#34;&gt;2.1.4 为软件开发建模 SoC
+&lt;/h4&gt;&lt;p&gt;以 Android 软件栈为例（图15）：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0054-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 15: The Android™ stack (based on source: “ Understanding Android ”)&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;栈层&lt;/th&gt;
+          &lt;th&gt;精度需求&lt;/th&gt;
+          &lt;th&gt;开发者关注点&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;应用层（Contacts, Browser, Phone）&lt;/td&gt;
+          &lt;td&gt;最低——&amp;ldquo;刚好够骗过应用&amp;rdquo;&lt;/td&gt;
+          &lt;td&gt;不直接访问硬件&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;中间件 / OS Kernel / 驱动&lt;/td&gt;
+          &lt;td&gt;需要寄存器精度&lt;/td&gt;
+          &lt;td&gt;完整的硬件映射&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;BSP / BIOS 层&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;最高——地址和时钟周期精度&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;硬件行为的软件描述&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;关键原则&lt;/strong&gt;：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在每个软件栈层，开发者只需要一个精度&amp;quot;刚好够骗过自己的代码觉得在目标 SoC 上运行&amp;quot;的模型。更多精度只会让模型跑得更慢。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;应用层 → SDK 或虚拟平台即可，速度快&lt;/li&gt;
+&lt;li&gt;底层驱动/BSP → 需要周期精确模型，FPGA 原型&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;当整个软件栈需要一起运行、或需要处理真实世界数据时，FPGA 原型的价值最大化&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;215-案例一freescale-3g-协议测试&#34;&gt;2.1.5 案例一：Freescale 3G 协议测试
+&lt;/h4&gt;&lt;p&gt;这是本章最精彩的案例。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;背景&lt;/strong&gt;：Freescale 蜂窝产品集团（德州奥斯汀），手机市场产品生命周期只有 1-2 年。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;挑战&lt;/strong&gt;：3G 协议测试即使在实时的速度下也需要一整天才能完成一轮：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;RTL 仿真 → 需要&lt;strong&gt;几年&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;仿真器（Emulator）→ 需要&lt;strong&gt;几周&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;两者都不实用&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;解决方案&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;硬件：Synopsys HAPS-54 原型板 + 4 颗 Xilinx Virtex-5 FPGA&lt;/li&gt;
+&lt;li&gt;设计规模：基带处理器超过 500 万 ASIC 门&lt;/li&gt;
+&lt;li&gt;架构：双核 MXC2（StarCore DSP + ARM926）+ 60+ 外设 + RF 收发器数字部分&lt;/li&gt;
+&lt;li&gt;工具：Synopsys Certify 将基带处理器分区到 3 颗 FPGA，RF 设计放第 4 颗&lt;/li&gt;
+&lt;li&gt;模拟部分不原型化，用 Anritsu 协议测试仪直接提供数字蜂窝网络数据&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;遇到的困难&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;老核心使用了一些 ASIC 友好但 FPGA 不友好的设计技巧&lt;/li&gt;
+&lt;li&gt;自动生成的 RTL 有过于复杂的时钟网络&lt;/li&gt;
+&lt;li&gt;需要修改 RTL 使其 FPGA 兼容——&lt;strong&gt;但回报显著&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;成果&lt;/strong&gt;：收到初版芯片时已经完成：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;调试器软件发布（硅后无大改）&lt;/li&gt;
+&lt;li&gt;驱动软件开发完成&lt;/li&gt;
+&lt;li&gt;SoC 启动到 OS 提示符&lt;/li&gt;
+&lt;li&gt;调制解调器完成网络注册和驻留&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;收到芯片仅 1 个月后实现系统级通话&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;产品进度加速超过 6 个月&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;项目负责人 Scott Constable 的原话（非常重要）&lt;/strong&gt;：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;除了我们既定的协议测试目标之外，FPGA 系统原型在诸多其他领域也带来了项目进度加速，多次证明了它的价值。也许最重要的是&lt;strong&gt;不可量化的人力收益——让工程师更早地参与项目，让设计、软件、验证、应用所有团队在芯片到来之前 6 个月就非常熟悉产品&lt;/strong&gt;。这种加速的产品专业素养很难在甘特图上衡量，但可能是最有价值的。&amp;rdquo;&lt;/p&gt;
+&lt;p&gt;&amp;ldquo;鉴于这些成就，&lt;strong&gt;使用 FPGA 原型方案加速 ASIC 进度是一个&amp;rsquo;不用动脑&amp;rsquo;的决定&lt;/strong&gt;。我们已将这套方法论推广到 Freescale 网络和微控制器部门。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;22-真实世界接口测试真实数据效应&#34;&gt;2.2 真实世界接口：测试真实数据效应
+&lt;/h3&gt;&lt;h4 id=&#34;为什么需要真实数据测试&#34;&gt;为什么需要真实数据测试？
+&lt;/h4&gt;&lt;p&gt;验证的困境：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;对于单个门或小 RTL 块，完整测试是可能的&lt;/li&gt;
+&lt;li&gt;随着复杂度增长，&lt;strong&gt;统计上不可能穷尽所有输入数据和初始条件的组合&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;约束随机验证虽然极大提升了覆盖度，但永远不是完全穷尽的&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;FPGA 原型的独特贡献&lt;/strong&gt;：将 SoC 放入原型中，以接近真实芯片的速度和精度运行，在最终的真实环境数据中进行&amp;quot;浸泡&amp;quot;测试——就像最终芯片一样。&lt;/p&gt;
+&lt;h4 id=&#34;221-案例二ds2-电力线通信bpl&#34;&gt;2.2.1 案例二：DS2 电力线通信（BPL）
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;背景&lt;/strong&gt;：西班牙瓦伦西亚的 DS2 公司，宽带电力线通信技术——用家庭电力线传输高清视频。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;核心技术挑战&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;复杂的硬件算法和嵌入式软件负责在电力线中编码和提取高速信号&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;电力线是非常嘈杂的电气环境&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;必须在各种真实世界条件下验证算法&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;为什么只能用 FPGA 原型&lt;/strong&gt;（DS2 的 ASIC 设计经理 Javier Jimenez 的话）：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;开发可靠的高速通信需要使用鲁棒的验证技术。需要非常多次的试验，使用不同的信道和噪声模型。&lt;strong&gt;只有 FPGA 原型&lt;/strong&gt;能让我们充分测试算法并在原型上运行嵌入式软件。此外，&lt;strong&gt;我们可以把原型带出实验室进行广泛的现场测试&lt;/strong&gt;，将多个原型放置在真实的家庭和工作场所——其中一些是非常恶劣的电气环境。&lt;strong&gt;仿真器系统无法用于此目的：它们太贵且不便于携带。&lt;/strong&gt;&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;关键启发&lt;/strong&gt;：让平台&lt;strong&gt;可靠和便携&lt;/strong&gt;是成功的关键——这将在第5章和第12章深入讨论。&lt;/p&gt;
+&lt;h3 id=&#34;23-可行性实验&#34;&gt;2.3 可行性实验
+&lt;/h3&gt;&lt;p&gt;FPGA 原型在项目初期的可行性研究中也有价值：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;芯片拓扑、性能、功耗、片上通信结构等基本决策阶段&lt;/li&gt;
+&lt;li&gt;一旦有 RTL（即使是算法工具自动生成的），就可以在 FPGA 中运行&lt;/li&gt;
+&lt;li&gt;比纯算法/数学工具的额外好处：&lt;strong&gt;更精确的模型 + 实时速度 + 真实世界输入交互&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;用途：在完整的 SoC 项目之间利用已有的 FPGA 硬件和工具，提高投资回报&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;24-原型走出实验室&#34;&gt;2.4 原型走出实验室
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;FPGA 原型的独特能力&lt;/strong&gt;：独立运行。&lt;/p&gt;
+&lt;p&gt;因为 FPGA 可以从 Flash EEPROM 等自包含介质配置（无需宿主机），原型可以在仿真器或虚拟平台无法企及的环境中运行。例如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;将原型安装在移动车辆中，探索运动、外部噪声、天线场强变化对设计的影响&lt;/li&gt;
+&lt;li&gt;通过公共 GSM 网络在行驶车辆中进行移动通话测试&lt;/li&gt;
+&lt;li&gt;贸易展会上进行预生产演示&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;241-案例三bbc-dvb-t2-数字电视&#34;&gt;2.4.1 案例三：BBC DVB-T2 数字电视
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;背景&lt;/strong&gt;：BBC 研发部门（伦敦），DVB-T2 是新的地面广播高清电视国际标准，规范制定耗时 30,000 工程师小时。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;挑战&lt;/strong&gt;：国际标准在最终冻结前会经历多次变更，需要灵活的硬件平台。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;为什么选 FPGA&lt;/strong&gt;：只有 FPGA 能提供在标准变更过程中所需的高度灵活性。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;时间线&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;2008年3月：标准冻结&lt;/li&gt;
+&lt;li&gt;2008年6月26日：作为 DVB 蓝皮书发布&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;同日&lt;/strong&gt;：BBC 使用 FPGA 原型实现世界首次 DVB-T2 直播传输&lt;/li&gt;
+&lt;li&gt;2008年9月：IBC 阿姆斯特丹展览会上完成端到端调制解调演示——&lt;strong&gt;标准发布后仅 3 个月&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;硬件方案&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;调制器：Synopsys HAPS-51 卡 + Virtex-5 FPGA + BBC 自研子卡（ASI 接口 + 上变频到 UHF）&lt;/li&gt;
+&lt;li&gt;解调器：同样基于 HAPS 的 FPGA 原型&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;BBC 项目负责人 Justin Mitchell&lt;/strong&gt;：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;FPGA 最大的优势之一是能够跟踪规范在发射日前的晚期变更。能够在规范变更时快速修改调制器是非常重要的。很难想到有其他技术能在如此短的时间内实现调制器和解调器的快速开发，并且具备便携性，使调制器和解调器能够独立用于现场发射机和公开展览。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;后续&lt;/strong&gt;：2009年3月都灵 PlugFest —— 5 个不同调制器和 6 个不同解调器互操作成功。&lt;/p&gt;
+&lt;h3 id=&#34;25-fpga-原型做不到什么&#34;&gt;2.5 FPGA 原型做不到什么
+&lt;/h3&gt;&lt;p&gt;作者明确列出了三个局限性，体现平衡视角：&lt;/p&gt;
+&lt;h4 id=&#34;251-fpga-原型不是-rtl-仿真器&#34;&gt;2.5.1 FPGA 原型不是 RTL 仿真器
+&lt;/h4&gt;&lt;p&gt;将仿真器比喻为 &lt;strong&gt;引擎 + 仪表盘&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;组件&lt;/th&gt;
+          &lt;th&gt;仿真器&lt;/th&gt;
+          &lt;th&gt;FPGA 原型&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;引擎（激励模型 + 记录结果）&lt;/td&gt;
+          &lt;td&gt;灵活、快速迭代&lt;/td&gt;
+          &lt;td&gt;快得多，但设置代价大&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;仪表盘（检查结果）&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;完全可见和控制&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;即使最充分的插桩也仅提供仿真器的一部分信息&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;仿真器是反复编写和评估 RTL 代码的更好环境。&lt;strong&gt;应该等到仿真基本完成、RTL 相对成熟后，再移交给 FPGA 原型团队。&lt;/strong&gt;&amp;quot;（第4章会详细讨论交接点）&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;252-fpga-原型不是-esl&#34;&gt;2.5.2 FPGA 原型不是 ESL
+&lt;/h4&gt;&lt;p&gt;ESL（电子系统级）工具允许在 SystemC 中使用预定义模型库进行设计和仿真：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;FPGA 原型需要 RTL，不适合算法或架构探索&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;FPGA 原型在 RTL 成熟后最有价值&lt;/strong&gt;——此时软件可以在更精确、更真实的环境中运行&lt;/li&gt;
+&lt;li&gt;有些团队会写少量 RTL 在 FPGA 中做可行性研究——这是一个小而重要的用途，但不同于全 SoC 系统级探索&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;253-连续性是关键&#34;&gt;2.5.3 连续性是关键
+&lt;/h4&gt;&lt;p&gt;优秀工程师选择正确工具，但必须确保&lt;strong&gt;工作可以在工具间传递&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ESL 仿真 → FPGA 原型 → 需要尽可能少的重复工作&lt;/li&gt;
+&lt;li&gt;高层综合（HLS）可以生成 RTL 供 FPGA 原型使用&lt;/li&gt;
+&lt;li&gt;但同样，应该等到硬件-软件分区和架构探索完成、RTL 稳定后再上 FPGA&lt;/li&gt;
+&lt;li&gt;第13章将讨论如何将 FPGA 原型与 ESL 和 RTL 仿真连接&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;26-总结为什么要用-fpga-原型&#34;&gt;2.6 总结：为什么要用 FPGA 原型？
+&lt;/h3&gt;&lt;p&gt;三个视角：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;团队&lt;/th&gt;
+          &lt;th&gt;FPGA 原型的价值&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;硬件团队&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;为需要长运行时间的 RTL 交互提供高速平台（如整个 OS boot 可在接近实时完成，节省数天仿真时间）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;软件团队&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;独一无二的芯片前软件调试平台——快速且精确，接近最终芯片条件&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;整个团队&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;最关键的阶段是软硬件首次集成。如果在芯片流片后才做这件事——发现新 bug 不是好消息。&lt;strong&gt;FPGA 原型让软件尽早接触精确快速的硬件模型&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;SoC 团队经常告诉我们：&lt;strong&gt;FPGA 原型最大的好处是——当初版芯片到达时，系统和软件在一天之内就能跑起来。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;关键图示解读&#34;&gt;关键图示解读
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;图15：Android 软件栈&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;清晰展示了从应用层到底层硬件的抽象层次&lt;/li&gt;
+&lt;li&gt;底部 BSP/内核层需要周期精度 → FPGA 原型的最佳切入点&lt;/li&gt;
+&lt;li&gt;顶部应用层可以脱离硬件精度 → SDK/虚拟平台即可&lt;/li&gt;
+&lt;li&gt;当需要&lt;strong&gt;整个栈一起跑&lt;/strong&gt;时 → FPGA 原型不可或缺&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;表1：项目目标分组&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;将看似多样的原型使用场景归纳为三大驱动力&lt;/li&gt;
+&lt;li&gt;这个分类框架是评估&amp;quot;FPGA 原型是否适合我的项目&amp;quot;的第一步&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;个人总结&#34;&gt;个人总结
+&lt;/h2&gt;&lt;p&gt;第2章通过三个高水平的真实案例，把第1章的抽象论证变成了具体故事。&lt;/p&gt;
+&lt;p&gt;对我触动最大的是 &lt;strong&gt;Freescale 案例中的&amp;quot;不可量化的人力收益&amp;rdquo;&lt;/strong&gt;——让所有团队在芯片到来前 6 个月就熟悉产品。这个价值不在甘特图上，但任何一个管理过复杂硬件项目的工程师都能理解它的分量。当硬件、软件、验证、应用四个团队同时熟悉同一个平台时，chip bring-up 的效率提升是倍数级的。&lt;/p&gt;
+&lt;p&gt;另一个重要收获是：&lt;strong&gt;FPGA 原型不是来替代仿真器或 ESL 的，而是填补它们之间的空白&lt;/strong&gt;。一个成熟的验证策略应该是三者的组合：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;ESL/虚拟平台 → 最早期的架构探索和早期软件开发&lt;/li&gt;
+&lt;li&gt;RTL 仿真器 → 反复迭代的 RTL 开发与验证&lt;/li&gt;
+&lt;li&gt;FPGA 原型 → RTL 成熟后的高速、高精度系统级验证&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;&amp;ldquo;连续性&amp;quot;是本章埋下的伏笔&lt;/strong&gt;——第13章将详细讨论这三种方法如何桥接。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;实践思考&#34;&gt;实践思考
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;如何判断 RTL 是否&amp;quot;足够成熟&amp;quot;可以上 FPGA？&lt;/strong&gt; 这是第4章的核心话题，但本章暗示了标准：仿真大部分完成、RTL 基本稳定、软硬件开始需要集成验证&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;自主运行能力（standalone）是 FPGA 原型的一个被低估的优势&lt;/strong&gt;。不需要宿主机的独立运行意味着原型可以放在仿真器永远去不了的地方——行驶的车辆、真实的家庭、贸易展览会&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;BBC 案例的标准-实现并行策略值得关注&lt;/strong&gt;：在标准制定过程中就使用 FPGA 原型进行开发和测试，标准发布当天就完成首次直播——这种敏捷性在标准驱动的行业中极具竞争力&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;DS2 案例的启示&lt;/strong&gt;：如果被测环境本身就是&amp;quot;嘈杂&amp;quot;和&amp;quot;不可预测&amp;quot;的，那么无论多么先进的仿真都无法替代真实环境中的浸泡测试&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0052-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 14: Block diagram of HDMI prototype&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0057-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 16: The Freescale[®] SoC design partitioned into HAPS[®] -54 board&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0059-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 17: BPL technology used in WiFi Range Extender&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0060-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 18: DS2 making in situ tests on real-world data (source: DS2)&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0062-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 19: DVB-T2 prototype at BBC Research and Development (Source: BBC)&#34;
+	
+	
+&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

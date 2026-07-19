@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="引言\r分布式训练将训练工作量分散到多个工作节点上，显著提高训练速度和模型准确性。PyTorch 2.0 提供了多种分布式训练方式：数据并行（DP）、模型并行（MP） 和 混合并行（Hybrid Parallel），配合设备网格（Device Mesh）、RPC 分布式训练等可扩展组件，满足不同规模模型的训练需求。\n三大核心组件：DDP（分布式数据并行）、RPC（通用分布式结构支持）、C10d（细粒度通信控制）。\n23.2 数据并行\r23.2.1 DP 与 DDP\r数据并行（DP） 将数据集分割成若干子集分配到不同 NPU 节点，每个节点运行相同模型副本处理不同数据子集，每轮结束后汇总梯度更新参数。\n但 DP 存在局限：Python GIL 限制多线程效率、全局梯度聚合在单一 NPU 造成资源浪费。\n分布式数据并行（DDP） 是 DP 的高级形式，核心改进包括：\n多进程实现方式，避免 GIL 限制 Ring All-Reduce 算法进行高效集合通信 延迟隐藏技术：反向传播与梯度通信重叠 各 NPU 负载均衡 23.2.2 DDP 实现分析\r前向传播：DDP 通过 _sync_module_states 在每次传播前同步各进程的 _parameters 和 _buffers，确保模型一致性。\n计算通信重叠：反向传播中，梯度一旦局部计算完成就立即进行通信（通过 autograd 钩子触发），无需等待全部计算完成。reducer 将参数梯度组织到多个桶（bucket）中分桶通信。\n数据加载：通过 DistributedSampler 按 NPU 索引切分数据，配合 DataLoader 多进程加载，pin_memory=True 时将数据异步拷贝到 NPU 内存。\n23.2.3 异步数据并行\r同步数据并行 要求所有 NPU 每轮迭代后同步参数（图23.2.2），慢速 NPU 拖累整体效率。\n">
+<title>AI系统学习笔记：第23章 分布式并行</title>
+
+<link rel='canonical' href='http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC23%E7%AB%A0-%E5%88%86%E5%B8%83%E5%BC%8F%E5%B9%B6%E8%A1%8C/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="AI系统学习笔记：第23章 分布式并行">
+<meta property='og:description' content="引言\r分布式训练将训练工作量分散到多个工作节点上，显著提高训练速度和模型准确性。PyTorch 2.0 提供了多种分布式训练方式：数据并行（DP）、模型并行（MP） 和 混合并行（Hybrid Parallel），配合设备网格（Device Mesh）、RPC 分布式训练等可扩展组件，满足不同规模模型的训练需求。\n三大核心组件：DDP（分布式数据并行）、RPC（通用分布式结构支持）、C10d（细粒度通信控制）。\n23.2 数据并行\r23.2.1 DP 与 DDP\r数据并行（DP） 将数据集分割成若干子集分配到不同 NPU 节点，每个节点运行相同模型副本处理不同数据子集，每轮结束后汇总梯度更新参数。\n但 DP 存在局限：Python GIL 限制多线程效率、全局梯度聚合在单一 NPU 造成资源浪费。\n分布式数据并行（DDP） 是 DP 的高级形式，核心改进包括：\n多进程实现方式，避免 GIL 限制 Ring All-Reduce 算法进行高效集合通信 延迟隐藏技术：反向传播与梯度通信重叠 各 NPU 负载均衡 23.2.2 DDP 实现分析\r前向传播：DDP 通过 _sync_module_states 在每次传播前同步各进程的 _parameters 和 _buffers，确保模型一致性。\n计算通信重叠：反向传播中，梯度一旦局部计算完成就立即进行通信（通过 autograd 钩子触发），无需等待全部计算完成。reducer 将参数梯度组织到多个桶（bucket）中分桶通信。\n数据加载：通过 DistributedSampler 按 NPU 索引切分数据，配合 DataLoader 多进程加载，pin_memory=True 时将数据异步拷贝到 NPU 内存。\n23.2.3 异步数据并行\r同步数据并行 要求所有 NPU 每轮迭代后同步参数（图23.2.2），慢速 NPU 拖累整体效率。\n">
+<meta property='og:url' content='http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC23%E7%AB%A0-%E5%88%86%E5%B8%83%E5%BC%8F%E5%B9%B6%E8%A1%8C/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='AI系统' /><meta property='article:tag' content='分布式训练' /><meta property='article:tag' content='数据并行' /><meta property='article:tag' content='模型并行' /><meta property='article:tag' content='流水并行' /><meta property='article:tag' content='混合并行' /><meta property='article:tag' content='FSDP' /><meta property='article:tag' content='ZeRO' /><meta property='article:tag' content='MindSpore' /><meta property='article:published_time' content='2026-05-21T23:55:00&#43;08:00'/><meta property='article:modified_time' content='2026-05-21T23:55:00&#43;08:00'/>
+<meta name="twitter:title" content="AI系统学习笔记：第23章 分布式并行">
+<meta name="twitter:description" content="引言\r分布式训练将训练工作量分散到多个工作节点上，显著提高训练速度和模型准确性。PyTorch 2.0 提供了多种分布式训练方式：数据并行（DP）、模型并行（MP） 和 混合并行（Hybrid Parallel），配合设备网格（Device Mesh）、RPC 分布式训练等可扩展组件，满足不同规模模型的训练需求。\n三大核心组件：DDP（分布式数据并行）、RPC（通用分布式结构支持）、C10d（细粒度通信控制）。\n23.2 数据并行\r23.2.1 DP 与 DDP\r数据并行（DP） 将数据集分割成若干子集分配到不同 NPU 节点，每个节点运行相同模型副本处理不同数据子集，每轮结束后汇总梯度更新参数。\n但 DP 存在局限：Python GIL 限制多线程效率、全局梯度聚合在单一 NPU 造成资源浪费。\n分布式数据并行（DDP） 是 DP 的高级形式，核心改进包括：\n多进程实现方式，避免 GIL 限制 Ring All-Reduce 算法进行高效集合通信 延迟隐藏技术：反向传播与梯度通信重叠 各 NPU 负载均衡 23.2.2 DDP 实现分析\r前向传播：DDP 通过 _sync_module_states 在每次传播前同步各进程的 _parameters 和 _buffers，确保模型一致性。\n计算通信重叠：反向传播中，梯度一旦局部计算完成就立即进行通信（通过 autograd 钩子触发），无需等待全部计算完成。reducer 将参数梯度组织到多个桶（bucket）中分桶通信。\n数据加载：通过 DistributedSampler 按 NPU 索引切分数据，配合 DataLoader 多进程加载，pin_memory=True 时将数据异步拷贝到 NPU 内存。\n23.2.3 异步数据并行\r同步数据并行 要求所有 NPU 每轮迭代后同步参数（图23.2.2），慢速 NPU 拖累整体效率。\n">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="http://localhost:1313/" selected>English</option>
+                                
+                                    <option value="http://localhost:1313/zh-cn/" >中文</option>
+                                
+                                    <option value="http://localhost:1313/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#引言">引言</a></li>
+    <li><a href="#232-数据并行">23.2 数据并行</a>
+      <ol>
+        <li><a href="#2321-dp-与-ddp">23.2.1 DP 与 DDP</a></li>
+        <li><a href="#2322-ddp-实现分析">23.2.2 DDP 实现分析</a></li>
+        <li><a href="#2323-异步数据并行">23.2.3 异步数据并行</a></li>
+        <li><a href="#2324-弹性数据并行">23.2.4 弹性数据并行</a></li>
+      </ol>
+    </li>
+    <li><a href="#233-数据并行进阶fsdp">23.3 数据并行进阶：FSDP</a>
+      <ol>
+        <li><a href="#2331-前置知识">23.3.1 前置知识</a></li>
+        <li><a href="#2332-完全分片数据并行-fsdp">23.3.2 完全分片数据并行 FSDP</a></li>
+        <li><a href="#2333-fsdp-实现示例">23.3.3 FSDP 实现示例</a></li>
+        <li><a href="#2334-zero-通信分析">23.3.4 ZeRO 通信分析</a></li>
+      </ol>
+    </li>
+    <li><a href="#234-张量并行">23.4 张量并行</a>
+      <ol>
+        <li><a href="#2341-朴素张量并行">23.4.1 朴素张量并行</a></li>
+        <li><a href="#2342-高阶张量并行">23.4.2 高阶张量并行</a></li>
+        <li><a href="#2343-devicemesh-实现-tp">23.4.3 DeviceMesh 实现 TP</a></li>
+      </ol>
+    </li>
+    <li><a href="#235-流水并行">23.5 流水并行</a></li>
+    <li><a href="#236-混合并行">23.6 混合并行</a></li>
+    <li><a href="#237-昇思-mindspore-并行">23.7 昇思 MindSpore 并行</a></li>
+    <li><a href="#本章小结">本章小结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/ai%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86%E4%B8%8E%E6%9E%B6%E6%9E%84/" >
+                AI系统原理与架构
+            </a>
+        
+            <a href="/categories/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/" >
+                学习总结
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/ai%E7%B3%BB%E7%BB%9F%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E7%AC%AC23%E7%AB%A0-%E5%88%86%E5%B8%83%E5%BC%8F%E5%B9%B6%E8%A1%8C/">AI系统学习笔记：第23章 分布式并行</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">May 21, 2026</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    2 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="引言">引言
+</h2><p>分布式训练将训练工作量分散到多个工作节点上，显著提高训练速度和模型准确性。PyTorch 2.0 提供了多种分布式训练方式：<strong>数据并行（DP）</strong>、<strong>模型并行（MP）</strong> 和 <strong>混合并行（Hybrid Parallel）</strong>，配合设备网格（Device Mesh）、RPC 分布式训练等可扩展组件，满足不同规模模型的训练需求。</p>
+<blockquote>
+<p>三大核心组件：<strong>DDP</strong>（分布式数据并行）、<strong>RPC</strong>（通用分布式结构支持）、<strong>C10d</strong>（细粒度通信控制）。</p>
+</blockquote>
+<hr>
+<h2 id="232-数据并行">23.2 数据并行
+</h2><h3 id="2321-dp-与-ddp">23.2.1 DP 与 DDP
+</h3><p><strong>数据并行（DP）</strong> 将数据集分割成若干子集分配到不同 NPU 节点，每个节点运行相同模型副本处理不同数据子集，每轮结束后汇总梯度更新参数。</p>
+<p>但 DP 存在局限：Python GIL 限制多线程效率、全局梯度聚合在单一 NPU 造成资源浪费。</p>
+<p><strong>分布式数据并行（DDP）</strong> 是 DP 的高级形式，核心改进包括：</p>
+<ul>
+<li><strong>多进程</strong>实现方式，避免 GIL 限制</li>
+<li><strong>Ring All-Reduce</strong> 算法进行高效集合通信</li>
+<li><strong>延迟隐藏技术</strong>：反向传播与梯度通信重叠</li>
+<li>各 NPU 负载均衡</li>
+</ul>
+<h3 id="2322-ddp-实现分析">23.2.2 DDP 实现分析
+</h3><p><strong>前向传播</strong>：DDP 通过 <code>_sync_module_states</code> 在每次传播前同步各进程的 <code>_parameters</code> 和 <code>_buffers</code>，确保模型一致性。</p>
+<p><strong>计算通信重叠</strong>：反向传播中，梯度一旦局部计算完成就立即进行通信（通过 autograd 钩子触发），无需等待全部计算完成。reducer 将参数梯度组织到多个桶（bucket）中分桶通信。</p>
+<p><img src="/images/ai_system/ch23/0834-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.2.1 DDP 计算与通信重叠"
+	
+	
+></p>
+<p><strong>数据加载</strong>：通过 <code>DistributedSampler</code> 按 NPU 索引切分数据，配合 <code>DataLoader</code> 多进程加载，<code>pin_memory=True</code> 时将数据异步拷贝到 NPU 内存。</p>
+<h3 id="2323-异步数据并行">23.2.3 异步数据并行
+</h3><p><strong>同步数据并行</strong> 要求所有 NPU 每轮迭代后同步参数（图23.2.2），慢速 NPU 拖累整体效率。</p>
+<p><img src="/images/ai_system/ch23/0838-07.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.2.2 同步数据并行 All-Reduce"
+	
+	
+></p>
+<p><strong>异步数据并行（ADP）</strong> 各 NPU 独立计算和更新，快速 NPU 不受慢速 NPU 影响，但需解决梯度更新竞争和模型收敛性问题（图23.2.3）。</p>
+<p><img src="/images/ai_system/ch23/0839-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.2.3 异步数据并行流程"
+	
+	
+></p>
+<h3 id="2324-弹性数据并行">23.2.4 弹性数据并行
+</h3><p>弹性训练通过动态资源分配应对节点故障。PyTorch 的 <strong>TorchElastic</strong> 组件包括：</p>
+<ul>
+<li><strong>Elastic Agent</strong>：管理本地工作进程，监控健康并故障恢复</li>
+<li><strong>Rendezvous</strong>：分布式同步原语 + 节点发现，支持 Barrier、排他性、一致性、故障恢复、共享键值存储</li>
+</ul>
+<p><img src="/images/ai_system/ch23/0841-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.2.4 Elastic Agent 架构"
+	
+	
+></p>
+<p><img src="/images/ai_system/ch23/0843-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.2.5 Rendezvous 工作流程状态图"
+	
+	
+></p>
+<hr>
+<h2 id="233-数据并行进阶fsdp">23.3 数据并行进阶：FSDP
+</h2><h3 id="2331-前置知识">23.3.1 前置知识
+</h3><p><strong>混精度训练</strong>：前向/反向使用 FP16 计算（速度快），参数更新使用 FP32（保证精度）。FSDP 中可通过 <code>MixedPrecision</code> 配置。</p>
+<p><img src="/images/ai_system/ch23/0850-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="混精度训练内存模型"
+	
+	
+></p>
+<p><strong>损失缩放</strong>：动态调整缩放因子（如 2^24 起始），检测梯度溢出时减半，防止 FP16 下溢。</p>
+<p><strong>内存消耗</strong> = 模型状态（优化器 + 梯度 + 参数 = 16Ψ）+ 剩余状态（激活值 + 临时存储 + 碎片）。</p>
+<h3 id="2332-完全分片数据并行-fsdp">23.3.2 完全分片数据并行 FSDP
+</h3><p><strong>FSDP</strong> 基于微软的 <strong>ZeRO</strong>（Zero Redundancy Optimizer）优化方案：</p>
+<p><strong>ZeRO-DP</strong> 对模型状态分片，三阶段渐进优化：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>阶段</th>
+          <th>别名</th>
+          <th>分片内容</th>
+          <th>显存降低</th>
+          <th>额外通信</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>阶段1</td>
+          <td>ZeRO-1</td>
+          <td>优化器状态</td>
+          <td>→ 1/4</td>
+          <td>无</td>
+      </tr>
+      <tr>
+          <td>阶段2</td>
+          <td>ZeRO-2</td>
+          <td>+ 梯度</td>
+          <td>→ 1/8</td>
+          <td>无</td>
+      </tr>
+      <tr>
+          <td>阶段3</td>
+          <td>ZeRO-3</td>
+          <td>+ 参数</td>
+          <td>→ 1/Nd</td>
+          <td>1.5×</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><img src="/images/ai_system/ch23/0849-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.3.1 ZeRO-DP 三阶段优化"
+	
+	
+></p>
+<p><img src="/images/ai_system/ch23/0851-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.3.4 ZeRO-3 参数分区示意"
+	
+	
+></p>
+<p><strong>ZeRO-R</strong> 优化剩余状态：</p>
+<ul>
+<li>分区激活检查点（按 Nm 分区，释放内存）</li>
+<li>恒定大小缓冲区（避免临时缓冲区膨胀）</li>
+<li>内存碎片整理</li>
+</ul>
+<p><strong>ZeRO-Infinity</strong> 突破 NPU 内存壁垒，支持万亿参数训练，在 NPU/CPU/NVMe 间智能迁移参数。</p>
+<h3 id="2333-fsdp-实现示例">23.3.3 FSDP 实现示例
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">torch.distributed.fsdp</span> <span class="kn">import</span> <span class="n">FullyShardedDataParallel</span> <span class="k">as</span> <span class="n">FSDP</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">model</span> <span class="o">=</span> <span class="n">FSDP</span><span class="p">(</span><span class="n">model</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">auto_wrap_policy</span><span class="o">=</span><span class="n">t5_auto_wrap_policy</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mixed_precision</span><span class="o">=</span><span class="n">bfSixteen</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">sharding_strategy</span><span class="o">=</span><span class="n">ShardingStrategy</span><span class="o">.</span><span class="n">SHARD_GRAD_OP</span>  <span class="c1"># Zero2</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="2334-zero-通信分析">23.3.4 ZeRO 通信分析
+</h3><ul>
+<li><strong>ZeRO-2</strong>：Reduce-Scatter(Ψ) + All-Gather(Ψ) = 2Ψ（与标准 DP 相同）</li>
+<li><strong>ZeRO-3</strong>：前向 All-Gather(Ψ) + 反向 All-Gather(Ψ) + Reduce-Scatter(Ψ) = 3Ψ（标准 DP 的 1.5 倍）</li>
+<li><strong>ZeRO-R</strong>：通信开销通常不到标准 MP 的 10%</li>
+</ul>
+<hr>
+<h2 id="234-张量并行">23.4 张量并行
+</h2><h3 id="2341-朴素张量并行">23.4.1 朴素张量并行
+</h3><p>将模型层分配到不同设备，如 ResNet50 前半部分在 NPU:0，后半部分在 NPU:1。缺点是设备利用率低（同时仅一设备工作），比单 NPU 慢约 7%。</p>
+<h3 id="2342-高阶张量并行">23.4.2 高阶张量并行
+</h3><p>更细粒度的模型并行，将单层内部参数拆分到不同设备：</p>
+<ul>
+<li><strong>MatMul 并行</strong>：矩阵按列/行切分并行计算（图23.4.1）</li>
+</ul>
+<p><img src="/images/ai_system/ch23/0858-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.4.1 MatMul 行/列切分并行"
+	
+	
+></p>
+<ul>
+<li><strong>Transformer 并行</strong>：MLP 中 A 列切割、B 行切割，配合 All-Reduce 汇总；Self-Attention 中 Q/K/V 列切割，线性层 B 行切割</li>
+</ul>
+<p><img src="/images/ai_system/ch23/0858-10.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.4.2 MLP 张量并行策略"
+	
+	
+></p>
+<ul>
+<li><strong>Embedding 并行</strong>：表切分（每个设备存部分嵌入表）和列切分（每个设备存嵌入表部分列）</li>
+</ul>
+<p><img src="/images/ai_system/ch23/0859-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.4.3 Embedding 并行两种切分方式"
+	
+	
+></p>
+<ul>
+<li><strong>Cross Entropy Loss 并行</strong>：在 vocab 维度分片计算，All-Reduce 取全局 max 和 sum，避免将完整 logits 聚集到单一设备</li>
+</ul>
+<p><img src="/images/ai_system/ch23/0860-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.4.4 Cross Entropy Loss 并行过程"
+	
+	
+></p>
+<h3 id="2343-devicemesh-实现-tp">23.4.3 DeviceMesh 实现 TP
+</h3><p>PyTorch 通过 <code>ColwiseParallel</code>/<code>RowwiseParallel</code>/<code>SequenceParallel</code> 等 API 配合 <code>DeviceMesh</code> 实现张量并行。</p>
+<hr>
+<h2 id="235-流水并行">23.5 流水并行
+</h2><p>将模型不同层按序分配到不同设备，输入数据切分为多个 Micro-Batch 实现流水线。</p>
+<p><strong>Gpipe 流水并行</strong>（F-then-B 策略）：前向→反向→参数更新，存在&quot;气泡&quot;空闲时间，通过激活检查点节省内存。</p>
+<p><strong>PipeDream 流水并行</strong>（1F1B 策略）：完成一个 Micro-Batch 的前向传播后立即进行反向传播，最大化设备利用率。</p>
+<p><img src="/images/ai_system/ch23/0864-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.5.1 PipeDream 1F1B 策略"
+	
+	
+></p>
+<p>PipeDream 是<strong>异步</strong>的，每个 Worker 使用对应的权重版本，需要管理权重一致性问题。</p>
+<p><img src="/images/ai_system/ch23/0864-07.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.5.2 PipeDream 权重版本管理"
+	
+	
+></p>
+<hr>
+<h2 id="236-混合并行">23.6 混合并行
+</h2><p><strong>3D 混合并行（DP+PP+TP）</strong> 结合三种并行方式：</p>
+<ul>
+<li><strong>内存效率</strong>：流水线 + 模型并行双重减少内存消耗</li>
+<li><strong>计算效率</strong>：ZeRO-DP 优化器状态分区 + 拓扑感知映射</li>
+<li><strong>通信优化</strong>：张量并行（通信最大）优先放在同节点内，流水并行（通信最小）可跨节点</li>
+</ul>
+<p><img src="/images/ai_system/ch23/0865-10.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.6.1 3D 混合并行示意图"
+	
+	
+></p>
+<hr>
+<h2 id="237-昇思-mindspore-并行">23.7 昇思 MindSpore 并行
+</h2><p>MindSpore 提供完整大模型训练方案：</p>
+<p><strong>张量重排布（Tensor Redistribution）</strong>：自动插入通信算子（如 All-Gather/Concat）解决设备间张量布局不一致。</p>
+<p><strong>通信算子自动微分</strong>：定义 All-Gather 的反向算子为 Reduce-Scatter，实现全图自动微分。</p>
+<p><strong>并行搜索</strong>：基于代价模型（同时考虑计算和通信开销），ResNet50 在 8 设备上搜索耗时 &lt; 1s，训练时间减少 ~55%。</p>
+<p><img src="/images/ai_system/ch23/0869-07.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.7.1 MindSpore 子结构并行策略示例"
+	
+	
+></p>
+<p><strong>函数式算子切分</strong>：动态图下通过 <code>@jit</code> 装饰符指定某段以图模式编译执行，支持算子级模型并行。</p>
+<p><img src="/images/ai_system/ch23/0870-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.7.2 函数式算子切分流程"
+	
+	
+></p>
+<p><strong>流水并行</strong>：</p>
+<p><img src="/images/ai_system/ch23/0871-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.7.3 流水并行 Stage 映射"
+	
+	
+></p>
+<p><img src="/images/ai_system/ch23/0871-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.7.4 Micro-Batch 流水线调度"
+	
+	
+></p>
+<p><strong>MoE 并行</strong>：Gate 计算并行化 + FFN 均分到各设备，All-to-All 通信路由数据，参数量扩展但计算量增加较少。</p>
+<p><img src="/images/ai_system/ch23/0872-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.7.5 MoE 内存优化调度"
+	
+	
+></p>
+<p><img src="/images/ai_system/ch23/0872-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.7.6 MoE 单设备单 FFN 执行"
+	
+	
+></p>
+<p><strong>异构并行训练</strong>：内存密集型算子→CPU，计算密集型算子→加速器，单机 8 卡可训练/推理千亿模型。</p>
+<p><img src="/images/ai_system/ch23/0873-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图23.7.7 异构并行训练架构"
+	
+	
+></p>
+<hr>
+<h2 id="本章小结">本章小结
+</h2><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>并行策略</th>
+          <th>核心思想</th>
+          <th>优点</th>
+          <th>适用场景</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>数据并行（DDP）</strong></td>
+          <td>数据分片，模型副本</td>
+          <td>实现简单，扩展性好</td>
+          <td>模型可放入单设备</td>
+      </tr>
+      <tr>
+          <td><strong>FSDP/ZeRO</strong></td>
+          <td>模型状态分片</td>
+          <td>显著降低显存</td>
+          <td>大模型训练</td>
+      </tr>
+      <tr>
+          <td><strong>张量并行（TP）</strong></td>
+          <td>单层参数/计算切分</td>
+          <td>细粒度并行</td>
+          <td>超大单层参数</td>
+      </tr>
+      <tr>
+          <td><strong>流水并行（PP）</strong></td>
+          <td>不同层分配到不同设备</td>
+          <td>通信量小</td>
+          <td>深层网络</td>
+      </tr>
+      <tr>
+          <td><strong>混合并行（3D）</strong></td>
+          <td>DP+PP+TP 组合</td>
+          <td>最大化资源利用</td>
+          <td>万亿参数模型</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>本章系统介绍了从基础数据并行到 3D 混合并行的完整技术栈，以及 MindSpore 在大模型训练上的工程实践，为理解现代分布式训练框架的设计奠定了坚实基础。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ai%E7%B3%BB%E7%BB%9F/">AI系统</a>
+        
+            <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/">分布式训练</a>
+        
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E5%B9%B6%E8%A1%8C/">数据并行</a>
+        
+            <a href="/tags/%E6%A8%A1%E5%9E%8B%E5%B9%B6%E8%A1%8C/">模型并行</a>
+        
+            <a href="/tags/%E6%B5%81%E6%B0%B4%E5%B9%B6%E8%A1%8C/">流水并行</a>
+        
+            <a href="/tags/%E6%B7%B7%E5%90%88%E5%B9%B6%E8%A1%8C/">混合并行</a>
+        
+            <a href="/tags/fsdp/">FSDP</a>
+        
+            <a href="/tags/zero/">ZeRO</a>
+        
+            <a href="/tags/mindspore/">MindSpore</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.524358946663b6a5f95fbef001d1c97000115552b473e36faad787d7b96c8241.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

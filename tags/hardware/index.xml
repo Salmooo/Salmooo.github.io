@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Hardware on SalmoneX Blog</title>
+        <link>http://localhost:1313/tags/hardware/</link>
+        <description>Recent content in Hardware on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright>
+        <lastBuildDate>Wed, 27 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/hardware/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>FPGA-Based Prototyping Methodology Manual 学习笔记</title>
+        <link>http://localhost:1313/post/fpga/fpga-prototyping/</link>
+        <pubDate>Wed, 27 May 2026 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/post/fpga/fpga-prototyping/</guid>
+        <description>&lt;p&gt;本书是 FPGA 原型验证领域的权威参考书，由 Synopsys 和 Xilinx 的专家 Doug Amos、Austin Lesea、René Richter 合著。全书共 15 章，系统讲解了基于 FPGA 的 SoC 原型验证方法论，从基础概念、FPGA 技术、平台选择，到设计移植、多 FPGA 分区、调试技巧和实际部署，覆盖完整流程。&lt;/p&gt;
+&lt;h2 id=&#34;全书章节&#34;&gt;全书章节
+&lt;/h2&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;章节&lt;/th&gt;
+          &lt;th&gt;标题&lt;/th&gt;
+          &lt;th&gt;摘要&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;1&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;01-introduction/&#34; &gt;Introduction: The Challenge of System Verification&lt;/a&gt;&lt;/td&gt;
+          &lt;td&gt;SoC 验证面临的挑战与原型验证的价值&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;2&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;02-fpga-prototyping-benefits/&#34; &gt;What Can FPGA-Based Prototyping Do For Us?&lt;/a&gt;&lt;/td&gt;
+          &lt;td&gt;FPGA 原型验证的能力边界与适用场景&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;3&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;03-fpga-technology/&#34; &gt;FPGA Technology Today: Chips and Tools&lt;/a&gt;&lt;/td&gt;
+          &lt;td&gt;FPGA 器件与 EDA 工具的技术基础&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;4&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;04-getting-started/&#34; &gt;Getting Started&lt;/a&gt;&lt;/td&gt;
+          &lt;td&gt;原型验证项目的起步指南与资源评估&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;5&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;05-build-your-own-platform/&#34; &gt;Which Platform? - Build Your Own&lt;/a&gt;&lt;/td&gt;
+          &lt;td&gt;自建 FPGA 原型平台的考量与实践&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;6&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;06-ready-made-platform/&#34; &gt;Which Platform? - Ready Made&lt;/a&gt;&lt;/td&gt;
+          &lt;td&gt;商业现成 FPGA 平台的选型评估&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;7&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;07-design-ready-for-prototype/&#34; &gt;Getting the Design Ready for the Prototype&lt;/a&gt;&lt;/td&gt;
+          &lt;td&gt;SoC 设计移植到 FPGA 的完整流程&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;8&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;08-partitioning-and-reconnecting/&#34; &gt;Partitioning and Reconnecting&lt;/a&gt;&lt;/td&gt;
+          &lt;td&gt;多 FPGA 分区与信号互连技术&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;9&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;09-design-for-prototyping/&#34; &gt;Design for Prototyping&lt;/a&gt;&lt;/td&gt;
+          &lt;td&gt;面向原型验证的设计方法论&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;10&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;10-ip-and-high-speed-interfaces/&#34; &gt;IP and High Speed Interfaces&lt;/a&gt;&lt;/td&gt;
+          &lt;td&gt;IP 核与高速接口在原型中的建模&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;11&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;11-bring-up-and-debug/&#34; &gt;Bring Up and Debug: The Prototype in the Lab&lt;/a&gt;&lt;/td&gt;
+          &lt;td&gt;原型板 bring-up 与实验室调试&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;12&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;12-prototype-in-the-field/&#34; &gt;Breaking Out of the Lab: The Prototype in the Field&lt;/a&gt;&lt;/td&gt;
+          &lt;td&gt;原型走出实验室的现场部署&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;13&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;13-prototyping-and-verification/&#34; &gt;Prototyping + Verification = The Best of Both Worlds&lt;/a&gt;&lt;/td&gt;
+          &lt;td&gt;原型与仿真验证的融合&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;14&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;14-future-of-prototyping/&#34; &gt;The Future of Prototyping&lt;/a&gt;&lt;/td&gt;
+          &lt;td&gt;原型验证的未来发展趋势&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;15&lt;/td&gt;
+          &lt;td&gt;&lt;a class=&#34;link&#34; href=&#34;15-conclusions/&#34; &gt;Conclusions&lt;/a&gt;&lt;/td&gt;
+          &lt;td&gt;全书总结与核心要点回顾&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

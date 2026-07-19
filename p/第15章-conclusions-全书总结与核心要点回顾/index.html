@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="《FPGA-Based Prototyping Methodology Manual》全书回顾：原型三定律的最终回答、FPGA 项目的九步路线图、DFP 的程序性建议总结，以及&rsquo;准备+努力=成功&rsquo;的最终方法论公式。">
+<title>第15章: Conclusions — 全书总结与核心要点回顾</title>
+
+<link rel='canonical' href='http://localhost:1313/p/%E7%AC%AC15%E7%AB%A0-conclusions-%E5%85%A8%E4%B9%A6%E6%80%BB%E7%BB%93%E4%B8%8E%E6%A0%B8%E5%BF%83%E8%A6%81%E7%82%B9%E5%9B%9E%E9%A1%BE/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="第15章: Conclusions — 全书总结与核心要点回顾">
+<meta property='og:description' content="《FPGA-Based Prototyping Methodology Manual》全书回顾：原型三定律的最终回答、FPGA 项目的九步路线图、DFP 的程序性建议总结，以及&rsquo;准备+努力=成功&rsquo;的最终方法论公式。">
+<meta property='og:url' content='http://localhost:1313/p/%E7%AC%AC15%E7%AB%A0-conclusions-%E5%85%A8%E4%B9%A6%E6%80%BB%E7%BB%93%E4%B8%8E%E6%A0%B8%E5%BF%83%E8%A6%81%E7%82%B9%E5%9B%9E%E9%A1%BE/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='FPGA' /><meta property='article:tag' content='Prototyping' /><meta property='article:tag' content='Summary' /><meta property='article:tag' content='Best Practices' /><meta property='article:tag' content='Three Laws' /><meta property='article:tag' content='Design-for-Prototyping' /><meta property='article:tag' content='Methodology' /><meta property='article:published_time' content='2026-06-11T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-06-11T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="第15章: Conclusions — 全书总结与核心要点回顾">
+<meta name="twitter:description" content="《FPGA-Based Prototyping Methodology Manual》全书回顾：原型三定律的最终回答、FPGA 项目的九步路线图、DFP 的程序性建议总结，以及&rsquo;准备+努力=成功&rsquo;的最终方法论公式。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="http://localhost:1313/" selected>English</option>
+                                
+                                    <option value="http://localhost:1313/zh-cn/" >中文</option>
+                                
+                                    <option value="http://localhost:1313/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#章节概览">章节概览</a></li>
+    <li><a href="#核心知识点">核心知识点</a></li>
+    <li><a href="#详细笔记">详细笔记</a>
+      <ol>
+        <li><a href="#151-fpmm-方法论的全景概览table-35">15.1 FPMM 方法论的全景概览（Table 35）</a></li>
+        <li><a href="#152-第一定律soc-比-fpga-大">15.2 第一定律：SoC 比 FPGA 大</a></li>
+        <li><a href="#153-第二定律soc-比-fpga-快">15.3 第二定律：SoC 比 FPGA 快</a></li>
+        <li><a href="#154-第三定律soc-对-fpga-不友好">15.4 第三定律：SoC 对 FPGA 不友好</a></li>
+        <li><a href="#155-dfp-打破三定律">15.5 DFP 打破三定律</a></li>
+        <li><a href="#156-全书方法论公式">15.6 全书方法论公式</a></li>
+      </ol>
+    </li>
+    <li><a href="#个人总结全书回顾">个人总结：全书回顾</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/fpga%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" >
+                FPGA学习笔记
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E7%AC%AC15%E7%AB%A0-conclusions-%E5%85%A8%E4%B9%A6%E6%80%BB%E7%BB%93%E4%B8%8E%E6%A0%B8%E5%BF%83%E8%A6%81%E7%82%B9%E5%9B%9E%E9%A1%BE/">第15章: Conclusions — 全书总结与核心要点回顾</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jun 11, 2026</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    2 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="章节概览">章节概览
+</h2><p>第15章是全书最短的章节——严格来说是一份&quot;总结&quot;而非独立的&quot;新内容&quot;。它有三个功能：(1) 用一张表（Table 35）将全书的方法论浓缩为九个步骤；(2) 回顾原型三定律，总结全书对每条定律的应对方案；(3) 提炼 DFP 的七条程序性建议并断言：<strong>&ldquo;如果只选一组指南——程序性指南可能比技术性指南更重要&rdquo;</strong>。</p>
+<p>最后作者给出了全书的方法论公式：<strong>成功 = 准备 + 努力</strong>。准备（规划、DFP、平台选择、工具熟悉）越多，所需要的努力（RTL 修改、分区迭代、调试时间）越少。</p>
+<hr>
+<h2 id="核心知识点">核心知识点
+</h2><ul>
+<li><strong>九步路线图</strong>（Table 35）：从头开始→理解目标→选择平台→修改 RTL→分区→重连→Bring-Up→调试→复制和使用。全书的章节编排就是按照这个顺序展开的</li>
+<li><strong>原型三定律的最终回答</strong>：
+<ul>
+<li><strong>Law 1（SoC &gt; FPGA）</strong>：分区是必需的，但借助 EDA 工具和可编程互联，可达 20 颗 FPGA、8000-9000 万 SoC 门规模</li>
+<li><strong>Law 2（SoC &gt; FPGA 速度）</strong>：内部逻辑 20-100MHz（降低到 10-25MHz 如果有跨 FPGA 路径和复用）。<strong>但是在 IO 上可以打破第二定律</strong>——USB 125MHz、HD 视频 72MHz——&ldquo;在 IO 上，FPGA 在大多数方面与 SoC 一样快&rdquo;</li>
+<li><strong>Law 3（SoC 对 FPGA 不友好）</strong>：DFP 让这一定律变得非必然——&ldquo;我们不一定要接受第三定律。DFP 意味着我们可以打破第三定律，使我们的 SoC 设计即使不 FPGA 友好，至少 FPGA 容忍！&rdquo;</li>
+</ul>
+</li>
+<li><strong>DFP 的程序性建议比技术性建议可能更重要</strong>：&ldquo;如果只能选一组——是程序性指南更重要&rdquo;</li>
+<li><strong>最终公式</strong>：&ldquo;成功 = 准备 + 努力——前者越多，后者越少&rdquo;</li>
+</ul>
+<hr>
+<h2 id="详细笔记">详细笔记
+</h2><h3 id="151-fpmm-方法论的全景概览table-35">15.1 FPMM 方法论的全景概览（Table 35）
+</h3><p>九个步骤概括全书 400 页：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>#</th>
+          <th>步骤</th>
+          <th>全书核心建议</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>1</td>
+          <td><strong>从头开始</strong></td>
+          <td>在 SoC 项目的最早阶段参与——不是等到大量 FPGA 敌意已经被引入设计之后</td>
+      </tr>
+      <tr>
+          <td>2</td>
+          <td><strong>理解目标</strong></td>
+          <td>原型的范围（多少设计）？目标速度？多少份拷贝？多少版本？交付期限？</td>
+      </tr>
+      <tr>
+          <td>3</td>
+          <td><strong>选择平台</strong></td>
+          <td>速度和容量重要，但<strong>灵活性关键</strong>——保持高质量和可靠性</td>
+      </tr>
+      <tr>
+          <td>4</td>
+          <td><strong>修改 RTL</strong></td>
+          <td>移除 FPGA 不友好元素 + 添加 FPGA 操作所需项目。<strong>保持版本控制</strong></td>
+      </tr>
+      <tr>
+          <td>5</td>
+          <td><strong>分区</strong></td>
+          <td>平衡资源使用 + <strong>最小化互联信号数</strong></td>
+      </tr>
+      <tr>
+          <td>6</td>
+          <td><strong>重连</strong></td>
+          <td>固定 IO + 必要时在 FPGA 间复用信号 + 酌情使用高速差分信令</td>
+      </tr>
+      <tr>
+          <td>7</td>
+          <td><strong>Bring-Up</strong></td>
+          <td><strong>递增式</strong>将设计引入板上——每一步检查生命迹象和正确操作</td>
+      </tr>
+      <tr>
+          <td>8</td>
+          <td><strong>调试</strong></td>
+          <td>开始使用原型调试设计+运行于其上的软件。<strong>有调试计划 + 使用增量工具流</strong></td>
+      </tr>
+      <tr>
+          <td>9</td>
+          <td><strong>复制和使用</strong></td>
+          <td>为每个终端用户复制足够份数 + 支持他们直到成功</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>&ldquo;我们在全书的每一章中处理了这些步骤，一次走一步，尽可能使用外部预制的资源。&rdquo;</p>
+</blockquote>
+<h3 id="152-第一定律soc-比-fpga-大">15.2 第一定律：SoC 比 FPGA 大
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>方面</th>
+          <th>结论</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>适用性</strong></td>
+          <td>经过 25 年进步后仍然适用。大部分 IP 验证和可行性项目仅需 1 颗 FPGA，但完整 SoC 通常需要多颗</td>
+      </tr>
+      <tr>
+          <td><strong>典型规模</strong></td>
+          <td><strong>1-10 颗 FPGA</strong>，借助自动化分区和可编程互联可达 <strong>20 颗</strong></td>
+      </tr>
+      <tr>
+          <td><strong>最大容量</strong></td>
+          <td>单颗 LX760 ≈ 400 万 SoC 门 → 20 颗 ≈ <strong>8000-9000 万门</strong>——远超当时大多数 SoC 设计</td>
+      </tr>
+      <tr>
+          <td><strong>额外工作</strong></td>
+          <td>跨多 FPGA 时需要额外工作：设计连续性、时钟网络、复位和启动同步——详见第8章</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>工具建议</strong>：使用专用 EDA 工具进行分区——交互式结果更好但耗时长，自动化更快速。</p>
+<h3 id="153-第二定律soc-比-fpga-快">15.3 第二定律：SoC 比 FPGA 快
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>方面</th>
+          <th>结论</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>核心逻辑</strong></td>
+          <td>SoC 数百 MHz → FPGA <strong>20-100MHz</strong>（粗粒度可编程架构的固有限制）</td>
+      </tr>
+      <tr>
+          <td><strong>跨 FPGA 路径</strong></td>
+          <td>如果关键路径穿越 FPGA 边界 → 进一步降低</td>
+      </tr>
+      <tr>
+          <td><strong>使用复用后</strong></td>
+          <td><strong>典型原型性能：10-25MHz</strong></td>
+      </tr>
+      <tr>
+          <td><strong>尽管如此</strong></td>
+          <td>&ldquo;这个原型速度代表了迄今为止<strong>最快的 pre-silicon 平台</strong>——用于锻炼 SoC 设计的 RTL&rdquo;</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>最关键的发现——在 IO 上第二定律可以被打破</strong>：</p>
+<blockquote>
+<p>&ldquo;在 IO 上，FPGA 在大多数方面与 SoC 一样快——支持几乎相同的标准化外设接口。<strong>FPGA IO 能够再现快速外设接口的能力，是它们相对于较慢验证技术的最宝贵优势之一。</strong>&rdquo;</p>
+</blockquote>
+<p>加上外部 PHY 设备和 FPGA 内置的 PHY → <strong>USB 125MHz、HD 视频 72MHz</strong> 的原型运行速率很常见。</p>
+<h3 id="154-第三定律soc-对-fpga-不友好">15.4 第三定律：SoC 对 FPGA 不友好
+</h3><p><strong>&ldquo;最低可接受结果&rdquo;</strong>：</p>
+<blockquote>
+<p>第7章覆盖了许多可能的场景——一个设计需要全部这些修改是极端病态的。<strong>一个好的原型团队即使面对最 FPGA 敌意的 SoC 设计也不会退缩</strong>——借助最好的工具、IP、板、器件，最重要的是正确的方法论和专业能力，我们可以为任何 SoC 设计创建至少大部分子集的 FPGA 就绪版本。</p>
+</blockquote>
+<p><strong>但&quot;最低可接受&quot;不是我们的目标——DFP 让第三定律从一开始就不必成立</strong>：</p>
+<blockquote>
+<p>&ldquo;我们不一定要接受原型第三定律为简单的生活事实。<strong>Design-for-Prototyping 方法意味着我们可以打破第三定律——使我们的 SoC 设计即使不 FPGA 友好，也至少 FPGA 容忍！</strong>&rdquo;</p>
+</blockquote>
+<h3 id="155-dfp-打破三定律">15.5 DFP 打破三定律
+</h3><p><strong>Table 37：DFP 七条程序性建议回顾</strong></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>建议</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>整合 RTL 团队和原型团队</strong></td>
+          <td>相同工具培训。共享 FPGA 和 SoC 的知识</td>
+      </tr>
+      <tr>
+          <td><strong>原型团队必须与软件团队紧密合作</strong></td>
+          <td>软件团队是原型工程师最好的&quot;客户&quot;</td>
+      </tr>
+      <tr>
+          <td><strong>将原型纳入验证计划</strong></td>
+          <td>在预先约定的成熟度里程碑分支 RTL</td>
+      </tr>
+      <tr>
+          <td><strong>保持原型兼容的仿真环境</strong></td>
+          <td>比较结果与原始 SoC 仿真</td>
+      </tr>
+      <tr>
+          <td><strong>保持统一的文档和版本控制</strong></td>
+          <td>在同一系统中追踪软件和 RTL 变更</td>
+      </tr>
+      <tr>
+          <td><strong>采用公司级硬件和附加件标准</strong></td>
+          <td>避免浪费，鼓励复用</td>
+      </tr>
+      <tr>
+          <td><strong>将 DFP 纳入 RTL 编码标准</strong></td>
+          <td>DFP 的 RTL 风格也对 SoC 好</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>全书最重要的断言之一</strong>：</p>
+<blockquote>
+<p>&ldquo;如果我们只能选择一组指南——那么<strong>程序性指南</strong>可能是更重要的一组。&rdquo;</p>
+</blockquote>
+<p><strong>成功的秘密</strong>：</p>
+<blockquote>
+<p>&ldquo;许多原型项目成功的秘密在于原型工程师与 SoC 设计团队其他成员的<strong>整合</strong>。这必须导致原型工程师的需求和反馈在 SoC 项目的<strong>早期阶段</strong>被纳入考虑。然后，仅需对流程和设计风格做<strong>小的改变</strong>，FPGA 原型验证的成功就可以被<strong>保证</strong>。&rdquo;</p>
+</blockquote>
+<p>&ldquo;作为回报，SoC 的软件和 RTL 部分在最早可能的机会以最小努力被集成——解决了当今大多数 SoC 项目最关键的工作量：嵌入式软件。&rdquo;</p>
+<h3 id="156-全书方法论公式">15.6 全书方法论公式
+</h3><blockquote>
+<p>&ldquo;主要的教训可能是：<strong>一次处理一步的复杂度——但要确保每一步朝正确的方向走，而不是走进死胡同。</strong>&rdquo;</p>
+</blockquote>
+<blockquote>
+<p>&ldquo;当开始一个 FPGA 原型项目时，<strong>成功 = 准备 + 努力</strong>。前者越多，后者越少。&rdquo;</p>
+</blockquote>
+<blockquote>
+<p>&ldquo;读过本书的大部分内容后，我们将享有显著的原型项目起跑优势。我们希望我们系统化的 FPGA 原型方法将使任何人都能更有信心地应对下一个 SoC 项目的复杂度，并取得更成功的成果。&rdquo;</p>
+</blockquote>
+<hr>
+<h2 id="个人总结全书回顾">个人总结：全书回顾
+</h2><p>第15章是简短的，但其中的&quot;准备+努力&quot;公式和&quot;程序性指南比技术性指南可能更重要&quot;的断言——是全书 400 页内容的思想精华。</p>
+<p>回顾全书 15 章的结构：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">三部曲的结构：
+</span></span><span class="line"><span class="cl">├── 理解为什么（Ch1-3）：验证挑战 → FPGA 原型能做什么 → FPGA 技术基础
+</span></span><span class="line"><span class="cl">├── 规划和准备（Ch4-6）：资源估算 → 自建平台 → 商业平台选型
+</span></span><span class="line"><span class="cl">├── 执行（Ch7-8）：设计移植到 FPGA → 多 FPGA 分区和重连
+</span></span><span class="line"><span class="cl">├── 组织和方法（Ch9）：DFP——从源头消除问题
+</span></span><span class="line"><span class="cl">├── 专用主题（Ch10）：IP 和高速接口的建模
+</span></span><span class="line"><span class="cl">├── 实验室和现场（Ch11-12）：Bring-Up 和调试 → 原型走出实验室
+</span></span><span class="line"><span class="cl">├── 超越独立使用（Ch13）：混合验证——原型成为统一验证生态的一部分
+</span></span><span class="line"><span class="cl">├── 展望和回顾（Ch14-15）：未来趋势 → 全书总结
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这本书最大的价值不在于它教了你多少具体技术——那些技术会随着 FPGA 器件和 EDA 工具的换代而不断更新——而在于它建立了一个<strong>系统化的思维框架</strong>：</p>
+<ol>
+<li><strong>原型三定律</strong>（作为问题陈述）</li>
+<li><strong>DFP 的双轨指南</strong>（程序性 + 技术性，作为预防）</li>
+<li><strong>九步方法论</strong>（作为执行流程）</li>
+<li><strong>成功的公式</strong>（准备 + 努力，作为最终交付的哲学）</li>
+</ol>
+<p>这个框架在 2011 年本书出版时是开创性的——它将一个之前被看作&quot;把设计塞进 FPGA&quot;的混沌过程系统化为一门可传授的工程学科。今天回看，这个框架依然完全有效——虽然 FPGAs 变了、工具变了、接口标准变了，但&quot;SoC 比 FPGA 大 / 快 / 不友好&quot;这三个基本约束以及应对它们的方法论没有变。</p>
+<p>最后，作者对&quot;<strong>原型工程师与 SoC 团队整合</strong>&ldquo;的反复强调（从第9章到第15章），触及了一个比技术更深层的问题：FPGA 原型验证最大的挑战往往不是技术性的，而是组织性的。一个技术上完美的原型方案，如果原型团队被隔离在 SoC 团队之外、在 RTL 交付后才第一次接触设计、没有渠道将发现反馈到设计流程中——它的最终价值会大打折扣。&ldquo;程序性指南可能比技术性指南更重要&rdquo;——这可能是全书最不直观但也最重要的一条结论。</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0436-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 169: Packet processing sub-system block diagram (source: Texas Instruments)"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0439-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 170: FPGA prototyping hardware used in the lab (source: Texas Instruments)"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0441-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 171: Clocking structure for high-speed scenario (source: Texas Instruments)"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0442-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 172: Clocking structure for low-speed scenario (source: Texas Instruments)"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0444-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 173: Block diagram of bus-width adaption (source: Texas Instruments)"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0445-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 174: Block diagram of partitioned sub-system (source: Texas Instruments)"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0451-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 176: Engineering costs as entered into CCS"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0452-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 177: Estimates for engineering effort entered into CCS"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0453-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 178: Estimates for material costs entered into CCS"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0456-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 179: Typical critical path for in-house board project"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0457-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Table 38: Comparing prototyping and non-prototyping FPGA project durations"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0458-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 180: Comparison of estimated useful lifetime of boards (from CCS)"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0461-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 181: Design example cost results given by CCS"
+	
+	
+></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/fpga/">FPGA</a>
+        
+            <a href="/tags/prototyping/">Prototyping</a>
+        
+            <a href="/tags/summary/">Summary</a>
+        
+            <a href="/tags/best-practices/">Best Practices</a>
+        
+            <a href="/tags/three-laws/">Three Laws</a>
+        
+            <a href="/tags/design-for-prototyping/">Design-for-Prototyping</a>
+        
+            <a href="/tags/methodology/">Methodology</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC7%E7%AB%A0-getting-the-design-ready-for-the-prototype/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第7章: Getting the Design Ready for the Prototype</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC9%E7%AB%A0-design-for-prototyping/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第9章: Design for Prototyping</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC12%E7%AB%A0-breaking-out-of-the-lab-the-prototype-in-the-field/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第12章: Breaking Out of the Lab — The Prototype in the Field</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC13%E7%AB%A0-prototyping--verification-the-best-of-both-worlds/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第13章: Prototyping &#43; Verification = The Best of Both Worlds</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC14%E7%AB%A0-the-future-of-prototyping/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第14章: The Future of Prototyping</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.524358946663b6a5f95fbef001d1c97000115552b473e36faad787d7b96c8241.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

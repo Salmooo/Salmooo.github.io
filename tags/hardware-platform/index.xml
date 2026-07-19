@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Hardware Platform on SalmoneX Blog</title>
+        <link>http://localhost:1313/tags/hardware-platform/</link>
+        <description>Recent content in Hardware Platform on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright>
+        <lastBuildDate>Fri, 05 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/hardware-platform/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>第5章: Which Platform? — Build Your Own</title>
+        <link>http://localhost:1313/p/%E7%AC%AC5%E7%AB%A0-which-platform-build-your-own/</link>
+        <pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/p/%E7%AC%AC5%E7%AB%A0-which-platform-build-your-own/</guid>
+        <description>&lt;h2 id=&#34;章节概览&#34;&gt;章节概览
+&lt;/h2&gt;&lt;p&gt;第4章告诉我们&amp;quot;需要什么资源&amp;quot;；第5章回答&amp;quot;如何自己造出承载这些资源的硬件平台&amp;quot;。&lt;/p&gt;
+&lt;p&gt;本章是全书硬件工程味道最浓的一章——从 PCB 拓扑、连接器选型、时钟延迟匹配（精确到 0.44ns）、电源树设计、地弹抑制、散热方案到 FPGA 配置机制和信号完整性，全面覆盖自建原型平台的每一个工程决策。&lt;/p&gt;
+&lt;p&gt;核心张力贯穿全文：&lt;strong&gt;为目标项目定制的专用性 vs 为未来项目预留的通用灵活性&lt;/strong&gt;。作者坦率指出：&amp;ldquo;在作者的经验中，大多数自建平台从未被复用于后续项目&amp;rdquo;——不是因为不想，而是因为时钟资源、互联和电压域的灵活性不足以适配新设计。本章最后探讨了如何在组织层面建立标准化平台生态体系来打破这个困境。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;核心知识点&#34;&gt;核心知识点
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;Pins-in / Pins-out&amp;rdquo; 拓扑&lt;/strong&gt;：在 SoC 引脚处做物理分界，初版芯片到达后可直插替换 FPGA 板——软件在数小时内即可跑起来&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;母板固定资源 + 子板项目专用外设&lt;/strong&gt; = 复用性与性能之间的最佳折中。固定外设会永久占用 FPGA IO 引脚（最宝贵的资源），即使不使用也无法释放&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;互联是比逻辑更稀缺的资源&lt;/strong&gt;：64 位 AHB 总线实际需要 200+ 引脚（地址+写数据+读数据+控制信号），即使复用也需 130+ 引脚&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;关键教训&lt;/strong&gt;：如果一颗 FPGA 不需要连接该总线，其 130+ IO 引脚只能设为高阻态——&lt;strong&gt;永久浪费&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;HAPS 时钟延迟匹配的量化模型&lt;/strong&gt;：定义两个延迟量子 X（stub 延迟，0.44ns）和 Y（标准同轴电缆延迟，1.45ns），任意 FPGA 时钟输入延迟 = 2X+Y = 2.33ns&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;电源分配的核心原则&lt;/strong&gt;：每个子板独立供电，不要从主板&amp;quot;借电&amp;quot;——Piggy-Back 供电是灾难的来源&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;地弹（Ground Bounce）机制&lt;/strong&gt;：大量 IO 同步翻转 → 大地电流经地引脚回流 → 地参考瞬时抬升 → 输入引脚误判逻辑电平。应对：低阻抗地平面 + 默认最小驱动电流而非 24mA&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;散热不可忽视&lt;/strong&gt;：高利用率 + 高时钟 + 封闭机箱 = 芯片损坏。FPGA 内置系统监控器（温度 ±4°C，电压 ±1%）是免费的保护机制&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;System ACE + CompactFLASH&lt;/strong&gt;：最流行的非专家友好配置方案——CF 卡可存多个配置+文档，终端用户通过开关或远程选择加载哪个&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;自建标准化平台需要组织级投入&lt;/strong&gt;：开发协调、库存管理、文档、培训、技术支持——本质上是一项&amp;quot;公司内部的小生意&amp;quot;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;详细笔记&#34;&gt;详细笔记
+&lt;/h2&gt;&lt;h3 id=&#34;51-平台的最佳形态&#34;&gt;5.1 平台的最佳形态
+&lt;/h3&gt;&lt;p&gt;四个维度评估平台拓扑：&lt;strong&gt;尺寸/外形、模块化、互联、灵活性&lt;/strong&gt;。&lt;/p&gt;
+&lt;h4 id=&#34;511-尺寸和外形&#34;&gt;5.1.1 尺寸和外形
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;脐带线缆（Umbilical Cable）拓扑&lt;/strong&gt;：FPGA 平台通过线缆连接到目标系统的 SoC 插座。优势：易于向外部合作伙伴演示。但需要考虑 FPGA IO 引脚是否有足够的电流驱动能力来驱动线缆负载。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;更常见的反向做法&lt;/strong&gt;：初版芯片插接到 FPGA 原型平台预先准备好的位置——这需要一种关键的物理拓扑：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pins-In / Pins-Out 分区&lt;/strong&gt;（图47）：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0141-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 47: FPGA-based Prototyping platform employing a personality board&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;SoC RTL 内部逻辑（Pins-In）        外部系统接口（Pins-Out）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        ↓                                  ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    FPGA 板                             个性板（Personality Board）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                                        （外设、目标产品接口等）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        ↓                                  ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    通过接头连接 ←→ 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  [初版芯片到达后] 芯片安装在基板上，替换掉 FPGA 板的位置
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;当初版芯片以这种方式接入之前已经在原型平台中验证过的系统时，软件在数小时内就能跑起来。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这种预规划使芯片回片后集成时间减少了几个数量级。&lt;/p&gt;
+&lt;h4 id=&#34;512-模块化&#34;&gt;5.1.2 模块化
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;核心权衡&lt;/strong&gt;：全部元件放一块板（性能更好）vs 不同元件分板放置（灵活性更好）。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;母板+子板 折中方案&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;母板：FPGA + 全局资源（每个项目必用）&lt;/li&gt;
+&lt;li&gt;子板：项目专用外设（随项目更换）&lt;/li&gt;
+&lt;li&gt;后续项目只需重新设计 1-2 块子板，而非整个平台&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;5121-母板子卡-vs-全部上板&#34;&gt;5.1.2.1 母板+子卡 vs &amp;ldquo;全部上板&amp;rdquo;
+&lt;/h4&gt;&lt;p&gt;一个关键的陷阱示例（图48）：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0143-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 48: Inefficient use of FPGA IO pins owing to dedicated peripherals&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;外设在母板上直接连接到 FPGA 引脚。如果某个设计不用该外设，这些 IO 引脚仍然被占用——无法作任何其他用途。&lt;strong&gt;&amp;ldquo;如果不确定是否需要的，就放上去&amp;rdquo;——这种态度会严重限制母板上最宝贵的资源：FPGA 的 IO 引脚。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;解决方案&lt;/strong&gt;：外设放在独立子卡上，需要时接入，不需要时移除。&lt;/p&gt;
+&lt;h4 id=&#34;513-互联&#34;&gt;5.1.3 互联
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;总线宽度陷阱&lt;/strong&gt;：64 位 AHB 总线实际包含：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;64 位地址&lt;/li&gt;
+&lt;li&gt;64 位写数据&lt;/li&gt;
+&lt;li&gt;64 位读数据&lt;/li&gt;
+&lt;li&gt;10-20+ 控制和状态信号&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;合计：200+ 连接&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;即使地址和数据复用，仍需要 130+ 全局引脚和走线。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;固定全局总线的浪费&lt;/strong&gt;（图49、图50）：一个 4 FPGA 系统中，只有 3 颗需要连接 AHB 总线，但第 4 颗 FPGA 的 130+ 引脚被硬连线到总线走线上——&lt;strong&gt;只能设高阻态，永久无法作其他用途&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0145-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 49 : Multiplexed address-data bus before partitioning (compare with Figure 50 )&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0146-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 50: Multiplexed address-data bus from Figure 49 after partitioning&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;两条路&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;专用互联&lt;/strong&gt;（匹配 SoC 顶层互联 → 分区容易 → 后续项目复用困难）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;通用互联&lt;/strong&gt;（设计无关 → 复用性好 → 分区时需要更多规划）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;建议&lt;/strong&gt;：用线缆或开关矩阵而非固定 PCB 走线来增加互联灵活性。&lt;/p&gt;
+&lt;h4 id=&#34;514-灵活性&#34;&gt;5.1.4 灵活性
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;一个刺眼的行业事实&lt;/strong&gt;：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;在作者的经验中，大多数自建平台从未被复用于后续项目。不仅因为复用本就不是初衷，而且即使有复用意图，板子本身的资源或互联也无法支持。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;五大灵活性维度&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;FPGA 资源总量&lt;/strong&gt; — 能否扩展&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;外设选择&lt;/strong&gt; — 是否模块化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;互联&lt;/strong&gt; — 是否固定&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;板级时钟资源&lt;/strong&gt; — 最常导致不可复用的元凶&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;电压域&lt;/strong&gt; — 新项目的 IO 电压需求可能完全不同&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;52-可测试性&#34;&gt;5.2 可测试性
+&lt;/h3&gt;&lt;p&gt;板级可测试性 ≠ FPGA 内部设计插桩（第11章）。&lt;/p&gt;
+&lt;p&gt;自建平台必须能测试：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;所有互联的连续性（尤其是多连接器的模块化系统）&lt;/li&gt;
+&lt;li&gt;FPGA 引脚烧毁的诊断&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;可测试性投入在平台故障时多次回报&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;53-板级时钟资源&#34;&gt;5.3 板级时钟资源
+&lt;/h3&gt;&lt;h4 id=&#34;核心概念super-fpga&#34;&gt;核心概念：&amp;ldquo;Super-FPGA&amp;rdquo;
+&lt;/h4&gt;&lt;blockquote&gt;
+&lt;p&gt;把整个板级系统看作一个&amp;quot;超级 FPGA&amp;quot;——各颗 FPGA 器件 + 连接它们的顶层资源。SoC 的时钟网络层级需要用板级资源来承载顶层。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;&amp;ldquo;Super-FPGA&amp;rdquo; 需要复制的板级资源&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;板级 PLL / 时钟复用器 / 时钟分频器 / 倍频器 / 时钟同步电路&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;简化策略&lt;/strong&gt;：用工具自动将 SoC 的门控时钟转为等效的全局 FPGA 时钟 + 时钟使能（第7章详述），减少时钟域总数。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;时钟灵活性不足是第一大复用杀手&lt;/strong&gt;：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;在作者的经验中，顶层时钟资源的限制是自建板在后续项目中不能被复用的最常见原因。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;531-板内外时钟延迟匹配haps-的量化模型&#34;&gt;5.3.1 板内外时钟延迟匹配——HAPS 的量化模型
+&lt;/h4&gt;&lt;p&gt;这是本章最精彩的技术细节。&lt;/p&gt;
+&lt;p&gt;定义两个基本延迟量子：&lt;/p&gt;
+$$
+X = \text{stub delay（FPGA 引脚到附近连接器的延迟）} = 0.44\text{ns}
+$$$$
+Y = \text{标准同轴电缆 delay（特定长度 + 高质量屏蔽 + 同轴连接器）} = 1.45\text{ns}
+$$&lt;p&gt;&lt;strong&gt;关键设计原则&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;所有同轴电缆统一类型和长度 → Y 值恒定&lt;/li&gt;
+&lt;li&gt;PCB 走线按规定长度做延迟匹配（可能需要蛇形走线，增加 PCB 层数）&lt;/li&gt;
+&lt;li&gt;同一板族中 X 和 Y 值保持不变 → 允许新旧板混合使用&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;时钟源到任意 FPGA 时钟引脚的总延迟&lt;/strong&gt;：= 2X + Y = 2.33ns&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;注意&lt;/strong&gt;：收到的各 FPGA 时钟虽然互相同步，但与主时钟输入 F 不同步——需要 PLL 来补偿。&lt;/p&gt;
+&lt;h4 id=&#34;532-pll锁相环&#34;&gt;5.3.2 PLL（锁相环）
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;板级 PLL 的作用&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;消除跨板时钟网络中的插入延迟&lt;/li&gt;
+&lt;li&gt;减少系统不同部分之间的时钟偏斜&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;关键要求&lt;/strong&gt;：PLL 输出到各 FPGA 的 stub 长度和电缆长度严格匹配。&lt;/p&gt;
+&lt;h4 id=&#34;533-系统时钟生成清单&#34;&gt;5.3.3 系统时钟生成清单
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;五大考量&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;时钟来源&lt;/strong&gt;：本地板上生成 / 外部输入 / FPGA 内部生成&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;时钟频率&lt;/strong&gt;：估计 FPGA 时钟频率范围，支持精细粒度任意频率生成&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;容忍偏斜&lt;/strong&gt;：FPGA 间同步——所有 FPGA 在可接受偏斜范围内收到时钟&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;板间同步&lt;/strong&gt;：大型多板系统——所有时钟到达所有 FPGA 的偏斜可接受&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;高速时钟&lt;/strong&gt;：引脚复用需要的高速时钟两端必须同步（CPM 工具支持）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;自建板应包含的时钟要素&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;板级时钟合成器&lt;/strong&gt;：PLL + 晶体振荡器（可插拔）→ 多时钟系统需多路独立的合成器&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;输入时钟源选择器&lt;/strong&gt;：本地/外部/FPGA 产生的多路选择 MUX → 手动开关或软件控制&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;时钟分配网络&lt;/strong&gt;：板上和板间延迟均衡化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;外部时钟源&lt;/strong&gt;：板间传播延迟需通过相位偏移补偿 → 多级 PLL 级联可能导致不稳定和失锁&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;高速多路复用时钟&lt;/strong&gt;：信号复用到单引脚需要的高速同步时钟&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;时钟缩放&lt;/strong&gt;：分频器（FPGA 内部）+ PLL（板级）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;54-时钟控制与配置&#34;&gt;5.4 时钟控制与配置
+&lt;/h3&gt;&lt;p&gt;复杂的多 FPGA 板可能需要大量开关来覆盖所有时钟选项。替代方案：&lt;strong&gt;可编程开关&lt;/strong&gt;由板载微控制器或外部主机控制（第6章详述商业平台的软件控制方案）。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;55-板级电压域&#34;&gt;5.5 板级电压域
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;SoC 的内部电压岛&lt;/strong&gt;（通过 UPF 文件描述，由 EDA 工具推断）一般不出现在 RTL 中，不会被映射到 FPGA 原型中。如果 RTL 中包含了电压控制逻辑和 retention 寄存器，需要将其&lt;strong&gt;固定到非活跃状态&lt;/strong&gt;（第7章）。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;外部电压需求必须正确处理&lt;/strong&gt;：FPGA IO 引脚按 Bank 分组，共享不同电压阈值，由不同电压环供电。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;电压不灵活的代价&lt;/strong&gt;：电压而非性能或互联成为分区决策的支配因素 → 其他优先级被妥协。新的电压需求是已有板子不能复用的另一大原因。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;HAPS-64 的电压配置工具&lt;/strong&gt;（图53）：将 FPGA 引脚和子卡连接器分组到不同区域，每个区域通过下拉菜单设置电压（包括&amp;quot;OFF&amp;quot;选项），配置工具控制板上的可编程开关设置参考电压和轨电压。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0154-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 53: On-board IO voltage configuration&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;56-电源供给与分配&#34;&gt;5.6 电源供给与分配
+&lt;/h3&gt;&lt;h4 id=&#34;核心原则每个板独立供电&#34;&gt;核心原则：&amp;ldquo;每个板独立供电&amp;rdquo;
+&lt;/h4&gt;&lt;p&gt;如图54（反例）：子板从主板取电→子板合并电流超过主板供电能力→烧毁主板供电电路和走线。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0155-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 54: Example of non-recommended power distribution&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;如图55（正例）：一个公共外部电源为所有板供电→各板独立取电。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0155-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 55: Example of centralized power distribution&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;关键警告&lt;/strong&gt;：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;即使是安装了自己 FPGA 的主要子系统板，从主板供电也是坏实践。FPGA 上电和配置时期（甚至 live reset 期间）的瞬时大电流，可能超出板间连接器的承载能力。&amp;lsquo;瞬间低压掉电&amp;rsquo;（Momentary Brown-Out）是原型项目后期最难诊断的问题之一。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;保护措施&lt;/strong&gt;：每个电源出口处加可复位保险丝（Resettable Fuse），连接器引脚根据预期电流适当选择规格。&lt;/p&gt;
+&lt;h4 id=&#34;561-板级电源分配&#34;&gt;5.6.1 板级电源分配
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;三种电压需求&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;电压类型&lt;/th&gt;
+          &lt;th&gt;用途&lt;/th&gt;
+          &lt;th&gt;特点&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Core Voltage&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;FPGA 内部逻辑&lt;/td&gt;
+          &lt;td&gt;最低，制造商决定&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;IO Voltage&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;FPGA 引脚&lt;/td&gt;
+          &lt;td&gt;按 Bank 分组，可变；多 IO 电压 = 多&amp;quot;功率岛&amp;quot;（Power Island）→ 复杂化 PCB 布局&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;IO Current&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;外部设备驱动&lt;/td&gt;
+          &lt;td&gt;超出 24mA 需加外置缓冲器（放在子卡上）&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;功耗估算&lt;/strong&gt;：取决于切换速率和 FF 使用量 → 统计性估算 → 保守为好。供应商提供功耗估算工具。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;电源监控&lt;/strong&gt;：由于核心和部分 IO 电压显著低于过去器件，变化容限比例缩小。强烈推荐电源监控电路。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;附加参考电压&lt;/strong&gt;：为外部 ADC/DAC 等模拟电路预留可编程参考电压供电。&lt;/p&gt;
+&lt;h4 id=&#34;562-电源分配的物理设计&#34;&gt;5.6.2 电源分配的物理设计
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;FPGA 的电流尖峰问题&lt;/strong&gt;：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;高速时钟 + 大量 FF 同步翻转 → 时钟边沿产生巨大电流尖峰 → 如果供电不足 → 电源电平下降或电源线上噪声 → 不可靠运行。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;设计规范&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;低阻抗电源平面 + 连续充足铜箔&lt;/li&gt;
+&lt;li&gt;低阻抗地回路同样重要&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;大容量电容（100μF）&lt;/strong&gt;：平滑慢速电流浪涌&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;高频小电容（0.1μF）&lt;/strong&gt;：平滑快速电流尖峰&lt;/li&gt;
+&lt;li&gt;两种电容都尽可能靠近 FPGA 电源引脚&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;地弹（Ground Bounce）机制与对策&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;每 N 个 IO 引脚共享一个地引脚（N 取决于 FPGA 型号）&lt;/li&gt;
+&lt;li&gt;大量 IO 同时同向翻转 → 大回流电流 → 地参考瞬时抬升 → 输入引脚误判逻辑&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;对策&lt;/strong&gt;：给 IO 间的地引脚提供低阻抗接地 + &lt;strong&gt;默认使用最小驱动电流而非全 24mA&lt;/strong&gt;，在保证信号质量的同时减少回流&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;57-系统可靠性管理&#34;&gt;5.7 系统可靠性管理
+&lt;/h3&gt;&lt;h4 id=&#34;571-电源监控&#34;&gt;5.7.1 电源监控
+&lt;/h4&gt;&lt;p&gt;每路供电电路持续监测电压 → 超出范围时以下动作可选其一或多选：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;可见指示（LED），大系统需链接到主机监控程序（尤其远程或封闭安装时）&lt;/li&gt;
+&lt;li&gt;触发全局复位减少工作电流&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;取消所有 FPGA 配置&lt;/strong&gt;→ 最小电流消耗 + 远程用户可见的故障信号&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&#34;572-温度监控与管理&#34;&gt;5.7.2 温度监控与管理
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;热问题三要素&lt;/strong&gt;：大 FPGA + 高利用率 + 高时钟 + 封闭机箱 = &lt;strong&gt;过热损坏风险&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;FPGA 系统监控器&lt;/strong&gt;（免费且强大的内置保护机制）：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;监测芯片平均结温（±4°C 精度）&lt;/li&gt;
+&lt;li&gt;JTAG 端口可读取（无需实例化）或通过设计内部实例化模块访问&lt;/li&gt;
+&lt;li&gt;可设温度报警 → 超出阈值时的自动操作&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;过热响应链&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;可见报警（LED）&lt;/li&gt;
+&lt;li&gt;开启风扇&lt;/li&gt;
+&lt;li&gt;系统进入复位状态&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;取消所有 FPGA 配置&lt;/strong&gt;（最小化功耗）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;CONFPRO 工具&lt;/strong&gt;（图57）：运行在 HAPS 板 MicroBlaze CPU 上的监控程序 → 读取 6 颗 Virtex-6 的系统监控器 → 控制各 FPGA 风扇。同一微控制器还控制 FPGA 时钟、复位和配置。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0161-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 57: monitor in CONFPRO&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;板级温度传感器&lt;/strong&gt;（在靠近 FPGA 等热区放置）→ 可编程报警输出 → 与片上传感器组合 → 建立完整监控系统。&lt;/p&gt;
+&lt;h4 id=&#34;573-fpga-散热&#34;&gt;5.7.3 FPGA 散热
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;散热片&lt;/strong&gt;：每颗 FPGA 标配，自粘式 → 简单易装&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;风扇&lt;/strong&gt;：散热片不够时加装（+ 散热片组合更好）→ 板上预留风扇电源和连接器&lt;/li&gt;
+&lt;li&gt;风扇不需常开 → 用 FPGA 温度监控器的闭环控制&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;长期无散热片/无风扇运行的 FPGA 板会受到温度应力，可靠性降低。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;58-fpga-配置&#34;&gt;5.8 FPGA 配置
+&lt;/h3&gt;&lt;p&gt;FPGA 是 SRAM 易失性器件 → &lt;strong&gt;每次上电必须重新配置&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;配置模式&lt;/strong&gt;：并行/串行、主/从、JTAG。&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;模式&lt;/th&gt;
+          &lt;th&gt;特点&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Master&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;FPGA 控制配置过程（上电或触发引脚触发）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Slave&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;外部设备控制配置接口&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Serial&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;比并行慢但占用信号少&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;JTAG&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;覆盖所有其他模式——最常见的调试下载方式&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;System ACE + CompactFLASH 方案&lt;/strong&gt;（推荐给非专家用户，图58）：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0163-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 58: CompactFLASH™ based configuration via System ACE™ technology&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;CF 卡（存多个配置 + 文档）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;System ACE 控制器（运行在独立小 FPGA 中）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    ↓ 模拟 JTAG 接口
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;FPGA1 → FPGA2 → ... → FPGAn（菊花链配置）
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;优势&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;CF 卡容量足够存最大 FPGA 的配置数据（几十 Mbits）&lt;/li&gt;
+&lt;li&gt;多配置共存同卡&lt;/li&gt;
+&lt;li&gt;终端用户通过开关或远程选择加载哪个配置&lt;/li&gt;
+&lt;li&gt;可拆卸 CF → 便于将配置运送到远程场地&lt;/li&gt;
+&lt;li&gt;&amp;ldquo;深受那些需要复制多份原型平台分发给远程终端用户的团队欢迎&amp;rdquo;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;59-信号完整性&#34;&gt;5.9 信号完整性
+&lt;/h3&gt;&lt;p&gt;时钟偏斜的两大来源：&lt;strong&gt;源信号抖动&lt;/strong&gt; + &lt;strong&gt;噪声电源和信号环境&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;最小化负面影响的要点&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;所有时钟信号阻抗一致性 — &lt;strong&gt;关键&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;合理布线减少串扰&lt;/li&gt;
+&lt;li&gt;良好稳压电源 + 低阻抗路径&lt;/li&gt;
+&lt;li&gt;并行数据和时钟路径的走线长度和延迟匹配&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;510-全局启动与复位&#34;&gt;5.10 全局启动与复位
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;多 FPGA 原型的核心要求&lt;/strong&gt;：所有 FPGA 必须在同一时钟边沿退出复位。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;PLL 锁定等待&lt;/strong&gt;：系统启动必须延迟到所有时序电路（板级 PLL + FPGA 内部 PLL）稳定锁定后。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;全局复位电路&lt;/strong&gt;：在全部 PLL 锁定之前保持整个系统在复位状态。板级设计时应确保外部 PLL 的锁定和复位信号能被至少一个 FPGA 的引脚访问。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;511-鲁棒性robustness&#34;&gt;5.11 鲁棒性（Robustness）
+&lt;/h3&gt;&lt;p&gt;为原型走出实验室的物理保障（第12章深入讨论）：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;加强支撑结构（支柱/间隔柱/螺丝固定子卡）&lt;/li&gt;
+&lt;li&gt;坚固外壳或机架安装&lt;/li&gt;
+&lt;li&gt;外壳需保留测试点、扩展卡插槽、外设端口&lt;/li&gt;
+&lt;li&gt;外壳需满足现场使用的电源和散热需求&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;512-建立内部标准化平台&#34;&gt;5.12 建立内部标准化平台
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;Tile-Based 方法&lt;/strong&gt;：大公司多站点间的标准化实践——统一外形、统一连接器、统一引脚定义。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;标准化的代价&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;需要大量协调和管理&lt;/li&gt;
+&lt;li&gt;新板开发面临&amp;quot;留在标准内 vs 为满足当前需要而打破标准&amp;quot;的抉择&lt;/li&gt;
+&lt;li&gt;技术换代时（如总线加宽超出标准连接器容量），遗留体系成为障碍&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;连接器是关键&lt;/strong&gt;：不仅信号数要够，电气特性要好，质量要高，物理上要坚固——&amp;ldquo;选连接器看价格是长期的假节约&amp;rdquo;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;标准化平台四大基础设施&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;维度&lt;/th&gt;
+          &lt;th&gt;内容&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;开发&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;协调多站点原型专家、维护可用板卡目录、规范/文档/路线图&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;分配&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;快速从现有板卡组装平台、制造团队需要看到未来项目预测&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;文档&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;标准本身的规范文档、合规认证、每块板的完整使用文档、培训材料/参考设计&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;支持&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;多站点多项目并行支持、现场人员、集中化实验室外包原型服务&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;一个有趣的现象&lt;/strong&gt;：有些集中化的原型设计服务团队不自己造板，而是从商业供应商处组装平台。——引出第6章：Ready-Made 平台。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;关键图示解读&#34;&gt;关键图示解读
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;图47：Pins-In / Pins-Out 分区&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;最值得采纳的设计思想之一：在 SoC 边界做物理划分&lt;/li&gt;
+&lt;li&gt;芯片到达后直接替换 → 数小时内部署已验证的软件 → ROI 暴增&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;图48：固定外设浪费 FPGA IO 的经典陷阱&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;不用的外设仍物理连接到 FPGA 引脚 → 永久不可用&lt;/li&gt;
+&lt;li&gt;所以&amp;quot;把外设放子卡&amp;quot;是最佳实践&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;图51：HAPS 延迟匹配模型&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;X=0.44ns, Y=1.45ns——这是工程精确到皮秒级别的硬件设计&lt;/li&gt;
+&lt;li&gt;理解了这个模型，就理解了为什么 HAPS 可以实现大规模多板系统的时钟一致性&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0149-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 51: Delay matching on and off board&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;图54 vs 图55：电源分布正反例&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;54（反例）：子板从主板取电 → 烧主板&lt;/li&gt;
+&lt;li&gt;55（正例）：公共电源线 → 各板独立&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;图58：System ACE + CompactFLASH 配置架构&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;最优雅的非专家方案——甚至可以在 CF 卡里存使用文档&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;个人总结&#34;&gt;个人总结
+&lt;/h2&gt;&lt;p&gt;这一章读下来最大的感受是：&lt;strong&gt;FPGA 原型验证不仅需要 SoC/RTL 知识，还需要一个真正硬件工程师的全部技能&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;本章暴露了一个在许多 EDA/软件背景读者可能没有预料到的现实：原型平台的硬件设计复杂性不亚于原型验证本身的工程工作量。从时钟延迟匹配到纳秒级，到地弹机制的理解和抑制，到每颗 FPGA 旁边放两个特定值的电容器——这些都是通过痛苦经验积累的工程准则。&lt;/p&gt;
+&lt;p&gt;关于平台复用性的行业坦白也值得深思。作者直言&amp;quot;大多数自建平台从未被复用&amp;quot;——这对管理者而言是一个关键的采购决策信号。如果你只做一次原型，自建可能是对的。但如果有第二个项目甚至更多，第6章的商业平台就值得认真考虑。&lt;/p&gt;
+&lt;p&gt;最后，&lt;strong&gt;&amp;ldquo;Super-FPGA&amp;rdquo;&lt;/strong&gt; 的思维模型很有启发。将整个板级系统视为一颗巨大的 FPGA，迫使你重新审视什么资源必须在芯片外（时钟树顶层、电源、互联），什么可以在芯片内（逻辑、本地存储器、DSP）。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;实践思考&#34;&gt;实践思考
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Pins-In/Pins-Out 分区可能是全书 ROI 最高的单一设计决策&lt;/strong&gt;。芯片回片后数小时跑起已验证的软件——这个速度取决于一个在平台设计阶段做出的架构选择&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;时钟灵活性是自建平台复用的第一杀手&lt;/strong&gt;——如果你的板子只打算用一次，没问题；如果管理层指望多次使用，请投入不成比例的精力在可配置时钟资源上&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;地弹和电源噪声是最难诊断的原型问题&lt;/strong&gt;——在原理图阶段花额外一周做电源完整性规划，比在 bring-up 阶段花一个月追踪&amp;quot;偶发性不可靠&amp;quot;值得&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;散热不可事后补救&lt;/strong&gt;——散热片+风扇+温度监控应该在管脚分配和电压域规划同时进行，不是&amp;quot;等发现烫了再加&amp;quot;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;System ACE + CF 卡的配置方案&lt;/strong&gt;对团队协作特别有价值：硬件工程师做好 bitstream → 拷贝到 CF 卡 → 软件工程师插卡即用——不需要他们了解 JTAG 或下载线缆&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0150-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 52: PLL used to re-align FPGA clocks&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0160-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 56: FPGA System Monitor&#34;
+	
+	
+&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

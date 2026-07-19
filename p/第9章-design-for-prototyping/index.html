@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="面向原型验证的设计方法（DFP）：从组织流程到代码风格的全套&rsquo;宣言&rsquo;——如何通过早期规划使 SoC RTL 天然兼容 FPGA，从而废除原型第三定律。涵盖 7 条程序性指南和 16 条技术性建议，本质上是让原型验证成本前移到设计阶段的一次方法论投资。">
+<title>第9章: Design for Prototyping</title>
+
+<link rel='canonical' href='http://localhost:1313/p/%E7%AC%AC9%E7%AB%A0-design-for-prototyping/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="第9章: Design for Prototyping">
+<meta property='og:description' content="面向原型验证的设计方法（DFP）：从组织流程到代码风格的全套&rsquo;宣言&rsquo;——如何通过早期规划使 SoC RTL 天然兼容 FPGA，从而废除原型第三定律。涵盖 7 条程序性指南和 16 条技术性建议，本质上是让原型验证成本前移到设计阶段的一次方法论投资。">
+<meta property='og:url' content='http://localhost:1313/p/%E7%AC%AC9%E7%AB%A0-design-for-prototyping/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='FPGA' /><meta property='article:tag' content='Prototyping' /><meta property='article:tag' content='DFP' /><meta property='article:tag' content='RTL Coding Standards' /><meta property='article:tag' content='Modular Design' /><meta property='article:tag' content='Methodology' /><meta property='article:tag' content='Verification' /><meta property='article:tag' content='Clock Management' /><meta property='article:tag' content='Organization Change' /><meta property='article:published_time' content='2026-06-05T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-06-05T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="第9章: Design for Prototyping">
+<meta name="twitter:description" content="面向原型验证的设计方法（DFP）：从组织流程到代码风格的全套&rsquo;宣言&rsquo;——如何通过早期规划使 SoC RTL 天然兼容 FPGA，从而废除原型第三定律。涵盖 7 条程序性指南和 16 条技术性建议，本质上是让原型验证成本前移到设计阶段的一次方法论投资。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="http://localhost:1313/" selected>English</option>
+                                
+                                    <option value="http://localhost:1313/zh-cn/" >中文</option>
+                                
+                                    <option value="http://localhost:1313/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#章节概览">章节概览</a></li>
+    <li><a href="#核心知识点">核心知识点</a></li>
+    <li><a href="#详细笔记">详细笔记</a>
+      <ol>
+        <li><a href="#91-什么是-design-for-prototyping">9.1 什么是 Design-for-Prototyping？</a>
+          <ol>
+            <li><a href="#911-对-fpga-好的通常对-soc-也好">9.1.1 对 FPGA 好的，通常对 SoC 也好</a></li>
+          </ol>
+        </li>
+        <li><a href="#92-程序性指南table-22">9.2 程序性指南（Table 22）</a>
+          <ol>
+            <li><a href="#921-rtl-团队与原型团队整合">9.2.1 RTL 团队与原型团队整合</a></li>
+            <li><a href="#922-定义原型团队交付物清单">9.2.2 定义原型团队交付物清单</a></li>
+            <li><a href="#923-原型团队服务软件团队">9.2.3 原型团队服务软件团队</a></li>
+          </ol>
+        </li>
+        <li><a href="#93-将原型整合到验证计划中">9.3 将原型整合到验证计划中</a>
+          <ol>
+            <li><a href="#9311-优化原型开发排程">9.3.1.1 优化原型开发排程</a></li>
+            <li><a href="#9312-保留仿真脚本">9.3.1.2 保留仿真脚本</a></li>
+            <li><a href="#932-文档化--版本控制">9.3.2 文档化 + 版本控制</a></li>
+            <li><a href="#933-公司级硬件标准">9.3.3 公司级硬件标准</a></li>
+            <li><a href="#934-将-dfp-纳入-rtl-编码标准">9.3.4 将 DFP 纳入 RTL 编码标准</a></li>
+          </ol>
+        </li>
+        <li><a href="#94-设计指南table-24--全书-rtl-编码规范总汇">9.4 设计指南（Table 24 — 全书 RTL 编码规范总汇）</a>
+          <ol>
+            <li><a href="#上半部分">上半部分：</a></li>
+            <li><a href="#下半部分">下半部分：</a></li>
+            <li><a href="#各条的具体展开">各条的具体展开</a></li>
+            <li><a href="#943-避免锁存器">9.4.3 避免锁存器</a></li>
+            <li><a href="#944-避免长组合路径">9.4.4 避免长组合路径</a></li>
+            <li><a href="#945-避免组合环路">9.4.5 避免组合环路</a></li>
+          </ol>
+        </li>
+        <li><a href="#95-目标特定性隔离指南">9.5 目标特定性隔离指南</a>
+          <ol>
+            <li><a href="#951-写纯-rtl-代码">9.5.1 写纯 RTL 代码</a></li>
+            <li><a href="#952-使源码变更的影响尽可能低">9.5.2 使源码变更的影响尽可能低</a></li>
+            <li><a href="#953-维护存储器兼容性">9.5.3 维护存储器兼容性</a></li>
+            <li><a href="#9551-phy-兼容性">9.5.5.1 PHY 兼容性</a></li>
+          </ol>
+        </li>
+        <li><a href="#96-时钟和架构指南">9.6 时钟和架构指南</a>
+          <ol>
+            <li><a href="#961-保持时钟逻辑在独立的顶层块中">9.6.1 保持时钟逻辑在独立的顶层块中</a></li>
+            <li><a href="#962-简化时钟网络">9.6.2 简化时钟网络</a></li>
+            <li><a href="#963-同步设计">9.6.3 同步设计</a></li>
+            <li><a href="#964-同步复位">9.6.4 同步复位</a></li>
+            <li><a href="#965-同步块边界">9.6.5 同步块边界</a></li>
+            <li><a href="#966-考虑设计在慢速时钟下的运行方式">9.6.6 考虑设计在慢速时钟下的运行方式</a></li>
+          </ol>
+        </li>
+        <li><a href="#97-总结dfp-宣言的核心主张">9.7 总结：DFP 宣言的核心主张</a></li>
+      </ol>
+    </li>
+    <li><a href="#关键图表解读">关键图表解读</a></li>
+    <li><a href="#个人总结">个人总结</a></li>
+    <li><a href="#实践思考">实践思考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/fpga%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" >
+                FPGA学习笔记
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E7%AC%AC9%E7%AB%A0-design-for-prototyping/">第9章: Design for Prototyping</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jun 05, 2026</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    4 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="章节概览">章节概览
+</h2><p>前八章都在讲&quot;如何应对&quot;原型三定律带来的问题。第9章换个角度：<strong>如何从根本上避免这些问题</strong>。</p>
+<p>Design-for-Prototyping (DFP) 的核心理念是：<strong>与其事后花费大量精力将 SoC 设计改造为 FPGA 兼容，不如在设计阶段就遵守一套使 RTL 双目标兼容的规则</strong>。本章以&quot;宣言&quot;形式汇总了全书散布的各种建议，分为两大维度——程序性指南（组织和流程，Table 22）和技术性指南（代码和架构，Table 24）。</p>
+<p>作者的核心论点是：<strong>对 FPGA 好的设计实践，几乎总是对 SoC 也好</strong>——干净架构、模块化、同步设计、FF 在模块边界——这些不是额外的负担，而是工程纪律的回归。</p>
+<hr>
+<h2 id="核心知识点">核心知识点
+</h2><ul>
+<li><strong>DFP 的定义</strong>：在设计初期就考虑原型验证需求，建立使原型开发与所有其他项目目标协同的程序性和技术性方法</li>
+<li><strong>7 条程序性指南</strong>（Table 22）：RTL 与原型团队整合、原型团队服务软件团队、原型进度纳入验证计划、保持可原型化仿真环境、文档化+统一版本控制、公司级硬件标准、DFP 纳入 RTL 编码规范</li>
+<li><strong>16 条技术性建议</strong>（Table 24）：避免锁存器、避免组合环路、用 `define 预判 RTL 修改、低影响源码修改（Wrapper）、纯 RTL 编码、隔离 RTL 修改、复用文件列表/脚本、存储器兼容、PHY 兼容、同步设计、避免长组合路径、隔离时钟源、同步复位、同步块边界、文档化设计怪癖、保持仿真环境</li>
+<li><strong>FPGA 配置天然初始化所有元素</strong>：BlockRAM/Distributed RAM/SRL/FF 即使未指定复位也处于已定义状态——而 SoC 必须显式复位。这个差异对复位策略设计有重要影响</li>
+<li><strong>纯 RTL 原则</strong>：RTL 不应包含任何低层技术库原语——时钟门控、扫描测试、低功耗缓解应由 SoC 工具流推断而非直接写入 RTL</li>
+<li><strong>Wrapper 是目标隔离的核心机制</strong>：每一个技术相关元素（RAM、IO、时钟生成器）都应被 Wrapper 封装 → 替代实现只在 Wrapper 内部变化</li>
+<li><strong>&ldquo;慢速运行&quot;需要架构层面的预判</strong>：多 FPGA 原型速度远低于 SoC 目标速度 → 需在架构设计阶段就规划速率适配器、跨时钟域 FIFO、核心与外设异步运行的方案</li>
+<li><strong>原型不是一次性&quot;扔掉&quot;的中间产物</strong>——它应该被视为可复用的工程资产，甚至可成为衍生产品的参考设计</li>
+</ul>
+<hr>
+<h2 id="详细笔记">详细笔记
+</h2><h3 id="91-什么是-design-for-prototyping">9.1 什么是 Design-for-Prototyping？
+</h3><blockquote>
+<p>&ldquo;Design-for-Prototyping 是一门在设计流程早期就考虑原型验证需求的艺术——建立程序性和设计特定技术来使原型开发与所有其他项目目标协同进行。&rdquo;</p>
+</blockquote>
+<p><strong>核心观点</strong>：采用 FPGA 原型验证不应是&quot;栓接式&quot;的并行步骤，而是一个<strong>改变先前实践的工程决策</strong>。它应该影响所有团队——SoC 设计师、验证工程师、软件开发团队、FPGA 平台专家。</p>
+<blockquote>
+<p>把 DFP 看作为了实现 FPGA 原型收益而做的<strong>前期投资</strong>。</p>
+</blockquote>
+<h4 id="911-对-fpga-好的通常对-soc-也好">9.1.1 对 FPGA 好的，通常对 SoC 也好
+</h4><p>FPGA 设计天然需要干净的架构和通用逻辑才能有效合成和映射。SoC 设计流程允许更自由随意的风格——这种自由度有时会被不当使用，给后期重构带来困难。</p>
+<p><strong>双目标需求驱动纪律</strong>：需要同一份 RTL 同时支持 FPGA 和 SoC → 驱使设计师遵循更干净的设计风格 → 这个副产品使 SoC 的长期维护也受益。</p>
+<p>关键成功因素：</p>
+<ul>
+<li>通过正式设计评审和非正式组织行为强化编程风格</li>
+<li>管理层和资深成员的全力支持</li>
+<li>&ldquo;栓接式&quot;原型（没有真正集成到 SoC 设计流）→ 投资回报大打折扣</li>
+</ul>
+<hr>
+<h3 id="92-程序性指南table-22">9.2 程序性指南（Table 22）
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>建议</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>RTL 团队与原型团队整合</strong></td>
+          <td>原型团队作为 RTL 设计团队的一部分，使用相同工具、相同编码标准、相同验证套件</td>
+      </tr>
+      <tr>
+          <td><strong>原型团队服务软件团队</strong></td>
+          <td>软件工程师是工作原型的最常见终端用户——两者必须有良好工作关系</td>
+      </tr>
+      <tr>
+          <td><strong>原型进度纳入验证计划</strong></td>
+          <td>在预先约定的里程碑分支 RTL，避免频繁增量 RTL 交付给原型设计师</td>
+      </tr>
+      <tr>
+          <td><strong>保持可原型化仿真环境</strong></td>
+          <td>项目关键节点将原型行为与原始 SoC 仿真比较</td>
+      </tr>
+      <tr>
+          <td><strong>清晰文档 + 统一版本控制</strong></td>
+          <td>在同一个源码控制系统中追踪软件和 RTL 变更</td>
+      </tr>
+      <tr>
+          <td><strong>公司级硬件标准</strong></td>
+          <td>通用硬件方法避免浪费，鼓励复用</td>
+      </tr>
+      <tr>
+          <td><strong>DFP 纳入 RTL 编码标准</strong></td>
+          <td>大多数使原型容易的 RTL 风格变更对 SoC 设计也是好的</td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="921-rtl-团队与原型团队整合">9.2.1 RTL 团队与原型团队整合
+</h4><p><strong>核心理念</strong>：一个设计，两个目标技术。</p>
+<blockquote>
+<p>作者知道的某些设计团队——<strong>每个 SoC 设计师负责将自己模块重新目标化到 FPGA</strong>。这是确保那些模块打破第三定律的最可靠方式。</p>
+</blockquote>
+<p><strong>管理必须营造共享责任感</strong>——避免&quot;在里程碑把设计扔过墙&quot;的行为。</p>
+<h5 id="9211-soc-rtl-团队的-fpga-教育">9.2.1.1 SoC RTL 团队的 FPGA 教育
+</h5><blockquote>
+<p>&ldquo;如果管理层认为设计团队无法承担初始原型实现，管理层应该努力<strong>交叉培训设计工程师理解 SoC 和 FPGA 两种技术</strong>。&rdquo;</p>
+</blockquote>
+<p>当必须使用技术特定编码时 → <strong>提前计划，而非事后重做</strong>。</p>
+<h4 id="922-定义原型团队交付物清单">9.2.2 定义原型团队交付物清单
+</h4><p><strong>Table 23</strong>（图）：一份来自某大型半导体原型实验室的真实交接检查清单——包含 RTL 文件清单、SDC 约束、库文件、存储器和 IP 配置与版本、验证环境、软件工具链。</p>
+<h5 id="9221-复用文件列表和脚本">9.2.2.1 复用文件列表和脚本
+</h5><blockquote>
+<p>&ldquo;所有脚本和文件列表应作为项目源码控制的一部分。捕获的不仅仅是 RTL 代码——这样其他人将来可以重新创建构建过程。&rdquo;</p>
+</blockquote>
+<p><strong>最佳方案</strong>：创建 SoC 和 FPGA 通用的项目 Makefile，用<strong>宏驱动分支</strong>处理不同目标。</p>
+<p>关键点：一份 RTL 描述，两种目标技术实现。<strong>必须有意识地将技术特定细节与功能定义分离</strong>。</p>
+<h4 id="923-原型团队服务软件团队">9.2.3 原型团队服务软件团队
+</h4><p><strong>由于原型速度低于最终 SoC，某些软件需要重写才能在 FPGA 原型上正确运行</strong>。</p>
+<p>设计师需要与软件开发者协商建立：</p>
+<ul>
+<li>软件设计上的额外需求（速率适配、更深的缓冲）</li>
+<li>原型设计上的额外需求（额外的探针点、复位、软件调试辅助）</li>
+</ul>
+<p>原型芯片到达后数小时内软件就跑起来——这个结果取决于<strong>早期两组人之间的互动质量</strong>。</p>
+<hr>
+<h3 id="93-将原型整合到验证计划中">9.3 将原型整合到验证计划中
+</h3><h4 id="9311-优化原型开发排程">9.3.1.1 优化原型开发排程
+</h4><p>重申第4章的关键点：</p>
+<blockquote>
+<p>&ldquo;原型不是 RTL 调试工具——那是软件仿真器的角色。应等待 RTL 达到预约定成熟度后才开始原型开发。&rdquo;</p>
+</blockquote>
+<p><strong>同步点</strong>：RTL 在仿真器中发出&quot;hello world&rdquo; → 通常与&quot;试实现（trial implementation）&ldquo;里程碑重合 → <strong>以此 RTL 里程碑为基础开发原型</strong> → 最小化 RTL 调试变更对原型工作的干扰。</p>
+<h4 id="9312-保留仿真脚本">9.3.1.2 保留仿真脚本
+</h4><ul>
+<li>SoC 设计和 FPGA 原型朝不同方向演化 → 保留工作仿真模型</li>
+<li>Bring-up 和调试时用&quot;金质测试平台&quot;检查异常行为</li>
+<li>验证团队可能已经发现了原型中看到的同一故障（甚至已在 RTL 中修复）</li>
+<li><strong>建议定期比较原型与 SoC 仿真结果</strong></li>
+</ul>
+<h4 id="932-文档化--版本控制">9.3.2 文档化 + 版本控制
+</h4><blockquote>
+<p>&ldquo;我们应该避免原型团队看起来像&rsquo;那些拿着板子的黑客&rsquo;——原型团队的所有改动应记录在与项目其他部分相同的版本控制系统中。&rdquo;</p>
+</blockquote>
+<h4 id="933-公司级硬件标准">9.3.3 公司级硬件标准
+</h4><ul>
+<li>板子从库存中可获得或标准供应商快速提供 → 板子损坏时可快速更换</li>
+<li>跨实验室和站点的兼容板卡 → 围绕选定平台积累公司级知识库和专业技能</li>
+<li>子板可在项目间复用</li>
+</ul>
+<blockquote>
+<p><strong>最坏情况</strong>：每个团队为每个原型项目获得或制造一块新的不兼容的板子——高风险 + 高开发成本。</p>
+</blockquote>
+<h4 id="934-将-dfp-纳入-rtl-编码标准">9.3.4 将 DFP 纳入 RTL 编码标准
+</h4><ul>
+<li>多数 DFP 规则本身就是好的编码实践——现在有了&quot;双目标映射&quot;这个硬性需求，多了执行这些已有规范的理由</li>
+<li>命名标准：目标特定设计元素（时钟生成、时钟、存储器、模拟块）</li>
+<li>检入回归 + Linting 要求</li>
+<li><strong>原型不是&quot;可丢弃的&rdquo;——如果现场发现重大问题，原型可以再次用于完全验证引起问题的工程变更（EC）</strong></li>
+</ul>
+<hr>
+<h3 id="94-设计指南table-24--全书-rtl-编码规范总汇">9.4 设计指南（Table 24 — 全书 RTL 编码规范总汇）
+</h3><h4 id="上半部分">上半部分：
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>建议</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>避免锁存器</strong></td>
+          <td>可实现但效率低、时序分析复杂。基于锁存器的设计降低 SoC 功耗但 FPGA 综合不建模省电行为</td>
+      </tr>
+      <tr>
+          <td><strong>避免组合环路</strong></td>
+          <td>可能因自底向上流程直到全芯片组装才暴露→而第一次全芯片组装恰恰发生在原型项目启动时</td>
+      </tr>
+      <tr>
+          <td><strong>用 `define 预判 RTL 修改</strong></td>
+          <td>单一宏切换所有原型改动。标准宏名纳入公司源码风格指南。用于隔离 BIST、存储器例化等</td>
+      </tr>
+      <tr>
+          <td><strong>低影响源码修改</strong></td>
+          <td>始终使用 Wrapper：替换文件而非编辑文件；将修改回注到真实源码</td>
+      </tr>
+      <tr>
+          <td><strong>写纯 RTL</strong></td>
+          <td>不直接在 RTL 中例化 SoC 库原语。让工具流推断时钟门控、插入测试、应用低功耗</td>
+      </tr>
+      <tr>
+          <td><strong>隔离 RTL 修改</strong></td>
+          <td>在库元素内部做改动（RAM、IO 库等），而非在 RTL 结构的外部——提高可移植性</td>
+      </tr>
+      <tr>
+          <td><strong>复用文件列表/脚本</strong></td>
+          <td>SoC 和 FPGA 通用 makefile + 宏分支</td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="下半部分">下半部分：
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>建议</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>存储器兼容</strong></td>
+          <td>每创建一个新的 SoC 存储器，同时生成 FPGA 兼容版本。技术选项通过 `define 并列选择</td>
+      </tr>
+      <tr>
+          <td><strong>PHY 兼容</strong></td>
+          <td>SoC 的 PHY 块在 FPGA 中需建模或用片外测试芯片。选择 SoC 的 PHY 组件时就要考虑这一点</td>
+      </tr>
+      <tr>
+          <td><strong>同步设计</strong></td>
+          <td>避免异步环路、双沿时钟等不映射到 FPGA 的结构。隔离这些电路到独立块→FPGA 等价功能替换</td>
+      </tr>
+      <tr>
+          <td><strong>避免长组合路径</strong></td>
+          <td>30+ 逻辑级在 SoC 中可能没问题（近距离放置+低延迟），但在 FPGA 中需 10+ LUT→互连延迟难以控制。用流水线打破长路径</td>
+      </tr>
+      <tr>
+          <td><strong>隔离时钟源</strong></td>
+          <td>将时钟门控和切换放在独立块中（最好在顶层）→允许用 FPGA 等价结构完整替换</td>
+      </tr>
+      <tr>
+          <td><strong>同步复位</strong></td>
+          <td>在每个时钟域边界重新同步复位→避免分区后时钟和复位之间的竞争条件</td>
+      </tr>
+      <tr>
+          <td><strong>简化时钟网络</strong></td>
+          <td>SoC 时钟网络非常复杂→如果可能，只为原型实现完整时钟选项的子集。ATPG 逻辑在 FPGA 中几乎永远不需要→`ifdef 移除</td>
+      </tr>
+      <tr>
+          <td><strong>同步块边界</strong></td>
+          <td>FF 在所有块的输入和输出——增加延迟但极大简化时序约束、提高性能、辅助芯片布局</td>
+      </tr>
+      <tr>
+          <td><strong>文档化设计怪癖</strong></td>
+          <td>几行行内注释解释好奇心驱动的设计元素——对晚期设计修正尤其关键</td>
+      </tr>
+      <tr>
+          <td><strong>保持仿真环境可用</strong></td>
+          <td>块级测试平台检查 RTL 修改 → &ldquo;金质测试平台&quot;建立信心</td>
+      </tr>
+      <tr>
+          <td><strong>架构层面考虑慢速运行</strong></td>
+          <td>核心和外设可以不同速率运行；慢速 FPGA 和全速外部数据间需深度缓冲</td>
+      </tr>
+      <tr>
+          <td><strong>考虑 NoC 而非宽总线</strong></td>
+          <td>行业趋势：&ldquo;局部同步、全局异步&rdquo;→更好分区——对原型有帮助</td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="各条的具体展开">各条的具体展开
+</h4><h4 id="943-避免锁存器">9.4.3 避免锁存器
+</h4><p><strong>解决方案</strong>：可以在基于 FF 的门级网表合成后，<strong>自动将需要锁存器的特定块进行锁存器转换</strong>。如果在设计阶段就将这些时序元素隔离或标记，可使转换更容易。</p>
+<h4 id="944-避免长组合路径">9.4.4 避免长组合路径
+</h4><blockquote>
+<p>&ldquo;在最新工艺库中，SoC 设计可能有 30+ 级逻辑在组合路径上。这在 SoC 中可以接受——近距离放置 + 低本征延迟。但在 FPGA 中，同样路径需要 10+ LUT，而 LUT 之间的<strong>互连延迟</strong>——而不是 LUT 本身的延迟——才是真正的问题，尤其当利用率高时。&rdquo;</p>
+</blockquote>
+<p><strong>解决</strong>：流水线。需要重新调度。</p>
+<h4 id="945-避免组合环路">9.4.5 避免组合环路
+</h4><blockquote>
+<p>&ldquo;组合环路有时在 SoC RTL 中看不到——因为自底向上的设计流，<strong>环路只在全芯片自上而下组装后才完整</strong>。而这个第一次全芯片组装可能恰恰发生在原型项目启动时。&rdquo;</p>
+</blockquote>
+<p>（注意：同步块边界可以消除这个问题和许多其他隐患。）</p>
+<hr>
+<h3 id="95-目标特定性隔离指南">9.5 目标特定性隔离指南
+</h3><h4 id="951-写纯-rtl-代码">9.5.1 写纯 RTL 代码
+</h4><p><strong>现实中的恶化过程</strong>：</p>
+<ul>
+<li>设计开始时是干净的通用 RTL</li>
+<li>随着反复细化实现，技术特定细节逐步渗透 → RTL 不再&quot;纯&rdquo;</li>
+<li><strong>传到原型团队手中的 RTL 已混有大量低层工艺库原语</strong></li>
+</ul>
+<blockquote>
+<p>&ldquo;这种实践不必要地复杂化了 FPGA 原型，并导致潜在错误。&rdquo;</p>
+</blockquote>
+<p><strong>建议</strong>：保持参考 RTL 设计为纯的，仅在叶子级小心引入技术特定细节 → 替代的 FPGA 和 SoC 定义可以在设计数据库中共存。</p>
+<h4 id="952-使源码变更的影响尽可能低">9.5.2 使源码变更的影响尽可能低
+</h4><ul>
+<li>始终使用 Wrapper——在 Wrapper <strong>内部</strong>修改</li>
+<li><strong>替换文件</strong>而非编辑文件</li>
+<li>将修改<strong>回注</strong>到真实源码文件</li>
+</ul>
+<p><strong>在库元素内部（RAM、IO 库等）而非在 RTL 结构的外部做修改</strong> → 原型代码靠近它所替换的原始代码。</p>
+<h4 id="953-维护存储器兼容性">9.5.3 维护存储器兼容性
+</h4><p><strong>文件覆盖法</strong>：创建带有 <code>_fpga</code> 前缀的特殊目标目录，放与原始文件同名的文件 → 将其添加到文件列表末尾 → 覆盖上面文件列表中更高层的原始 RTL。</p>
+<blockquote>
+<p>Synopsys 提供帮助自动化文件列表管理的脚本。</p>
+</blockquote>
+<h4 id="9551-phy-兼容性">9.5.5.1 PHY 兼容性
+</h4><p><strong>选择 SoC 的 PHY 组件时就要考虑原型验证需求</strong>：</p>
+<ul>
+<li>有测试芯片可用 → 连接到原型板作为外部插件 → RTL 写入片外连接</li>
+<li>无测试芯片 → PHY 需要用通用 RTL 功能定义来建模映射到 FPGA</li>
+</ul>
+<hr>
+<h3 id="96-时钟和架构指南">9.6 时钟和架构指南
+</h3><h4 id="961-保持时钟逻辑在独立的顶层块中">9.6.1 保持时钟逻辑在独立的顶层块中
+</h4><ul>
+<li>如果时钟生成逻辑与设计其他部分独立 → 适应性更强</li>
+<li>往往时钟生成逻辑中有远超 FPGA 需要的选项 → 独立后可直接替换为只驱动几个常量频率的块</li>
+<li>对导入的 IP 内部的时钟结构也可选择性地硬编码或简化</li>
+</ul>
+<h4 id="962-简化时钟网络">9.6.2 简化时钟网络
+</h4><blockquote>
+<p>&ldquo;时钟复杂度最大的贡献者之一是什么？测试逻辑。ATPG 电路插入逻辑来复用时钟。注意——<strong>FPGA 是可重编程的，出厂时已经过充分测试。几乎永远没有理由在 FPGA 原型中包含 ATPG 逻辑。</strong> 包含了它只会引入不必要的复杂度。&rdquo;</p>
+</blockquote>
+<p><strong>处理测试逻辑</strong>：</p>
+<ul>
+<li>将测试逻辑分为&quot;仅 SoC 需要&quot;和&quot;FPGA 也需要&quot;两类</li>
+<li>至少用注释标明哪是哪，以及如何 tie-off 信号来禁用 FPGA 不需要的测试逻辑</li>
+<li>理想情况：用 <code>ifdef FPGA</code> → 将不需要的测试逻辑输入 tie-off 到禁用值 → FPGA 综合自动修剪</li>
+</ul>
+<h4 id="963-同步设计">9.6.3 同步设计
+</h4><blockquote>
+<p>最小化在外部接口所需时钟上运行的设计部分；<strong>尽可能使用异步 FIFO 将数据从这些接口传输到系统时钟域</strong>。</p>
+</blockquote>
+<h4 id="964-同步复位">9.6.4 同步复位
+</h4><p><strong>FPGA 与 SoC 的关键差异</strong>：FPGA 的配置过程初始化每个 BlockRAM、分布式 RAM、SRL 和 FF 到已定义状态——<strong>即使 RTL 中没有指定复位，FPGA 也能启动，SoC 则不能</strong>。</p>
+<blockquote>
+<p>&ldquo;关键是花更多时间在前端考虑复位策略，并以简单、一致、灵活的方式编写复位逻辑。如果 FPGA 的这些考虑能被容纳，它将开启许多创造性解决方案。&rdquo;</p>
+</blockquote>
+<h4 id="965-同步块边界">9.6.5 同步块边界
+</h4><blockquote>
+<p>&ldquo;在每个设计者的块边界放置 FF——这个简单实践如果被遵守，则在分区间找到 FF 的可能性就大大增加。如果遵循同步边界的实践，在约束 FPGA 原型时应该只有极少数例外需处理。&rdquo;</p>
+</blockquote>
+<p><strong>附益</strong>：辅助芯片布局和 FPGA 分区。时钟域交叉处本来就应该有同步器。</p>
+<h4 id="966-考虑设计在慢速时钟下的运行方式">9.6.6 考虑设计在慢速时钟下的运行方式
+</h4><blockquote>
+<p>&ldquo;如果在架构层面处理，SoC 与原型实现间预期的速度差异可以被干净地隔离和适当管理。例如，在很多情况下 FPGA 原型需要速率适配器。但如果在架构早期就考虑这一点，主要功能模块的总线接口往往可以设计得不需速率桥接。&rdquo;</p>
+</blockquote>
+<p><strong>附益</strong>：这种架构风格带来的独立性使设计本身也更鲁棒、适应性更强、可读性更好。</p>
+<hr>
+<h3 id="97-总结dfp-宣言的核心主张">9.7 总结：DFP 宣言的核心主张
+</h3><ol>
+<li><strong>FPGA 原型开发是整个 SoC 设计项目的关键元素</strong> → 需要纳入计划和排程</li>
+<li><strong>RTL 设计需遵循鲁棒的编码风格</strong> → 有效表示 FPGA 和 SoC 两种技术。RTL 定义质量的提升在设计的整个生命周期中都会产生回报</li>
+<li><strong>使用模块化编码风格</strong> → 原型特定组件的干净分离、独立数据流、时钟域隔离</li>
+<li><strong>扩展设计文档</strong> → 尽早识别设计的挑战性部分并通报原型团队</li>
+<li><strong>SoC 团队可能需要轻度重新对齐</strong> → 将原型验证整合到流程和人员技能中</li>
+</ol>
+<blockquote>
+<p>最终结果：FPGA 原型收益更早到达 → 更早的软件验证 → 更早的芯片前集成。</p>
+</blockquote>
+<hr>
+<h2 id="关键图表解读">关键图表解读
+</h2><p><strong>Table 22：7 条程序性建议</strong></p>
+<ul>
+<li>不仅仅是&quot;建议&rdquo;——每条都是针对一个常见组织失效模式的对抗措施：&ldquo;扔过墙&quot;式交接 → 整合团队；没有 RTL 准入标准 → 纳入验证计划里程碑；原型团队被隔离 → 纳入统一版本控制</li>
+</ul>
+<p><strong>Table 24：16 条技术性建议</strong></p>
+<ul>
+<li>全书 RTL 编码规范的汇总版。可以打印成海报贴在 SoC 设计团队的办公区——每一条在前八章都有详细展开，这张表是&quot;索引&rdquo;</li>
+</ul>
+<p><strong>Table 23：原型项目启动前的设计交接检查清单</strong></p>
+<ul>
+<li>真实来源于某大型半导体实验室——说明这些规则已经过工业验证而不是纯理论</li>
+</ul>
+<hr>
+<h2 id="个人总结">个人总结
+</h2><p>第9章在整个书的结构中扮演了&quot;方法论转折&quot;的角色。前八章是&quot;把事情做对&quot;（do things right），第9章是&quot;做对的事情&quot;（do the right things）——它提出了一个根本性的命题：<strong>不要在河下游捞尸体，去上游修桥</strong>。</p>
+<p>本章最有价值的洞见之一是**&ldquo;对 FPGA 好的对 SoC 也好&quot;这个互惠原则**。很多工程师可能认为 DFP 是在为原型团队做额外工作；本章论证了 DFP 的规则本身就是好的工程实践——干净的模块化、同步边界、隔离的时钟管理、纯 RTL——只是 SoC 流程的宽松自由度使这些纪律有时被忽视了。有了 FPGA 原型这个&quot;第二消费者&rdquo;，才重新获得了遵循这些纪律的动力。</p>
+<p>另一个深层观点是<strong>原型不应被视为一次性产物</strong>。&ldquo;出了问题可以再拿原型来验证 EC&rdquo;——这意味着原型不仅在 pre-silicon 阶段有价值，在 post-silicon 阶段也是重要的工程资产。这个认知会改变我们分配原型质量的资源投入方式。</p>
+<p>最后，<strong>程序性指南（Table 22）可能是全书 ROI 最高的单一变革</strong>。技术技巧可以通过实践积累，但&quot;原型团队坐在验证团队旁边、使用同一版本控制、RTL 交付纳入正式里程碑&quot;——这些组织层面的决策，一旦做对，比任何技术技巧都能更根本地提高原型验证的效率和成功率。</p>
+<hr>
+<h2 id="实践思考">实践思考
+</h2><ul>
+<li><strong>DFP 的投资回报需要管理层理解</strong>。如果管理层认为原型是&quot;额外负担&quot;而非&quot;风险降低投资&quot;，DFP 的任何建议都无法执行。本章可以作为向管理层推销 DFP 价值的参考材料</li>
+<li><strong>&ldquo;每个 SoC 设计师负责自己模块的 FPGA 重新目标化&rdquo;</strong> 这个模式值得深思——它消除了&quot;移交&quot;产生的信息损耗，但也要求 SoC 团队具备 FPGA 技能。这本质上是一个 build-vs-buy 问题：是培训内部团队还是雇佣专门的原型工程师</li>
+<li><strong>ATPG 逻辑在 FPGA 中几乎永远不需要</strong>——但如何识别和移除它？需要 SoC 验证团队在设计阶段就将 ATPG 逻辑与功能逻辑分离，用 `ifdef 标记或者至少清晰注释</li>
+<li><strong>FF 在块边界</strong>——这条规则执行成本最低但收益最高。在代码审查中检查这条规则，比事后在分区时为几百条组合路径写 IO 时序约束要容易得多</li>
+<li><strong>公司级标准平台 + 子板生态</strong>——如果组织打算做第三次或更多 FPGA 原型项目，投资建立标准化平台（而不是每个项目自由选择）的 ROI 远超直觉估计</li>
+<li><strong>保持原型兼容的仿真环境</strong>——这条建议可能是最容易被忽视的。一旦 RTL 为原型做了修改，原始仿真测试平台可能不再能直接运行。维护两套可互相参照的环境需要纪律，但在调试阶段价值巨大</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0296-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Table 23: Example of design hand-over checklist before prototyping project starts"
+	
+	
+></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/fpga/">FPGA</a>
+        
+            <a href="/tags/prototyping/">Prototyping</a>
+        
+            <a href="/tags/dfp/">DFP</a>
+        
+            <a href="/tags/rtl-coding-standards/">RTL Coding Standards</a>
+        
+            <a href="/tags/modular-design/">Modular Design</a>
+        
+            <a href="/tags/methodology/">Methodology</a>
+        
+            <a href="/tags/verification/">Verification</a>
+        
+            <a href="/tags/clock-management/">Clock Management</a>
+        
+            <a href="/tags/organization-change/">Organization Change</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC15%E7%AB%A0-conclusions-%E5%85%A8%E4%B9%A6%E6%80%BB%E7%BB%93%E4%B8%8E%E6%A0%B8%E5%BF%83%E8%A6%81%E7%82%B9%E5%9B%9E%E9%A1%BE/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第15章: Conclusions — 全书总结与核心要点回顾</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC5%E7%AB%A0-which-platform-build-your-own/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第5章: Which Platform? — Build Your Own</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC1%E7%AB%A0-introduction-the-challenge-of-system-verification/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第1章: Introduction — The Challenge of System Verification</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC12%E7%AB%A0-breaking-out-of-the-lab-the-prototype-in-the-field/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第12章: Breaking Out of the Lab — The Prototype in the Field</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC13%E7%AB%A0-prototyping--verification-the-best-of-both-worlds/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第13章: Prototyping &#43; Verification = The Best of Both Worlds</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.524358946663b6a5f95fbef001d1c97000115552b473e36faad787d7b96c8241.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

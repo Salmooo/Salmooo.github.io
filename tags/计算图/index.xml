@@ -1,0 +1,566 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>计算图 on SalmoneX Blog</title>
+        <link>http://localhost:1313/tags/%E8%AE%A1%E7%AE%97%E5%9B%BE/</link>
+        <description>Recent content in 计算图 on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright><atom:link href="http://localhost:1313/tags/%E8%AE%A1%E7%AE%97%E5%9B%BE/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>AI系统：第22章 计算图</title>
+        <link>http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC22%E7%AB%A0-%E8%AE%A1%E7%AE%97%E5%9B%BE/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC22%E7%AB%A0-%E8%AE%A1%E7%AE%97%E5%9B%BE/</guid>
+        <description>&lt;h2 id=&#34;本章概览&#34;&gt;本章概览
+&lt;/h2&gt;&lt;p&gt;第 22 章深入探讨 AI 框架的核心抽象——&lt;strong&gt;计算图（Computation Graph）&lt;/strong&gt;。计算图作为 AI 框架中连接前端表达与后端执行的关键数据结构，贯穿神经网络模型的整个生命周期——从前向计算到自动微分、从编译优化到运行时调度执行。本章从计算图的基本原理出发，逐步深入到自动微分的实现、调度与执行策略、控制流的表达，以及动态图与静态图的转换技术。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;221-引言&#34;&gt;22.1 引言
+&lt;/h2&gt;&lt;p&gt;目前主流的 AI 框架都选择使用&lt;strong&gt;计算图&lt;/strong&gt;来抽象神经网络计算表达。神经网络的训练流程主要包括前向计算、计算损失、自动求导、反向传播和更新模型参数 5 个过程。在基于计算图的 AI 框架中，这 5 个阶段统一表示为由基本算子构成的计算图，算子是数据流图中的一个节点，由后端进行高效实现。&lt;/p&gt;
+&lt;p&gt;在实际程序实现中会遇到的编程性问题（如控制流 if/else/while/for），本章也将深入探讨计算图和控制流之间的关系，以及计算图的调度和执行方式。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;222-计算图基本原理&#34;&gt;22.2 计算图基本原理
+&lt;/h2&gt;&lt;h3 id=&#34;2221-ai-系统化问题&#34;&gt;22.2.1 AI 系统化问题
+&lt;/h3&gt;&lt;p&gt;在 AI 工程化过程中面临的挑战包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如何对复杂神经网络实现自动微分？&lt;/li&gt;
+&lt;li&gt;如何利用编译期分析 Pass 对计算进行化简、合并、变换？&lt;/li&gt;
+&lt;li&gt;如何规划 Kernel 在 GPU/TPU/NPU 上高效执行？&lt;/li&gt;
+&lt;li&gt;如何进行内存预分配和管理？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;为了解决这些问题，目前主流的 AI 框架都选择使用&lt;strong&gt;计算图&lt;/strong&gt;来抽象神经网络计算。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;计算图定义&lt;/strong&gt;：被定义为有向图，其中节点对应于数学运算，计算图是表达和评估数学表达式的一种方式。在 AI 框架中，计算图就是一个表示运算的&lt;strong&gt;有向无环图（DAG）&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;2222-计算图的基本构成&#34;&gt;22.2.2 计算图的基本构成
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;数据表达方式&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;标量（Scalar）&lt;/strong&gt;：只有大小没有方向的量，是零阶张量&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;向量（Vector）&lt;/strong&gt;：有大小和方向的量，是一阶张量&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;矩阵（Matrix）&lt;/strong&gt;：二维数组，是二阶张量&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;张量（Tensor）&lt;/strong&gt;：向量和矩阵的推广，是 AI 框架中数据的统一表示&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0800-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;标量、向量、矩阵&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0800-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.2.1 标量/向量/矩阵图示&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;在 AI 框架中，图像任务通常将图片组织成三维张量 (C, H, W)，NLP 任务中句子组织成二维张量，增加 Batch 维度后变成四维张量 (N, C, H, W)。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0801-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.2.2 四维张量的内存表示&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;张量表示的重要因素&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;元素数据类型&lt;/strong&gt;：整型、浮点型、布尔型等&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;形状（Shape）&lt;/strong&gt;：描述维度及每个维度的长度&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;计算图的两个核心元素&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;节点（Node）&lt;/strong&gt;：在 AI 框架中代表&lt;strong&gt;算子（Operator）&lt;/strong&gt;——具体的计算操作&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;边（Edge）&lt;/strong&gt;：代表&lt;strong&gt;张量（Tensor）&lt;/strong&gt;——数据在节点间的流动&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0802-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.2.3 简单计算图 z=x&amp;#43;y&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0802-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.2.3 续&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;以 Conv + ReLU 的神经网络为例，前向计算公式为 \(f(x) = \text{ReLU}(\text{Conv}(w, x, b))\)，对应的计算图和反向计算图如下：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0803-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.2.4 Conv&amp;#43;ReLU 前向与反向计算图&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0803-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.2.4 续&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;2223-pytorch-计算图&#34;&gt;22.2.3 PyTorch 计算图
+&lt;/h3&gt;&lt;p&gt;PyTorch 使用的是&lt;strong&gt;动态计算图&lt;/strong&gt;，有两重含义：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;前向传播立即执行&lt;/strong&gt;：无需等待完整计算图创建，每条语句动态添加节点并立即执行&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;反向传播后立即销毁&lt;/strong&gt;：调用 Backward 后计算图被销毁，下次调用需重新构建&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;PyTorch 中的 &lt;strong&gt;Function&lt;/strong&gt; 是计算图的另一类节点，同时包含前向计算和反向传播逻辑，通过继承 &lt;code&gt;torch.autograd.Function&lt;/code&gt; 来创建自定义算子。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;223-计算图与自动微分&#34;&gt;22.3 计算图与自动微分
+&lt;/h2&gt;&lt;h3 id=&#34;2231-深度学习训练流程&#34;&gt;22.3.1 深度学习训练流程
+&lt;/h3&gt;&lt;p&gt;训练过程分为三步：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;前向计算&lt;/strong&gt;：输入数据 → 模型输出预测值&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;计算损失&lt;/strong&gt;：真实值与预测值比较，对各参数求偏导&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;更新权重&lt;/strong&gt;：根据优化器策略，沿梯度方向更新参数 \(w = w - \eta \cdot \text{grad}\)&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;反向传播算法实际上就是自动微分&lt;/strong&gt;。在 AI 框架中，计算图的根节点为损失函数，节点间的偏导称为误差项。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;2232-自动微分基础回顾&#34;&gt;22.3.2 自动微分基础回顾
+&lt;/h3&gt;&lt;p&gt;自动微分（Automatic Differentiation, AD）按工作模式分为：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;前向自动微分&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;反向自动微分&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;按实现方式分为：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;基于对偶数的前向微分&lt;/li&gt;
+&lt;li&gt;基于 Tape 的反向微分（如 PyTorch）&lt;/li&gt;
+&lt;li&gt;基于源代码转换的反向微分&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;反向微分的优势&lt;/strong&gt;：在神经网络中，输出是标量损失函数，保留前向计算的所有中间结果，只需运行程序一次即可计算出损失函数对所有参数的导数。时间复杂度为 \(O(m)\)，其中 \(m\) 是输出变量个数。&lt;/p&gt;
+&lt;h3 id=&#34;2233-ai-框架自动微分方式&#34;&gt;22.3.3 AI 框架自动微分方式
+&lt;/h3&gt;&lt;p&gt;在反向模式的自动求导中，根据反向计算图的构建时机，分为两种方式：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0809-09.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.3.1 前向计算图与反向计算图的关系&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0809-10.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.3.1 续&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0810-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.3.2 AI框架自动微分的两种方式&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0810-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.3.2 续&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h4 id=&#34;动态计算图表达式追踪&#34;&gt;动态计算图（表达式追踪）
+&lt;/h4&gt;&lt;p&gt;PyTorch 采用&lt;strong&gt;基于磁带的自动微分（Tape-Based）&lt;/strong&gt;：在前向计算时记录操作到 Tape 上，反向时重放 Tape 计算梯度。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;优点&lt;/strong&gt;：易用性高，方便调试
+&lt;strong&gt;缺点&lt;/strong&gt;：需保存大量中间结果，内存占用较高&lt;/p&gt;
+&lt;h4 id=&#34;静态计算图&#34;&gt;静态计算图
+&lt;/h4&gt;&lt;p&gt;图层 IR 方式：静态生成计算图，在执行前完成构图和编译优化。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;优点&lt;/strong&gt;：可全局编译优化、内存复用、执行效率高
+&lt;strong&gt;缺点&lt;/strong&gt;：错误不易发现、调试困难&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;AI 框架在实现自动微分时，对每个中间层存储的是&lt;strong&gt;向量-雅可比乘积&lt;/strong&gt;而非完整的雅可比矩阵，以减少存储空间。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;224-计算图的调度与执行&#34;&gt;22.4 计算图的调度与执行
+&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0812-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.4.1 计算图执行架构&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0812-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.4.1 续&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;2241-图调度&#34;&gt;22.4.1 图调度
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;算子定义&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;狭义算子（Kernel）&lt;/strong&gt;：对张量执行的基本操作集合（四则运算、数学函数等），不感知微分&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;广义算子（Function）&lt;/strong&gt;：配合 Autograd 模块支持自动梯度求导&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;算子间调度fifo-队列&#34;&gt;算子间调度（FIFO 队列）
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0813-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.4.2 复合函数计算图&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;调度策略：通过先进先出（FIFO）队列执行：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;将入度为 0 的节点加入 FIFO 队列&lt;/li&gt;
+&lt;li&gt;从队列中选择节点分配给线程执行&lt;/li&gt;
+&lt;li&gt;节点执行结束后将其后继节点加入就绪队列&lt;/li&gt;
+&lt;li&gt;重复直到队列为空&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0814-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.4.3 计算图的调度序列&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0814-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.4.3 续&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h4 id=&#34;算子并发调度&#34;&gt;算子并发调度
+&lt;/h4&gt;&lt;p&gt;找到相互独立的算子进行并发调度，通过后端编译优化 Pass 提供并发执行队列：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0814-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.4.4 算子并发调度&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0814-09.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.4.4 续&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;策略&lt;/strong&gt;：低代价节点在当前线程执行，高代价节点派发给线程池中其他线程并发执行。&lt;/p&gt;
+&lt;h4 id=&#34;算子异构调度&#34;&gt;算子异构调度
+&lt;/h4&gt;&lt;p&gt;在手机端侧，CPU、GPU、NPU 等多种异构计算 IP 共同参与计算：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0815-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.4.5 异构计算图&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;CPU 算子&lt;/strong&gt;：利用 CPU 多核心能力&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;GPU 算子&lt;/strong&gt;：为高度并行 Kernel 提供加速&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;NPU 算子&lt;/strong&gt;：为高维张量提供专用 Kernel&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;异构调度的挑战：调度逻辑复杂、上下节点依赖重、通信开销常大于计算开销。&lt;/p&gt;
+&lt;h3 id=&#34;2242-图执行&#34;&gt;22.4.2 图执行
+&lt;/h3&gt;&lt;p&gt;三种执行模式：&lt;/p&gt;
+&lt;h4 id=&#34;单算子执行&#34;&gt;单算子执行
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0816-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.4.6 单算子执行流程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;将计算图展开为执行序列，按序列逐个 Kernel 执行。PyTorch、TensorFlow Eager、MindSpore PyNative 均采用此方式。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;优点&lt;/strong&gt;：灵活性高，可直接通过 Python 调度，便于调试
+&lt;strong&gt;缺点&lt;/strong&gt;：缺乏全局优化信息，无法完成算子融合、代数简化等编译优化&lt;/p&gt;
+&lt;h4 id=&#34;整图下沉执行&#34;&gt;整图下沉执行
+&lt;/h4&gt;&lt;p&gt;将整个计算图或子图一次性下发到 DSA 芯片（如 TPU、昇腾 NPU）执行。避免了 Host 与 Device 频繁交互，获得更好的整体计算性能。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;局限&lt;/strong&gt;：动态 Shape、复杂控制流、副作用等场景面临技术挑战。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;图切分到多设备执行&#34;&gt;图切分到多设备执行
+&lt;/h4&gt;&lt;p&gt;将大模型计算图拆分到不同 AI 加速芯片上执行，兼顾性能和灵活性。&lt;/p&gt;
+&lt;h3 id=&#34;2243-pytorch-算子执行&#34;&gt;22.4.3 PyTorch 算子执行
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0818-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.4.7 PyTorch 两次调度过程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0818-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.4.7 续&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;PyTorch 调用 &lt;code&gt;torch.add&lt;/code&gt; 时经历&lt;strong&gt;两次调度&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;第一次调度&lt;/strong&gt;：根据设备（Device）和布局（Layout）动态选择实现函数（如 CPU/Strided、CUDA/Strided 等）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;第二次调度&lt;/strong&gt;：根据数据类型通过 Switch 分支静态选择具体的 Kernel 执行&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;225-计算图的控制流实现&#34;&gt;22.5 计算图的控制流实现
+&lt;/h2&gt;&lt;p&gt;计算图在数学上是 DAG，但编程中需要 if/else/while/for 等控制流。引入控制流后可以构造更复杂的神经网络结构。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0819-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.5.1 控制流示意&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0819-09.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.5.1 续&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;2251-控制流&#34;&gt;22.5.1 控制流
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;引入控制流的两大难点&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;计算图变为动态，分支选择依赖运行时数据&lt;/li&gt;
+&lt;li&gt;循环导致计算图出现环，无法有效拓扑排序&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;三类设计方案&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;方案&lt;/th&gt;
+          &lt;th&gt;代表框架&lt;/th&gt;
+          &lt;th&gt;核心思路&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;复用宿主语言&lt;/td&gt;
+          &lt;td&gt;PyTorch&lt;/td&gt;
+          &lt;td&gt;用 Python 控制流驱动后端执行&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;支持控制流原语&lt;/td&gt;
+          &lt;td&gt;TensorFlow&lt;/td&gt;
+          &lt;td&gt;计算图中引入控制流原语，运行时原生支持&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;源码解析&lt;/td&gt;
+          &lt;td&gt;MindSpore&lt;/td&gt;
+          &lt;td&gt;前端代码 → AST → 静态计算图（含控制流子图）&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;2252-动态图复用宿主语言&#34;&gt;22.5.2 动态图（复用宿主语言）
+&lt;/h3&gt;&lt;p&gt;PyTorch 采用动态图机制，遇到控制流时使用 Python 原生方式执行，遇到 PyTorch API 时才按动态计算图执行。这被称为&amp;quot;&lt;strong&gt;模型即代码&lt;/strong&gt;&amp;ldquo;的声明式编程方式。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;优点&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;易用性高，即时输出中间结果&lt;/li&gt;
+&lt;li&gt;模型定义如同编写普通程序&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;缺点&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;易于滥用前端语言特性，带来性能问题&lt;/li&gt;
+&lt;li&gt;执行流在语言边界来回跳转，运行开销大&lt;/li&gt;
+&lt;li&gt;不利于大规模部署&lt;/li&gt;
+&lt;li&gt;跨语言边界优化困难&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;2253-静态图&#34;&gt;22.5.3 静态图
+&lt;/h3&gt;&lt;h4 id=&#34;控制流原语tensorflow&#34;&gt;控制流原语（TensorFlow）
+&lt;/h4&gt;&lt;p&gt;TensorFlow 引入控制流原语（Switch、Merge、Enter、Exit、NextIteration），运行时以**执行帧（Execution Frame）**管理。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0822-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.5.2 TensorFlow 控制流 API 与计算图表示&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0824-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.5.3 TensorFlow 五个控制流原语&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0824-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.5.3 续&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;执行帧可嵌套，对应嵌套控制流。不同执行帧中无数据依赖的算子可并发执行。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;优点&lt;/strong&gt;：编译期可全局优化，执行效率高
+&lt;strong&gt;缺点&lt;/strong&gt;：编程习惯差异大，构建步骤相对复杂&lt;/p&gt;
+&lt;h4 id=&#34;源码解析mindspore&#34;&gt;源码解析（MindSpore）
+&lt;/h4&gt;&lt;p&gt;通过 AST 解析 Python 源码为计算图，控制流展开为子图。遇到 if/else 分别创建两个子图，运行时动态选择。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;优点&lt;/strong&gt;：解耦宿主语言与执行、继承静态图优化优势
+&lt;strong&gt;缺点&lt;/strong&gt;：部分宿主语言控制流不能表示、带有一定约束&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;226-动态图与静态图转换&#34;&gt;22.6 动态图与静态图转换
+&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0825-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.6.1 动静态图转换发展历程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;2261-背景&#34;&gt;22.6.1 背景
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;发展三阶段&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;动静分离&lt;/strong&gt;（2017-2018）：TensorFlow 默认静态图，PyTorch 默认动态图&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;动静结合&lt;/strong&gt;（2019-2022）：TensorFlow 2.0 支持动静态图转换，PyTorch 2.0 支持 Compiler&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;动静统一&lt;/strong&gt;（目标）：灵活在动态图与静态图间切换，是 AI 框架的终极追求&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;转换路径&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;动态转静态&lt;/strong&gt;：运行中通过 JIT 自动转换，如 PyTorch Lazy Tensor&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;静态转静态&lt;/strong&gt;：编译中发现不支持语法则 Fallback 回 Python&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;2262-追踪模式tracing&#34;&gt;22.6.2 追踪模式（Tracing）
+&lt;/h3&gt;&lt;p&gt;基于追踪的方式直接执行用户代码，记录算子调用序列并保存为静态图。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;两个阶段&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;创建并运行动态图代码，捕获所有算子构建静态图&lt;/li&gt;
+&lt;li&gt;再次调用相同模型时，自动指向静态图执行&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0827-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.6.2 追踪模式产生的两种可能性&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;优点&lt;/strong&gt;：简单易实现，广泛支持动态控制流
+&lt;strong&gt;缺点&lt;/strong&gt;：只能保留一次执行轨迹，缺失其他分支；循环无法有效追踪全部迭代&lt;/p&gt;
+&lt;h3 id=&#34;2263-源码解析parsingscript&#34;&gt;22.6.3 源码解析（Parsing/Script）
+&lt;/h3&gt;&lt;p&gt;三个阶段的转换流程：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;词法分析&lt;/strong&gt;：将源代码转换为词法单元列表&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;语法分析&lt;/strong&gt;：词法单元 → AST → AI 框架内部 AST&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;转换&lt;/strong&gt;：内部 AST → 别名分析 → SSA 化 → 类型推断 → 静态计算图&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0829-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.6.3 PyTorch Script 源码解析过程&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch22/ai_system.pdf-0829-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图22.6.3 续&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;PyTorch Dynamo 属于基于源码转换，但在 Python 解释器中转换成 FX Graph，而非对 Python 语言本身进行转换。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;优点&lt;/strong&gt;：能保留完整控制结构，更广泛支持动态控制流
+&lt;strong&gt;缺点&lt;/strong&gt;：Python 动态类型导致类型推导复杂；过度灵活的控制流会 Fallback 回 Python&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;小结&#34;&gt;小结
+&lt;/h2&gt;&lt;p&gt;第 22 章系统阐述了计算图作为 AI 框架核心抽象的全貌：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;基本原理&lt;/strong&gt;：计算图 = 算子（节点）+ 张量（边），是有向无环图，统一表达神经网络计算&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;自动微分&lt;/strong&gt;：反向传播即为自动微分，分为动态图（Tape-Based）和静态图（图层 IR）两种实现&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;调度执行&lt;/strong&gt;：从单算子串行 → 并发调度 → 异构调度 → 整图下沉，性能逐级提升&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;控制流&lt;/strong&gt;：三种方案（复用宿主语言/控制流原语/源码解析）各有权衡&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;动静转换&lt;/strong&gt;：从 Tracing 到 Script/Parsing 再到 Dynamo，追求易用性与性能的统一&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;核心启示&lt;/strong&gt;：计算图的设计决定了 AI 框架的表达能力、优化空间和执行效率。动静统一是 AI 框架技术演进的终极方向。&lt;/p&gt;
+&lt;/blockquote&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

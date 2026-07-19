@@ -7,7 +7,15 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en</language>
         <copyright>salmone</copyright>
-        <lastBuildDate>Tue, 27 Feb 2024 17:29:29 +0800</lastBuildDate><atom:link href="https://Salmooo.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Thu, 04 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://Salmooo.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>FPGA学习笔记</title>
+        <link>https://Salmooo.github.io/categories/fpga%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</link>
+        <pubDate>Thu, 04 Jun 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/categories/fpga%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>LLVM</title>
         <link>https://Salmooo.github.io/categories/llvm/</link>
         <pubDate>Tue, 27 Feb 2024 17:29:29 +0800</pubDate>

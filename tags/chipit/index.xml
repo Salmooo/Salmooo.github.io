@@ -1,0 +1,690 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>CHIPit on SalmoneX Blog</title>
+        <link>http://localhost:1313/tags/chipit/</link>
+        <description>Recent content in CHIPit on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright>
+        <lastBuildDate>Fri, 05 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/chipit/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>第6章: Which Platform? — Ready Made</title>
+        <link>http://localhost:1313/p/%E7%AC%AC6%E7%AB%A0-which-platform-ready-made/</link>
+        <pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/p/%E7%AC%AC6%E7%AB%A0-which-platform-ready-made/</guid>
+        <description>&lt;h2 id=&#34;章节概览&#34;&gt;章节概览
+&lt;/h2&gt;&lt;p&gt;第5章讲了&amp;quot;造&amp;quot;；第6章讲&amp;quot;买&amp;quot;——如何评估和选择商业现成的 FPGA 原型平台。&lt;/p&gt;
+&lt;p&gt;本章的核心论点是：&lt;strong&gt;互联灵活性（而非原始飞行时间）才是决定平台真正性能的关键因素&lt;/strong&gt;。作者通过严谨的量化时序分析证明，即使是延迟互联（4ns 飞行时间）也能达到 100MHz+ 的系统性能，但互联资源的可用性——即能否提供足够的引脚来避免信号复用——才是实际的性能瓶颈。一个能让你以直连方式跑关键路径的平台，比一个飞行时间更短但逼你用 8:1 复用的平台更快。&lt;/p&gt;
+&lt;p&gt;本章最终给出了一份 &lt;strong&gt;Top-10 检查清单&lt;/strong&gt;（Table 14），可作为任何商业 FPGA 原型板采购评估的标准化模板。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;核心知识点&#34;&gt;核心知识点
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;商业原型板 ≠ 通用 FPGA 评估板&lt;/strong&gt;：市场上很多&amp;quot;原型板&amp;quot;实际上是评估板、FMC 标准板或低成本目标板——它们不是本书讨论的 SoC 原型验证平台&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;不同使用场景对板子特性的需求完全不同&lt;/strong&gt;：RTL 调试需要极好的可见性和速度；软件验证几乎不需要调试功能但要求极高的鲁棒性和可复制性；评估板的分发要求低成本和高可靠性&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;互联灵活性比飞行时间更重要&lt;/strong&gt;：FPGA 内部路径延迟（~4.5ns）主导总路径延迟。直接互联飞行时间 1ns（总路径 5.5ns, ~180MHz）；延迟/交换互联飞行时间 4ns（总路径 9.5ns, ~105MHz）——差距仅约 2 倍，但灵活性带来的更好的分区方案往往远超这个差异&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;HapsTrak II（延迟互联）&lt;/strong&gt;：FPGA 引脚全部引出到连接器→通过夹层连接板或排线在板间连接→每项目定制互联拓扑→项目结束后拆掉重新配置。&lt;strong&gt;连接器的粒度决定灵活性&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;CHIPit（交换互联）&lt;/strong&gt;：可编程开关矩阵→以 8 路为粒度分配互联→可由分区工具实时控制→无需物理改动即可重新配置→支持远程操作&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;互联可用性 &amp;gt; 飞行时间&lt;/strong&gt;：如果分区需要 200 条路径而只有 100 个空闲引脚，2:1 复用 → 实际性能减半。灵活互联提供不同分区方案 → 释放更多引脚 → 消除复用需求 → 净性能可能更高&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;LVDS 高速 TDM 可达 1GHz&lt;/strong&gt;：使用差分信令和源同步路径 → 8:1 复用 @800MHz 轻松支持 128MHz 内部逻辑 → 甚至 64:2 @30MHz+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;HSTDM（高速时分复用）&lt;/strong&gt;：HAPS-60 + Certify 工具自动化实现——板级 LVDS 能力 + 分区工具内置知识 = 自动化高性能复用&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;永远无视供应商的门数宣称&lt;/strong&gt;：跑自己的综合得到真实资源需求 → 加倍作为安全余量 → 与候选板的实际资源对比&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;总拥有成本（TCO）≠ 购买价格&lt;/strong&gt;：便宜板在数亿规模的 SoC 项目上出的问题，代价远超省下的钱&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;详细笔记&#34;&gt;详细笔记
+&lt;/h2&gt;&lt;h3 id=&#34;61-你需要板子做什么&#34;&gt;6.1 你需要板子做什么？
+&lt;/h3&gt;&lt;p&gt;商业 FPGA 板市场鱼龙混杂——不同的板子为完全不同的目的设计和优化：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;FMC 标准板（VITA 57）：为低量产物项设计，容量不够原型验证&lt;/li&gt;
+&lt;li&gt;低成本目标板：为评估特定 FPGA 器件或 IP 而设计&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;真正的 FPGA 原型平台&lt;/strong&gt;：本书描述的对象&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;原型板的十一种使用目标&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;验证原始 RTL 代码的功能性&lt;/li&gt;
+&lt;li&gt;测试开发中算法的系统内性能&lt;/li&gt;
+&lt;li&gt;验证外部 IP 的系统内操作&lt;/li&gt;
+&lt;li&gt;项目后期 ECO 的回归测试&lt;/li&gt;
+&lt;li&gt;物理层软件和驱动的系统内测试&lt;/li&gt;
+&lt;li&gt;应用软件与嵌入式 OS 的早期集成&lt;/li&gt;
+&lt;li&gt;为软件验证创建独立目标平台&lt;/li&gt;
+&lt;li&gt;为潜在合作伙伴提供评估或软件开发平台&lt;/li&gt;
+&lt;li&gt;建立公司级跨项目标准验证基础设施&lt;/li&gt;
+&lt;li&gt;未实现产品的展会展演&lt;/li&gt;
+&lt;li&gt;标准组织&amp;quot;PlugFest&amp;quot;兼容性测试&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;关键洞察&lt;/strong&gt;：同一块板不可能同时最优地满足所有这些目标。例如——大量测试点的复杂调试板，不适合作为独立软件目标平台分发给软件团队。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;62-基于目标选择板子&#34;&gt;6.2 基于目标选择板子
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;Table 11：使用场景 × 板子因素的权重矩阵&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;使用场景&lt;/th&gt;
+          &lt;th&gt;灵活性&lt;/th&gt;
+          &lt;th&gt;速度&lt;/th&gt;
+          &lt;th&gt;调试&lt;/th&gt;
+          &lt;th&gt;鲁棒性&lt;/th&gt;
+          &lt;th&gt;容量&lt;/th&gt;
+          &lt;th&gt;成本&lt;/th&gt;
+          &lt;th&gt;交付&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RTL 调试&lt;/td&gt;
+          &lt;td&gt;++&lt;/td&gt;
+          &lt;td&gt;++&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;+++&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+          &lt;td&gt;++&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;算法研究&lt;/td&gt;
+          &lt;td&gt;+&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+          &lt;td&gt;++&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+          &lt;td&gt;-&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;IP 评估&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+          &lt;td&gt;++&lt;/td&gt;
+          &lt;td&gt;+&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;ECO 回归&lt;/td&gt;
+          &lt;td&gt;+&lt;/td&gt;
+          &lt;td&gt;++&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+          &lt;td&gt;+&lt;/td&gt;
+          &lt;td&gt;+&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+          &lt;td&gt;++&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;驱动测试&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+          &lt;td&gt;++&lt;/td&gt;
+          &lt;td&gt;+&lt;/td&gt;
+          &lt;td&gt;+&lt;/td&gt;
+          &lt;td&gt;-&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;App/OS 集成&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+          &lt;td&gt;+&lt;/td&gt;
+          &lt;td&gt;-&lt;/td&gt;
+          &lt;td&gt;++&lt;/td&gt;
+          &lt;td&gt;++&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;软件验证&lt;/td&gt;
+          &lt;td&gt;-&lt;/td&gt;
+          &lt;td&gt;+&lt;/td&gt;
+          &lt;td&gt;-&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;++&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;+&lt;/td&gt;
+          &lt;td&gt;+&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;评估板分发&lt;/td&gt;
+          &lt;td&gt;- -&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+          &lt;td&gt;+&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;+++&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;- -&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;++&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;++&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;标准基础设施&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;+++&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;+&lt;/td&gt;
+          &lt;td&gt;++&lt;/td&gt;
+          &lt;td&gt;+&lt;/td&gt;
+          &lt;td&gt;++&lt;/td&gt;
+          &lt;td&gt;=&lt;/td&gt;
+          &lt;td&gt;+&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;推荐实践&lt;/strong&gt;：在自己的团队中重新创建这个矩阵，让所有利益相关者对齐关键选型标准。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;63-灵活性模块化&#34;&gt;6.3 灵活性：模块化
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;大单板 vs 模块化系统&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;20 颗 FPGA 的单板 → 当前项目需要接近 20 颗时很诱人
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                    → 下一个小项目呢？大量资源闲置
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;2×4 模块化系统   → 当前项目组合成 8 颗
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                    → 后续项目可独立使用每块 4 FPGA 板
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                    → ROI 显著提高
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;外设模块化的逻辑相同&lt;/strong&gt;：不要在 baseboard 上固定放置任何特定外设（USB、以太网等）。原因：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;不用的外设浪费 FPGA 引脚（最宝贵的资源）&lt;/li&gt;
+&lt;li&gt;模块化子卡允许精确按需配置（包括 0 个）&lt;/li&gt;
+&lt;li&gt;IP 核通常只能通过模块化子卡支持（PHY 敏感、RTL 不可得）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;HAPS 生态的例子&lt;/strong&gt;：Synopsys 同时提供板和 IP → 同一供应商预测试过的 IP 子卡 → IP 升级到下一代标准时只需换子卡，不用替换整个平台。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;一般而言，终端用户应避免&amp;rsquo;一刀切&amp;rsquo;式的 FPGA 原型供应商选择方式，因为在大多数情况下，这会导致设计、项目和商业上的妥协。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;64-灵活性互联&#34;&gt;6.4 灵活性：互联
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;三种固定互联拓扑&lt;/strong&gt;（图59）：&lt;/p&gt;
+&lt;p&gt;| 拓&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0173-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 59: Examples of fixed interconnect configurations found on FPGA boards&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;扑&lt;/th&gt;
+          &lt;th&gt;优势&lt;/th&gt;
+          &lt;th&gt;劣势&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;菊花链（Daisy-Chain）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;单一宽数据通路效率高&lt;/td&gt;
+          &lt;td&gt;信号需穿越 FPGA（大量引脚浪费 + 路径延迟暴增）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;星形（Star）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;任意 FPGA 直接驱动任意 FPGA&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;IO 引脚效率最低&lt;/strong&gt;——所有 FPGA 的引脚硬连接到所有总线&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;混合&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;多数商业板的选择&lt;/td&gt;
+          &lt;td&gt;固定的折中仍然不可能完美匹配每个设计&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;星形互联的经典陷阱&lt;/strong&gt;（图60，延续第5章的例子）：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;3 个模块在 AHB 总线上 → 分区到 3 颗 FPGA&lt;/li&gt;
+&lt;li&gt;第 4 颗 FPGA 的 130+ 引脚硬连接到总线 → 只能设高阻态 → &lt;strong&gt;永久浪费&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;如果用第 4 颗 FPGA 放设计的其他部分 → 引脚浪费可能致命&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0174-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 60: Multiplexed bus partitioned into a star-based interconnect.&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;自建板 vs 商业板的关键差异&lt;/strong&gt;：自建板可让互联精确匹配 SoC 顶层块图（尤其配合 DFP 方法时）。商业板有固定互联 → 必须妥协。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;65-什么是最理想的互联拓扑&#34;&gt;6.5 什么是最理想的互联拓扑？
+&lt;/h3&gt;&lt;p&gt;答案：&lt;strong&gt;间接互联（Indirect Interconnect）&lt;/strong&gt; — 两种形式。&lt;/p&gt;
+&lt;h4 id=&#34;形式一延迟互联deferred-interconnect-hapstrak-ii&#34;&gt;形式一：延迟互联（Deferred Interconnect）= HapsTrak II
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;原理&lt;/strong&gt;：FPGA 引脚不直接互连，而是全部引出到连接器 → 通过夹层连接板或柔性排线按需连接。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;FPGA1 引脚 → 连接器 A ──(夹层板/排线)── 连接器 D → FPGA4 引脚
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;关键特性&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;可创建本地和远程连接&lt;/li&gt;
+&lt;li&gt;项目结束后拆掉线缆，下一个项目重新配置拓扑&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;连接器的粒度决定灵活性&lt;/strong&gt;——粒度越细（每个连接器承载的引脚数越少），重组越灵活&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;形式二交换互联switched-interconnect-chipit&#34;&gt;形式二：交换互联（Switched Interconnect）= CHIPit
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;原理&lt;/strong&gt;：可编程开关矩阵连接不同互联段。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;粒度&lt;/strong&gt;：CHIPit 系统以 &lt;strong&gt;8 路为单位&lt;/strong&gt; 分配互联。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;核心优势&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;可编程 → 无需物理改动即可重新配置 → 支持远程操作（远程软件验证实验室加载设计映像+配置交换机，完全不需要碰硬件）&lt;/li&gt;
+&lt;li&gt;由分区工具控制 → 分区器发现需要更多连接时立即行使该选项 → 边分区边调整互联资源&lt;/li&gt;
+&lt;li&gt;空闲引脚可在设计加载后重新路由到调试端口&lt;/li&gt;
+&lt;li&gt;支持细粒度开关 → 解决分区问题用的最少必要连接数 → 其余本地连接仍可用于其他地方&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;现实限制&lt;/strong&gt;：理论上理想的&amp;quot;任意点到任意点&amp;quot;全交叉矩阵难以扩展到大量连接。实际实现中会级联较小的开关矩阵并混合部分直接互联。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;CHIPit 系统架构&lt;/strong&gt;（图63）：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;同板 FPGA 之间有固定走线&lt;/li&gt;
+&lt;li&gt;可编程开关提供额外连接路径&lt;/li&gt;
+&lt;li&gt;类似开关可以链接存储模块、连接其他板/平台&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;非所有开关组合合法且数量过多无法手工控制 → 由软件自动配置&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0177-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 63: Switched interconnect matrix in CHIPit prototyping system&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;66-速度互联延迟的影响&#34;&gt;6.6 速度：互联延迟的影响
+&lt;/h3&gt;&lt;h4 id=&#34;量化时序分析全书最严谨的路径延迟分解&#34;&gt;量化时序分析（全书最严谨的路径延迟分解）
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;路径延迟的通用表达式&lt;/strong&gt;（图64）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;![Book page 179](/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0179-04.png)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;![Figure 64: Comparing path delays for different interconnect examples](/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0179-01.png)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Total Path Delay = FFTOC + Onchip1 + Obuf + Delay(onboard) + Ibuf + Onchip2 + FFTSU
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;FPGA 内部的固定开销&lt;/strong&gt;（Virtex-6 典型值）：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;组件&lt;/th&gt;
+          &lt;th&gt;含义&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;FFTOC&lt;/td&gt;
+          &lt;td&gt;发起 FF 的 Clock-to-Output 延迟&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Onchip1,2&lt;/td&gt;
+          &lt;td&gt;FPGA 内布线延迟&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Obuf&lt;/td&gt;
+          &lt;td&gt;第一颗 FPGA 的输出 pad 延迟&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Ibuf&lt;/td&gt;
+          &lt;td&gt;第二颗 FPGA 的输入 pad 延迟&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;FFTSU&lt;/td&gt;
+          &lt;td&gt;接收 FF 的 Setup 时间&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;合计&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;~4.5ns&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;不同互联方式的飞行时间和 Fmax&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;互联方式&lt;/th&gt;
+          &lt;th&gt;飞行时间&lt;/th&gt;
+          &lt;th&gt;总路径&lt;/th&gt;
+          &lt;th&gt;Fmax（近似）&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;直接互联&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;1ns&lt;/td&gt;
+          &lt;td&gt;5.5ns&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;180MHz&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;延迟互联&lt;/strong&gt;（高质量线缆+插座）&lt;/td&gt;
+          &lt;td&gt;4ns&lt;/td&gt;
+          &lt;td&gt;9.5ns&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;105MHz&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;交换互联&lt;/strong&gt;（典型 2 级开关遍历）&lt;/td&gt;
+          &lt;td&gt;4ns&lt;/td&gt;
+          &lt;td&gt;9.5ns&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;105MHz&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;即使直接互联，总延迟的主导因素也不是飞行时间而是 FPGA 内部路径。&lt;strong&gt;最大性能可达 250MHz&lt;/strong&gt;（如果关键路径能分到直接互联上的话）。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;交换互联更详细的分析&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;单个开关元件延迟：0.15ns ~ 0.25ns&lt;/li&gt;
+&lt;li&gt;加上往返开关的板级走线：单次飞行时间约 1.5ns（最佳情况）&lt;/li&gt;
+&lt;li&gt;实际设计中信号可能穿越多段（平均 2 级，极端 8 级，大设计分到 20 颗 FPGA 时）&lt;/li&gt;
+&lt;li&gt;→ 需供应商提供路由优化工具 + 分区器协同控制路由器 → 最优结果&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;661-飞行时间到底有多重要&#34;&gt;6.6.1 飞行时间到底有多重要？
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;核心洞察：互联可用性 &amp;gt; 飞行时间&lt;/strong&gt;。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在大多数 FPGA 原型项目中，性能确实受限于互联——但限制因素是其&lt;strong&gt;可用数量&lt;/strong&gt;而非飞行时间。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;一个典型的例子&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;分区器要求两颗 FPGA 间 200 条路径&lt;/li&gt;
+&lt;li&gt;实际只有 100 个空闲引脚&lt;/li&gt;
+&lt;li&gt;无论是直接还是&amp;quot;从火星绕一圈&amp;quot;，都只能装 100 条&lt;/li&gt;
+&lt;li&gt;→ 必须 2:1 复用 → &lt;strong&gt;实际系统性能减半&lt;/strong&gt;（内部逻辑最多以互联速度的一半运行）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;灵活互联的价值&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;提供不同的分区方案 → 可能释放 100+ 额外引脚&lt;/li&gt;
+&lt;li&gt;→ 200 条信号无需复用全速运行&lt;/li&gt;
+&lt;li&gt;→ &lt;strong&gt;灵活性产生的净性能可能远超直接互联的飞行时间优势&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在速度与灵活性的权衡中，最优决策往往偏向灵活性。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;总结&lt;/strong&gt;：一个好的 FPGA 平台应&lt;strong&gt;同时提供多种选项&lt;/strong&gt;——关键信号走直接互联，非关键信号走间接互联。识别非关键信号后甚至可以将其复用到共享路径上，为更关键的信号释放引脚。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;67-速度设计与布局的质量&#34;&gt;6.7 速度：设计与布局的质量
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;高性能 PCB 的要求&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;PCIe / DDR3 等接口原生运行需 100MHz+ → FPGA 的快速引脚 + PCB 的鲁棒设计&lt;/li&gt;
+&lt;li&gt;最新高引脚数 FPGA 需要极复杂板设计——&lt;strong&gt;极少供应商能设计和制造 40 层板&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;走线长度和阻抗匹配 → 良好差分信令 + 远程同步点间延迟匹配&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;多批次一致性&lt;/strong&gt;：不同批次甚至同批次不同板子间性能差异显著 → 设计质量差的标志&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;时钟和复位网络尤为重要&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;必须足够灵活容纳各种时钟源和频率&lt;/li&gt;
+&lt;li&gt;必须在分布式时钟网络的每一点都交付优质时钟信号&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;电源同样关键&lt;/strong&gt;：低阻抗、高电流路径到 FPGA 核心和 IO 电压轨引脚 → 维持低噪声（尤其每个时钟周期大量信号在 FPGA 间翻转时）。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;两颗使用相同 FPGA 的板子可能看起来速度和质量差不多，但&lt;strong&gt;是板供应商的专业能力&lt;/strong&gt;——而非 FPGA 芯片本身——决定它们能否可靠地交付原始性能。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;68-板上信号复用支持&#34;&gt;6.8 板上信号复用支持
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;TDM 的基本概念&lt;/strong&gt;：2+ 路信号共享同一条互联路径 → FPGA 内部需要 mux/demux 逻辑 + 两端同步。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Certify 的 CPM（Certify Pin Multiplier）&lt;/strong&gt;：自动插入 TDM 逻辑、分析时序、选择哪些信号放入 MUX。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;复用比与性能的跷跷板&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;复用比 8:1 + 内部逻辑跑 16MHz&lt;/li&gt;
+&lt;li&gt;→ 要么降到 2MHz（几乎等于仿真器了）&lt;/li&gt;
+&lt;li&gt;→ 要么外部信号以 128MHz+ 传输&lt;/li&gt;
+&lt;li&gt;→ 需要板子支持高速外部信号 + 低噪声（否则毛刺破坏 TDM 流同步）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;lvds-高速-tdm图65&#34;&gt;LVDS 高速 TDM（图65）
+&lt;/h4&gt;&lt;p&gt;使用&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0184-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 65: High Speed TDM using differential signaling between FPGAs&#34;
+	
+	
+&gt;
+FPGA 的 LVDS 差分信令能力 → 板上路径速度可达 &lt;strong&gt;1GHz&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;HSTDM（高速 TDM）示例&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;800MHz 传输 + 8:1 复用 → 轻松支撑 128MHz 内部逻辑&lt;/li&gt;
+&lt;li&gt;甚至 40:1 复用比也支持（只要板子质量够好）&lt;/li&gt;
+&lt;li&gt;差分对 → 64:2 的 TDM 比率 → 30MHz+ 的原型 + 极其充裕的有效互联&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;HAPS-60 + Certify 的自动化 HSTDM&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;板级 LVDS 能力信息内置于分区工具&lt;/li&gt;
+&lt;li&gt;工具自动分配差分对到最合适的信号&lt;/li&gt;
+&lt;li&gt;→ &lt;strong&gt;板和工具协同开发的价值&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;69-成本与鲁棒性&#34;&gt;6.9 成本与鲁棒性
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;总拥有成本（TCO）≠ 购买价&lt;/strong&gt;。需权衡：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;初始资本成本 vs 跨项目复用能力&lt;/li&gt;
+&lt;li&gt;板子能否达到要求性能的风险&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;为多年期数亿美元的 SoC 项目冒险使用一块便宜板子可能不是明智的&amp;rdquo;&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;鲁棒性特别重要&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;多数原型平台需要多份复制 → 分发给远程终端用户&lt;/li&gt;
+&lt;li&gt;有些项目需要原型部署到真实环境（车载/客户/现场）&lt;/li&gt;
+&lt;li&gt;板子必须可靠 + 鲁棒到能承受运输&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;具有经过验证的异地部署和可靠性记录的板子，投资回收周期远短于需要持续关注才能保持运行的板子。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;供应商保修&lt;/strong&gt;：应承诺保修期内立即从库存更换。&lt;/p&gt;
+&lt;h4 id=&#34;691-fpga-供应决定板子交付&#34;&gt;6.9.1 FPGA 供应决定板子交付
+&lt;/h4&gt;&lt;p&gt;最新一代 FPGA 在早期产能爬坡期通常短缺 → &lt;strong&gt;板供应商能否保障 FPGA 器件是关键的商业差异&lt;/strong&gt;。板供应商必须是 FPGA 供应商的大批量客户才能确保自己的器件可获得性。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;610-容量&#34;&gt;6.10 容量
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;永远不要轻信供应商的门数宣称&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;LX550T vs LX760 的实际对比&lt;/strong&gt;（表13）：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;资源&lt;/th&gt;
+          &lt;th&gt;XC6VLX550T&lt;/th&gt;
+          &lt;th&gt;XC6VLX760&lt;/th&gt;
+          &lt;th&gt;比值&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Logic Cells&lt;/td&gt;
+          &lt;td&gt;549,888&lt;/td&gt;
+          &lt;td&gt;758,784&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;138%&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;FF&lt;/td&gt;
+          &lt;td&gt;687,360&lt;/td&gt;
+          &lt;td&gt;948,480&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;138%&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;BlockRAM (Kbit)&lt;/td&gt;
+          &lt;td&gt;22,752&lt;/td&gt;
+          &lt;td&gt;25,920&lt;/td&gt;
+          &lt;td&gt;114%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;DSP&lt;/td&gt;
+          &lt;td&gt;864&lt;/td&gt;
+          &lt;td&gt;864&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;100%（相同！）&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;GTX&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;36&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;0&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;不适用&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;关键教训&lt;/strong&gt;：资源对比不是线性的——不同设计中关键资源可能完全不同。&lt;strong&gt;DSP 相同的两块板，在算术密集型设计中实际上提供相同的有效容量。&lt;/strong&gt; 而 LX760 没有 GTX——如果需要高速串行接口，LX550T 反而是更好的选择。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;在项目开始阶段节约板子容量成本，会在项目后期设计增长超出可用空间时浪费大量时间——这是很多人难以接受的建议。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;611-总结top-10-选购检查清单&#34;&gt;6.11 总结：Top-10 选购检查清单
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;#&lt;/th&gt;
+          &lt;th&gt;检查项&lt;/th&gt;
+          &lt;th&gt;追问&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;1&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;Baseboard 产品线有多广？&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;相互兼容且可叠加吗？&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;2&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;子板/子卡生态如何？&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;哪些 IP、微处理器和互联标准？&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;3&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;互联有多灵活？&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;能满足跨项目的性能需求吗？&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;4&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;板子有经过验证的质量和可靠性记录吗？&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;有参考客户可核实吗？&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;5&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;是否提供本地支持？&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;有培训吗？文档有多完整？&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;6&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;其他用户达到了什么性能？&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;有参考客户可核实吗？&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;7&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;板子够便携和鲁棒吗？&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;能被证明吗？&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;8&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;板上调试能力如何？&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;能远程调试吗？&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;9&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;能链接到哪些其他调试和验证工具？&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;与现有验证工具一起工作过吗？&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;10&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;供应商提供延长保修吗？&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;有快速替换选项吗？&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;关键图示解读&#34;&gt;关键图示解读
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;Table 11：使用场景 × 选型因素的权重矩阵&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;为什么 RTL 调试的 Robustness 是&amp;quot;无关紧要（=）&amp;quot;，而评估板分发的 Robustness 是&amp;quot;极关键（+++）&amp;quot;——因为后者要被寄送到根本不了解 FPGA 的第三方手中独立运行&lt;/li&gt;
+&lt;li&gt;这张表本质上是一份&amp;quot;买板前的需求对齐会议&amp;quot;的标准化议事日程&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;图59：三种固定互联拓扑&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;菊花链（最省引脚但最慢）→ 星形（最快但最浪费引脚）→ 混合（商业板常见但仍然是固定折中）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;图64：三种互联方式的延迟分解&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;8.5ns vs 9.5ns vs 9.5ns——直接互联仅领先约 75% 的性能，而非直观预期的&amp;quot;快好几倍&amp;quot;&lt;/li&gt;
+&lt;li&gt;这个量化分析支撑了全章最核心的论点&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;图62：HAPS 延迟互联的实际照片&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;理论与实践的差距——看到真实的排线和夹层板后，对&amp;quot;灵活性&amp;quot;三个字有了物理上的理解&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0176-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 62: Synopsys HAPS[®] : example of deferred interconnect&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0176-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 62: Synopsys HAPS[®] : example of deferred interconnect&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;图63：CHIPit 交换互联的拓扑图&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;固定走线 + 可编程开关的混合架构——开关矩阵不是全交叉，而是级联小块&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Table 14：Top-10 检查清单&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;值得打印出来放在会议室桌上，每次采购 FPGA 原型板时对照使用&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;个人总结&#34;&gt;个人总结
+&lt;/h2&gt;&lt;p&gt;这一章和上一章一起构成了&amp;quot;Make vs Buy&amp;quot;的完整论证。第5章教你怎么造，第6章教你如何买——但更重要的是，第6章悄悄论证了一个事实：&lt;strong&gt;对于大多数团队而言，&amp;ldquo;买&amp;quot;优于&amp;quot;造&amp;rdquo;&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;作者的论证策略非常巧妙。他不是直接比较自建和购买的成本——那在第5章已经用&amp;quot;大多数自建板从未被复用&amp;quot;的事实暗示过。第6章专注论证的是一个更微妙但更重要的点：&lt;strong&gt;互联灵活性才是性能的真正决定因素，而非原始飞行时间&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;这个结论的推论是：商业平台在互联灵活性上的投资（HapsTrak II 的延迟互联、CHIPit 的交换互联、HSTDM、由分区工具自动控制的路由）是单个自建项目难以复制的。这些不是硬件层面的创新——它们是&lt;strong&gt;硬件+软件+工具链的协同设计&lt;/strong&gt;。一家公司可以设计一块板子，但几乎不可能为一两次自建项目开发出与商业平台同等水平的工具链支持。&lt;/p&gt;
+&lt;p&gt;最后，Top-10 检查清单的价值不仅在选板——它也反向定义了什么是一个好的原型验证平台。在后续章节讨论具体设计方法时，这十个维度可以作为判断&amp;quot;这对我选用的平台是否适用&amp;quot;的快速评估框架。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;实践思考&#34;&gt;实践思考
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Table 11 的价值在于迫使你承认：没有一块板同时擅长一切&lt;/strong&gt;。精确理解你的主要使用场景，买最匹配的板，而不是最全的板&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;互联可用性 &amp;gt; 飞行时间&lt;/strong&gt;是一个反直觉但极其实用的工程准则。在选择板子时，问&amp;quot;能给我多少条有效路径避免复用&amp;quot;比问&amp;quot;最快能跑多少 MHz&amp;quot;更有实际意义&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;LVDS/HSTDM 是平台质量的放大器&lt;/strong&gt;——一块板如果不能支持高质量差分信令，它的有效互联比标称值大打折扣&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;门数&amp;quot;是一个有毒的营销指标&lt;/strong&gt;。无视供应商的一切门数宣称；跑自己的综合、加倍结果、对比实际资源&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;保修和交付可靠性应该被写入采购合同&lt;/strong&gt;——如果你依赖原型平台来验证数亿规模的 SoC 项目，等 8 周才能拿到替换板是不可接受的&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;HAPS 和 CHIPit 代表了两种不同的哲学&lt;/strong&gt;：HAPS 用物理上可重新配置的连接（延迟互联），CHIPit 用电子的可编程开关（交换互联）。前者在项目变化时可能需要动手，但路径质量更好；后者可以在几分钟内重新配置，甚至支持远程操作——选择哪种取决于团队的使用模式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0175-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 61: Two examples of Indirect Interconnect&#34;
+	
+	
+&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

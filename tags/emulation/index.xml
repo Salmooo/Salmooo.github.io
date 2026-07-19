@@ -1,0 +1,570 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Emulation on SalmoneX Blog</title>
+        <link>https://Salmooo.github.io/tags/emulation/</link>
+        <description>Recent content in Emulation on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright>
+        <lastBuildDate>Wed, 27 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://Salmooo.github.io/tags/emulation/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>第1章: Introduction — The Challenge of System Verification</title>
+        <link>https://Salmooo.github.io/p/%E7%AC%AC1%E7%AB%A0-introduction-the-challenge-of-system-verification/</link>
+        <pubDate>Wed, 27 May 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/p/%E7%AC%AC1%E7%AB%A0-introduction-the-challenge-of-system-verification/</guid>
+        <description>&lt;h2 id=&#34;章节概览&#34;&gt;章节概览
+&lt;/h2&gt;&lt;p&gt;本章作为全书导论，为 FPGA 原型验证建立了背景框架。核心论点：&lt;strong&gt;在现代 SoC 项目中，软件开发成本已超过硬件开发，而传统串行流程中软件必须等到芯片流片后才能充分验证——这使得原型验证（尤其是 FPGA 原型）成为缩短上市时间、提升 ROI 的关键手段。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;本章系统对比了四种原型方法：虚拟平台、SDK、FPGA 原型、仿真器（Emulator）和初版芯片，分析了各自在可用时机、执行速度、精度上的权衡，并梳理了用户在选择原型方案时的 12 项优先级标准。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;核心知识点&#34;&gt;核心知识点
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;SoC 定义&lt;/strong&gt;：本书将 SoC 定义为包含至少一个 CPU 并运行嵌入式软件的专用芯片，是 ASIC 的超集&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;倒三角市场结构&lt;/strong&gt;：芯片研发 $85.4B → EDA/IP 工具 $8.6B → 电子系统 $1,116B（2009年数据）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;软件开发占比 40%&lt;/strong&gt;：在 65nm 无线耳机芯片案例中，软件开发消耗了总成本的 40%，项目周期长达 27 个月&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;提前 7 个月开始软件 = $50M 额外收入&lt;/strong&gt;：用 GSA 的 ROI 计算器，若软件能提前 7 个月开始，量产可提前 3 个月，盈亏平衡点提前 5 个月&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;四种原型方法&lt;/strong&gt;：虚拟平台 (earliest) → FPGA 原型 (pre-silicon, high speed) → 仿真器 (slower, more automated) → 初版芯片 (latest, full accuracy)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;FPGA 原型的核心优势&lt;/strong&gt;：以 RTL 精度运行，速度可达几十 MIPS per CPU，远快于仿真器&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;8 大芯片设计趋势&lt;/strong&gt;：工艺微缩、设计总量下降、可编程性/软件含量激增、IP 复用、应用专用化、多核架构、低功耗、混合信号&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;12 项用户选择标准&lt;/strong&gt;：可用时机、执行速度、精度、容量、开发成本、移植成本、部署成本、调试可见性、执行控制、系统接口、周转时间、与低功耗/验证的联动价值&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;详细笔记&#34;&gt;详细笔记
+&lt;/h2&gt;&lt;h3 id=&#34;11-moore-was-right-与-soc-的定义&#34;&gt;1.1 Moore was Right! 与 SoC 的定义
+&lt;/h3&gt;&lt;p&gt;Gordon Moore 的晶体管翻倍定律已持续半个多世纪，且仍未停止。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;本书对 SoC 的定义：&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;一个为特定目的设计和制造、由特定所有者独家使用的器件。SoC 必须包含至少一个 CPU 并运行嵌入式软件。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;关键洞察：本书之所以聚焦 SoC 而非通用 ASIC，是因为&lt;strong&gt;FPGA 原型的最大价值在于提供快速且精确的 SoC 模型，从而支持软件的早期验证&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;12-soc-设计的经济学&#34;&gt;1.2 SoC 设计的经济学
+&lt;/h3&gt;&lt;h4 id=&#34;硬件-软件拆解视角&#34;&gt;硬件-软件拆解视角
+&lt;/h4&gt;&lt;p&gt;智能手机的拆解揭示了两层栈：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;层次&lt;/th&gt;
+          &lt;th&gt;软件栈&lt;/th&gt;
+          &lt;th&gt;硬件栈&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;顶层&lt;/td&gt;
+          &lt;td&gt;用户应用&lt;/td&gt;
+          &lt;td&gt;终端设备&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;中层&lt;/td&gt;
+          &lt;td&gt;中间件 → OS → 驱动&lt;/td&gt;
+          &lt;td&gt;电路板 → 外设/芯片&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;底层&lt;/td&gt;
+          &lt;td&gt;（硬件抽象层）&lt;/td&gt;
+          &lt;td&gt;IP 模块 / 定制模块&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;应用开发者不直接接触硬件内存、时序等底层细节，这依赖于完整的软件栈与硬件栈之间的抽象层。&lt;/p&gt;
+&lt;h4 id=&#34;四大核心挑战&#34;&gt;四大核心挑战
+&lt;/h4&gt;&lt;p&gt;EDA 工具行业面临的关键赋能挑战：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;(a) 尽早启动软件开发&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;(b) 在目标系统上下文中验证硬件/软件&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;(c) 设计和复用基本构建块&lt;/strong&gt; — 处理器、加速器、外设、互联结构（如 ARM AMBA）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;(d) 芯片的架构设计&lt;/strong&gt; — 从基本构建块组装芯片&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&#34;案例研究65nm-无线耳机芯片&#34;&gt;案例研究：65nm 无线耳机芯片
+&lt;/h4&gt;&lt;p&gt;这是一个非常有说服力的真实项目案例（图3展示了项目各阶段的 effort 分布）：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0030-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 3: Project effort for a 65nm wireless headset design&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;参数&lt;/th&gt;
+          &lt;th&gt;数值&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;工艺&lt;/td&gt;
+          &lt;td&gt;65nm 主流工艺&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;预期产量&lt;/td&gt;
+          &lt;td&gt;150 万片/月&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;平均售价&lt;/td&gt;
+          &lt;td&gt;$5.50&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;总开发成本&lt;/td&gt;
+          &lt;td&gt;$31,650,000&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;硬件设计周期&lt;/td&gt;
+          &lt;td&gt;12 个月&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;项目总周期&lt;/td&gt;
+          &lt;td&gt;27 个月&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RTL 验证&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;整个 12 个月硬件周期中最关键的部分&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;软件开发占比&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;总成本的 40%&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;关键发现：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;软件开发在 RTL 基本稳定后才全面展开（它分为 OS 移植、底层软件、高层应用软件三个层次）&lt;/li&gt;
+&lt;li&gt;收支平衡需要 34 个月（项目启动后近 3 年）&lt;/li&gt;
+&lt;li&gt;如果软件能提前 7 个月开始 → 量产提前 3 个月 → 盈亏平衡提前 5 个月 → &lt;strong&gt;额外 $50M 收入&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;这就是原型验证的商业价值闭环。不是锦上添花，而是直接影响公司营收的核心能力。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;13-四种原型方法对比&#34;&gt;1.3 四种原型方法对比
+&lt;/h3&gt;&lt;h4 id=&#34;131-虚拟平台-virtual-platforms&#34;&gt;1.3.1 虚拟平台 (Virtual Platforms)
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;最早可用&lt;/strong&gt;（规格定下来就能建，如果模型可用）&lt;/li&gt;
+&lt;li&gt;功能完整、时序宽松的软件模型，运行在主机仿真上&lt;/li&gt;
+&lt;li&gt;速度：几十 MIPS（松时序模型）&lt;/li&gt;
+&lt;li&gt;可执行未经修改的生产代码&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;优势&lt;/strong&gt;：极强的调试可见性和控制能力，易于复制分发，支持虚拟 I/O 和用户界面&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;劣势&lt;/strong&gt;：时序精度不足，加入精确模型后速度降至个位数 MIPS&lt;/li&gt;
+&lt;li&gt;适用于：早期软件开发、硬件架构协同探索&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;典型工具：Synopsys Innovator（第13章将讨论如何连接 FPGA 原型与虚拟仿真）&lt;/p&gt;
+&lt;h4 id=&#34;132-sdk&#34;&gt;1.3.2 SDK
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;Android SDK 上线前两天即被下载 10 万次以上——这是一个被广泛使用的原型平台&lt;/li&gt;
+&lt;li&gt;精度有限，&amp;ldquo;刚好够骗过应用&amp;rdquo;&lt;/li&gt;
+&lt;li&gt;编译目标是主机而非最终芯片，事后需重新编译&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;133-fpga-原型&#34;&gt;1.3.3 FPGA 原型
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;较晚可用&lt;/strong&gt;（需要 RTL 相对成熟且验证稳定）&lt;/li&gt;
+&lt;li&gt;实现的是与 SoC 相同的 RTL&lt;/li&gt;
+&lt;li&gt;速度：&lt;strong&gt;几十 MIPS per CPU&lt;/strong&gt;，接近实时&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;RTL 精度&lt;/strong&gt; + 真实外部接口连接&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;不是 RTL 调试的首选平台&lt;/strong&gt;（调试可见性不如虚拟平台和仿真器）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;不是软硬件协同开发平台&lt;/strong&gt;（当 FPGA 原型跑起来时，硬件架构已基本固定，除非发现重大瓶颈）&lt;/li&gt;
+&lt;li&gt;复制成本高于虚拟平台，但远低于仿真器&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;134-仿真器-emulators&#34;&gt;1.3.4 仿真器 (Emulators)
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;强调自动化映射和快速编译，但执行速度低（单 MIPS 以下）&lt;/li&gt;
+&lt;li&gt;昂贵，难以大量复制给软件团队&lt;/li&gt;
+&lt;li&gt;更恰当的定位：&lt;strong&gt;RTL 仿真的加速器&lt;/strong&gt;，是验证环境的延伸&lt;/li&gt;
+&lt;li&gt;软件方面只适用于短时运行（如 boot ROM），不适合 OS bring-up 或应用程序&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;135-初版芯片&#34;&gt;1.3.5 初版芯片
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;实时速度 + 完整精度&lt;/li&gt;
+&lt;li&gt;最便宜（量产芯片的开发板）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;最晚可用&lt;/strong&gt;，几乎没有提前量&lt;/li&gt;
+&lt;li&gt;调试可见性受限（除非内置 OCI 功能）&lt;/li&gt;
+&lt;li&gt;物流成本：需要处理海关、电路板 bring-up、物理损坏等问题&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;四种方法总结对比&#34;&gt;四种方法总结对比
+&lt;/h4&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;方法&lt;/th&gt;
+          &lt;th&gt;可用时机&lt;/th&gt;
+          &lt;th&gt;执行速度&lt;/th&gt;
+          &lt;th&gt;精度&lt;/th&gt;
+          &lt;th&gt;调试可见性&lt;/th&gt;
+          &lt;th&gt;复制成本&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;虚拟平台&lt;/td&gt;
+          &lt;td&gt;最早&lt;/td&gt;
+          &lt;td&gt;高 (几十 MIPS)&lt;/td&gt;
+          &lt;td&gt;松时序&lt;/td&gt;
+          &lt;td&gt;极好&lt;/td&gt;
+          &lt;td&gt;极低&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;FPGA 原型&lt;/td&gt;
+          &lt;td&gt;中等&lt;/td&gt;
+          &lt;td&gt;高 (几十 MIPS)&lt;/td&gt;
+          &lt;td&gt;RTL 精度&lt;/td&gt;
+          &lt;td&gt;中等&lt;/td&gt;
+          &lt;td&gt;中等&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;仿真器&lt;/td&gt;
+          &lt;td&gt;中等&lt;/td&gt;
+          &lt;td&gt;低 (&amp;lt;1 MIPS)&lt;/td&gt;
+          &lt;td&gt;RTL 精度&lt;/td&gt;
+          &lt;td&gt;好&lt;/td&gt;
+          &lt;td&gt;高&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;初版芯片&lt;/td&gt;
+          &lt;td&gt;最晚&lt;/td&gt;
+          &lt;td&gt;实时&lt;/td&gt;
+          &lt;td&gt;完全精确&lt;/td&gt;
+          &lt;td&gt;有限&lt;/td&gt;
+          &lt;td&gt;低&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;14-原型验证的三种使用模式&#34;&gt;1.4 原型验证的三种使用模式
+&lt;/h3&gt;&lt;h4 id=&#34;141-架构探索&#34;&gt;1.4.1 架构探索
+&lt;/h4&gt;&lt;p&gt;芯片架构师需要在项目初期决定：拓扑结构、性能、功耗、片上通信架构。理想情况是获得同时具备&lt;strong&gt;完整精度&lt;/strong&gt;和&lt;strong&gt;全速运行&lt;/strong&gt;能力的模型——但现实中两者不可兼得。事实上，大多数架构师仍在依赖 Excel 和白板讨论。&lt;/p&gt;
+&lt;h4 id=&#34;142-软件开发&#34;&gt;1.4.2 软件开发
+&lt;/h4&gt;&lt;p&gt;不同软件类型对硬件精度的要求不同：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;软件类型&lt;/th&gt;
+          &lt;th&gt;精度要求&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;应用软件&lt;/td&gt;
+          &lt;td&gt;不需要硬件精度，SDK + 高级 API 即可&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;中间件和驱动&lt;/td&gt;
+          &lt;td&gt;需要一定时序表示（cache/MMU 的时序注释可能就够了）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;实时软件&lt;/td&gt;
+          &lt;td&gt;指令的高级周期时序 + 微架构效应&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;时间关键软件（如 ISR）&lt;/td&gt;
+          &lt;td&gt;完全周期精确&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h4 id=&#34;143-验证&#34;&gt;1.4.3 验证
+&lt;/h4&gt;&lt;p&gt;一个重要趋势：&lt;strong&gt;功能验证正在向嵌入式处理器上的软件执行转移&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;超过 50% 的工程师已经在使用运行在嵌入式处理器上的软件来验证周边硬件。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;验证复用路径（核心价值）&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;快速指令精确处理器模型 + TLM DUT
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  → 混合 TLM/RTL 仿真
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  → 纯 RTL 仿真
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  → FPGA 原型（处理器作为 RTL 在 FPGA 中，或以芯片形式插入）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  → 后硅验证
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;同一套软件测试可以在上述所有阶段复用，实现&amp;quot;写一次，处处验证&amp;quot;。&lt;/p&gt;
+&lt;h3 id=&#34;15-用户选择原型方案的-12-项优先级&#34;&gt;1.5 用户选择原型方案的 12 项优先级
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;#&lt;/th&gt;
+          &lt;th&gt;优先级&lt;/th&gt;
+          &lt;th&gt;含义&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;1&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;可用时机&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;规格冻结后，软件验证环境何时能就绪？&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;2&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;执行速度&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;能否接近实时？回归测试时能否快于实时？&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;3&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;精度&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;取决于开发的软件类型，需要多精确的硬件表示？&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;4&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;容量&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;能否处理最大规模的 SoC？能否未来扩展？&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;5&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;开发成本&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;生产成本 + 移植成本&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;6&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;移植成本&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;除流片必需工作外的额外开销&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;7&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;部署成本&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;多份复制、分发、维护的总成本&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;8&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;调试可见性&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;能否访问设计内部信号、寄存器、硬件/软件状态？&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;9&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;执行控制&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;断点、断言、多核同步停止的能力&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;10&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;系统接口&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;能否连接真实世界接口（USB、网络、无线等协议栈）？&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;11&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;周转时间&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;从新的源文件到新的原型版本需要多长时间？&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;12&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;与低功耗/验证的联动&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;原型能否融入更大的验证和功耗优化流程？&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;没有任何用户在单一项目中同时关心所有 12 项标准——关键是找到适合当前项目的优先级组合。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;16-芯片设计的八大趋势&#34;&gt;1.6 芯片设计的八大趋势
+&lt;/h3&gt;&lt;h4 id=&#34;161-工艺微缩&#34;&gt;1.6.1 工艺微缩
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;1979 X86: 29,000 晶体管 → 2005 Dual Core Itanium: 17.2 亿晶体管（60,000 倍增长）&lt;/li&gt;
+&lt;li&gt;65nm 和 45nm 从 2007 年开始，现已成为主流&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;对原型的影响&lt;/strong&gt;：需要更高密度的 FPGA，单一 FPGA 容量不足时需多 FPGA 分区&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;162-设计总量下降&#34;&gt;1.6.2 设计总量下降
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;SoC 设计总量将显著下降（130nm 及以上节点会大幅减少），但先进工艺仍然活跃&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;对原型的影响&lt;/strong&gt;：每个设计的风险更大，原型验证更加成为必须（mandatory）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;163-可编程性和软件含量激增&#34;&gt;1.6.3 可编程性和软件含量激增
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;在 65nm 节点，&lt;strong&gt;软件研发支出已超过硬件&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;软件成为芯片开发的关键路径&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;对原型的影响&lt;/strong&gt;：尽早启动软件原型验证成为刚需。硬件原型 + 虚拟平台可以混合使用，发挥各自优势：
+&lt;ul&gt;
+&lt;li&gt;避免重复建模已有 RTL 的部分&lt;/li&gt;
+&lt;li&gt;已验证的测试平台加速硬件原型 bring-up&lt;/li&gt;
+&lt;li&gt;混合方案灵活管理精度/速度/可用时机的权衡&lt;/li&gt;
+&lt;li&gt;USB 3.0 驱动甚至在物理线缆面世前就已在虚拟平台上完成开发&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;164-ip-复用&#34;&gt;1.6.4 IP 复用
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;2007 年以来 IP 复用率从 45% 增至 55%&lt;/li&gt;
+&lt;li&gt;每个芯片平均 IP 数量从 28 增至 50&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;芯片设计正在变成&amp;quot;用互联结构组装已有模块&amp;quot;&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;对原型的影响&lt;/strong&gt;：IP 供应商被要求提供不同抽象级别的模型（处理器领域已有 ARM、MIPS、ARC、Tensilica 的快速仿真模型）；OSCI SystemC TLM-2.0 标准的出现使 IP 模型可以跨仿真引擎互操作&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;165-应用专用化与混合信号&#34;&gt;1.6.5 应用专用化与混合信号
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;ITRS 将 SoC 细分为网络、消费便携、消费固定等不同类别，各有独特需求&lt;/li&gt;
+&lt;li&gt;模拟/混合信号比例增加&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;对原型的影响&lt;/strong&gt;：不同应用领域需要特定的系统接口，外部接口速度决定了原型是否可直接使用或需要降速&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;166-多核架构与低功耗&#34;&gt;1.6.6 多核架构与低功耗
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;CPU 频率在 4GHz（桌面）、嵌入式处理器在 1GHz 遇到功耗极限&lt;/li&gt;
+&lt;li&gt;解决方案：多核——更多核 + 更低频率 = 更低功耗&lt;/li&gt;
+&lt;li&gt;消费应用中 DPE 数量从 2007 到 2011 几乎翻了三倍&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;挑战转移到了软件侧&lt;/strong&gt;：传统串行软件需要向多核分布&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;对原型的影响&lt;/strong&gt;：调试（启动/暂停/恢复/停止硬件软件执行）变得更加重要&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;17-总结&#34;&gt;1.7 总结
+&lt;/h3&gt;&lt;blockquote&gt;
+&lt;p&gt;原型验证，以其各种形式，为硬件设计的验证和软件的确认提供了强大的方法论。FPGA 原型在项目后期硬件软件首次集成的关键阶段特别有价值。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;本章的核心结论：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;设计验证和软件开发已经主导了 SoC 开发的工作量&lt;/strong&gt;，原型验证的重要性前所未有&lt;/li&gt;
+&lt;li&gt;用户确实在主动使用多种不同的原型方案（116 人调查显示各种方法都在活跃使用中）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;原型验证不是可选项，是现代芯片设计的必需项&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;关键图示解读&#34;&gt;关键图示解读
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;图1：IC 设计-电子市场的倒三角&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;倒三角形象地说明了 $8.6B 的 EDA/IP 工具市场支撑了 $85.4B 的芯片市场和 $1,116B 的电子系统市场&lt;/li&gt;
+&lt;li&gt;原型验证工具处于这个产业链的关键赋能位置&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0027-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 1: The relationship of IC design to the electronics market&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;图3：65nm 无线耳机芯片项目 effort 分布&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;清晰展示了 RTL 验证在 12 个月硬件周期中的主导地位&lt;/li&gt;
+&lt;li&gt;软件开发三个层次（OS、底层、应用）在 RTL 后期才真正展开&lt;/li&gt;
+&lt;li&gt;这是理解&amp;quot;为什么要提前软件开发&amp;quot;最直观的图&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;图14：原型方法使用调查&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;2009 年 8 月 SoC 虚拟会议上 116 份问卷结果&lt;/li&gt;
+&lt;li&gt;问题：&amp;ldquo;你用什么方法开发硬件相关软件（驱动、固件）？&amp;rdquo;&lt;/li&gt;
+&lt;li&gt;结果：&lt;strong&gt;所有本章描述的原型技术都在活跃使用中&lt;/strong&gt;——说明不同优先级确实导向不同的最佳方案&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;个人总结&#34;&gt;个人总结
+&lt;/h2&gt;&lt;p&gt;这一章没有讲任何 FPGA 的技术细节，而是建立了一个&lt;strong&gt;商业和工程经济学的论证框架&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;本章最有说服力的论点不是技术性的——它来自那个简单的商业计算：提前 7 个月开始软件开发 = $50M 额外收入。这个数字应该成为每个芯片项目经理桌上的座右铭。&lt;/p&gt;
+&lt;p&gt;另一个让我印象深刻的是&amp;quot;写一次，处处验证&amp;quot;的验证复用路径。从 TLM 模型到 RTL 仿真再到 FPGA 原型，同一套软件测试贯穿始终——这种一致性不仅节省工作量，更能确保不同阶段发现的问题都是真实的 bug，而不是模型切换引入的假象。&lt;/p&gt;
+&lt;p&gt;最后，12 项选择标准是一个很好的框架。在后续章节深入学习具体 FPGA 原型技术时，应该不断回到这几个维度来衡量每种技术对特定需求的匹配度。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;实践思考&#34;&gt;实践思考
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;FPGA 原型的定位很微妙&lt;/strong&gt;：它不是最早的（虚拟平台更快），不是最准的（初版芯片更准），不是最便宜的（SDK 更便宜），但它是唯一能在 RTL 精度下跑到几十 MIPS 的方案。这个独特交叉点才是它的不可替代性&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;为什么要等 RTL 成熟才上 FPGA 原型？&lt;/strong&gt; 因为 FPGA 映射成本高，如果 RTL 还在频繁变更，迭代成本太大。理解这个时机限制有助于合理规划项目各阶段的原型策略&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;混合原型环境是未来方向&lt;/strong&gt;：用虚拟平台做早期软件开发和测试平台验证，然后用已验证的测试平台加速 FPGA 原型 bring-up，最终混合运行——这种&amp;quot;验证握手&amp;quot;模式值得在项目中实践&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0028-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 2: Hardware-software teardown of a consumer device&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0032-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 4: Pre-Silicon virtual prototype of OMAP design&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0033-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 5: Android™ SDK screenshot showing GUI emulation&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0041-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 6: Design starts per technology node (Source: IBS)&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0042-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 7: Overall number of design starts per year (Source: IBS)&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0043-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 8: Software effort as percentage of R&amp;D expense (Source: IBS)&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0045-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 9: Percentage of reuse of IP blocks (Source: Semico Research Corp.)&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0045-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 10:  IP instances in SoC designs (Source: Semico Research Corp.)&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0046-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 11: Application specific requirements (Source: ITRS)&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0048-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 12: CPU requirements for consumer applications (source: ITRS)&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0049-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 13: Users recognizing a variety of prototyping options&#34;
+	
+	
+&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

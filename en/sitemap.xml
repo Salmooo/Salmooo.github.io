@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://Salmooo.github.io/</loc>
-    <lastmod>2026-05-21T23:55:00+08:00</lastmod>
+    <lastmod>2026-06-11T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
@@ -21,13 +21,16 @@
                 />
   </url><url>
     <loc>https://Salmooo.github.io/post/</loc>
-    <lastmod>2026-05-21T23:55:00+08:00</lastmod>
+    <lastmod>2026-06-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://Salmooo.github.io/tags/ast/</loc>
-    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+    <loc>https://Salmooo.github.io/tags/bbc/</loc>
+    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/case-study/</loc>
+    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/categories/</loc>
-    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
@@ -44,23 +47,32 @@
                 href="https://Salmooo.github.io/categories/"
                 />
   </url><url>
-    <loc>https://Salmooo.github.io/tags/compiler/</loc>
-    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+    <loc>https://Salmooo.github.io/tags/ds2/</loc>
+    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://Salmooo.github.io/tags/llvm/</loc>
-    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+    <loc>https://Salmooo.github.io/tags/fpga/</loc>
+    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://Salmooo.github.io/categories/llvm/</loc>
-    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+    <loc>https://Salmooo.github.io/categories/fpga%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>
+    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://Salmooo.github.io/tags/mlir/</loc>
-    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+    <loc>https://Salmooo.github.io/tags/freescale/</loc>
+    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://Salmooo.github.io/p/mlir-toy-%E6%95%99%E7%A8%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-chapter-1-toy-language-and-ast/</loc>
-    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+    <loc>https://Salmooo.github.io/tags/hw-sw-integration/</loc>
+    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/prototyping/</loc>
+    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/real-time-dataflow/</loc>
+    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/software-validation/</loc>
+    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/tags/</loc>
-    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
@@ -76,6 +88,45 @@
                 hreflang="en"
                 href="https://Salmooo.github.io/tags/"
                 />
+  </url><url>
+    <loc>https://Salmooo.github.io/p/%E7%AC%AC2%E7%AB%A0-what-can-fpga-based-prototyping-do-for-us/</loc>
+    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/chip-design-trends/</loc>
+    <lastmod>2026-05-27T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/emulation/</loc>
+    <lastmod>2026-05-27T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/soc/</loc>
+    <lastmod>2026-05-27T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/verification/</loc>
+    <lastmod>2026-05-27T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/virtual-platform/</loc>
+    <lastmod>2026-05-27T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/p/%E7%AC%AC1%E7%AB%A0-introduction-the-challenge-of-system-verification/</loc>
+    <lastmod>2026-05-27T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/ast/</loc>
+    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/compiler/</loc>
+    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/llvm/</loc>
+    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/categories/llvm/</loc>
+    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/mlir/</loc>
+    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/p/mlir-toy-%E6%95%99%E7%A8%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-chapter-1-toy-language-and-ast/</loc>
+    <lastmod>2024-02-27T17:29:29+08:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/tags/toy-tutorial/</loc>
     <lastmod>2024-02-27T17:29:29+08:00</lastmod>
@@ -223,6 +274,8 @@
   </url><url>
     <loc>https://Salmooo.github.io/p/hello_world/</loc>
     <lastmod>2018-07-18T17:01:01+08:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/p/</loc>
   </url><url>
     <loc>https://Salmooo.github.io/p/59.-%E8%9E%BA%E6%97%8B%E7%9F%A9%E9%98%B5-ii/</loc>
   </url><url>

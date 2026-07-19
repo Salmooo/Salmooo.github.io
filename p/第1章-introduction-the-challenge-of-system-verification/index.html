@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="SoC 验证面临的挑战：为什么原型验证在现代芯片开发中不可或缺，以及 FPGA 原型与其他原型方法的对比定位。">
+<title>第1章: Introduction — The Challenge of System Verification</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/%E7%AC%AC1%E7%AB%A0-introduction-the-challenge-of-system-verification/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="第1章: Introduction — The Challenge of System Verification">
+<meta property='og:description' content="SoC 验证面临的挑战：为什么原型验证在现代芯片开发中不可或缺，以及 FPGA 原型与其他原型方法的对比定位。">
+<meta property='og:url' content='https://Salmooo.github.io/p/%E7%AC%AC1%E7%AB%A0-introduction-the-challenge-of-system-verification/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='FPGA' /><meta property='article:tag' content='Prototyping' /><meta property='article:tag' content='SoC' /><meta property='article:tag' content='Verification' /><meta property='article:tag' content='Virtual Platform' /><meta property='article:tag' content='Emulation' /><meta property='article:tag' content='Chip Design Trends' /><meta property='article:published_time' content='2026-05-27T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-05-27T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="第1章: Introduction — The Challenge of System Verification">
+<meta name="twitter:description" content="SoC 验证面临的挑战：为什么原型验证在现代芯片开发中不可或缺，以及 FPGA 原型与其他原型方法的对比定位。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#章节概览">章节概览</a></li>
+    <li><a href="#核心知识点">核心知识点</a></li>
+    <li><a href="#详细笔记">详细笔记</a>
+      <ol>
+        <li><a href="#11-moore-was-right-与-soc-的定义">1.1 Moore was Right! 与 SoC 的定义</a></li>
+        <li><a href="#12-soc-设计的经济学">1.2 SoC 设计的经济学</a>
+          <ol>
+            <li><a href="#硬件-软件拆解视角">硬件-软件拆解视角</a></li>
+            <li><a href="#四大核心挑战">四大核心挑战</a></li>
+            <li><a href="#案例研究65nm-无线耳机芯片">案例研究：65nm 无线耳机芯片</a></li>
+          </ol>
+        </li>
+        <li><a href="#13-四种原型方法对比">1.3 四种原型方法对比</a>
+          <ol>
+            <li><a href="#131-虚拟平台-virtual-platforms">1.3.1 虚拟平台 (Virtual Platforms)</a></li>
+            <li><a href="#132-sdk">1.3.2 SDK</a></li>
+            <li><a href="#133-fpga-原型">1.3.3 FPGA 原型</a></li>
+            <li><a href="#134-仿真器-emulators">1.3.4 仿真器 (Emulators)</a></li>
+            <li><a href="#135-初版芯片">1.3.5 初版芯片</a></li>
+            <li><a href="#四种方法总结对比">四种方法总结对比</a></li>
+          </ol>
+        </li>
+        <li><a href="#14-原型验证的三种使用模式">1.4 原型验证的三种使用模式</a>
+          <ol>
+            <li><a href="#141-架构探索">1.4.1 架构探索</a></li>
+            <li><a href="#142-软件开发">1.4.2 软件开发</a></li>
+            <li><a href="#143-验证">1.4.3 验证</a></li>
+          </ol>
+        </li>
+        <li><a href="#15-用户选择原型方案的-12-项优先级">1.5 用户选择原型方案的 12 项优先级</a></li>
+        <li><a href="#16-芯片设计的八大趋势">1.6 芯片设计的八大趋势</a>
+          <ol>
+            <li><a href="#161-工艺微缩">1.6.1 工艺微缩</a></li>
+            <li><a href="#162-设计总量下降">1.6.2 设计总量下降</a></li>
+            <li><a href="#163-可编程性和软件含量激增">1.6.3 可编程性和软件含量激增</a></li>
+            <li><a href="#164-ip-复用">1.6.4 IP 复用</a></li>
+            <li><a href="#165-应用专用化与混合信号">1.6.5 应用专用化与混合信号</a></li>
+            <li><a href="#166-多核架构与低功耗">1.6.6 多核架构与低功耗</a></li>
+          </ol>
+        </li>
+        <li><a href="#17-总结">1.7 总结</a></li>
+      </ol>
+    </li>
+    <li><a href="#关键图示解读">关键图示解读</a></li>
+    <li><a href="#个人总结">个人总结</a></li>
+    <li><a href="#实践思考">实践思考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/fpga%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" >
+                FPGA学习笔记
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E7%AC%AC1%E7%AB%A0-introduction-the-challenge-of-system-verification/">第1章: Introduction — The Challenge of System Verification</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">May 27, 2026</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    4 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="章节概览">章节概览
+</h2><p>本章作为全书导论，为 FPGA 原型验证建立了背景框架。核心论点：<strong>在现代 SoC 项目中，软件开发成本已超过硬件开发，而传统串行流程中软件必须等到芯片流片后才能充分验证——这使得原型验证（尤其是 FPGA 原型）成为缩短上市时间、提升 ROI 的关键手段。</strong></p>
+<p>本章系统对比了四种原型方法：虚拟平台、SDK、FPGA 原型、仿真器（Emulator）和初版芯片，分析了各自在可用时机、执行速度、精度上的权衡，并梳理了用户在选择原型方案时的 12 项优先级标准。</p>
+<hr>
+<h2 id="核心知识点">核心知识点
+</h2><ul>
+<li><strong>SoC 定义</strong>：本书将 SoC 定义为包含至少一个 CPU 并运行嵌入式软件的专用芯片，是 ASIC 的超集</li>
+<li><strong>倒三角市场结构</strong>：芯片研发 $85.4B → EDA/IP 工具 $8.6B → 电子系统 $1,116B（2009年数据）</li>
+<li><strong>软件开发占比 40%</strong>：在 65nm 无线耳机芯片案例中，软件开发消耗了总成本的 40%，项目周期长达 27 个月</li>
+<li><strong>提前 7 个月开始软件 = $50M 额外收入</strong>：用 GSA 的 ROI 计算器，若软件能提前 7 个月开始，量产可提前 3 个月，盈亏平衡点提前 5 个月</li>
+<li><strong>四种原型方法</strong>：虚拟平台 (earliest) → FPGA 原型 (pre-silicon, high speed) → 仿真器 (slower, more automated) → 初版芯片 (latest, full accuracy)</li>
+<li><strong>FPGA 原型的核心优势</strong>：以 RTL 精度运行，速度可达几十 MIPS per CPU，远快于仿真器</li>
+<li><strong>8 大芯片设计趋势</strong>：工艺微缩、设计总量下降、可编程性/软件含量激增、IP 复用、应用专用化、多核架构、低功耗、混合信号</li>
+<li><strong>12 项用户选择标准</strong>：可用时机、执行速度、精度、容量、开发成本、移植成本、部署成本、调试可见性、执行控制、系统接口、周转时间、与低功耗/验证的联动价值</li>
+</ul>
+<hr>
+<h2 id="详细笔记">详细笔记
+</h2><h3 id="11-moore-was-right-与-soc-的定义">1.1 Moore was Right! 与 SoC 的定义
+</h3><p>Gordon Moore 的晶体管翻倍定律已持续半个多世纪，且仍未停止。</p>
+<p><strong>本书对 SoC 的定义：</strong></p>
+<blockquote>
+<p>一个为特定目的设计和制造、由特定所有者独家使用的器件。SoC 必须包含至少一个 CPU 并运行嵌入式软件。</p>
+</blockquote>
+<p>关键洞察：本书之所以聚焦 SoC 而非通用 ASIC，是因为<strong>FPGA 原型的最大价值在于提供快速且精确的 SoC 模型，从而支持软件的早期验证</strong>。</p>
+<h3 id="12-soc-设计的经济学">1.2 SoC 设计的经济学
+</h3><h4 id="硬件-软件拆解视角">硬件-软件拆解视角
+</h4><p>智能手机的拆解揭示了两层栈：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>层次</th>
+          <th>软件栈</th>
+          <th>硬件栈</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>顶层</td>
+          <td>用户应用</td>
+          <td>终端设备</td>
+      </tr>
+      <tr>
+          <td>中层</td>
+          <td>中间件 → OS → 驱动</td>
+          <td>电路板 → 外设/芯片</td>
+      </tr>
+      <tr>
+          <td>底层</td>
+          <td>（硬件抽象层）</td>
+          <td>IP 模块 / 定制模块</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>应用开发者不直接接触硬件内存、时序等底层细节，这依赖于完整的软件栈与硬件栈之间的抽象层。</p>
+<h4 id="四大核心挑战">四大核心挑战
+</h4><p>EDA 工具行业面临的关键赋能挑战：</p>
+<ol>
+<li><strong>(a) 尽早启动软件开发</strong></li>
+<li><strong>(b) 在目标系统上下文中验证硬件/软件</strong></li>
+<li><strong>(c) 设计和复用基本构建块</strong> — 处理器、加速器、外设、互联结构（如 ARM AMBA）</li>
+<li><strong>(d) 芯片的架构设计</strong> — 从基本构建块组装芯片</li>
+</ol>
+<h4 id="案例研究65nm-无线耳机芯片">案例研究：65nm 无线耳机芯片
+</h4><p>这是一个非常有说服力的真实项目案例（图3展示了项目各阶段的 effort 分布）：</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0030-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 3: Project effort for a 65nm wireless headset design"
+	
+	
+></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>参数</th>
+          <th>数值</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>工艺</td>
+          <td>65nm 主流工艺</td>
+      </tr>
+      <tr>
+          <td>预期产量</td>
+          <td>150 万片/月</td>
+      </tr>
+      <tr>
+          <td>平均售价</td>
+          <td>$5.50</td>
+      </tr>
+      <tr>
+          <td>总开发成本</td>
+          <td>$31,650,000</td>
+      </tr>
+      <tr>
+          <td>硬件设计周期</td>
+          <td>12 个月</td>
+      </tr>
+      <tr>
+          <td>项目总周期</td>
+          <td>27 个月</td>
+      </tr>
+      <tr>
+          <td>RTL 验证</td>
+          <td><strong>整个 12 个月硬件周期中最关键的部分</strong></td>
+      </tr>
+      <tr>
+          <td>软件开发占比</td>
+          <td><strong>总成本的 40%</strong></td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>关键发现：</strong></p>
+<ul>
+<li>软件开发在 RTL 基本稳定后才全面展开（它分为 OS 移植、底层软件、高层应用软件三个层次）</li>
+<li>收支平衡需要 34 个月（项目启动后近 3 年）</li>
+<li>如果软件能提前 7 个月开始 → 量产提前 3 个月 → 盈亏平衡提前 5 个月 → <strong>额外 $50M 收入</strong></li>
+</ul>
+<blockquote>
+<p>这就是原型验证的商业价值闭环。不是锦上添花，而是直接影响公司营收的核心能力。</p>
+</blockquote>
+<h3 id="13-四种原型方法对比">1.3 四种原型方法对比
+</h3><h4 id="131-虚拟平台-virtual-platforms">1.3.1 虚拟平台 (Virtual Platforms)
+</h4><ul>
+<li><strong>最早可用</strong>（规格定下来就能建，如果模型可用）</li>
+<li>功能完整、时序宽松的软件模型，运行在主机仿真上</li>
+<li>速度：几十 MIPS（松时序模型）</li>
+<li>可执行未经修改的生产代码</li>
+<li><strong>优势</strong>：极强的调试可见性和控制能力，易于复制分发，支持虚拟 I/O 和用户界面</li>
+<li><strong>劣势</strong>：时序精度不足，加入精确模型后速度降至个位数 MIPS</li>
+<li>适用于：早期软件开发、硬件架构协同探索</li>
+</ul>
+<p>典型工具：Synopsys Innovator（第13章将讨论如何连接 FPGA 原型与虚拟仿真）</p>
+<h4 id="132-sdk">1.3.2 SDK
+</h4><ul>
+<li>Android SDK 上线前两天即被下载 10 万次以上——这是一个被广泛使用的原型平台</li>
+<li>精度有限，&ldquo;刚好够骗过应用&rdquo;</li>
+<li>编译目标是主机而非最终芯片，事后需重新编译</li>
+</ul>
+<h4 id="133-fpga-原型">1.3.3 FPGA 原型
+</h4><ul>
+<li><strong>较晚可用</strong>（需要 RTL 相对成熟且验证稳定）</li>
+<li>实现的是与 SoC 相同的 RTL</li>
+<li>速度：<strong>几十 MIPS per CPU</strong>，接近实时</li>
+<li><strong>RTL 精度</strong> + 真实外部接口连接</li>
+<li><strong>不是 RTL 调试的首选平台</strong>（调试可见性不如虚拟平台和仿真器）</li>
+<li><strong>不是软硬件协同开发平台</strong>（当 FPGA 原型跑起来时，硬件架构已基本固定，除非发现重大瓶颈）</li>
+<li>复制成本高于虚拟平台，但远低于仿真器</li>
+</ul>
+<h4 id="134-仿真器-emulators">1.3.4 仿真器 (Emulators)
+</h4><ul>
+<li>强调自动化映射和快速编译，但执行速度低（单 MIPS 以下）</li>
+<li>昂贵，难以大量复制给软件团队</li>
+<li>更恰当的定位：<strong>RTL 仿真的加速器</strong>，是验证环境的延伸</li>
+<li>软件方面只适用于短时运行（如 boot ROM），不适合 OS bring-up 或应用程序</li>
+</ul>
+<h4 id="135-初版芯片">1.3.5 初版芯片
+</h4><ul>
+<li>实时速度 + 完整精度</li>
+<li>最便宜（量产芯片的开发板）</li>
+<li><strong>最晚可用</strong>，几乎没有提前量</li>
+<li>调试可见性受限（除非内置 OCI 功能）</li>
+<li>物流成本：需要处理海关、电路板 bring-up、物理损坏等问题</li>
+</ul>
+<h4 id="四种方法总结对比">四种方法总结对比
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>方法</th>
+          <th>可用时机</th>
+          <th>执行速度</th>
+          <th>精度</th>
+          <th>调试可见性</th>
+          <th>复制成本</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>虚拟平台</td>
+          <td>最早</td>
+          <td>高 (几十 MIPS)</td>
+          <td>松时序</td>
+          <td>极好</td>
+          <td>极低</td>
+      </tr>
+      <tr>
+          <td>FPGA 原型</td>
+          <td>中等</td>
+          <td>高 (几十 MIPS)</td>
+          <td>RTL 精度</td>
+          <td>中等</td>
+          <td>中等</td>
+      </tr>
+      <tr>
+          <td>仿真器</td>
+          <td>中等</td>
+          <td>低 (&lt;1 MIPS)</td>
+          <td>RTL 精度</td>
+          <td>好</td>
+          <td>高</td>
+      </tr>
+      <tr>
+          <td>初版芯片</td>
+          <td>最晚</td>
+          <td>实时</td>
+          <td>完全精确</td>
+          <td>有限</td>
+          <td>低</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="14-原型验证的三种使用模式">1.4 原型验证的三种使用模式
+</h3><h4 id="141-架构探索">1.4.1 架构探索
+</h4><p>芯片架构师需要在项目初期决定：拓扑结构、性能、功耗、片上通信架构。理想情况是获得同时具备<strong>完整精度</strong>和<strong>全速运行</strong>能力的模型——但现实中两者不可兼得。事实上，大多数架构师仍在依赖 Excel 和白板讨论。</p>
+<h4 id="142-软件开发">1.4.2 软件开发
+</h4><p>不同软件类型对硬件精度的要求不同：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>软件类型</th>
+          <th>精度要求</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>应用软件</td>
+          <td>不需要硬件精度，SDK + 高级 API 即可</td>
+      </tr>
+      <tr>
+          <td>中间件和驱动</td>
+          <td>需要一定时序表示（cache/MMU 的时序注释可能就够了）</td>
+      </tr>
+      <tr>
+          <td>实时软件</td>
+          <td>指令的高级周期时序 + 微架构效应</td>
+      </tr>
+      <tr>
+          <td>时间关键软件（如 ISR）</td>
+          <td>完全周期精确</td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="143-验证">1.4.3 验证
+</h4><p>一个重要趋势：<strong>功能验证正在向嵌入式处理器上的软件执行转移</strong>。</p>
+<p>超过 50% 的工程师已经在使用运行在嵌入式处理器上的软件来验证周边硬件。</p>
+<p><strong>验证复用路径（核心价值）</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">快速指令精确处理器模型 + TLM DUT
+</span></span><span class="line"><span class="cl">  → 混合 TLM/RTL 仿真
+</span></span><span class="line"><span class="cl">  → 纯 RTL 仿真
+</span></span><span class="line"><span class="cl">  → FPGA 原型（处理器作为 RTL 在 FPGA 中，或以芯片形式插入）
+</span></span><span class="line"><span class="cl">  → 后硅验证
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>同一套软件测试可以在上述所有阶段复用，实现&quot;写一次，处处验证&quot;。</p>
+<h3 id="15-用户选择原型方案的-12-项优先级">1.5 用户选择原型方案的 12 项优先级
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>#</th>
+          <th>优先级</th>
+          <th>含义</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>1</td>
+          <td><strong>可用时机</strong></td>
+          <td>规格冻结后，软件验证环境何时能就绪？</td>
+      </tr>
+      <tr>
+          <td>2</td>
+          <td><strong>执行速度</strong></td>
+          <td>能否接近实时？回归测试时能否快于实时？</td>
+      </tr>
+      <tr>
+          <td>3</td>
+          <td><strong>精度</strong></td>
+          <td>取决于开发的软件类型，需要多精确的硬件表示？</td>
+      </tr>
+      <tr>
+          <td>4</td>
+          <td><strong>容量</strong></td>
+          <td>能否处理最大规模的 SoC？能否未来扩展？</td>
+      </tr>
+      <tr>
+          <td>5</td>
+          <td><strong>开发成本</strong></td>
+          <td>生产成本 + 移植成本</td>
+      </tr>
+      <tr>
+          <td>6</td>
+          <td><strong>移植成本</strong></td>
+          <td>除流片必需工作外的额外开销</td>
+      </tr>
+      <tr>
+          <td>7</td>
+          <td><strong>部署成本</strong></td>
+          <td>多份复制、分发、维护的总成本</td>
+      </tr>
+      <tr>
+          <td>8</td>
+          <td><strong>调试可见性</strong></td>
+          <td>能否访问设计内部信号、寄存器、硬件/软件状态？</td>
+      </tr>
+      <tr>
+          <td>9</td>
+          <td><strong>执行控制</strong></td>
+          <td>断点、断言、多核同步停止的能力</td>
+      </tr>
+      <tr>
+          <td>10</td>
+          <td><strong>系统接口</strong></td>
+          <td>能否连接真实世界接口（USB、网络、无线等协议栈）？</td>
+      </tr>
+      <tr>
+          <td>11</td>
+          <td><strong>周转时间</strong></td>
+          <td>从新的源文件到新的原型版本需要多长时间？</td>
+      </tr>
+      <tr>
+          <td>12</td>
+          <td><strong>与低功耗/验证的联动</strong></td>
+          <td>原型能否融入更大的验证和功耗优化流程？</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>没有任何用户在单一项目中同时关心所有 12 项标准——关键是找到适合当前项目的优先级组合。</p>
+</blockquote>
+<h3 id="16-芯片设计的八大趋势">1.6 芯片设计的八大趋势
+</h3><h4 id="161-工艺微缩">1.6.1 工艺微缩
+</h4><ul>
+<li>1979 X86: 29,000 晶体管 → 2005 Dual Core Itanium: 17.2 亿晶体管（60,000 倍增长）</li>
+<li>65nm 和 45nm 从 2007 年开始，现已成为主流</li>
+<li><strong>对原型的影响</strong>：需要更高密度的 FPGA，单一 FPGA 容量不足时需多 FPGA 分区</li>
+</ul>
+<h4 id="162-设计总量下降">1.6.2 设计总量下降
+</h4><ul>
+<li>SoC 设计总量将显著下降（130nm 及以上节点会大幅减少），但先进工艺仍然活跃</li>
+<li><strong>对原型的影响</strong>：每个设计的风险更大，原型验证更加成为必须（mandatory）</li>
+</ul>
+<h4 id="163-可编程性和软件含量激增">1.6.3 可编程性和软件含量激增
+</h4><ul>
+<li>在 65nm 节点，<strong>软件研发支出已超过硬件</strong></li>
+<li>软件成为芯片开发的关键路径</li>
+<li><strong>对原型的影响</strong>：尽早启动软件原型验证成为刚需。硬件原型 + 虚拟平台可以混合使用，发挥各自优势：
+<ul>
+<li>避免重复建模已有 RTL 的部分</li>
+<li>已验证的测试平台加速硬件原型 bring-up</li>
+<li>混合方案灵活管理精度/速度/可用时机的权衡</li>
+<li>USB 3.0 驱动甚至在物理线缆面世前就已在虚拟平台上完成开发</li>
+</ul>
+</li>
+</ul>
+<h4 id="164-ip-复用">1.6.4 IP 复用
+</h4><ul>
+<li>2007 年以来 IP 复用率从 45% 增至 55%</li>
+<li>每个芯片平均 IP 数量从 28 增至 50</li>
+<li><strong>芯片设计正在变成&quot;用互联结构组装已有模块&quot;</strong></li>
+<li><strong>对原型的影响</strong>：IP 供应商被要求提供不同抽象级别的模型（处理器领域已有 ARM、MIPS、ARC、Tensilica 的快速仿真模型）；OSCI SystemC TLM-2.0 标准的出现使 IP 模型可以跨仿真引擎互操作</li>
+</ul>
+<h4 id="165-应用专用化与混合信号">1.6.5 应用专用化与混合信号
+</h4><ul>
+<li>ITRS 将 SoC 细分为网络、消费便携、消费固定等不同类别，各有独特需求</li>
+<li>模拟/混合信号比例增加</li>
+<li><strong>对原型的影响</strong>：不同应用领域需要特定的系统接口，外部接口速度决定了原型是否可直接使用或需要降速</li>
+</ul>
+<h4 id="166-多核架构与低功耗">1.6.6 多核架构与低功耗
+</h4><ul>
+<li>CPU 频率在 4GHz（桌面）、嵌入式处理器在 1GHz 遇到功耗极限</li>
+<li>解决方案：多核——更多核 + 更低频率 = 更低功耗</li>
+<li>消费应用中 DPE 数量从 2007 到 2011 几乎翻了三倍</li>
+<li><strong>挑战转移到了软件侧</strong>：传统串行软件需要向多核分布</li>
+<li><strong>对原型的影响</strong>：调试（启动/暂停/恢复/停止硬件软件执行）变得更加重要</li>
+</ul>
+<h3 id="17-总结">1.7 总结
+</h3><blockquote>
+<p>原型验证，以其各种形式，为硬件设计的验证和软件的确认提供了强大的方法论。FPGA 原型在项目后期硬件软件首次集成的关键阶段特别有价值。</p>
+</blockquote>
+<p>本章的核心结论：</p>
+<ol>
+<li><strong>设计验证和软件开发已经主导了 SoC 开发的工作量</strong>，原型验证的重要性前所未有</li>
+<li>用户确实在主动使用多种不同的原型方案（116 人调查显示各种方法都在活跃使用中）</li>
+<li><strong>原型验证不是可选项，是现代芯片设计的必需项</strong></li>
+</ol>
+<hr>
+<h2 id="关键图示解读">关键图示解读
+</h2><p><strong>图1：IC 设计-电子市场的倒三角</strong></p>
+<ul>
+<li>倒三角形象地说明了 $8.6B 的 EDA/IP 工具市场支撑了 $85.4B 的芯片市场和 $1,116B 的电子系统市场</li>
+<li>原型验证工具处于这个产业链的关键赋能位置</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0027-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 1: The relationship of IC design to the electronics market"
+	
+	
+></p>
+<p><strong>图3：65nm 无线耳机芯片项目 effort 分布</strong></p>
+<ul>
+<li>清晰展示了 RTL 验证在 12 个月硬件周期中的主导地位</li>
+<li>软件开发三个层次（OS、底层、应用）在 RTL 后期才真正展开</li>
+<li>这是理解&quot;为什么要提前软件开发&quot;最直观的图</li>
+</ul>
+<p><strong>图14：原型方法使用调查</strong></p>
+<ul>
+<li>2009 年 8 月 SoC 虚拟会议上 116 份问卷结果</li>
+<li>问题：&ldquo;你用什么方法开发硬件相关软件（驱动、固件）？&rdquo;</li>
+<li>结果：<strong>所有本章描述的原型技术都在活跃使用中</strong>——说明不同优先级确实导向不同的最佳方案</li>
+</ul>
+<hr>
+<h2 id="个人总结">个人总结
+</h2><p>这一章没有讲任何 FPGA 的技术细节，而是建立了一个<strong>商业和工程经济学的论证框架</strong>。</p>
+<p>本章最有说服力的论点不是技术性的——它来自那个简单的商业计算：提前 7 个月开始软件开发 = $50M 额外收入。这个数字应该成为每个芯片项目经理桌上的座右铭。</p>
+<p>另一个让我印象深刻的是&quot;写一次，处处验证&quot;的验证复用路径。从 TLM 模型到 RTL 仿真再到 FPGA 原型，同一套软件测试贯穿始终——这种一致性不仅节省工作量，更能确保不同阶段发现的问题都是真实的 bug，而不是模型切换引入的假象。</p>
+<p>最后，12 项选择标准是一个很好的框架。在后续章节深入学习具体 FPGA 原型技术时，应该不断回到这几个维度来衡量每种技术对特定需求的匹配度。</p>
+<hr>
+<h2 id="实践思考">实践思考
+</h2><ul>
+<li><strong>FPGA 原型的定位很微妙</strong>：它不是最早的（虚拟平台更快），不是最准的（初版芯片更准），不是最便宜的（SDK 更便宜），但它是唯一能在 RTL 精度下跑到几十 MIPS 的方案。这个独特交叉点才是它的不可替代性</li>
+<li><strong>为什么要等 RTL 成熟才上 FPGA 原型？</strong> 因为 FPGA 映射成本高，如果 RTL 还在频繁变更，迭代成本太大。理解这个时机限制有助于合理规划项目各阶段的原型策略</li>
+<li><strong>混合原型环境是未来方向</strong>：用虚拟平台做早期软件开发和测试平台验证，然后用已验证的测试平台加速 FPGA 原型 bring-up，最终混合运行——这种&quot;验证握手&quot;模式值得在项目中实践</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0028-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 2: Hardware-software teardown of a consumer device"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0032-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 4: Pre-Silicon virtual prototype of OMAP design"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0033-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 5: Android™ SDK screenshot showing GUI emulation"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0041-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 6: Design starts per technology node (Source: IBS)"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0042-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 7: Overall number of design starts per year (Source: IBS)"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0043-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 8: Software effort as percentage of R&D expense (Source: IBS)"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0045-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 9: Percentage of reuse of IP blocks (Source: Semico Research Corp.)"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0045-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 10:  IP instances in SoC designs (Source: Semico Research Corp.)"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0046-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 11: Application specific requirements (Source: ITRS)"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0048-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 12: CPU requirements for consumer applications (source: ITRS)"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0049-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 13: Users recognizing a variety of prototyping options"
+	
+	
+></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/fpga/">FPGA</a>
+        
+            <a href="/tags/prototyping/">Prototyping</a>
+        
+            <a href="/tags/soc/">SoC</a>
+        
+            <a href="/tags/verification/">Verification</a>
+        
+            <a href="/tags/virtual-platform/">Virtual Platform</a>
+        
+            <a href="/tags/emulation/">Emulation</a>
+        
+            <a href="/tags/chip-design-trends/">Chip Design Trends</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC2%E7%AB%A0-what-can-fpga-based-prototyping-do-for-us/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第2章: What Can FPGA-Based Prototyping Do For Us?</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

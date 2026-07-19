@@ -7,7 +7,119 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en</language>
         <copyright>salmone</copyright>
-        <lastBuildDate>Tue, 27 Feb 2024 17:29:29 +0800</lastBuildDate><atom:link href="https://Salmooo.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Thu, 04 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://Salmooo.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>BBC</title>
+        <link>https://Salmooo.github.io/tags/bbc/</link>
+        <pubDate>Thu, 04 Jun 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/bbc/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Case Study</title>
+        <link>https://Salmooo.github.io/tags/case-study/</link>
+        <pubDate>Thu, 04 Jun 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/case-study/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>DS2</title>
+        <link>https://Salmooo.github.io/tags/ds2/</link>
+        <pubDate>Thu, 04 Jun 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/ds2/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>FPGA</title>
+        <link>https://Salmooo.github.io/tags/fpga/</link>
+        <pubDate>Thu, 04 Jun 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/fpga/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Freescale</title>
+        <link>https://Salmooo.github.io/tags/freescale/</link>
+        <pubDate>Thu, 04 Jun 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/freescale/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>HW-SW Integration</title>
+        <link>https://Salmooo.github.io/tags/hw-sw-integration/</link>
+        <pubDate>Thu, 04 Jun 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/hw-sw-integration/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Prototyping</title>
+        <link>https://Salmooo.github.io/tags/prototyping/</link>
+        <pubDate>Thu, 04 Jun 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/prototyping/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Real-Time Dataflow</title>
+        <link>https://Salmooo.github.io/tags/real-time-dataflow/</link>
+        <pubDate>Thu, 04 Jun 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/real-time-dataflow/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Software Validation</title>
+        <link>https://Salmooo.github.io/tags/software-validation/</link>
+        <pubDate>Thu, 04 Jun 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/software-validation/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Chip Design Trends</title>
+        <link>https://Salmooo.github.io/tags/chip-design-trends/</link>
+        <pubDate>Wed, 27 May 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/chip-design-trends/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Emulation</title>
+        <link>https://Salmooo.github.io/tags/emulation/</link>
+        <pubDate>Wed, 27 May 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/emulation/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>SoC</title>
+        <link>https://Salmooo.github.io/tags/soc/</link>
+        <pubDate>Wed, 27 May 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/soc/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Verification</title>
+        <link>https://Salmooo.github.io/tags/verification/</link>
+        <pubDate>Wed, 27 May 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/verification/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Virtual Platform</title>
+        <link>https://Salmooo.github.io/tags/virtual-platform/</link>
+        <pubDate>Wed, 27 May 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/virtual-platform/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>AST</title>
         <link>https://Salmooo.github.io/tags/ast/</link>
         <pubDate>Tue, 27 Feb 2024 17:29:29 +0800</pubDate>

@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="原型板实验室 bring-up 与调试的完整方法论：从空板验证到全设计加载的七步递进流程、三类 bug 的分类框架、触发/跟踪/总线访问三种调试深度、12条实战调试技巧、以及依靠增量综合与 P&amp;R 的快速迭代周转方案。">
+<title>第11章: Bring Up and Debug — The Prototype in the Lab</title>
+
+<link rel='canonical' href='http://localhost:1313/p/%E7%AC%AC11%E7%AB%A0-bring-up-and-debug-the-prototype-in-the-lab/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="第11章: Bring Up and Debug — The Prototype in the Lab">
+<meta property='og:description' content="原型板实验室 bring-up 与调试的完整方法论：从空板验证到全设计加载的七步递进流程、三类 bug 的分类框架、触发/跟踪/总线访问三种调试深度、12条实战调试技巧、以及依靠增量综合与 P&amp;R 的快速迭代周转方案。">
+<meta property='og:url' content='http://localhost:1313/p/%E7%AC%AC11%E7%AB%A0-bring-up-and-debug-the-prototype-in-the-lab/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='FPGA' /><meta property='article:tag' content='Prototyping' /><meta property='article:tag' content='Bring-Up' /><meta property='article:tag' content='Debug' /><meta property='article:tag' content='Lab' /><meta property='article:tag' content='Timing Analysis' /><meta property='article:tag' content='JTAG' /><meta property='article:tag' content='UMRBus' /><meta property='article:tag' content='Incremental Synthesis' /><meta property='article:tag' content='ChipScope' /><meta property='article:tag' content='Identify' /><meta property='article:published_time' content='2026-06-06T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-06-06T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="第11章: Bring Up and Debug — The Prototype in the Lab">
+<meta name="twitter:description" content="原型板实验室 bring-up 与调试的完整方法论：从空板验证到全设计加载的七步递进流程、三类 bug 的分类框架、触发/跟踪/总线访问三种调试深度、12条实战调试技巧、以及依靠增量综合与 P&amp;R 的快速迭代周转方案。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="http://localhost:1313/" selected>English</option>
+                                
+                                    <option value="http://localhost:1313/zh-cn/" >中文</option>
+                                
+                                    <option value="http://localhost:1313/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#章节概览">章节概览</a></li>
+    <li><a href="#核心知识点">核心知识点</a></li>
+    <li><a href="#详细笔记">详细笔记</a>
+      <ol>
+        <li><a href="#111-bring-up-与-debug两个必须分离的步骤">11.1 Bring-Up 与 Debug：两个必须分离的步骤</a></li>
+        <li><a href="#112-起点零故障的板子">11.2 起点：零故障的板子</a></li>
+        <li><a href="#113-运行测试设计">11.3 运行测试设计</a>
+          <ol>
+            <li><a href="#典型测试设计清单">典型测试设计清单</a></li>
+            <li><a href="#1131-四抽头-fir-滤波器测试设计">11.3.1 四抽头 FIR 滤波器测试设计</a></li>
+            <li><a href="#1132-构建-bring-up-测试设计库">11.3.2 构建 Bring-Up 测试设计库</a></li>
+          </ol>
+        </li>
+        <li><a href="#114-准备上板了吗">11.4 准备上板了吗？</a>
+          <ol>
+            <li><a href="#1141-复用-soc-验证环境">11.4.1 复用 SoC 验证环境</a></li>
+            <li><a href="#1142-常见-fpga-实现问题">11.4.2 常见 FPGA 实现问题</a></li>
+            <li><a href="#1143-时序违规的-8-种类型及对策">11.4.3 时序违规的 8 种类型及对策</a></li>
+            <li><a href="#1144-跨-fpga-互连错误">11.4.4 跨 FPGA 互连错误</a></li>
+            <li><a href="#1145-与外部世界的互连">11.4.5 与外部世界的互连</a></li>
+            <li><a href="#1146-fpga-io-pad-配置">11.4.6 FPGA IO Pad 配置</a></li>
+          </ol>
+        </li>
+        <li><a href="#115-将设计引入板上">11.5 将设计引入板上</a>
+          <ol>
+            <li><a href="#1151-多-fpga-的启动状态不正确">11.5.1 多 FPGA 的启动状态不正确</a></li>
+          </ol>
+        </li>
+        <li><a href="#116-调试板上问题">11.6 调试板上问题</a>
+          <ol>
+            <li><a href="#1161-三类设计-bug">11.6.1 三类设计 Bug</a></li>
+            <li><a href="#1162-逻辑设计问题的调试方法">11.6.2 逻辑设计问题的调试方法</a></li>
+            <li><a href="#1163-调试可见性">11.6.3 调试可见性</a></li>
+            <li><a href="#1164-1165-总线基础调试系统umrbus">11.6.4-11.6.5 总线基础调试系统（UMRBus）</a></li>
+            <li><a href="#1166-使用嵌入式-cpu-的定制调试器">11.6.6 使用嵌入式 CPU 的定制调试器</a></li>
+          </ol>
+        </li>
+        <li><a href="#117-组合使用多种调试技术">11.7 组合使用多种调试技术</a></li>
+        <li><a href="#118-12-条实战调试技巧">11.8 12 条实战调试技巧</a></li>
+        <li><a href="#119-bug-修复后的快速周转">11.9 Bug 修复后的快速周转</a>
+          <ol>
+            <li><a href="#1191-增量综合流程compile-points">11.9.1 增量综合流程：Compile Points</a></li>
+            <li><a href="#1192-自动化与并行综合">11.9.2 自动化与并行综合</a></li>
+            <li><a href="#1193-增量-prdesign-preservation">11.9.3 增量 P&amp;R：Design Preservation</a></li>
+            <li><a href="#1194-组合增量流程图146">11.9.4 组合增量流程（图146）</a></li>
+          </ol>
+        </li>
+        <li><a href="#1110-bring-up-和调试检查清单">11.10 Bring-Up 和调试检查清单</a></li>
+      </ol>
+    </li>
+    <li><a href="#关键图示解读">关键图示解读</a></li>
+    <li><a href="#个人总结">个人总结</a></li>
+    <li><a href="#实践思考">实践思考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/fpga%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" >
+                FPGA学习笔记
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E7%AC%AC11%E7%AB%A0-bring-up-and-debug-the-prototype-in-the-lab/">第11章: Bring Up and Debug — The Prototype in the Lab</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jun 06, 2026</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    6 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="章节概览">章节概览
+</h2><p>前面十一章的最终目的是把设计跑起来并找到 bug。第11章讲述的就是这最后一个环节：<strong>如何在实验室中将原型 bring-up 并从&quot;不工作&quot;走到&quot;完全功能验证&quot;</strong>。</p>
+<p>章节的两大主题如标题所示：<strong>Bring-Up</strong>（使原型启动并运行）和 <strong>Debug</strong>（当它不按预期工作时找到原因）。作者反复强调两者必须分开——板子和工具链的问题必须先行排除，剩余的功能故障才是真正的设计 bug。从空板→参考设计→设计子集→全设计，这是一个不容跳步的递进验证过程。</p>
+<p>本章也是全书中&quot;实战色彩&quot;最强的章节——从四抽头 FIR 滤波器测试代码到 UMRBus 高速调试总线的架构，再到&quot;检查安全锁单元的 ID 寄存器&quot;这种极端场景——全是实验室角落实战经验的浓缩。</p>
+<hr>
+<h2 id="核心知识点">核心知识点
+</h2><ul>
+<li><strong>Bring-Up 七步递进流程</strong>：测试基板 → 测试基板+子板 → 单 FPGA 参考设计 → 多 FPGA 参考设计 → 检查 SoC 设计实现问题 → 分功能子集加载真实设计 → 加载完整设计</li>
+<li><strong>三类设计 Bug</strong>（Table 29）：逻辑 bug（RTL 中未发现的错误）→ 接口 bug（外部接口未预见的交互问题）→ 软件 bug（软硬件首次集成时暴露）——第三类最有价值</li>
+<li><strong>四抽头 FIR 滤波器测试</strong>（Figure 135）：全同步单时钟设计，每抽头分区到不同 FPGA —— 验证复位时序+时钟偏斜+跨 FPGA 连接+分区+综合+P&amp;R+加载的完整流程</li>
+<li><strong>IOB FF 使用不当的微妙时序问题</strong>：三态信号的数据路径用 IOB FF 而控制路径没用 → 数据早到但必须等三态控制 → <strong>净时序优势被抵消</strong>。较坏情况：三态控制路径和数据路径到达时间偏斜→ PAD 输出产生毛刺</li>
+<li><strong>JTAG 是调试的基础通道</strong>：可捕获 FPGA 引脚静态快照——但带宽极低，上传一个典型软件映像需 ~30 分钟</li>
+<li><strong>UMRBus 高速调试总线</strong>：USB 2.0 通道→FPGA 内总线协议→连接各 CAPIM 模块→集高速配置、存储器直接访问、软件快速加载、数据流注入于一体——30 分钟缩短到不足 1 分钟</li>
+<li><strong>Compile Point 增量综合</strong>：将设计分为子模块（CP）→ 仅改动过的 CP 重新综合 → 其他 CP 重用历史结果。跨 CP 边界优化可控（soft/hard/locked）</li>
+<li><strong>Design Preservation 增量 P&amp;R</strong>：分区状态设为 &ldquo;implement&rdquo;（已变更）或 &ldquo;import&rdquo;（保留前次）→ 仅变更分区重新 P&amp;R</li>
+<li><strong>组合增量流程</strong>：综合 CP = &ldquo;locked, partition&rdquo; → 自动标记为 P&amp;R 分区 → Synplify 自动写入 &ldquo;implement&rdquo;/&ldquo;import&rdquo;——端到端径流时间大幅缩减</li>
+<li><strong>10 步 Bring-Up 检查清单</strong>（Table 30）：从电源轨→输入时钟→FPGA 配置和复位→小 RTL 设计→加插桩→自运行程序→外部 RAM→Hello World→全 SoC→真实软件映像</li>
+</ul>
+<hr>
+<h2 id="详细笔记">详细笔记
+</h2><h3 id="111-bring-up-与-debug两个必须分离的步骤">11.1 Bring-Up 与 Debug：两个必须分离的步骤
+</h3><p><strong>核心原则</strong>：板子故障 vs 设计故障——二者必须被分开调试。</p>
+<blockquote>
+<p>&ldquo;为了有效的 &lsquo;调试-修复&rsquo; 循环，关键是确保我们看到的 bug 是真正的设计问题，而非故障的 FPGA 板或在原型方法论中的错误。&rdquo;</p>
+</blockquote>
+<p><strong>七步递进流程</strong>：</p>
+<ol>
+<li>测试基板</li>
+<li>测试基板 + 子板</li>
+<li>单 FPGA 加载小型参考设计</li>
+<li>多 FPGA 加载参考设计</li>
+<li>检查 SoC 设计的实现问题</li>
+<li>按功能子集依次应用真实设计</li>
+<li>应用完整设计</li>
+</ol>
+<p><strong>注意</strong>：即使在实验室环境中，经验丰富的原型团队完成这些步骤也只需要几小时到几天——但这个投入是&quot;防止浪费数天追踪假 bug&quot;的保险。</p>
+<h3 id="112-起点零故障的板子">11.2 起点：零故障的板子
+</h3><p><strong>商业板的优势</strong>：已经过供应商工厂的完整生产测试和签核。好的供应商应提供用户可执行的测试工具——如自检终端或自动测试程序。</p>
+<p><strong>关键建议</strong>：</p>
+<blockquote>
+<p>&ldquo;花几分钟跑自检，可能节省数小时方向错误的调试分析。&rdquo;</p>
+</blockquote>
+<p><strong>HAPS 的例子</strong>：每块板附带 STB2_1x1 终端块（图133），可插到每个 HapsTrak 连接器上依次测试开路、短路和信号连续性。</p>
+<p>**自建</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0340-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 133 : STB2_1x1. An example of a test header for FPGA Boards"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0340-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 133 : STB2_1x1. An example of a test header for FPGA Boards"
+	
+	
+>
+板的需要**：创建和维护一个小型测试设计库来验证板子各部分。</p>
+<h3 id="113-运行测试设计">11.3 运行测试设计
+</h3><h4 id="典型测试设计清单">典型测试设计清单
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>测试类型</th>
+          <th>目的</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Signs-of-Life</strong></td>
+          <td>从外部端口读写寄存器 → 确认 FPGA 自身配置正确</td>
+      </tr>
+      <tr>
+          <td><strong>Counter Test</strong></td>
+          <td>简单计数器 + 时钟/复位输入 → 输出到 LED 或测试点 → 验证时钟和复位正常</td>
+      </tr>
+      <tr>
+          <td><strong>子板参考设计</strong></td>
+          <td>验证子板功能及其与主板的接口</td>
+      </tr>
+      <tr>
+          <td><strong>高速 IO 测试</strong></td>
+          <td>使用与实际相同的物理连线测试 LVDS/HSTDM——环境相关性需真实路径</td>
+      </tr>
+      <tr>
+          <td><strong>多 FPGA 测试</strong></td>
+          <td>简单设计的跨 FPGA 分区 → 验证跨 FPGA 连接和同步</td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="1131-四抽头-fir-滤波器测试设计">11.3.1 四抽头 FIR 滤波器测试设计
+</h4><p><strong>FIR 为什么是理想的多 FPGA 测试</strong>（图134+135+136+137）：</p>
+<ul>
+<li><strong>全同步单时钟</strong>→ 验证复位时序+时钟偏斜</li>
+<li>每抽头（乘法器+系数+加法器）分到不同 FPGA</li>
+<li>脉冲输入（01h 一个时钟 → 00h 此后所有时钟）→ 预期输出 = 滤波器系数顺序出现</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0342-07.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 134 : A 4-tap pre-loadable transposed FIR filter test design"
+	
+	
+></p>
+<p><strong>附带收益</strong>：运行这个设计 = 完整走通&quot;分区→综合→P&amp;R→位流→配置→调试&quot;全流程。对第一次做原型的团队来说，这是为后续 SoC 设计流程&quot;疏通管道&quot;的最好方式。</p>
+<h4 id="1132-构建-bring-up-测试设计库">11.3.2 构建 Bring-Up 测试设计库
+</h4><blockquote>
+<p>&ldquo;创建一个可复用的测试基础设施——在不同板子上的已知良好测试库——是一项将惠及多个原型项目的投资。&rdquo;</p>
+</blockquote>
+<h3 id="114-准备上板了吗">11.4 准备上板了吗？
+</h3><h4 id="1141-复用-soc-验证环境">11.4.1 复用 SoC 验证环境
+</h4><p>在将 FPGA 就绪版的设计加载到板上之前，最好先用原来的 SoC 验证环境（&ldquo;Hello World&quot;测试平台）对其再做一次仿真。<strong>只有预期中的或故意引入的差异才能被接受；意外的功能差异必须在进实验室前调查清楚。</strong></p>
+<h4 id="1142-常见-fpga-实现问题">11.4.2 常见 FPGA 实现问题
+</h4><p>三大初次实现问题：</p>
+<ol>
+<li><strong>时序违规</strong>：综合/P&amp;R 仅分析单个 FPGA——跨 FPGA 路径和跨时钟域路径不会在标准流程中被高亮</li>
+<li><strong>意外逻辑移除</strong>：综合的优化导致模块和 IO &ldquo;消失&rdquo;——常见原因是不当的互连或核实例化导致无驱动逻辑。&ldquo;IO 突然无法解释的下降 = 警示信号&rdquo;</li>
+<li><strong>跨 FPGA 互连错误</strong>：引脚位置约束丢失或被覆盖 → P&amp;R 随机分配引脚 → 源和目的不在同一走线上</li>
+</ol>
+<h4 id="1143-时序违规的-8-种类型及对策">11.4.3 时序违规的 8 种类型及对策
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>类型</th>
+          <th>要点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>内部保持时间</strong></td>
+          <td>极低时钟速率下看似不可能有时序违规——但保持时间违规<strong>与时钟频率无关</strong>！必须使用最小延时模型跑全时序分析</td>
+      </tr>
+      <tr>
+          <td><strong>跨 FPGA 延迟</strong></td>
+          <td>使用 X/Y 常量（HAPS-54: X=0.44ns, Y=1.45ns）加入延迟计算</td>
+      </tr>
+      <tr>
+          <td><strong>TDM 时序复杂度</strong></td>
+          <td>复用连接上的多路信号——传输和设计时钟间的延迟约束是关键</td>
+      </tr>
+      <tr>
+          <td><strong>IO 时序</strong></td>
+          <td>尽可能利用 IOB FF——消除内部 FF 到 IOB 的长布线延迟</td>
+      </tr>
+      <tr>
+          <td><strong>IOB FF 的不对称使用</strong></td>
+          <td><strong>微妙问题</strong>：三态信号——数据路径用 IOB FF + 三态控制路径不用 → 数据早到但需等三态控制 → 优势被抵消。最坏：到达时间偏斜产生 PAD 输出毛刺</td>
+      </tr>
+      <tr>
+          <td><strong>跨时钟域时序</strong></td>
+          <td>异步时钟间→亚稳态。SoC 中已有的双重锁存等防护可照搬</td>
+      </tr>
+      <tr>
+          <td><strong>门控时钟时序</strong></td>
+          <td>未转化的门控时钟→偏斜导致保持时间违规+可能的毛刺</td>
+      </tr>
+      <tr>
+          <td><strong>复用互连上的时序</strong></td>
+          <td>P&amp;R 后时序分析确认传输和设计时钟延迟在限制内、飞行时间未超预期、异步 MUX 的同步已包含</td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="1144-跨-fpga-互连错误">11.4.4 跨 FPGA 互连错误
+</h4><p><strong>数千条信号穿越 FPGA 边界</strong>（图139）。一个引脚错位 = 和芯片中一段金属断裂一样破坏性的故障——且更难发现（虽然更容易修复）。</p>
+<p>**错误</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0351-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 139 : Certify[®] Partition View illustrating complexity of signals between FPGAs"
+	
+	
+>
+原因**：约束在流程中的某个工具被丢弃了——常见于&quot;只做了一个小改动但设计突然不工作&quot;的场景。</p>
+<p><strong>自动化响应</strong>：脚本读取 PAD 报告 → 与&quot;金质&quot;引脚位置参考文件比对 → 在每个设计迭代后自动检查。</p>
+<h4 id="1145-与外部世界的互连">11.4.5 与外部世界的互连
+</h4><p><strong>命名约定驱动的自动走线分配</strong>：信号叫 <code>acknowledge</code>、走线叫 <code>ack</code>、子卡引脚叫 <code>ack</code> → 高级分区工具自动识别并分配。</p>
+<h4 id="1146-fpga-io-pad-配置">11.4.6 FPGA IO Pad 配置
+</h4><p><strong>规模问题</strong>：管理数千路信号的电压标准——每路都要正确配置。一个好的分区工具应自动确保互连引脚使用相同 IO 标准，并在不一致时发出警告。</p>
+<p><strong>五大检查项</strong>：差分信号 → 外设电压需求 → VCCO/VREF 供电 → 终端阻抗（如 DCI）→ 驱动电流（2-24mA）</p>
+<p><strong>驱动电流的隐蔽性</strong>：在实验室条件下可能因&quot;运气好&quot;而未暴露——直到软件启用了之前未使用的外设功能。不一致的性能表现 = 典型的驱动电流不足症状。</p>
+<h5 id="11461-用脚本检查-io-一致性">11.4.6.1 用脚本检查 IO 一致性
+</h5><p>创建&quot;金质&quot;参考文件 + 脚本 = 每次迭代自动对比 PAD 报告→无需重复手工检查数千行报告→在进入实验室前捕获配置错误。</p>
+<h3 id="115-将设计引入板上">11.5 将设计引入板上
+</h3><p><strong>分阶段引入的根本原因</strong>：一些配置错误会掩盖另一些——分阶段暴露减少这种&quot;遮蔽效应&rdquo;。</p>
+<p><strong>关键检查点</strong>：</p>
+<ol>
+<li>编程前确认供电正常→编程后检查 DONE 引脚（HAPS 板上连接 LED）</li>
+<li><strong>配置期间的峰值电流</strong>可能触发实验室电源的电流限制→电压轨掉电（brown-out）。这是比板级供电故障更常见的场景</li>
+<li>先检查输入→特别是从其他 FPGA 内部派生的时钟和复位。<strong>循环依赖</strong>是 SoC 设计在 FPGA 中无法启动的常见原因（FPGA A 的复位 = FPGA B 中的逻辑输出，而后者又依赖 FPGA A 的内部信号）</li>
+<li>先调试单 FPGA 内的部分→排除跨 FPGA 连接问题</li>
+<li>先调试 FPGA 内部的部分→排除外部芯片组交互问题</li>
+</ol>
+<h4 id="1151-多-fpga-的启动状态不正确">11.5.1 多 FPGA 的启动状态不正确
+</h4><p><strong>问题本质</strong>：FPGA 成为 operational 的时间各不相同——即使只差一个时钟沿，第一个寄存器到寄存器的传输就丢失了。</p>
+<p><strong>根本原因</strong>：PLL/DCM 的内部反馈电路 → 锁定时间可变。外部硬 IO（以太网 PHY 等）比 FPGA 早得多就绪。</p>
+<p><strong>解决方案</strong>：全局复位管理——所有系统级&quot;就绪&quot;条件汇聚到单点 → 在全部条件满足后才释放——已在第 8 章详细讨论。</p>
+<h3 id="116-调试板上问题">11.6 调试板上问题
+</h3><h4 id="1161-三类设计-bug">11.6.1 三类设计 Bug
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>类型</th>
+          <th>描述</th>
+          <th>典型场景</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>逻辑 Bug</strong></td>
+          <td>RTL 中未发现的错误</td>
+          <td>真实世界数据依赖——仿真从未暴露</td>
+      </tr>
+      <tr>
+          <td><strong>接口 Bug</strong></td>
+          <td>对外部硬件的未预见交互</td>
+          <td>特定 IP 组合首次在同一平台中使用</td>
+      </tr>
+      <tr>
+          <td><strong>软件 Bug</strong></td>
+          <td>软硬件首次集成</td>
+          <td>时间依赖+数据依赖+环境依赖——最难建模</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>任何特定故障可能同时涉及两类甚至全部三类 Bug。</p>
+</blockquote>
+<h4 id="1162-逻辑设计问题的调试方法">11.6.2 逻辑设计问题的调试方法
+</h4><p><strong>第一步</strong>：隔离到 FPGA 级别——需要<strong>设计的内部可见性</strong>。</p>
+<p><strong>可见性层级递进</strong>：</p>
+<ol>
+<li><strong>物理探针</strong>：测试点和连接器 → 仅限顶层 IO 和关键信号</li>
+<li><strong>JTAG 边界扫描</strong>：取样 FPGA 引脚值 → 静态快照 → 通过智能触发捕捉时间序列</li>
+<li><strong>ChipScope / Identify 嵌入式追踪</strong>：内部节点 + BlockRAM 捕获 → 数千采样 × 数千节点</li>
+</ol>
+<p><strong>DFP 技巧</strong>：RTL 编写者创建&quot;你会最先看哪&quot;的<strong>关键节点清单</strong>——作为默认插桩的起点。</p>
+<h4 id="1163-调试可见性">11.6.3 调试可见性
+</h4><p><strong>视角转换</strong>：</p>
+<blockquote>
+<p>&ldquo;与纯 RTL 仿真器相比，FPGA 原型的可见性远不如。但这是错误的比较。<strong>原型是在替代最终芯片的位置</strong>——因此它实际上比测试芯片或芯片本身提供了<strong>远更大的</strong>电路行为可见性。&rdquo;</p>
+</blockquote>
+<p><strong>四种调试可见性方法</strong>：</p>
+<ol>
+<li><strong>实时信号探测</strong>：RTL 修改→内部节点引到 FPGA 引脚→示波器/逻辑分析仪。可以关联信号行为和其他实时事件</li>
+<li><strong>嵌入式追踪提取</strong>：EDA 工具插入采样逻辑+BlockRAM→暂存→后期提取分析</li>
+<li><strong>总线基础插桩</strong>：在设计中实例化探测块→总线协议读写→类似 UMRBus</li>
+<li><strong>定制调试器</strong>：将 MicroBlaze 等小型 CPU 挂到 SoC 内部总线→检测特定数据组合或错误条件</li>
+</ol>
+<h4 id="1164-1165-总线基础调试系统umrbus">11.6.4-11.6.5 总线基础调试系统（UMRBus）
+</h4><p><strong>JTAG 的带宽瓶颈</strong>：</p>
+<ul>
+<li>上传软件映像：~30 分钟</li>
+<li>UMRBus 同任务：<strong>远低于 1 分钟</strong></li>
+</ul>
+<p><strong>高带宽通道的五种关键能力</strong>：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>能力</th>
+          <th>价值</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>高速 FPGA 配置</strong></td>
+          <td>配置时间从数分钟降到数秒→初期快速迭代时大量节省等待时间</td>
+      </tr>
+      <tr>
+          <td><strong>高性能存储器访问</strong></td>
+          <td>直接读写原型上数 MB 的内部 RAM→避免通过 SoC CPU 和总线中转</td>
+      </tr>
+      <tr>
+          <td><strong>软件映像快速上传</strong></td>
+          <td>30 分钟→不足 1 分钟→软件开发团队的快速迭代方法论得以保留</td>
+      </tr>
+      <tr>
+          <td><strong>高性能数据流注入</strong></td>
+          <td>从主机以接近真实速率注入视频/音频/图像数据→欺骗 SoC 认为数据来自真实世界</td>
+      </tr>
+      <tr>
+          <td><strong>远程配置和管理</strong></td>
+          <td>远程访问和编程→扫描板类型→自动检测设置→远程初始化/配置/监控</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>UMRBus 的 CAPIM 架构</strong>（图141）：多个 CAPIM 模块通过总线协议互联 + 与主机 USB 通信 → 每个 CAPIM 连接到一个设计块 → 统一的访问和控制框架。</p>
+<p>**CO</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0364-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 141 : UMRBus with three CAPIMs connected into various design blocks"
+	
+	
+>
+NFPRO 硬件接口模块**：HAPS-60 上 PCIe 到 UMRBus 的桥接——通过 USB 发送大量数据到板载 supervisor → 以 FPGA 的快速并行模式（而非 JTAG）配置 FPGA。</p>
+<p><strong>预定义 IP 库的价值</strong>：UMRBus-to-SDRAM 组件——直接访问 SDRAM——无需重新综合或 P&amp;R 更改。</p>
+<h4 id="1166-使用嵌入式-cpu-的定制调试器">11.6.6 使用嵌入式 CPU 的定制调试器
+</h4><p>绝大多数有嵌入式处理器的 SoC 已有内置调试器——可直接利用：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">SoC 内置调试器 → 专用 IO 端口 → FPGA IO 引脚 → 测试点引出 → 笔记本电脑上调试软件（USB 连接）
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>流程：连接内部调试器 → 读写处理器总线上所有内存空间 → 加载简单程序运行 → 确认基本功能 → <strong>在真实设计上做实际软件调试</strong>。</p>
+<h3 id="117-组合使用多种调试技术">11.7 组合使用多种调试技术
+</h3><p>调试更多是直觉而非发明——但&quot;有经验的工程师 + 多样的工具&quot;是最佳组合。</p>
+<p><strong>TFT 显示驱动的组合调试示例</strong>：</p>
+<ol>
+<li>定制调试器：读写外设寄存器 → 检查基本硬件访问</li>
+<li>Identify：在处理器总线上设触发点（=该寄存器地址）→ 追踪信号确认数据正确</li>
+<li>示波器/逻辑分析仪：直接查看 TFT 连线信号 → 确认寄存器读写时信号适当</li>
+</ol>
+<h3 id="118-12-条实战调试技巧">11.8 12 条实战调试技巧
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>#</th>
+          <th>技巧</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>1</td>
+          <td><strong>分而治之</strong></td>
+          <td>逐个接口测试 → 先用可见的（探针外部接口信号）再深入不可见的（ChipScope 探内部状态机）</td>
+      </tr>
+      <tr>
+          <td>2</td>
+          <td><strong>检查外部芯片</strong></td>
+          <td>问题可能在 FPGA 之外——用 FPGA 内实现一个可综合模型替代外部芯片做对照测试</td>
+      </tr>
+      <tr>
+          <td>3</td>
+          <td><strong>调整 IO 延迟</strong></td>
+          <td>IODELAY 可编程绝对延迟——调整时钟和数据路径延迟→确保采样正确</td>
+      </tr>
+      <tr>
+          <td>4</td>
+          <td><strong>降低时钟速率</strong></td>
+          <td>系统不是&quot;死的&quot;但行为异常→降时钟→排除时序边缘问题</td>
+      </tr>
+      <tr>
+          <td>5</td>
+          <td><strong>理解关键设置需求</strong></td>
+          <td>SoC 内部寄存器可能默认处于睡眠模式需要写入有效值才能激活；外部传感器增益寄存器可能需要非默认配置</td>
+      </tr>
+      <tr>
+          <td>6</td>
+          <td><strong>检查内置安全机制</strong></td>
+          <td>安全锁单元检查内部 ID 寄存器中的特定值——不存在则原型看似活着但无响应。Boot 代码期望 Flash 中存在密钥才能继续</td>
+      </tr>
+      <tr>
+          <td>7</td>
+          <td><strong>挑战基本假设</strong></td>
+          <td>大端/小端匹配→发射/接收端口直连或交叉→这些&quot;显然&quot;在跨 FPGA 和外部芯片时都可能错</td>
+      </tr>
+      <tr>
+          <td>8</td>
+          <td><strong>终端电阻</strong></td>
+          <td>I2C/PCI/SPI 等接口的物理终端 → 连接器是否间歇接触→局部电压轨问题</td>
+      </tr>
+      <tr>
+          <td>9</td>
+          <td><strong>从外向内测试 IP</strong></td>
+          <td><strong>验证接口而非 IP 功能本身</strong>——IP 应是充分测试过的。但如果 IP 是 RTL 形式且不被供应商支持用于 FPGA → 此假设需要被挑战</td>
+      </tr>
+      <tr>
+          <td>10</td>
+          <td><strong>复用板子：从已知良好的开始</strong></td>
+          <td>从之前项目验证过的 IP 或设计块开始——已知良好的 USB IP + CPU = 验证总线工作 → 以好基础调试新外设</td>
+      </tr>
+      <tr>
+          <td>11</td>
+          <td><strong>先测 GTX 引脚，再测协议</strong></td>
+          <td>IBERT（ChipScope 内置）→ 评估和监控收发器物理层健康 → 确认后再上协议分析仪</td>
+      </tr>
+      <tr>
+          <td>12</td>
+          <td><strong>使用高级分析仪</strong></td>
+          <td>实时协议检查、总线性能统计、总线延迟监控。无外部设备→可综合的总线 exerciser + analyzer 自己写</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="119-bug-修复后的快速周转">11.9 Bug 修复后的快速周转
+</h3><p><strong>调试变成迭代时</strong>——大型 SoC 综合+P&amp;R 可能需要 24+ 小时。</p>
+<p><strong>调试计划</strong>：类似于 SoC 整体的验证计划。每日构建 → 明确每次构建激活哪些部分 → 多份原型拷贝并行使用时特别有用。</p>
+<p><strong>小改动的优化</strong>：只改动一颗 FPGA → 只需重新合成这颗 FPGA → 前面的分区保持不变 → Pre-synthesis 分区显著加速。只需几个小时甚至几十分钟。</p>
+<h4 id="1191-增量综合流程compile-points">11.9.1 增量综合流程：Compile Points
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">设计 → 手动定义 CP（子模块）× N → 仅改动过的 CP 重新综合
+</span></span><span class="line"><span class="cl">                                        未改动的 CP → 重用历史结果
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>三种 CP 类型</strong>：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>类型</th>
+          <th>跨边界优化</th>
+          <th>适用场景</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Soft</strong></td>
+          <td>允许</td>
+          <td>追求最优性能</td>
+      </tr>
+      <tr>
+          <td><strong>Hard</strong></td>
+          <td>阻止</td>
+          <td>模块接口稳定、需隔离变更</td>
+      </tr>
+      <tr>
+          <td><strong>Locked</strong></td>
+          <td>阻止 + 锁定为分区</td>
+          <td>与增量 P&amp;R 的集成模式</td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="1192-自动化与并行综合">11.9.2 自动化与并行综合
+</h4><p><strong>自动 CP</strong>：Synplify 分析设计 → 自动识别可作为 CP 的模块 → 从顶层约束自动时序预算 → 无需手动创建每个 CP 的约束文件。</p>
+<p><strong>多处理器并行</strong>：多个 CP 同时综合 → 即使是全量重构也能缩短总运行时间。</p>
+<h4 id="1193-增量-prdesign-preservation">11.9.3 增量 P&amp;R：Design Preservation
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">第一次迭代：所有分区状态 = &#34;implement&#34;
+</span></span><span class="line"><span class="cl">后续迭代：
+</span></span><span class="line"><span class="cl">  → 已变更分区 → &#34;implement&#34;
+</span></span><span class="line"><span class="cl">  → 未变更分区 → &#34;import&#34;（保留前次实现的映射/布局/布线）
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="1194-组合增量流程图146">11.9.4 组合增量流程（图146）
+</h4><p>**关键</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0376-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 146: Combined synthesis and place & route incremental flow"
+	
+	
+>
+**：仅设置增量综合而不设置增量 P&amp;R → 效果有限（因为 P&amp;R 占绝大部分运行时间）。<strong>必须两者都启用。</strong></p>
+<p>CP 类型 = &ldquo;locked, partition&rdquo; → Synplify 自动将 CP 标记为 P&amp;R 分区 → 自动写入 &ldquo;implement&rdquo;/&ldquo;import&rdquo; → 端到端大幅缩短周转时间。</p>
+<h3 id="1110-bring-up-和调试检查清单">11.10 Bring-Up 和调试检查清单
+</h3><p><strong>Table 30：10 步系统化方法</strong></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>步骤</th>
+          <th>内容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>1</td>
+          <td><strong>检查所有电源轨</strong> — 电压稳定？连接良好？电流限制是否意外触发？</td>
+      </tr>
+      <tr>
+          <td>2</td>
+          <td><strong>检查所有输入时钟</strong> — 频率？质量？相位关系？</td>
+      </tr>
+      <tr>
+          <td>3</td>
+          <td><strong>检查 FPGA 配置和复位</strong> — 所有 FPGA 在同一时钟沿退出复位？</td>
+      </tr>
+      <tr>
+          <td>4</td>
+          <td><strong>加载小型 RTL 设计</strong> — 验证 1-3 + 确认板硬件就绪</td>
+      </tr>
+      <tr>
+          <td>5</td>
+          <td><strong>添加插桩</strong> — 用小 RTL 设计先熟悉调试器操作</td>
+      </tr>
+      <tr>
+          <td>6</td>
+          <td><strong>加载小型自运行程序到 CPU</strong> — 测试关键寄存器的读写和内部 RAM</td>
+      </tr>
+      <tr>
+          <td>7</td>
+          <td><strong>测试外部 RAM</strong> — 接口可能是专为原型做的——独立调试</td>
+      </tr>
+      <tr>
+          <td>8</td>
+          <td><strong>加载 Hello World 到 CPU</strong> — 测试 CPU-主机通信、外部 IP 通信</td>
+      </tr>
+      <tr>
+          <td>9</td>
+          <td><strong>加载完整 SoC 原型</strong> — 含内部 IP 和所有存储器</td>
+      </tr>
+      <tr>
+          <td>10</td>
+          <td><strong>加载真实软件映像</strong> — 原型对终端用户有用了——开香槟！</td>
+      </tr>
+  </tbody>
+</table></div>
+<hr>
+<h2 id="关键图示解读">关键图示解读
+</h2><p><strong>图135：FIR 滤波器 RTL</strong></p>
+<ul>
+<li>仅 ~40 行 Verilog 但精确地测试了多 FPGA 原型的每个关键环节</li>
+<li>全同步单时钟 + 四个不同系数——如果各个 FPGA 的输出按预期顺序出现 → 分区、综合、P&amp;R、配置、跨 FPGA 连接、时钟同步、复位时序全部正确</li>
+</ul>
+<p><strong>图137：FIR 预期输出波形</strong></p>
+<ul>
+<li>脉冲激励 → 系数依次出现在输出——每一级抽头对应一个系数值</li>
+<li>如果输出顺序错位 → 跨 FPGA 的复位或时钟同步有问题</li>
+<li>如果输出值不对 → 跨 FPGA 信号布线有错位</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0345-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 137 : Expected FIR behavior across four FPGAs"
+	
+	
+></p>
+<p><strong>图138：典型 FPGA IO Cell 的 FF 排列</strong></p>
+<ul>
+<li>三态控制路径和数据路径各自有独立的 IOB FF</li>
+<li>不对称使用的陷阱在正文中详细展开</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0348-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 138 : Typical FF arrangement in an FPGA IO cell"
+	
+	
+></p>
+<p><strong>图139：分区环境中的跨 FPGA 信号复杂度</strong></p>
+<ul>
+<li>一幅图胜过千言——密密麻麻的连线让&quot;几千个信号不能错一根&quot;有了视觉上的冲击力</li>
+</ul>
+<p><strong>图141：UMRBus 与三个 CAPIM 连接到不同设计模块</strong></p>
+<ul>
+<li>总线基础调试架构的完整示意图——CAPIM 作为设计各个部分的&quot;窗口&quot;</li>
+</ul>
+<p><strong>图143：Compile Point 层级嵌套</strong></p>
+<ul>
+<li>任意嵌套深度 + 顶层默认 CP——最简单的做法是仅在冻结或预期不变的模块上定义 CP</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0372-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 143: possible arrangement for Compile Points during FPGA Synthesis"
+	
+	
+></p>
+<p><strong>表30：10 步 Bring-Up 检查清单</strong></p>
+<ul>
+<li>可作为实验室白板上的固定参考——从电源轨到香槟，每一步都是数个失败教训的浓缩</li>
+</ul>
+<hr>
+<h2 id="个人总结">个人总结
+</h2><p>第11章是全书中最&quot;接地气&quot;的一章。前10章都在讲怎么正确地做，这一章讲的是&quot;当事情不如预期时怎么找到原因&quot;。</p>
+<p>对调试的分类（逻辑/接口/软件三类 Bug）比看上去更深层——它实际上定义了原型验证能发现什么类型的价值。逻辑 bug 应该由 RTL 仿真发现——原型发现它们其实是意外收获。接口 bug 是&quot;多个 IP 首次在同一平台协同&quot;的常见产物。而<strong>软件 bug——软硬件首次集成时暴露的问题——才是 FPGA 原型真正的价值所在</strong>。正是在这个阶段，原型从一个技术工具变成了一个商业价值引擎。</p>
+<p>本章最实用的哲学就是**&ldquo;先验证平台，再验证设计&rdquo;**。这看似在 bring-up 阶段花更多时间，但&quot;不要将板子问题和设计 bug 混为一谈&quot;是 debug 的第一铁律——违反了它，你可能花三天追踪一个不存在的 RTL bug，而根因只是一根线缆接触不良。</p>
+<p>关于 UMRBus 的讨论也指向了一个重要的行业方向：<strong>JTAG 带宽（KB/s 级）→ USB/PCIe 带宽（MB/s-GB/s 级）→ 调试范式的质变</strong>。当软件映像加载从 30 分钟降到 30 秒，这不仅节约了时间——它让软件团队保持了他们的&quot;快速迭代─测试─修复&quot;的惯常工作方法论。这比任何单一调试功能都更能提升软件团队对原型的接受度。</p>
+<hr>
+<h2 id="实践思考">实践思考
+</h2><ul>
+<li><strong>FIR 测试设计是&quot;零投资高回报&quot;的起点</strong>——花 2 小时写一个简单的全同步测试设计并成功跑在多 FPGA 上，比直接上 SoC 设计然后花 3 天追踪&quot;是板子还是设计的问题&quot;要划算得多</li>
+<li><strong>IOB FF 的不对称使用是真实项目中的高频陷阱</strong>——在代码审查时专门检查三态信号的数据和控制路径是否一致使用 IOB FF</li>
+<li><strong>IO 约束验证脚本是&quot;睡得着觉&quot;的保障</strong>——在 makefile 中将 PAD 报告与&quot;金质&quot;引脚的自动比对作为 P&amp;R 后的强制步骤。一个引脚错位 = 数天的不必要调试</li>
+<li><strong>循环依赖是 SoC 启动失败的常见但隐蔽的原因</strong>——检查&quot;FPGA A 的复位是否依赖 FPGA B 中需要 FPGA A 信号的逻辑&quot;——在分区时就应该被识别和打破</li>
+<li><strong>不要在 JTAG 上浪费软件团队的时间</strong>——如果原型的主要用户是软件团队，投资建立高带宽通道（USB/PCIe+UMRBus 或等效方案）是软件团队接受原型的必要前提</li>
+<li><strong>Compile Point + Design Preservation 组合是迭代阶段的&quot;生产力放大器&quot;</strong>——需要花时间初始设置，但从第三次设计迭代开始就以 2-5× 的速度回报</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0344-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 136 : FIR filter test design partitioned across 4 FPGAs"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0367-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 142: Software debugger linked into FPGA-based prototype"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0374-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 144: Automatic compile points and synthesis on multiple CPUs"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0375-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 145: Design preservation flow in Xilinx[®] ISE[®] tools"
+	
+	
+></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/fpga/">FPGA</a>
+        
+            <a href="/tags/prototyping/">Prototyping</a>
+        
+            <a href="/tags/bring-up/">Bring-Up</a>
+        
+            <a href="/tags/debug/">Debug</a>
+        
+            <a href="/tags/lab/">Lab</a>
+        
+            <a href="/tags/timing-analysis/">Timing Analysis</a>
+        
+            <a href="/tags/jtag/">JTAG</a>
+        
+            <a href="/tags/umrbus/">UMRBus</a>
+        
+            <a href="/tags/incremental-synthesis/">Incremental Synthesis</a>
+        
+            <a href="/tags/chipscope/">ChipScope</a>
+        
+            <a href="/tags/identify/">Identify</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC3%E7%AB%A0-fpga-technology-today-chips-and-tools/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第3章: FPGA Technology Today — Chips and Tools</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC13%E7%AB%A0-prototyping--verification-the-best-of-both-worlds/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第13章: Prototyping &#43; Verification = The Best of Both Worlds</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC12%E7%AB%A0-breaking-out-of-the-lab-the-prototype-in-the-field/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第12章: Breaking Out of the Lab — The Prototype in the Field</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC14%E7%AB%A0-the-future-of-prototyping/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第14章: The Future of Prototyping</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC15%E7%AB%A0-conclusions-%E5%85%A8%E4%B9%A6%E6%80%BB%E7%BB%93%E4%B8%8E%E6%A0%B8%E5%BF%83%E8%A6%81%E7%82%B9%E5%9B%9E%E9%A1%BE/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第15章: Conclusions — 全书总结与核心要点回顾</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.524358946663b6a5f95fbef001d1c97000115552b473e36faad787d7b96c8241.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

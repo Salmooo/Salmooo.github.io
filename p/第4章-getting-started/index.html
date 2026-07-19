@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="FPGA 原型项目的起步实战：RTL 成熟度准入标准、FPGA 资源估算方法论、50% 利用率黄金法则、工具运行时间优化、工程人力评估，以及 Make vs Buy 平台的权衡。">
+<title>第4章: Getting Started</title>
+
+<link rel='canonical' href='http://localhost:1313/p/%E7%AC%AC4%E7%AB%A0-getting-started/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="第4章: Getting Started">
+<meta property='og:description' content="FPGA 原型项目的起步实战：RTL 成熟度准入标准、FPGA 资源估算方法论、50% 利用率黄金法则、工具运行时间优化、工程人力评估，以及 Make vs Buy 平台的权衡。">
+<meta property='og:url' content='http://localhost:1313/p/%E7%AC%AC4%E7%AB%A0-getting-started/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='FPGA' /><meta property='article:tag' content='Prototyping' /><meta property='article:tag' content='Project Planning' /><meta property='article:tag' content='Resource Estimation' /><meta property='article:tag' content='RTL Maturity' /><meta property='article:tag' content='Utilization' /><meta property='article:tag' content='Workstation' /><meta property='article:tag' content='HAPS' /><meta property='article:published_time' content='2026-06-04T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-06-04T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="第4章: Getting Started">
+<meta name="twitter:description" content="FPGA 原型项目的起步实战：RTL 成熟度准入标准、FPGA 资源估算方法论、50% 利用率黄金法则、工具运行时间优化、工程人力评估，以及 Make vs Buy 平台的权衡。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="http://localhost:1313/" selected>English</option>
+                                
+                                    <option value="http://localhost:1313/zh-cn/" >中文</option>
+                                
+                                    <option value="http://localhost:1313/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#章节概览">章节概览</a></li>
+    <li><a href="#核心知识点">核心知识点</a></li>
+    <li><a href="#详细笔记">详细笔记</a>
+      <ol>
+        <li><a href="#41-启动清单table-7">4.1 启动清单（Table 7）</a></li>
+        <li><a href="#42-估算所需资源fpga">4.2 估算所需资源：FPGA</a>
+          <ol>
+            <li><a href="#421-rtl-需要多成熟">4.2.1 RTL 需要多成熟？</a></li>
+            <li><a href="#423-无法映射到-fpga-的设计块">4.2.3 无法映射到 FPGA 的设计块</a></li>
+            <li><a href="#424-一颗-fpga-到底有多大">4.2.4 一颗 FPGA 到底有多大？</a></li>
+            <li><a href="#425-soc-设计到底有多大在-fpga-术语下">4.2.5 SoC 设计到底有多大？（在 FPGA 术语下）</a></li>
+            <li><a href="#426-fpga-资源估算方法论">4.2.6 FPGA 资源估算方法论</a></li>
+            <li><a href="#4261-知名-soc-模块的-fpga-消耗量">4.2.6.1 知名 SoC 模块的 FPGA 消耗量</a></li>
+            <li><a href="#427-原型能跑多快">4.2.7 原型能跑多快？</a></li>
+          </ol>
+        </li>
+        <li><a href="#43-一个原型中能用多少颗-fpga">4.3 一个原型中能用多少颗 FPGA？</a></li>
+        <li><a href="#44-估算所需资源工具和硬件">4.4 估算所需资源（工具和硬件）</a></li>
+        <li><a href="#45-跑一遍设计要多久">4.5 跑一遍设计要多久？</a>
+          <ol>
+            <li><a href="#工具链各阶段耗时比例">工具链各阶段耗时比例</a></li>
+            <li><a href="#451-缩短运行时间的六大策略">4.5.1 缩短运行时间的六大策略</a></li>
+            <li><a href="#452-分区运行时间">4.5.2 分区运行时间</a></li>
+          </ol>
+        </li>
+        <li><a href="#46-工作量预算是多少">4.6 工作量预算是多少？</a>
+          <ol>
+            <li><a href="#461-首次实现的工作量">4.6.1 首次实现的工作量</a></li>
+            <li><a href="#462-后续迭代的工作量">4.6.2 后续迭代的工作量</a></li>
+            <li><a href="#463-工程人力资源">4.6.3 工程人力资源</a></li>
+          </ol>
+        </li>
+        <li><a href="#47-fpga-平台预商用平台示例">4.7 FPGA 平台（预商用平台示例）</a></li>
+      </ol>
+    </li>
+    <li><a href="#关键表格和图解读">关键表格和图解读</a></li>
+    <li><a href="#个人总结">个人总结</a></li>
+    <li><a href="#实践思考">实践思考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/fpga%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" >
+                FPGA学习笔记
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E7%AC%AC4%E7%AB%A0-getting-started/">第4章: Getting Started</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jun 04, 2026</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    5 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="章节概览">章节概览
+</h2><p>前三章讲了 Why（为什么做原型）和 What（FPGA 技术是什么），第四章终于进入 How——如何启动一个 FPGA 原型项目。</p>
+<p>本章是一份完整的项目启动手册，回答了六个核心问题：(1) RTL 什么时候才算准备好了？(2) 需要多少 FPGA 资源？(3) 原型能跑多快？(4) 处理一遍设计要多久？(5) 工程工作量多大？(6) 团队需要什么技能？</p>
+<p>最有实践价值的发现包括：<strong>初始利用率不超过 50%</strong> 的经验法则、基于综合报告计算 FPGA 数量、四 FPGA 系统首次实现耗时 10-16 人周的估算基准，以及&quot;至少需要一个会看 RTL + 懂 FPGA + 擅长 bench 调试的专职工程师&quot;的团队配方。</p>
+<hr>
+<h2 id="核心知识点">核心知识点
+</h2><ul>
+<li><strong>启动清单（Table 7）</strong>：分 Setup 和 Usage 两大阶段，覆盖选 FPGA、制板/买板、设计移植、Bring-Up、跑软件、实地测试的全流程</li>
+<li><strong>RTL 准入标准</strong>：TI 团队要求覆盖率达到 80% 才放入原型；同步到 ASIC 流程的试实现阶段（&ldquo;Hello World&quot;测试通过）是实用的交接点</li>
+<li><strong>FPGA 资源量化（LX760）</strong>：~750K LUT + ~950K FF ≈ 400 万 SoC 门（满载）或 250 万门（合理利用率），720 个 36Kb BlockRAM ≈ 26Mb，864 个 DSP48E1，1200 IO，18 个 MMCM</li>
+<li><strong>利用率黄金法则</strong>：初始 ≤50%（为后期增长和调试逻辑留余地），极限 ≤75%（生产 FPGA 设计的上限）</li>
+<li><strong>从综合报告反推 FPGA 数量</strong>：总 LUT 需求 / (单器件 LUT × 50%) = 所需 FPGA 数</li>
+<li><strong>知名 IP 的 FPGA 消耗量</strong>：ARM Cortex-A5（小型配置）≈ 2 颗 LX330 @50%，ARM Mali-400 w/3 pixel processors ≈ 4 颗 LX330 @50%</li>
+<li><strong>首次实现耗时</strong>：4 FPGA 系统、50% 利用率、宽松时钟 → <strong>10-16 人周</strong>（5-8 周 / 双人团队）</li>
+<li><strong>后续迭代耗时</strong>：小改动 1-4 小时/FPGA（增量模式）；中改动需分区调整 → 最多几天</li>
+<li><strong>时钟和 IO 常比逻辑更早成为瓶颈</strong>：高互连设计即使逻辑资源够用，仍可能因 FPGA 间连线耗尽而受限</li>
+<li><strong>运行时间以小时计而非天</strong>：日常应选择&quot;白天改代码、晚上跑脚本&quot;的节奏</li>
+</ul>
+<hr>
+<h2 id="详细笔记">详细笔记
+</h2><h3 id="41-启动清单table-7">4.1 启动清单（Table 7）
+</h3><p>两阶段框架：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>阶段</th>
+          <th>任务</th>
+          <th>考量</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Setup</strong></td>
+          <td>选择 FPGA</td>
+          <td>容量？速度？IO？</td>
+      </tr>
+      <tr>
+          <td></td>
+          <td>自建 vs 买板</td>
+          <td>内部能力？时间？预算？</td>
+      </tr>
+      <tr>
+          <td></td>
+          <td>设计移植到 FPGA</td>
+          <td>原型三定律、最小化设计改动、构建追踪</td>
+      </tr>
+      <tr>
+          <td><strong>Usage</strong></td>
+          <td>Bring-Up 和找 bug</td>
+          <td>需要什么插桩？原型可共享吗？</td>
+      </tr>
+      <tr>
+          <td></td>
+          <td>跑软件</td>
+          <td>软件团队能独立使用吗？如何链接调试器？</td>
+      </tr>
+      <tr>
+          <td></td>
+          <td>在真实世界运行</td>
+          <td>可搬运性？鲁棒性？封装需求？</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>关键事实：<strong>大部分工作在 Setup 阶段，大部分收益在 Usage 阶段</strong>。</p>
+<blockquote>
+<p>这个清单的主线 = 本书后续各章的路线图。</p>
+</blockquote>
+<hr>
+<h3 id="42-估算所需资源fpga">4.2 估算所需资源：FPGA
+</h3><p>作者给出一个血淋淋的教训：有新手严重低估 FPGA 资源需求，导致内部设计制造的整个平台报废，数周项目进度付诸东流。</p>
+<h4 id="421-rtl-需要多成熟">4.2.1 RTL 需要多成熟？
+</h4><p><strong>核心矛盾</strong>：越早做原型越好（给软件团队争取时间） vs 太早做的 RTL 不成熟（浪费时间于仿真器就能轻易发现的初级 bug）。</p>
+<p><strong>行业实践两个极端</strong>：</p>
+<ul>
+<li><strong>TI（保守派）</strong>：RTL 代码完整、覆盖率达到 ≥80% 后才放入原型</li>
+<li><strong>激进派</strong>：代码完成 75% 即可提前交付 RTL</li>
+</ul>
+<p><strong>实用建议</strong>：<strong>将 RTL 的首次交付时点同步到 ASIC 流程开始试实现的时间点</strong>。</p>
+<p>这个时点的特征：</p>
+<ul>
+<li>每个块级已通过测试</li>
+<li>RTL 已组装足够运行基本的早期测试</li>
+<li>&ldquo;Hello World&rdquo; 测试通过——能在仿真器中加载/读写寄存器、看到端口、数据能在 SoC 中流通</li>
+<li><strong>如果设计在仿真器中通过这类测试，在原型中也应该至少能通过</strong>——这本身就是 prototype 好坏的试金石</li>
+</ul>
+<p><strong>关键机制</strong>：<strong>RTL 原型交付应纳入整体 SoC 验证计划，作为正式里程</strong>碑——这是第9章&quot;面向原型验证的设计&rdquo;（DFP）的一部分。</p>
+<h4 id="423-无法映射到-fpga-的设计块">4.2.3 无法映射到 FPGA 的设计块
+</h4><p>两类块不能进 FPGA：</p>
+<ol>
+<li><strong>模拟电路</strong>（天然不匹配）</li>
+<li><strong>固定数字 IP</strong>（无源码且无 FPGA 网表）</li>
+</ol>
+<p><strong>替代方案</strong>：</p>
+<ul>
+<li>IP 供应商的评估板（固定芯片中的 IP）</li>
+<li>自建等效功能板</li>
+<li>现有/遗留 SoC 芯片挂接到 FPGA 平台</li>
+</ul>
+<p><strong>外部模块的五大互通考量</strong>：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>考量</th>
+          <th>具体内容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>电气连通性</strong></td>
+          <td>RTL 中提供连接到 FPGA 外部的模块</td>
+      </tr>
+      <tr>
+          <td><strong>信令</strong></td>
+          <td>IO 信令电平兼容性、信号完整性</td>
+      </tr>
+      <tr>
+          <td><strong>时钟和时序</strong></td>
+          <td>提供必要时钟、计算时钟延迟和互连时序</td>
+      </tr>
+      <tr>
+          <td><strong>逻辑同步</strong></td>
+          <td>外部硬件冷启动远快于 FPGA 加载 → 同步问题、复位、脉冲宽度</td>
+      </tr>
+      <tr>
+          <td><strong>物理/机械</strong></td>
+          <td>物理连接方式、供电、线缆管理、反复插拔保护</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>减小设计规模的三种策略</strong>：</p>
+<ol>
+<li><strong>永久移除</strong>：有硬件等价物的块 → 物理 SoC 或评估板替代（典型的如处理器 IP）</li>
+<li><strong>临时移除</strong>：超量的模块分批原型化（如多个存储接口分时验证）</li>
+<li><strong>规模缩小</strong>：存储器缩小到只跑代码子集，多通道设计只保留一个通道验证驱动软件</li>
+</ol>
+<h4 id="424-一颗-fpga-到底有多大">4.2.4 一颗 FPGA 到底有多大？
+</h4><p><strong>不应用 SoC 门数来衡量 FPGA</strong>——&ldquo;一颗 FPGA 有 n 百万门&quot;这种说法往往是误导。</p>
+<p><strong>LX760 资源详览</strong>（以 SoC 等效门表示）：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>资源</th>
+          <th>数量</th>
+          <th>等效门数</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>逻辑</strong></td>
+          <td>750K LUT + 950K FF</td>
+          <td>约 400 万门（满载）/ 250 万门（合理利用率）</td>
+      </tr>
+      <tr>
+          <td><strong>存储器</strong></td>
+          <td>720 个 BlockRAM</td>
+          <td>~26Mb 各配置（ROM/RAM/FIFO）+ 8.3Mb 分布式 RAM</td>
+      </tr>
+      <tr>
+          <td><strong>DSP</strong></td>
+          <td>864 个 DSP48E1</td>
+          <td>每个等于数百等效门——算术密集型设计可释放大量逻辑</td>
+      </tr>
+      <tr>
+          <td><strong>IO</strong></td>
+          <td>1200 引脚</td>
+          <td><strong>往往比逻辑和存储更关键</strong></td>
+      </tr>
+      <tr>
+          <td><strong>时钟</strong></td>
+          <td>18 个 MMCM</td>
+          <td>全局或区域低偏斜时钟——多时钟设计的关键限制</td>
+      </tr>
+      <tr>
+          <td><strong>特殊块</strong></td>
+          <td>以太网 MAC / PCIe / GTX</td>
+          <td>不能透明映射——需将 SoC 块替换为 FPGA 等价物</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>最重要的提醒</strong>：</p>
+<ul>
+<li>FPGA 与 SoC 在门数指标上不可比</li>
+<li>FF/LUT 比率高的流水线设计映射更好，跑得更快</li>
+<li>IO 引脚是比逻辑容量更常见的瓶颈</li>
+</ul>
+<h4 id="425-soc-设计到底有多大在-fpga-术语下">4.2.5 SoC 设计到底有多大？（在 FPGA 术语下）
+</h4><p><strong>FPGA 高利用率的三宗罪</strong>：</p>
+<ol>
+<li><strong>设计本身</strong>：FF 丰富的设计映射效率高；FF 稀疏的设计门利用率低</li>
+<li><strong>时钟资源</strong>：多时钟设计必须仔细检查时钟资源和区域限制</li>
+<li><strong>互连资源</strong>：高互连设计可能局部耗尽布线资源，导致该区域其余逻辑不可用</li>
+</ol>
+<blockquote>
+<p><strong>建议</strong>：虽然 90%+ 利用率可能达到，但初始利用率目标应 <strong>≤50%</strong>。</p>
+</blockquote>
+<h4 id="426-fpga-资源估算方法论">4.2.6 FPGA 资源估算方法论
+</h4><p><strong>手动估算</strong>：特殊资源（BlockRAM、乘法器、高速 IO）手工估算不难且较准确；随机逻辑和 FF 的手工估算误差大。</p>
+<p><strong>推荐做法</strong>：RTL 可综合时立即跑 Quick Synthesis → 获得精确的资源使用估计。</p>
+<p><strong>从综合报告反推 FPGA 个数</strong>（图45 实例）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Total LUTs = 1,919,724
+</span></span><span class="line"><span class="cl">单颗 LX760 LUTs = 758,784
+</span></span><span class="line"><span class="cl">目标利用率 = 50%
+</span></span><span class="line"><span class="cl">所需 FPGA 数 = 1,919,724 / (758,784 × 0.5) ≈ 5 颗
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>为什么限制利用率？</strong>：</p>
+<ul>
+<li>P&amp;R 质量随利用率升高大幅恶化</li>
+<li>运行时间急剧增长（90% 利用率 → 24+ 小时跑全程）</li>
+<li><strong>没有余量应对中后期设计增长和调试逻辑</strong></li>
+<li>原型的目标是降低风险 → 把 FPGA 塞到满不是低风险做法</li>
+</ul>
+<p><strong>利用率经验值</strong>：</p>
+<ul>
+<li>生产 FPGA 设计 → ≤75%</li>
+<li><strong>原型项目 → 60% 甚至 50% 都很合理</strong></li>
+</ul>
+<h4 id="4261-知名-soc-模块的-fpga-消耗量">4.2.6.1 知名 SoC 模块的 FPGA 消耗量
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>IP / SoC 功能</th>
+          <th>FPGA 资源需求</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>ARM Cortex-A5（小型配置）</td>
+          <td>2 颗 Virtex-5 LX330 @50%</td>
+      </tr>
+      <tr>
+          <td>ARM Cortex-A9</td>
+          <td>1 颗 Virtex-5 LX330 @80%</td>
+      </tr>
+      <tr>
+          <td>ARM Mali-400 w/3 pixel processors</td>
+          <td>4 颗 Virtex-5 LX330 @50%</td>
+      </tr>
+      <tr>
+          <td>ARC AS221（音频）</td>
+          <td>1 颗 Virtex-5 LX330 @10%</td>
+      </tr>
+      <tr>
+          <td>ARC AV 417V（视频）</td>
+          <td>1 颗 Virtex-5 LX330 @60%</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>即使 FPGA 持续变大，<strong>原型第一定律（SoC &gt; FPGA）仍然成立</strong>。</p>
+</blockquote>
+<h4 id="427-原型能跑多快">4.2.7 原型能跑多快？
+</h4><p>六大影响因素：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>因素</th>
+          <th>影响机制</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>设计类型</strong></td>
+          <td>高流水线设计比低流水线更快</td>
+      </tr>
+      <tr>
+          <td><strong>内部互联复杂度</strong></td>
+          <td>高扇出 → 布线延迟长 → 慢；且分区 IO 更多</td>
+      </tr>
+      <tr>
+          <td><strong>资源利用率</strong></td>
+          <td>高利用率 → 拥塞 → 长延迟 → 慢</td>
+      </tr>
+      <tr>
+          <td><strong>FPGA 原始性能</strong></td>
+          <td>理论极限（但通常远在设计-工具限制之下才触达）</td>
+      </tr>
+      <tr>
+          <td><strong>跨 FPGA 时序</strong></td>
+          <td>FPGA 标准 IO 速度远低于内部逻辑速度——<strong>往往是系统时钟的主导限制</strong></td>
+      </tr>
+      <tr>
+          <td><strong>外部接口</strong></td>
+          <td>如果外部刺激不能减速，原型必须匹配其速率</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>引脚复用的性能代价</strong>（第8章详细展开）：</p>
+<blockquote>
+<p>4 路 20MHz 信号复用到一根物理线 → 至少需 80MHz 的数据率 + 额外开销 → 每路有效数据率 &lt; 物理上限的 1/4。<strong>引脚复用严重限制系统时钟，应在早期可行性阶段评估。</strong></p>
+</blockquote>
+<hr>
+<h3 id="43-一个原型中能用多少颗-fpga">4.3 一个原型中能用多少颗 FPGA？
+</h3><p><strong>理论无上限</strong>，实际受限于：</p>
+<ol>
+<li><strong>FPGA 间互联</strong>：分割越多，跨 FPGA 连线通常越长 → 引脚复用可缓解但降低速度</li>
+<li><strong>信号传播延迟</strong>：IO pad 的延迟大于芯片内部——跨 FPGA 路径通常是<strong>时序关键路径</strong>。多板连接经多个连接器/线缆时，接地回流和参考电平可能退化</li>
+<li><strong>时钟分布</strong>：跨 FPGA 的时钟偏斜必须最小化——系统变大后物理时钟分配越来越难</li>
+<li><strong>手工分区的复杂度</strong>：FPGA 越多，手工分区越不现实</li>
+<li><strong>管理成本的线性增长</strong>：需并行处理的多颗 FPGA 要求多个工具 License</li>
+</ol>
+<blockquote>
+<p><strong>建议</strong>：早期发现分区和实现问题是关键——使用 Certify 等分区工具可显著简化和加速。</p>
+</blockquote>
+<hr>
+<h3 id="44-估算所需资源工具和硬件">4.4 估算所需资源（工具和硬件）
+</h3><p><strong>工作站配置</strong>：</p>
+<ul>
+<li>几乎全部跑在 <strong>Linux 工作站</strong>上</li>
+<li><strong>每个进程至少 16GB RAM</strong></li>
+<li>驱动因素：FPGA 数据库有数百万个实例</li>
+</ul>
+<p><strong>并行化</strong>：分区后的多颗 FPGA 可以同时跑综合和 P&amp;R→ 总运行时间 = 最慢那颗 FPGA 的时间。</p>
+<hr>
+<h3 id="45-跑一遍设计要多久">4.5 跑一遍设计要多久？
+</h3><h4 id="工具链各阶段耗时比例">工具链各阶段耗时比例
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>任务</th>
+          <th>传统流程（Flow 1）</th>
+          <th>物理综合流程（Flow 2）</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>综合</td>
+          <td>10%</td>
+          <td>10%</td>
+      </tr>
+      <tr>
+          <td>映射</td>
+          <td>20%</td>
+          <td>35%（前后端合并）</td>
+      </tr>
+      <tr>
+          <td>布局</td>
+          <td>30%</td>
+          <td>35%</td>
+      </tr>
+      <tr>
+          <td>布线</td>
+          <td>35%</td>
+          <td>15%</td>
+      </tr>
+      <tr>
+          <td>位流生成</td>
+          <td>5%</td>
+          <td>5%</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p><strong>布局+布线占总时间的 65-70%（传统流程）</strong>——这就是为什么利用率对大 FPGA 如此关键。</p>
+</blockquote>
+<p><strong>实际耗时量级</strong>：大 FPGA 90% 利用率 → 24+ 小时跑完全流程，其中 3/4 在 P&amp;R。</p>
+<h4 id="451-缩短运行时间的六大策略">4.5.1 缩短运行时间的六大策略
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>策略</th>
+          <th>方法</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>加工作站和 License</strong></td>
+          <td>更多并行处理</td>
+      </tr>
+      <tr>
+          <td><strong>降利用率</strong></td>
+          <td>重新分区到更多 FPGA——宁愿 6 颗 @50% 不要 4 颗 @75%</td>
+      </tr>
+      <tr>
+          <td><strong>放宽时序约束</strong></td>
+          <td>非关键路径放低目标→显著降低 P&amp;R 时间</td>
+      </tr>
+      <tr>
+          <td><strong>增量流程</strong></td>
+          <td>未改动部分不复用——第11章详述</td>
+      </tr>
+      <tr>
+          <td><strong>快速通道</strong></td>
+          <td>关掉部分优化步骤（如 Synplify Fast Synthesis）</td>
+      </tr>
+      <tr>
+          <td><strong>放宽时序模型</strong></td>
+          <td>极端情况下利用原型只在实验室运行的事实</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p><strong>日常节奏</strong>：&ldquo;白天改设计、晚上跑 build 脚本、第二天看结果&quot;是成熟的实践模式。自动脚本应包含错误捕获和通知功能。</p>
+</blockquote>
+<h4 id="452-分区运行时间">4.5.2 分区运行时间
+</h4><p>分区工具的运行时间在整个流程中占比小，但<strong>自动化和容错性比速度更重要</strong>：</p>
+<blockquote>
+<p>如果某个新门出现在 RTL 中，分区器应该能自动假设&quot;源和目标都在某 FPGA 中 → 该门也自动放入该 FPGA&rdquo;，而不是半夜弹出一个对话框问你要放哪——然后脚本就卡住了。</p>
+</blockquote>
+<hr>
+<h3 id="46-工作量预算是多少">4.6 工作量预算是多少？
+</h3><h4 id="461-首次实现的工作量">4.6.1 首次实现的工作量
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>活动</th>
+          <th>内容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>SoC 设计修改</strong></td>
+          <td>流水线优化、裁剪不需要原型化的部分、SoC 结构→FPGA 结构替换</td>
+      </tr>
+      <tr>
+          <td><strong>分区</strong></td>
+          <td>把设计划分到多颗 FPGA</td>
+      </tr>
+      <tr>
+          <td><strong>设计约束生成</strong></td>
+          <td>引脚布局、时序约束、综合指令</td>
+      </tr>
+      <tr>
+          <td><strong>调试功能配置</strong></td>
+          <td>插入调试插桩（可选但常用）</td>
+      </tr>
+      <tr>
+          <td><strong>物理设计实现</strong></td>
+          <td>综合→映射→P&amp;R→时序分析→位流生成</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>首次实现耗时基准</strong>：</p>
+<blockquote>
+<p>4 FPGA 系统，每颗 50% 利用率，宽松时钟目标 → <strong>10-16 人周</strong>。
+即 <strong>双人团队 5-8 周</strong>。</p>
+<p>这不包括平台和工具评估培训时间。首次团队还需加上学习新技术、工具和获取平台组件的时间。</p>
+</blockquote>
+<h4 id="462-后续迭代的工作量">4.6.2 后续迭代的工作量
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>改动规模</th>
+          <th>耗时</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>小改动</strong>（仅改调试探针/小逻辑改动）</td>
+          <td>1-4 小时/FPGA（增量模式下仅变更模块重新综合+P&amp;R）</td>
+      </tr>
+      <tr>
+          <td><strong>中等改动</strong>（设计增长超出 50% 利用率 + 时序更难 + 可能需重新分区）</td>
+          <td><strong>最多几天</strong></td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="463-工程人力资源">4.6.3 工程人力资源
+</h4><p><strong>这不是给实习生做的暑期项目</strong>。</p>
+<p><strong>成功的原型工程师需要同时具备</strong>：</p>
+<ol>
+<li>对 RTL 设计有深刻理解</li>
+<li>熟悉 FPGA 技术</li>
+<li>掌握 EDA 工具</li>
+<li><strong>优秀的 bench 硬件调试能力</strong></li>
+</ol>
+<blockquote>
+<p>&ldquo;这些技能在 SoC 验证团队中不常见——需要刻意建设和维持这样的内部专业力量。&rdquo;</p>
+</blockquote>
+<p><strong>大公司的实践</strong>：维护一个专职原型验证团队。<strong>这些专家的投资回报率很高</strong>。</p>
+<p><strong>推荐策略</strong>：</p>
+<ul>
+<li>首次项目：<strong>雇佣顾问</strong>——既能交付当前项目，又能把团队带上轨道</li>
+<li>某些任务可以让 SoC 工程师分担（如识别多周期路径、RTL 时序改进）</li>
+</ul>
+<hr>
+<h3 id="47-fpga-平台预商用平台示例">4.7 FPGA 平台（预商用平台示例）
+</h3><p>以 Synopsys HAPS-64 为例：</p>
+<ul>
+<li>4 颗 Virtex-6 LX760 + 1 颗小 FPGA（板级配置 + Supervisor + 通信）</li>
+<li>另有 1 颗或 2 颗 LX760 的配置变体</li>
+<li>不同互联选项 + 独立子板（硬 IP、存储、IO）</li>
+<li><strong>灵活性 = 跨项目复用的前提</strong></li>
+</ul>
+<hr>
+<h2 id="关键表格和图解读">关键表格和图解读
+</h2><p><strong>Table 7：启动清单</strong></p>
+<ul>
+<li>将 15 章书的主线浓缩为 Setup + Usage 两阶段</li>
+<li>可用作项目 Kick-Off 会议的实际代办清单</li>
+</ul>
+<p><strong>Table 8：知名 IP 消耗量</strong></p>
+<ul>
+<li>ARM Cortex-A5 即便最小的配置也要 2 颗 LX330 @50%</li>
+<li>这直观印证了&quot;原型第一定律&rdquo;——尽管 FPGA 越来越大，SoC 始终领先一步</li>
+</ul>
+<p><strong>图45：综合资源报告</strong></p>
+<ul>
+<li>直接展示了如何从 1,919,724 LUTs / (758,784 × 0.5) ≈ 5 颗 FPGA 的估算过程</li>
+</ul>
+<p><strong>Table 10：工具链各阶段运行时间占比</strong></p>
+<ul>
+<li>布局布线占 65%——这是所有优化策略的出发点：如果你要加快迭代，第一件事是降低利用率</li>
+</ul>
+<p><strong>图46：HAPS-64 平台</strong></p>
+<ul>
+<li>四颗主 FPGA + 管理 FPGA + 子板生态——商业平台应对复用性的典型做法</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0138-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 46: Example of a ready-made FPGA platform, HAPS[®] -64"
+	
+	
+></p>
+<hr>
+<h2 id="个人总结">个人总结
+</h2><p>这一章没有讲任何硬件细节，却是全书对首次实践者最有价值的一章。它把前面三章的理论变成了可执行的项目计划。</p>
+<p>对我最大的启发是 <strong>&ldquo;50% 初始利用率&quot;这个经验法则</strong>。乍看很浪费——为什么要多买一倍的 FPGA？但算算账：</p>
+<ul>
+<li>90% 利用率：24+ 小时跑一遍，且没有余量容纳中后期设计增长和调试插桩</li>
+<li>50% 利用率：几小时跑一遍，多个白天迭代一次，且有足够的空间应对项目不确定性</li>
+</ul>
+<p><strong>FPGA 本身可能比工程师的时间便宜。</strong> 浪费几天等待 P&amp;R、因利用率爆满而重新分区——这些人力成本很快就超过多买几颗 FPGA 的费用。</p>
+<p>另一个深刻印象是<strong>工程团队的技能配方</strong>。RTL 知识 + FPGA 技术 + 工具掌握 + bench 调试能力——这确实是罕见的 T 型人才。难怪作者建议首次项目雇顾问带队。</p>
+<p>最后，&ldquo;Hello World&quot;测试作为 RTL-FPGA 交接信号这个思路极其实用——它提供了一个客观的、可自动化的、不依赖主观判断的准入标准。</p>
+<hr>
+<h2 id="实践思考">实践思考
+</h2><ul>
+<li><strong>&ldquo;早上改设计、晚上跑 build&quot;的节奏需要自动脚本支撑</strong>——花一周写好可靠的构建脚本 + 错误通知机制，比整个项目期间每天手动启动各个步骤要划算得多</li>
+<li><strong>引脚复用必须在早期评估</strong>——等到分区做了几轮才发现跨 FPGA 连线不够、必须降速来引脚复用，代价巨大</li>
+<li><strong>不要低估外部模块的同步问题</strong>——FPGA 加载需要时间，外面芯片早就在跑了。冷启动、热复位、异步复位/同步复位的场景要在设计阶段就想清楚</li>
+<li><strong>首次实现的 10-16 人周基准</strong>可以作为项目规划的上限参考（不含学习曲线）</li>
+<li><strong>利用率 50% 不是浪费</strong>——它买的是迭代速度、调试余量和项目抗风险能力</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/fpga/">FPGA</a>
+        
+            <a href="/tags/prototyping/">Prototyping</a>
+        
+            <a href="/tags/project-planning/">Project Planning</a>
+        
+            <a href="/tags/resource-estimation/">Resource Estimation</a>
+        
+            <a href="/tags/rtl-maturity/">RTL Maturity</a>
+        
+            <a href="/tags/utilization/">Utilization</a>
+        
+            <a href="/tags/workstation/">Workstation</a>
+        
+            <a href="/tags/haps/">HAPS</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC6%E7%AB%A0-which-platform-ready-made/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第6章: Which Platform? — Ready Made</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC12%E7%AB%A0-breaking-out-of-the-lab-the-prototype-in-the-field/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第12章: Breaking Out of the Lab — The Prototype in the Field</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC13%E7%AB%A0-prototyping--verification-the-best-of-both-worlds/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第13章: Prototyping &#43; Verification = The Best of Both Worlds</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC14%E7%AB%A0-the-future-of-prototyping/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第14章: The Future of Prototyping</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC15%E7%AB%A0-conclusions-%E5%85%A8%E4%B9%A6%E6%80%BB%E7%BB%93%E4%B8%8E%E6%A0%B8%E5%BF%83%E8%A6%81%E7%82%B9%E5%9B%9E%E9%A1%BE/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第15章: Conclusions — 全书总结与核心要点回顾</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.524358946663b6a5f95fbef001d1c97000115552b473e36faad787d7b96c8241.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

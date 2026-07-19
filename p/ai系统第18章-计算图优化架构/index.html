@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="《AI系统：原理与架构》学习笔记 — 深入理解推理引擎的图优化模块：从四种冗余到常量折叠、节点消除、算子融合、算子替换、FlashAttention 等核心技术">
+<title>AI系统：第18章 计算图优化架构</title>
+
+<link rel='canonical' href='http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC18%E7%AB%A0-%E8%AE%A1%E7%AE%97%E5%9B%BE%E4%BC%98%E5%8C%96%E6%9E%B6%E6%9E%84/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="AI系统：第18章 计算图优化架构">
+<meta property='og:description' content="《AI系统：原理与架构》学习笔记 — 深入理解推理引擎的图优化模块：从四种冗余到常量折叠、节点消除、算子融合、算子替换、FlashAttention 等核心技术">
+<meta property='og:url' content='http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC18%E7%AB%A0-%E8%AE%A1%E7%AE%97%E5%9B%BE%E4%BC%98%E5%8C%96%E6%9E%B6%E6%9E%84/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='AI System' /><meta property='article:tag' content='Deep Learning' /><meta property='article:tag' content='AI Infra' /><meta property='article:tag' content='Graph Optimization' /><meta property='article:tag' content='Operator Fusion' /><meta property='article:tag' content='Constant Folding' /><meta property='article:tag' content='FlashAttention' /><meta property='article:tag' content='Inference Engine' />
+<meta name="twitter:title" content="AI系统：第18章 计算图优化架构">
+<meta name="twitter:description" content="《AI系统：原理与架构》学习笔记 — 深入理解推理引擎的图优化模块：从四种冗余到常量折叠、节点消除、算子融合、算子替换、FlashAttention 等核心技术">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="http://localhost:1313/" selected>English</option>
+                                
+                                    <option value="http://localhost:1313/zh-cn/" >中文</option>
+                                
+                                    <option value="http://localhost:1313/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#本章概览">本章概览</a></li>
+    <li><a href="#181-引言挑战方案与优化方式">18.1 引言：挑战、方案与优化方式</a>
+      <ol>
+        <li><a href="#1811-离线模块的四大挑战">18.1.1 离线模块的四大挑战</a></li>
+        <li><a href="#1812-推理-vs-训练中的图优化差异">18.1.2 推理 vs 训练中的图优化差异</a></li>
+        <li><a href="#1813-图优化的方式">18.1.3 图优化的方式</a></li>
+      </ol>
+    </li>
+    <li><a href="#182-离线图优化技术">18.2 离线图优化技术</a>
+      <ol>
+        <li><a href="#1821-常量折叠">18.2.1 常量折叠</a>
+          <ol>
+            <li><a href="#1-const-折叠">1. Const 折叠</a></li>
+            <li><a href="#2-expanddims-折叠">2. ExpandDims 折叠</a></li>
+            <li><a href="#3-binary-折叠">3. Binary 折叠</a></li>
+          </ol>
+        </li>
+        <li><a href="#1822-冗余节点消除">18.2.2 冗余节点消除</a>
+          <ol>
+            <li><a href="#1-op-本身无意义">1. Op 本身无意义</a></li>
+            <li><a href="#2-op-参数无意义">2. Op 参数无意义</a></li>
+            <li><a href="#3-op-位置无意义">3. Op 位置无意义</a></li>
+            <li><a href="#4-op-前后反义">4. Op 前后反义</a></li>
+            <li><a href="#5-公共子图优化cse">5. 公共子图优化（CSE）</a></li>
+          </ol>
+        </li>
+        <li><a href="#1823-算子融合">18.2.3 算子融合</a>
+          <ol>
+            <li><a href="#示例一以-conv-为中心的融合">示例一：以 Conv 为中心的融合</a></li>
+            <li><a href="#示例二更多融合模式">示例二：更多融合模式</a></li>
+          </ol>
+        </li>
+        <li><a href="#1824-算子替换">18.2.4 算子替换</a>
+          <ol>
+            <li><a href="#一换一替换单一算子替换">一换一替换（单一算子替换）</a></li>
+            <li><a href="#一换多替换组合算子替换">一换多替换（组合算子替换）</a></li>
+          </ol>
+        </li>
+        <li><a href="#1825-算子前移">18.2.5 算子前移</a></li>
+      </ol>
+    </li>
+    <li><a href="#183-其他计算图优化">18.3 其他计算图优化</a>
+      <ol>
+        <li><a href="#1831-融合算子替换">18.3.1 融合算子替换</a></li>
+        <li><a href="#1832-flashattention--改变游戏规则">18.3.2 FlashAttention —— 改变游戏规则</a>
+          <ol>
+            <li><a href="#问题背景">问题背景</a></li>
+            <li><a href="#gpu-存储架构的关键洞察">GPU 存储架构的关键洞察</a></li>
+            <li><a href="#flashattention-的两大核心技术">FlashAttention 的两大核心技术</a></li>
+            <li><a href="#性能分析">性能分析</a></li>
+          </ol>
+        </li>
+        <li><a href="#1833-layout--memory-优化">18.3.3 Layout &amp; Memory 优化</a></li>
+      </ol>
+    </li>
+    <li><a href="#小结与思考">小结与思考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/ai/" >
+                AI
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC18%E7%AB%A0-%E8%AE%A1%E7%AE%97%E5%9B%BE%E4%BC%98%E5%8C%96%E6%9E%B6%E6%9E%84/">AI系统：第18章 计算图优化架构</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            《AI系统：原理与架构》学习笔记 — 深入理解推理引擎的图优化模块：从四种冗余到常量折叠、节点消除、算子融合、算子替换、FlashAttention 等核心技术
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    4 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="本章概览">本章概览
+</h2><p>如果说前面的章节介绍了推理引擎的整体架构，那么第 18 章则将焦点对准推理引擎中<strong>最核心的优化环节——计算图优化（Graph Optimization）</strong>。</p>
+<p>计算图是一种表示和执行数学运算的数据结构。在深度学习中，模型的训练和推理过程通常被表示成一个复杂的计算图，其中<strong>节点代表运算操作，边代表张量在操作之间的流动</strong>。推理引擎中的图优化模块负责实现计算图中的各种优化操作，包括算子融合、布局转换、算子替换和内存优化等，目标是<strong>提高计算效率和减少内存占用</strong>。</p>
+<p>本章从离线优化模块面临的<strong>四类冗余</strong>出发，系统梳理了<strong>基础优化与扩展优化</strong>两大范式，然后深入到常量折叠、冗余节点消除、算子融合/替换/前移等具体技术，最后重点介绍了 <strong>FlashAttention</strong>——一种在大模型时代至关重要的注意力计算优化算法。</p>
+<blockquote>
+<p>核心洞察：<strong>图优化的本质是对&quot;冗余&quot;的识别与消除</strong>。无论是结构性冗余、精度冗余、算法冗余还是读写冗余，图优化模块都在做一件事——用更少的计算和更少的内存，完成同样的推理任务。</p>
+</blockquote>
+<hr>
+<h2 id="181-引言挑战方案与优化方式">18.1 引言：挑战、方案与优化方式
+</h2><h3 id="1811-离线模块的四大挑战">18.1.1 离线模块的四大挑战
+</h3><p>推理引擎的离线优化模块面临四种核心冗余：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>冗余类型</th>
+          <th>说明</th>
+          <th>优化方向</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>结构冗余</strong></td>
+          <td>无效计算节点、重复计算子图、相同结构模块</td>
+          <td>算子融合、算子替换、常量折叠</td>
+      </tr>
+      <tr>
+          <td><strong>精度冗余</strong></td>
+          <td>FP32 范围宽但存在冗余，可压缩到 FP16/INT8</td>
+          <td>量化、稀疏化、低秩近似</td>
+      </tr>
+      <tr>
+          <td><strong>算法冗余</strong></td>
+          <td>算子/Kernel 实现算法本身存在计算冗余</td>
+          <td>Kernel 泛化性提升、多尺度 Kernel</td>
+      </tr>
+      <tr>
+          <td><strong>读写冗余</strong></td>
+          <td>重复读写内存、内存访问不连续</td>
+          <td>数据排布优化、内存池管理</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="1812-推理-vs-训练中的图优化差异">18.1.2 推理 vs 训练中的图优化差异
+</h3><p>AI 编译器的前端优化已经在训练场景中广泛应用，但推理引擎的图优化有其独特之处：</p>
+<ul>
+<li><strong>训练场景</strong>：实验时间相对宽松，可引入较多 JIT 编译等高级手段</li>
+<li><strong>推理场景</strong>：更多采用<strong>预先写好的模板</strong>进行图转换，基于先验知识实现优化，追求极致的确定性和低延迟</li>
+</ul>
+<p>这种&quot;模板驱动&quot;的方式在特定场景能带来巨大计算收益，但缺点是需要根据先验知识手动设计优化规则。</p>
+<h3 id="1813-图优化的方式">18.1.3 图优化的方式
+</h3><p>图优化分为**基础优化（Basic）<strong>和</strong>扩展优化（Extended）**两大类：</p>
+<p><strong>五大基础优化方式：</strong></p>
+<ol>
+<li><strong>常量折叠（Constant Folding）</strong>：编译时预先计算常量节点，替换为结果值</li>
+<li><strong>冗余节点消除（Redundant Node Elimination）</strong>：删除不参与计算的算子</li>
+<li><strong>有限数量的算子融合（Operator Fusion）</strong>：合并相邻算子减少访存</li>
+<li><strong>扩展优化（Extended）</strong>：针对特定硬件（如 CUDA）的特殊优化</li>
+<li><strong>Layout &amp; Memory 优化</strong>：布局转换与内存分配优化</li>
+</ol>
+<p><strong>三个阶段的分工：</strong></p>
+<ul>
+<li><strong>预优化（Pre Optimize）</strong>：Basic 优化方式</li>
+<li><strong>优化（Optimize）</strong>：Basic + Extended 混合</li>
+<li><strong>后优化（Post Optimize）</strong>：Extended 优化 + Layout &amp; Memory</li>
+</ul>
+<hr>
+<h2 id="182-离线图优化技术">18.2 离线图优化技术
+</h2><h3 id="1821-常量折叠">18.2.1 常量折叠
+</h3><p>常量折叠是编译器最经典的优化技术之一——在编译时计算出常量表达式的结果，消除运行时计算。</p>
+<p><strong>基本原理：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># 优化前
+</span></span><span class="line"><span class="cl">x = 5
+</span></span><span class="line"><span class="cl">y = 10
+</span></span><span class="line"><span class="cl">z = x * y
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># 常量折叠后
+</span></span><span class="line"><span class="cl">z = 50
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>三种具体折叠形式：</strong></p>
+<h4 id="1-const-折叠">1. Const 折叠
+</h4><p>如果某 Op 的所有输入都是常量，先计算好结果替代该 Op，避免每次推理重复计算。</p>
+<p><img src="/images/ai_system/ch18/ai_system.pdf-0661-11.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图18.2.1 Const折叠"
+	
+	
+></p>
+<blockquote>
+<p>图18.2.1：Op1 的两个输入均为常量，离线阶段预先计算后作为新常量直接输入 Op2。</p>
+</blockquote>
+<h4 id="2-expanddims-折叠">2. ExpandDims 折叠
+</h4><p>当 ExpandDims 的指定维度输入是常量时，将该维度以参数形式折叠到算子内部，减少一个算子。</p>
+<p><img src="/images/ai_system/ch18/ai_system.pdf-0661-12.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图18.2.2 ExpandDims折叠"
+	
+	
+></p>
+<h4 id="3-binary-折叠">3. Binary 折叠
+</h4><p>Binary Op 的第二个输入是标量常量时，将该标量以参数形式折叠到 Binary Op 的属性中。</p>
+<p><img src="/images/ai_system/ch18/ai_system.pdf-0662-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图18.2.3 Binary折叠"
+	
+	
+></p>
+<h3 id="1822-冗余节点消除">18.2.2 冗余节点消除
+</h3><p>冗余节点消除在不改变图形结构的前提下删除无意义节点，分为<strong>五种形态</strong>：</p>
+<h4 id="1-op-本身无意义">1. Op 本身无意义
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>消除情况</th>
+          <th>具体描述</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>冗余算子删除</td>
+          <td>去掉 Identity、NoOp、Print、Assert、StopGradient、Split 等</td>
+      </tr>
+      <tr>
+          <td>Dropout 删除</td>
+          <td>删除推理阶段不再需要的 Dropout 节点</td>
+      </tr>
+      <tr>
+          <td>Cast 删除</td>
+          <td>Cast 转换前后数据类型相同时删除</td>
+      </tr>
+      <tr>
+          <td>Concat 删除</td>
+          <td>Concat 只有一个输入 Tensor 时删除</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><img src="/images/ai_system/ch18/ai_system.pdf-0663-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图18.2.4 冗余节点消除"
+	
+	
+></p>
+<blockquote>
+<p>图18.2.4：冗余算子消除的三种情况——直接连接、切分为两个子图、轮循删除直到输入有意义为止。</p>
+</blockquote>
+<h4 id="2-op-参数无意义">2. Op 参数无意义
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>场景</th>
+          <th>消除条件</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Cast 消除</td>
+          <td>参数 Src = Dst 时无意义</td>
+      </tr>
+      <tr>
+          <td>Slice 消除</td>
+          <td>index_start=0 或 index_end=channel-1 时无意义</td>
+      </tr>
+      <tr>
+          <td>Expand 消除</td>
+          <td>输出 Shape = 输入 Shape 时无意义</td>
+      </tr>
+      <tr>
+          <td>Pooling 消除</td>
+          <td>滑窗为 1×1 时无意义</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><img src="/images/ai_system/ch18/ai_system.pdf-0664-09.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图18.2.5 Op参数无意义消除"
+	
+	
+></p>
+<h4 id="3-op-位置无意义">3. Op 位置无意义
+</h4><p>某些算子在计算图中特定位置会变得多余：</p>
+<p><img src="/images/ai_system/ch18/ai_system.pdf-0665-07.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图18.2.6 Op位置无意义消除（一）"
+	
+	
+></p>
+<blockquote>
+<p>图18.2.6：Remove Output Cast、UnSqueeze Elimination、Orphaned Elimination、Reshape after Global Pooling 等场景。</p>
+</blockquote>
+<p><img src="/images/ai_system/ch18/ai_system.pdf-0666-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图18.2.7 Op位置无意义消除（二）"
+	
+	
+></p>
+<blockquote>
+<p>图18.2.7：Flatten after Linear Elimination、重复的 Reshape 或 Cast 均可删除。</p>
+</blockquote>
+<h4 id="4-op-前后反义">4. Op 前后反义
+</h4><p>前后两个相邻 Op 语义相反时，两者均可删除：</p>
+<ul>
+<li><strong>Squeeze ↔ ExpandDims</strong>：压缩与扩展维度互为逆向</li>
+<li><strong>Inverse Cast</strong>：A→B→A 等同于无操作</li>
+<li><strong>Quant ↔ Dequant</strong>：量化与反量化抵消</li>
+<li><strong>Concat ↔ Slice</strong>：合并后拆分可简化为直接索引</li>
+</ul>
+<p><img src="/images/ai_system/ch18/ai_system.pdf-0667-09.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图18.2.8 Op前后反义消除"
+	
+	
+></p>
+<h4 id="5-公共子图优化cse">5. 公共子图优化（CSE）
+</h4><p>当模型中出现类型、参数和输入均相同的公共子图时，只需计算一次，其他通过赋值复用结果。</p>
+<p><img src="/images/ai_system/ch18/ai_system.pdf-0668-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图18.2.9 公共子图消除"
+	
+	
+></p>
+<blockquote>
+<p>实现思路：通过一个 MAP 表记录已处理过的同类型 Op，匹配到相同输入和参数的 Op 即为公共子表达式。</p>
+</blockquote>
+<h3 id="1823-算子融合">18.2.3 算子融合
+</h3><p>算子融合是深度学习中减少内存访问的核心技术。以 <code>y = ReLU(Conv(x))</code> 为例，分开计算需要<strong>两次访存</strong>（先写 Conv 结果，再读回做 ReLU），融合后只需<strong>一次访存</strong>。</p>
+<h4 id="示例一以-conv-为中心的融合">示例一：以 Conv 为中心的融合
+</h4><p><strong>1) Conv + BN + Act</strong></p>
+<p>将 BN 的 \( \gamma \) 和 \( \beta \) 参数融合到 Conv 的权重和偏置中：</p>
+<p><img src="/images/ai_system/ch18/ai_system.pdf-0669-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Conv&#43;BN融合公式"
+	
+	
+></p>
+<p>Python 示例：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">fuse_conv_bn</span><span class="p">(</span><span class="n">conv</span><span class="p">,</span> <span class="n">bn</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">w</span> <span class="o">=</span> <span class="n">conv</span><span class="o">.</span><span class="n">weight</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mean</span> <span class="o">=</span> <span class="n">bn</span><span class="o">.</span><span class="n">running_mean</span>
+</span></span><span class="line"><span class="cl">    <span class="n">var_sqrt</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">bn</span><span class="o">.</span><span class="n">running_var</span> <span class="o">+</span> <span class="n">bn</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">gamma</span> <span class="o">=</span> <span class="n">bn</span><span class="o">.</span><span class="n">weight</span>
+</span></span><span class="line"><span class="cl">    <span class="n">beta</span> <span class="o">=</span> <span class="n">bn</span><span class="o">.</span><span class="n">bias</span>
+</span></span><span class="line"><span class="cl">    <span class="n">w_prime</span> <span class="o">=</span> <span class="n">gamma</span> <span class="o">/</span> <span class="n">var_sqrt</span> <span class="o">*</span> <span class="n">w</span>
+</span></span><span class="line"><span class="cl">    <span class="n">b_prime</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">-</span> <span class="n">gamma</span> <span class="o">/</span> <span class="n">var_sqrt</span> <span class="o">*</span> <span class="n">mean</span>
+</span></span><span class="line"><span class="cl">    <span class="n">conv</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">w_prime</span>
+</span></span><span class="line"><span class="cl">    <span class="n">conv</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">b_prime</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">conv</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>2) Conv + Bias + Add</strong>：Add 的值直接合并到 Bias 中，<code>b' = b + a</code></p>
+<p><strong>3) Conv + Scale + Act</strong>：Scale 参数 α 融合到权重，<code>W' = αW</code>, <code>b' = αb</code></p>
+<p><strong>4) Conv + MatMul + Act</strong>：与 Scale 融合原理相同</p>
+<p><img src="/images/ai_system/ch18/ai_system.pdf-0670-11.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图18.2.10 算子融合示例一"
+	
+	
+></p>
+<h4 id="示例二更多融合模式">示例二：更多融合模式
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>融合模式</th>
+          <th>优化方式</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>MatMul + Add</td>
+          <td>使用 GEMM 替代</td>
+      </tr>
+      <tr>
+          <td>MatMul + Add/Scale/Div</td>
+          <td>通过数学交换律持续向后融合（可能牺牲精度）</td>
+      </tr>
+      <tr>
+          <td>Mean + Add</td>
+          <td>使用 Layer Norm 代替</td>
+      </tr>
+      <tr>
+          <td>Batch Norm + Scale</td>
+          <td>Scale 的 s 和 b 直接融入 BN</td>
+      </tr>
+      <tr>
+          <td>MatMul + Batch Norm</td>
+          <td>类似 Conv + BN</td>
+      </tr>
+      <tr>
+          <td>Conv + ReLU / ReLU6 / Act</td>
+          <td>计算后立即激活，减少一次访存</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><img src="/images/ai_system/ch18/ai_system.pdf-0672-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图18.2.11 算子融合示例二"
+	
+	
+></p>
+<blockquote>
+<p>注意：MatMul 融合虽然性能提升，但 Scale 通常 &lt; 1，融合后权重数值进一步降低，可能导致<strong>精度下降</strong>。</p>
+</blockquote>
+<h3 id="1824-算子替换">18.2.4 算子替换
+</h3><p>算子替换通过合并同类项、提取公因式等数学方法，将原算子替换为功能相同但更高效的算子。</p>
+<h4 id="一换一替换单一算子替换">一换一替换（单一算子替换）
+</h4><ul>
+<li><strong>MatMul → Conv2D</strong>：利用框架对 Conv 的深度优化</li>
+<li><strong>Linear → Conv2D</strong>：全连接层转为 1×1 Conv</li>
+<li><strong>Batch Normal → Scale</strong>：等价转换，计算量更少</li>
+<li><strong>pReLU → Leaky ReLU</strong>：不影响性能前提下聚焦有限算法</li>
+<li><strong>Conv → Linear</strong>（Global Pooling 之后）：简化后续处理</li>
+</ul>
+<p><img src="/images/ai_system/ch18/ai_system.pdf-0673-09.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图18.2.12 一换一算子替换"
+	
+	
+></p>
+<h4 id="一换多替换组合算子替换">一换多替换（组合算子替换）
+</h4><ul>
+<li><strong>Shuffle Channel</strong>：通过 Reshape + Permute 组合实现</li>
+<li><strong>Pad Replace</strong>：老版 ONNX pad-2 的参数转输入形式</li>
+<li><strong>Group Conv</strong>：通过 Slice + Conv 组合实现</li>
+<li><strong>ShapeN</strong>：通过多个 Shape 操作组合实现</li>
+</ul>
+<p><img src="/images/ai_system/ch18/ai_system.pdf-0675-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图18.2.13 一换多算子替换"
+	
+	
+></p>
+<h3 id="1825-算子前移">18.2.5 算子前移
+</h3><p>算子前移将固定不变的计算提前执行并保存结果，避免每次推理重复计算。典型应用：</p>
+<ul>
+<li><strong>Slice and Mul</strong>：利用交换律调整算子顺序</li>
+<li><strong>Bit shift and Reduce Sum</strong>：通过算术简化减少数据传输</li>
+</ul>
+<p><img src="/images/ai_system/ch18/ai_system.pdf-0676-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图18.2.14 算子前移与算术简化"
+	
+	
+></p>
+<blockquote>
+<p>算子前移需要谨慎考虑计算顺序和数据依赖性，不能随意将计算提前。</p>
+</blockquote>
+<hr>
+<h2 id="183-其他计算图优化">18.3 其他计算图优化
+</h2><h3 id="1831-融合算子替换">18.3.1 融合算子替换
+</h3><p>某些复杂算子在框架中没有直接实现，而是通过基本算子组合实现，导致效率降低。融合算子替换将这些组合转为单一高效算子：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>融合类型</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Fuse Layer Norm</td>
+          <td>组合实现的 Norm → 单一 Op</td>
+      </tr>
+      <tr>
+          <td>Fuse PReLU</td>
+          <td>组合实现的 PReLU → 单一 Op</td>
+      </tr>
+      <tr>
+          <td>Fuse MatMul Transpose</td>
+          <td>Transpose + MatMul → 带转置参数的 MatMul</td>
+      </tr>
+      <tr>
+          <td>Fuse Binary Eltwise</td>
+          <td>Add + Mul 融合为带系数的 Eltwise Sum</td>
+      </tr>
+      <tr>
+          <td>Fuse Reduction → Global Pooling</td>
+          <td>两次 reduction mean → 一次 global_mean_pooling</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><img src="/images/ai_system/ch18/ai_system.pdf-0677-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图18.3.1 融合算子替换"
+	
+	
+></p>
+<h3 id="1832-flashattention--改变游戏规则">18.3.2 FlashAttention —— 改变游戏规则
+</h3><p>FlashAttention 是本章最具深度的小节，也是当前大模型时代最著名的系统优化技术之一。</p>
+<h4 id="问题背景">问题背景
+</h4><p>Transformer 的核心是 Attention 机制，其计算复杂度为 \( O(N^2) \)，这导致：</p>
+<ul>
+<li><strong>长序列无法处理</strong>：早期 GPT 只支持 2k~4k token</li>
+<li><strong>二次方增长</strong>：序列长度翻倍，资源消耗变为 4 倍</li>
+<li><strong>显存瓶颈</strong>：\( S \) 和 \( P \) 矩阵需要 \( O(N^2) \) 的存储空间</li>
+</ul>
+<h4 id="gpu-存储架构的关键洞察">GPU 存储架构的关键洞察
+</h4><p>A100 GPU 有两个存储层级：</p>
+<ul>
+<li><strong>HBM</strong>：40<del>80 GB，带宽 1.5</del>2.0 TB/s（慢但大）</li>
+<li><strong>SRAM</strong>：每 108 个 SM 有 192 KB，带宽约 19 TB/s（快但小）</li>
+</ul>
+<p>SRAM 的访问速度是 HBM 的约 10 倍！标准 Attention 的问题在于：每个 Kernel 都从 HBM 读取数据、计算、再写回 HBM，产生了大量冗余的 HBM 访问。</p>
+<h4 id="flashattention-的两大核心技术">FlashAttention 的两大核心技术
+</h4><p><img src="/images/ai_system/ch18/ai_system.pdf-0680-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图18.3.2 FlashAttention 算法"
+	
+	
+></p>
+<blockquote>
+<p>图18.3.2：FlashAttention 算法伪代码 — 核心在于 Tiling（分块计算）+ Recomputation（反向重算）。</p>
+</blockquote>
+<p><strong>1. Tiling（平铺）</strong></p>
+<p>将 \( N \times N \) 的 softmax/scores 矩阵分块处理，每个 Block 在 SRAM 中完成计算：</p>
+<ul>
+<li>外循环：加载 \( K \)、\( V \) 的 Block 到 SRAM</li>
+<li>内循环：加载 \( Q \) 的 Block 到 SRAM</li>
+<li>在 SRAM 上完成 Block S 的计算</li>
+</ul>
+<p><strong>2. 分块 Safe Softmax</strong></p>
+<p>标准 Attention 需要全局最大值来稳定 softmax 计算，分块后无法拿到全局信息。FlashAttention 通过数学证明：<strong>分块 softmax 与全局 softmax 在数学上等价</strong>，通过维护 \( m \)（行最大值）和 \( \ell \)（累积分母）的递推更新来实现。</p>
+<p>关键公式（简化版）：</p>
+<ul>
+<li>计算当前块 \( S_{ij} \) → 块最大值 \( m_{ij} \) → 块 softmax 分子 \( P_{ij} \) → 块累积和 \( \ell_{ij} \)</li>
+<li>与上一轮结果合并：\( m^{new} = \max(m, m_{ij}) \)，\( \ell^{new} = e^{m - m^{new}} \cdot \ell + e^{m_{ij} - m^{new}} \cdot \ell_{ij} \)</li>
+<li>最终：\( O_i = \text{diag}(\ell^{new})^{-1} \cdot \left[ \text{diag}(\ell) \cdot e^{m - m^{new}} \cdot O_i + e^{m_{ij} - m^{new}} \cdot P_{ij} \cdot V_j \right] \)</li>
+</ul>
+<p><strong>3. Recomputation（重计算）</strong></p>
+<p>前向过程只保存 \( O \)、\( \ell \)、\( m \) 到 HBM，反向传播时重新计算 \( S \) 和 \( P \)，以计算换存储。</p>
+<h4 id="性能分析">性能分析
+</h4><p>FlashAttention 的 HBM 访问次数从标准 Attention 的 \( O(N \times d + N^2) \) 降低到 \( O(N^2 \times d^2 / M) \)，其中 \( M \) 是 SRAM 大小。三个 Kernel 合并为一个，中间计算完全基于 SRAM。</p>
+<h3 id="1833-layout--memory-优化">18.3.3 Layout &amp; Memory 优化
+</h3><p>当上一层和下一层的算子输入输出格式不同时，需要插入特定算子进行数据节点转换。同时，内存优化通过以下策略减少内存占用：</p>
+<p><img src="/images/ai_system/ch18/ai_system.pdf-0684-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="图18.3.3 Layout & Memory优化"
+	
+	
+></p>
+<p><strong>Inplace Operation（原地操作）</strong>：如果一块内存不再需要，且下一个操作是 Element-Wise（如加法、乘法），直接在原内存上计算覆盖，节省内存分配和回收开销。</p>
+<p><strong>Memory Sharing（内存共享）</strong>：当两个数据大小相同且前一个不再需要时，后一个直接覆盖前一个的内存。</p>
+<hr>
+<h2 id="小结与思考">小结与思考
+</h2><p>第 18 章构建了推理引擎图优化的完整知识体系：</p>
+<ul>
+<li>
+<p><strong>为什么需要图优化？</strong> 神经网络模型存在结构、精度、算法和读写四类冗余。图优化通过自动化的方式消除这些冗余，降低运行成本和内存占用。</p>
+</li>
+<li>
+<p><strong>图优化的核心手段有哪些？</strong></p>
+<ul>
+<li><strong>常量折叠</strong>：编译时计算，消除运行时开销</li>
+<li><strong>冗余节点消除</strong>：五种形态（无意义 Op、无意义参数、无意义位置、前后反义、公共子图）精简图结构</li>
+<li><strong>算子融合</strong>：将多个算子合并为一个，减少内存访问次数</li>
+<li><strong>算子替换</strong>：用高效算子替代低效实现</li>
+<li><strong>算子前移</strong>：将固定计算提前执行</li>
+</ul>
+</li>
+<li>
+<p><strong>FlashAttention 为什么重要？</strong> 它完美诠释了&quot;利用更高速的存储层减少低速存储访问&quot;这一系统优化的核心思想。通过 Tiling + 分块 Softmax + Recomputation 三项技术，让 Attention 计算中的中间结果完全驻留在 SRAM 中，大幅降低了 HBM 访问次数。这是大模型能支持更长序列的关键技术突破。</p>
+</li>
+<li>
+<p><strong>图优化三阶段</strong>：预优化（Basic）→ 优化（Basic + Extended）→ 后优化（Extended + Layout/Memory），层层递进。</p>
+</li>
+</ul>
+<blockquote>
+<p>如果说 Transformer 是 AI 的&quot;发动机&quot;，那 FlashAttention 就是让这个发动机能持续高速运转的&quot;涡轮增压器&quot;。而图优化整体，就像是对发动机的全面调校——从减少零件冗余（节点消除）、精简管道（算子融合）、到升级点火系统（常量折叠）——让每一滴燃油（计算资源）都发挥最大价值。</p>
+</blockquote>
+<hr>
+<p><em>下一篇预告：第19章将深入推理引擎的 Kernel 优化，详解卷积算法的 Im2Col、Winograd 等方法，以及内存布局、汇编优化和调度优化等技术。</em></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ai-system/">AI System</a>
+        
+            <a href="/tags/deep-learning/">Deep Learning</a>
+        
+            <a href="/tags/ai-infra/">AI Infra</a>
+        
+            <a href="/tags/graph-optimization/">Graph Optimization</a>
+        
+            <a href="/tags/operator-fusion/">Operator Fusion</a>
+        
+            <a href="/tags/constant-folding/">Constant Folding</a>
+        
+            <a href="/tags/flashattention/">FlashAttention</a>
+        
+            <a href="/tags/inference-engine/">Inference Engine</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC10%E7%AB%A0-%E5%89%8D%E7%AB%AF%E4%BC%98%E5%8C%96/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第10章 前端优化</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC14%E7%AB%A0-%E6%8E%A8%E7%90%86%E7%B3%BB%E7%BB%9F/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第14章 推理系统</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC17%E7%AB%A0-%E6%A8%A1%E5%9E%8B%E8%BD%AC%E6%8D%A2/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第17章 模型转换</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC11%E7%AB%A0-%E5%90%8E%E7%AB%AF%E4%BC%98%E5%8C%96/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第11章 后端优化</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC13%E7%AB%A0-cann-ascend-c-%E8%AE%A1%E7%AE%97%E6%9E%B6%E6%9E%84/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AI系统：第13章 CANN &amp; Ascend C 计算架构</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.524358946663b6a5f95fbef001d1c97000115552b473e36faad787d7b96c8241.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

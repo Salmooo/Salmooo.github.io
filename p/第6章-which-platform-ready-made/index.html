@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="商业现成 FPGA 原型平台的选型评估指南：从使用场景到决策矩阵、从互联灵活性（HapsTrak II延迟互联 vs CHIPit交换互联）到飞行时间量化分析、从 TDM 信号复用到供应商评估——一本完整的&rsquo;买板&rsquo;决策手册。">
+<title>第6章: Which Platform? — Ready Made</title>
+
+<link rel='canonical' href='http://localhost:1313/p/%E7%AC%AC6%E7%AB%A0-which-platform-ready-made/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="第6章: Which Platform? — Ready Made">
+<meta property='og:description' content="商业现成 FPGA 原型平台的选型评估指南：从使用场景到决策矩阵、从互联灵活性（HapsTrak II延迟互联 vs CHIPit交换互联）到飞行时间量化分析、从 TDM 信号复用到供应商评估——一本完整的&rsquo;买板&rsquo;决策手册。">
+<meta property='og:url' content='http://localhost:1313/p/%E7%AC%AC6%E7%AB%A0-which-platform-ready-made/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='FPGA' /><meta property='article:tag' content='Prototyping' /><meta property='article:tag' content='Commercial Platform' /><meta property='article:tag' content='HAPS' /><meta property='article:tag' content='CHIPit' /><meta property='article:tag' content='Interconnect' /><meta property='article:tag' content='TDM' /><meta property='article:tag' content='LVDS' /><meta property='article:tag' content='Make vs Buy' /><meta property='article:tag' content='Board Selection' /><meta property='article:published_time' content='2026-06-05T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-06-05T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="第6章: Which Platform? — Ready Made">
+<meta name="twitter:description" content="商业现成 FPGA 原型平台的选型评估指南：从使用场景到决策矩阵、从互联灵活性（HapsTrak II延迟互联 vs CHIPit交换互联）到飞行时间量化分析、从 TDM 信号复用到供应商评估——一本完整的&rsquo;买板&rsquo;决策手册。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="http://localhost:1313/" selected>English</option>
+                                
+                                    <option value="http://localhost:1313/zh-cn/" >中文</option>
+                                
+                                    <option value="http://localhost:1313/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#章节概览">章节概览</a></li>
+    <li><a href="#核心知识点">核心知识点</a></li>
+    <li><a href="#详细笔记">详细笔记</a>
+      <ol>
+        <li><a href="#61-你需要板子做什么">6.1 你需要板子做什么？</a></li>
+        <li><a href="#62-基于目标选择板子">6.2 基于目标选择板子</a></li>
+        <li><a href="#63-灵活性模块化">6.3 灵活性：模块化</a></li>
+        <li><a href="#64-灵活性互联">6.4 灵活性：互联</a></li>
+        <li><a href="#65-什么是最理想的互联拓扑">6.5 什么是最理想的互联拓扑？</a>
+          <ol>
+            <li><a href="#形式一延迟互联deferred-interconnect-hapstrak-ii">形式一：延迟互联（Deferred Interconnect）= HapsTrak II</a></li>
+            <li><a href="#形式二交换互联switched-interconnect-chipit">形式二：交换互联（Switched Interconnect）= CHIPit</a></li>
+          </ol>
+        </li>
+        <li><a href="#66-速度互联延迟的影响">6.6 速度：互联延迟的影响</a>
+          <ol>
+            <li><a href="#量化时序分析全书最严谨的路径延迟分解">量化时序分析（全书最严谨的路径延迟分解）</a></li>
+            <li><a href="#661-飞行时间到底有多重要">6.6.1 飞行时间到底有多重要？</a></li>
+          </ol>
+        </li>
+        <li><a href="#67-速度设计与布局的质量">6.7 速度：设计与布局的质量</a></li>
+        <li><a href="#68-板上信号复用支持">6.8 板上信号复用支持</a>
+          <ol>
+            <li><a href="#lvds-高速-tdm图65">LVDS 高速 TDM（图65）</a></li>
+          </ol>
+        </li>
+        <li><a href="#69-成本与鲁棒性">6.9 成本与鲁棒性</a>
+          <ol>
+            <li><a href="#691-fpga-供应决定板子交付">6.9.1 FPGA 供应决定板子交付</a></li>
+          </ol>
+        </li>
+        <li><a href="#610-容量">6.10 容量</a></li>
+        <li><a href="#611-总结top-10-选购检查清单">6.11 总结：Top-10 选购检查清单</a></li>
+      </ol>
+    </li>
+    <li><a href="#关键图示解读">关键图示解读</a></li>
+    <li><a href="#个人总结">个人总结</a></li>
+    <li><a href="#实践思考">实践思考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/fpga%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" >
+                FPGA学习笔记
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E7%AC%AC6%E7%AB%A0-which-platform-ready-made/">第6章: Which Platform? — Ready Made</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jun 05, 2026</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    5 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="章节概览">章节概览
+</h2><p>第5章讲了&quot;造&quot;；第6章讲&quot;买&quot;——如何评估和选择商业现成的 FPGA 原型平台。</p>
+<p>本章的核心论点是：<strong>互联灵活性（而非原始飞行时间）才是决定平台真正性能的关键因素</strong>。作者通过严谨的量化时序分析证明，即使是延迟互联（4ns 飞行时间）也能达到 100MHz+ 的系统性能，但互联资源的可用性——即能否提供足够的引脚来避免信号复用——才是实际的性能瓶颈。一个能让你以直连方式跑关键路径的平台，比一个飞行时间更短但逼你用 8:1 复用的平台更快。</p>
+<p>本章最终给出了一份 <strong>Top-10 检查清单</strong>（Table 14），可作为任何商业 FPGA 原型板采购评估的标准化模板。</p>
+<hr>
+<h2 id="核心知识点">核心知识点
+</h2><ul>
+<li><strong>商业原型板 ≠ 通用 FPGA 评估板</strong>：市场上很多&quot;原型板&quot;实际上是评估板、FMC 标准板或低成本目标板——它们不是本书讨论的 SoC 原型验证平台</li>
+<li><strong>不同使用场景对板子特性的需求完全不同</strong>：RTL 调试需要极好的可见性和速度；软件验证几乎不需要调试功能但要求极高的鲁棒性和可复制性；评估板的分发要求低成本和高可靠性</li>
+<li><strong>互联灵活性比飞行时间更重要</strong>：FPGA 内部路径延迟（~4.5ns）主导总路径延迟。直接互联飞行时间 1ns（总路径 5.5ns, ~180MHz）；延迟/交换互联飞行时间 4ns（总路径 9.5ns, ~105MHz）——差距仅约 2 倍，但灵活性带来的更好的分区方案往往远超这个差异</li>
+<li><strong>HapsTrak II（延迟互联）</strong>：FPGA 引脚全部引出到连接器→通过夹层连接板或排线在板间连接→每项目定制互联拓扑→项目结束后拆掉重新配置。<strong>连接器的粒度决定灵活性</strong></li>
+<li><strong>CHIPit（交换互联）</strong>：可编程开关矩阵→以 8 路为粒度分配互联→可由分区工具实时控制→无需物理改动即可重新配置→支持远程操作</li>
+<li><strong>互联可用性 &gt; 飞行时间</strong>：如果分区需要 200 条路径而只有 100 个空闲引脚，2:1 复用 → 实际性能减半。灵活互联提供不同分区方案 → 释放更多引脚 → 消除复用需求 → 净性能可能更高</li>
+<li><strong>LVDS 高速 TDM 可达 1GHz</strong>：使用差分信令和源同步路径 → 8:1 复用 @800MHz 轻松支持 128MHz 内部逻辑 → 甚至 64:2 @30MHz+</li>
+<li><strong>HSTDM（高速时分复用）</strong>：HAPS-60 + Certify 工具自动化实现——板级 LVDS 能力 + 分区工具内置知识 = 自动化高性能复用</li>
+<li><strong>永远无视供应商的门数宣称</strong>：跑自己的综合得到真实资源需求 → 加倍作为安全余量 → 与候选板的实际资源对比</li>
+<li><strong>总拥有成本（TCO）≠ 购买价格</strong>：便宜板在数亿规模的 SoC 项目上出的问题，代价远超省下的钱</li>
+</ul>
+<hr>
+<h2 id="详细笔记">详细笔记
+</h2><h3 id="61-你需要板子做什么">6.1 你需要板子做什么？
+</h3><p>商业 FPGA 板市场鱼龙混杂——不同的板子为完全不同的目的设计和优化：</p>
+<ul>
+<li>FMC 标准板（VITA 57）：为低量产物项设计，容量不够原型验证</li>
+<li>低成本目标板：为评估特定 FPGA 器件或 IP 而设计</li>
+<li><strong>真正的 FPGA 原型平台</strong>：本书描述的对象</li>
+</ul>
+<p><strong>原型板的十一种使用目标</strong>：</p>
+<ol>
+<li>验证原始 RTL 代码的功能性</li>
+<li>测试开发中算法的系统内性能</li>
+<li>验证外部 IP 的系统内操作</li>
+<li>项目后期 ECO 的回归测试</li>
+<li>物理层软件和驱动的系统内测试</li>
+<li>应用软件与嵌入式 OS 的早期集成</li>
+<li>为软件验证创建独立目标平台</li>
+<li>为潜在合作伙伴提供评估或软件开发平台</li>
+<li>建立公司级跨项目标准验证基础设施</li>
+<li>未实现产品的展会展演</li>
+<li>标准组织&quot;PlugFest&quot;兼容性测试</li>
+</ol>
+<p><strong>关键洞察</strong>：同一块板不可能同时最优地满足所有这些目标。例如——大量测试点的复杂调试板，不适合作为独立软件目标平台分发给软件团队。</p>
+<hr>
+<h3 id="62-基于目标选择板子">6.2 基于目标选择板子
+</h3><p><strong>Table 11：使用场景 × 板子因素的权重矩阵</strong></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>使用场景</th>
+          <th>灵活性</th>
+          <th>速度</th>
+          <th>调试</th>
+          <th>鲁棒性</th>
+          <th>容量</th>
+          <th>成本</th>
+          <th>交付</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>RTL 调试</td>
+          <td>++</td>
+          <td>++</td>
+          <td><strong>+++</strong></td>
+          <td>=</td>
+          <td>=</td>
+          <td>=</td>
+          <td>++</td>
+      </tr>
+      <tr>
+          <td>算法研究</td>
+          <td>+</td>
+          <td>=</td>
+          <td>++</td>
+          <td>=</td>
+          <td>-</td>
+          <td>=</td>
+          <td>=</td>
+      </tr>
+      <tr>
+          <td>IP 评估</td>
+          <td>=</td>
+          <td>++</td>
+          <td>+</td>
+          <td>=</td>
+          <td>=</td>
+          <td>=</td>
+          <td>=</td>
+      </tr>
+      <tr>
+          <td>ECO 回归</td>
+          <td>+</td>
+          <td>++</td>
+          <td>=</td>
+          <td>+</td>
+          <td>+</td>
+          <td>=</td>
+          <td>++</td>
+      </tr>
+      <tr>
+          <td>驱动测试</td>
+          <td>=</td>
+          <td>++</td>
+          <td>+</td>
+          <td>+</td>
+          <td>-</td>
+          <td>=</td>
+          <td>=</td>
+      </tr>
+      <tr>
+          <td>App/OS 集成</td>
+          <td>=</td>
+          <td>+</td>
+          <td>-</td>
+          <td>++</td>
+          <td>++</td>
+          <td>=</td>
+          <td>=</td>
+      </tr>
+      <tr>
+          <td>软件验证</td>
+          <td>-</td>
+          <td>+</td>
+          <td>-</td>
+          <td><strong>++</strong></td>
+          <td>+</td>
+          <td>+</td>
+          <td>=</td>
+      </tr>
+      <tr>
+          <td>评估板分发</td>
+          <td>- -</td>
+          <td>=</td>
+          <td>+</td>
+          <td><strong>+++</strong></td>
+          <td>- -</td>
+          <td><strong>++</strong></td>
+          <td>++</td>
+      </tr>
+      <tr>
+          <td>标准基础设施</td>
+          <td><strong>+++</strong></td>
+          <td>+</td>
+          <td>++</td>
+          <td>+</td>
+          <td>++</td>
+          <td>=</td>
+          <td>+</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>推荐实践</strong>：在自己的团队中重新创建这个矩阵，让所有利益相关者对齐关键选型标准。</p>
+<hr>
+<h3 id="63-灵活性模块化">6.3 灵活性：模块化
+</h3><p><strong>大单板 vs 模块化系统</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">20 颗 FPGA 的单板 → 当前项目需要接近 20 颗时很诱人
+</span></span><span class="line"><span class="cl">                    → 下一个小项目呢？大量资源闲置
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">2×4 模块化系统   → 当前项目组合成 8 颗
+</span></span><span class="line"><span class="cl">                    → 后续项目可独立使用每块 4 FPGA 板
+</span></span><span class="line"><span class="cl">                    → ROI 显著提高
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>外设模块化的逻辑相同</strong>：不要在 baseboard 上固定放置任何特定外设（USB、以太网等）。原因：</p>
+<ul>
+<li>不用的外设浪费 FPGA 引脚（最宝贵的资源）</li>
+<li>模块化子卡允许精确按需配置（包括 0 个）</li>
+<li>IP 核通常只能通过模块化子卡支持（PHY 敏感、RTL 不可得）</li>
+</ul>
+<p><strong>HAPS 生态的例子</strong>：Synopsys 同时提供板和 IP → 同一供应商预测试过的 IP 子卡 → IP 升级到下一代标准时只需换子卡，不用替换整个平台。</p>
+<blockquote>
+<p>&ldquo;一般而言，终端用户应避免&rsquo;一刀切&rsquo;式的 FPGA 原型供应商选择方式，因为在大多数情况下，这会导致设计、项目和商业上的妥协。&rdquo;</p>
+</blockquote>
+<hr>
+<h3 id="64-灵活性互联">6.4 灵活性：互联
+</h3><p><strong>三种固定互联拓扑</strong>（图59）：</p>
+<p>| 拓</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0173-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 59: Examples of fixed interconnect configurations found on FPGA boards"
+	
+	
+></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>扑</th>
+          <th>优势</th>
+          <th>劣势</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>菊花链（Daisy-Chain）</strong></td>
+          <td>单一宽数据通路效率高</td>
+          <td>信号需穿越 FPGA（大量引脚浪费 + 路径延迟暴增）</td>
+      </tr>
+      <tr>
+          <td><strong>星形（Star）</strong></td>
+          <td>任意 FPGA 直接驱动任意 FPGA</td>
+          <td><strong>IO 引脚效率最低</strong>——所有 FPGA 的引脚硬连接到所有总线</td>
+      </tr>
+      <tr>
+          <td><strong>混合</strong></td>
+          <td>多数商业板的选择</td>
+          <td>固定的折中仍然不可能完美匹配每个设计</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>星形互联的经典陷阱</strong>（图60，延续第5章的例子）：</p>
+<ul>
+<li>3 个模块在 AHB 总线上 → 分区到 3 颗 FPGA</li>
+<li>第 4 颗 FPGA 的 130+ 引脚硬连接到总线 → 只能设高阻态 → <strong>永久浪费</strong></li>
+<li>如果用第 4 颗 FPGA 放设计的其他部分 → 引脚浪费可能致命</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0174-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 60: Multiplexed bus partitioned into a star-based interconnect."
+	
+	
+></p>
+<p><strong>自建板 vs 商业板的关键差异</strong>：自建板可让互联精确匹配 SoC 顶层块图（尤其配合 DFP 方法时）。商业板有固定互联 → 必须妥协。</p>
+<hr>
+<h3 id="65-什么是最理想的互联拓扑">6.5 什么是最理想的互联拓扑？
+</h3><p>答案：<strong>间接互联（Indirect Interconnect）</strong> — 两种形式。</p>
+<h4 id="形式一延迟互联deferred-interconnect-hapstrak-ii">形式一：延迟互联（Deferred Interconnect）= HapsTrak II
+</h4><p><strong>原理</strong>：FPGA 引脚不直接互连，而是全部引出到连接器 → 通过夹层连接板或柔性排线按需连接。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">FPGA1 引脚 → 连接器 A ──(夹层板/排线)── 连接器 D → FPGA4 引脚
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>关键特性</strong>：</p>
+<ul>
+<li>可创建本地和远程连接</li>
+<li>项目结束后拆掉线缆，下一个项目重新配置拓扑</li>
+<li><strong>连接器的粒度决定灵活性</strong>——粒度越细（每个连接器承载的引脚数越少），重组越灵活</li>
+</ul>
+<h4 id="形式二交换互联switched-interconnect-chipit">形式二：交换互联（Switched Interconnect）= CHIPit
+</h4><p><strong>原理</strong>：可编程开关矩阵连接不同互联段。</p>
+<p><strong>粒度</strong>：CHIPit 系统以 <strong>8 路为单位</strong> 分配互联。</p>
+<p><strong>核心优势</strong>：</p>
+<ul>
+<li>可编程 → 无需物理改动即可重新配置 → 支持远程操作（远程软件验证实验室加载设计映像+配置交换机，完全不需要碰硬件）</li>
+<li>由分区工具控制 → 分区器发现需要更多连接时立即行使该选项 → 边分区边调整互联资源</li>
+<li>空闲引脚可在设计加载后重新路由到调试端口</li>
+<li>支持细粒度开关 → 解决分区问题用的最少必要连接数 → 其余本地连接仍可用于其他地方</li>
+</ul>
+<p><strong>现实限制</strong>：理论上理想的&quot;任意点到任意点&quot;全交叉矩阵难以扩展到大量连接。实际实现中会级联较小的开关矩阵并混合部分直接互联。</p>
+<p><strong>CHIPit 系统架构</strong>（图63）：</p>
+<ul>
+<li>同板 FPGA 之间有固定走线</li>
+<li>可编程开关提供额外连接路径</li>
+<li>类似开关可以链接存储模块、连接其他板/平台</li>
+<li><strong>非所有开关组合合法且数量过多无法手工控制 → 由软件自动配置</strong></li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0177-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 63: Switched interconnect matrix in CHIPit prototyping system"
+	
+	
+></p>
+<hr>
+<h3 id="66-速度互联延迟的影响">6.6 速度：互联延迟的影响
+</h3><h4 id="量化时序分析全书最严谨的路径延迟分解">量化时序分析（全书最严谨的路径延迟分解）
+</h4><p><strong>路径延迟的通用表达式</strong>（图64）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">![Book page 179](/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0179-04.png)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">![Figure 64: Comparing path delays for different interconnect examples](/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0179-01.png)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Total Path Delay = FFTOC + Onchip1 + Obuf + Delay(onboard) + Ibuf + Onchip2 + FFTSU
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>FPGA 内部的固定开销</strong>（Virtex-6 典型值）：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>组件</th>
+          <th>含义</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>FFTOC</td>
+          <td>发起 FF 的 Clock-to-Output 延迟</td>
+      </tr>
+      <tr>
+          <td>Onchip1,2</td>
+          <td>FPGA 内布线延迟</td>
+      </tr>
+      <tr>
+          <td>Obuf</td>
+          <td>第一颗 FPGA 的输出 pad 延迟</td>
+      </tr>
+      <tr>
+          <td>Ibuf</td>
+          <td>第二颗 FPGA 的输入 pad 延迟</td>
+      </tr>
+      <tr>
+          <td>FFTSU</td>
+          <td>接收 FF 的 Setup 时间</td>
+      </tr>
+      <tr>
+          <td><strong>合计</strong></td>
+          <td><strong>~4.5ns</strong></td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>不同互联方式的飞行时间和 Fmax</strong>：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>互联方式</th>
+          <th>飞行时间</th>
+          <th>总路径</th>
+          <th>Fmax（近似）</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>直接互联</strong></td>
+          <td>1ns</td>
+          <td>5.5ns</td>
+          <td><strong>180MHz</strong></td>
+      </tr>
+      <tr>
+          <td><strong>延迟互联</strong>（高质量线缆+插座）</td>
+          <td>4ns</td>
+          <td>9.5ns</td>
+          <td><strong>105MHz</strong></td>
+      </tr>
+      <tr>
+          <td><strong>交换互联</strong>（典型 2 级开关遍历）</td>
+          <td>4ns</td>
+          <td>9.5ns</td>
+          <td><strong>105MHz</strong></td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>即使直接互联，总延迟的主导因素也不是飞行时间而是 FPGA 内部路径。<strong>最大性能可达 250MHz</strong>（如果关键路径能分到直接互联上的话）。</p>
+</blockquote>
+<p><strong>交换互联更详细的分析</strong>：</p>
+<ul>
+<li>单个开关元件延迟：0.15ns ~ 0.25ns</li>
+<li>加上往返开关的板级走线：单次飞行时间约 1.5ns（最佳情况）</li>
+<li>实际设计中信号可能穿越多段（平均 2 级，极端 8 级，大设计分到 20 颗 FPGA 时）</li>
+<li>→ 需供应商提供路由优化工具 + 分区器协同控制路由器 → 最优结果</li>
+</ul>
+<h4 id="661-飞行时间到底有多重要">6.6.1 飞行时间到底有多重要？
+</h4><p><strong>核心洞察：互联可用性 &gt; 飞行时间</strong>。</p>
+<blockquote>
+<p>在大多数 FPGA 原型项目中，性能确实受限于互联——但限制因素是其<strong>可用数量</strong>而非飞行时间。</p>
+</blockquote>
+<p><strong>一个典型的例子</strong>：</p>
+<ul>
+<li>分区器要求两颗 FPGA 间 200 条路径</li>
+<li>实际只有 100 个空闲引脚</li>
+<li>无论是直接还是&quot;从火星绕一圈&quot;，都只能装 100 条</li>
+<li>→ 必须 2:1 复用 → <strong>实际系统性能减半</strong>（内部逻辑最多以互联速度的一半运行）</li>
+</ul>
+<p><strong>灵活互联的价值</strong>：</p>
+<ul>
+<li>提供不同的分区方案 → 可能释放 100+ 额外引脚</li>
+<li>→ 200 条信号无需复用全速运行</li>
+<li>→ <strong>灵活性产生的净性能可能远超直接互联的飞行时间优势</strong></li>
+</ul>
+<blockquote>
+<p>在速度与灵活性的权衡中，最优决策往往偏向灵活性。</p>
+</blockquote>
+<p><strong>总结</strong>：一个好的 FPGA 平台应<strong>同时提供多种选项</strong>——关键信号走直接互联，非关键信号走间接互联。识别非关键信号后甚至可以将其复用到共享路径上，为更关键的信号释放引脚。</p>
+<hr>
+<h3 id="67-速度设计与布局的质量">6.7 速度：设计与布局的质量
+</h3><p><strong>高性能 PCB 的要求</strong>：</p>
+<ul>
+<li>PCIe / DDR3 等接口原生运行需 100MHz+ → FPGA 的快速引脚 + PCB 的鲁棒设计</li>
+<li>最新高引脚数 FPGA 需要极复杂板设计——<strong>极少供应商能设计和制造 40 层板</strong></li>
+<li>走线长度和阻抗匹配 → 良好差分信令 + 远程同步点间延迟匹配</li>
+<li><strong>多批次一致性</strong>：不同批次甚至同批次不同板子间性能差异显著 → 设计质量差的标志</li>
+</ul>
+<p><strong>时钟和复位网络尤为重要</strong>：</p>
+<ul>
+<li>必须足够灵活容纳各种时钟源和频率</li>
+<li>必须在分布式时钟网络的每一点都交付优质时钟信号</li>
+</ul>
+<p><strong>电源同样关键</strong>：低阻抗、高电流路径到 FPGA 核心和 IO 电压轨引脚 → 维持低噪声（尤其每个时钟周期大量信号在 FPGA 间翻转时）。</p>
+<blockquote>
+<p>两颗使用相同 FPGA 的板子可能看起来速度和质量差不多，但<strong>是板供应商的专业能力</strong>——而非 FPGA 芯片本身——决定它们能否可靠地交付原始性能。</p>
+</blockquote>
+<hr>
+<h3 id="68-板上信号复用支持">6.8 板上信号复用支持
+</h3><p><strong>TDM 的基本概念</strong>：2+ 路信号共享同一条互联路径 → FPGA 内部需要 mux/demux 逻辑 + 两端同步。</p>
+<p><strong>Certify 的 CPM（Certify Pin Multiplier）</strong>：自动插入 TDM 逻辑、分析时序、选择哪些信号放入 MUX。</p>
+<p><strong>复用比与性能的跷跷板</strong>：</p>
+<ul>
+<li>复用比 8:1 + 内部逻辑跑 16MHz</li>
+<li>→ 要么降到 2MHz（几乎等于仿真器了）</li>
+<li>→ 要么外部信号以 128MHz+ 传输</li>
+<li>→ 需要板子支持高速外部信号 + 低噪声（否则毛刺破坏 TDM 流同步）</li>
+</ul>
+<h4 id="lvds-高速-tdm图65">LVDS 高速 TDM（图65）
+</h4><p>使用</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0184-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 65: High Speed TDM using differential signaling between FPGAs"
+	
+	
+>
+FPGA 的 LVDS 差分信令能力 → 板上路径速度可达 <strong>1GHz</strong>。</p>
+<p><strong>HSTDM（高速 TDM）示例</strong>：</p>
+<ul>
+<li>800MHz 传输 + 8:1 复用 → 轻松支撑 128MHz 内部逻辑</li>
+<li>甚至 40:1 复用比也支持（只要板子质量够好）</li>
+<li>差分对 → 64:2 的 TDM 比率 → 30MHz+ 的原型 + 极其充裕的有效互联</li>
+</ul>
+<p><strong>HAPS-60 + Certify 的自动化 HSTDM</strong>：</p>
+<ul>
+<li>板级 LVDS 能力信息内置于分区工具</li>
+<li>工具自动分配差分对到最合适的信号</li>
+<li>→ <strong>板和工具协同开发的价值</strong></li>
+</ul>
+<hr>
+<h3 id="69-成本与鲁棒性">6.9 成本与鲁棒性
+</h3><p><strong>总拥有成本（TCO）≠ 购买价</strong>。需权衡：</p>
+<ul>
+<li>初始资本成本 vs 跨项目复用能力</li>
+<li>板子能否达到要求性能的风险</li>
+<li><strong>&ldquo;为多年期数亿美元的 SoC 项目冒险使用一块便宜板子可能不是明智的&rdquo;</strong></li>
+</ul>
+<p><strong>鲁棒性特别重要</strong>：</p>
+<ul>
+<li>多数原型平台需要多份复制 → 分发给远程终端用户</li>
+<li>有些项目需要原型部署到真实环境（车载/客户/现场）</li>
+<li>板子必须可靠 + 鲁棒到能承受运输</li>
+</ul>
+<blockquote>
+<p>&ldquo;具有经过验证的异地部署和可靠性记录的板子，投资回收周期远短于需要持续关注才能保持运行的板子。&rdquo;</p>
+</blockquote>
+<p><strong>供应商保修</strong>：应承诺保修期内立即从库存更换。</p>
+<h4 id="691-fpga-供应决定板子交付">6.9.1 FPGA 供应决定板子交付
+</h4><p>最新一代 FPGA 在早期产能爬坡期通常短缺 → <strong>板供应商能否保障 FPGA 器件是关键的商业差异</strong>。板供应商必须是 FPGA 供应商的大批量客户才能确保自己的器件可获得性。</p>
+<hr>
+<h3 id="610-容量">6.10 容量
+</h3><p><strong>永远不要轻信供应商的门数宣称</strong>。</p>
+<p><strong>LX550T vs LX760 的实际对比</strong>（表13）：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>资源</th>
+          <th>XC6VLX550T</th>
+          <th>XC6VLX760</th>
+          <th>比值</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Logic Cells</td>
+          <td>549,888</td>
+          <td>758,784</td>
+          <td><strong>138%</strong></td>
+      </tr>
+      <tr>
+          <td>FF</td>
+          <td>687,360</td>
+          <td>948,480</td>
+          <td><strong>138%</strong></td>
+      </tr>
+      <tr>
+          <td>BlockRAM (Kbit)</td>
+          <td>22,752</td>
+          <td>25,920</td>
+          <td>114%</td>
+      </tr>
+      <tr>
+          <td>DSP</td>
+          <td>864</td>
+          <td>864</td>
+          <td><strong>100%（相同！）</strong></td>
+      </tr>
+      <tr>
+          <td>GTX</td>
+          <td><strong>36</strong></td>
+          <td><strong>0</strong></td>
+          <td>不适用</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>关键教训</strong>：资源对比不是线性的——不同设计中关键资源可能完全不同。<strong>DSP 相同的两块板，在算术密集型设计中实际上提供相同的有效容量。</strong> 而 LX760 没有 GTX——如果需要高速串行接口，LX550T 反而是更好的选择。</p>
+<blockquote>
+<p>&ldquo;在项目开始阶段节约板子容量成本，会在项目后期设计增长超出可用空间时浪费大量时间——这是很多人难以接受的建议。&rdquo;</p>
+</blockquote>
+<hr>
+<h3 id="611-总结top-10-选购检查清单">6.11 总结：Top-10 选购检查清单
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>#</th>
+          <th>检查项</th>
+          <th>追问</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>1</td>
+          <td><strong>Baseboard 产品线有多广？</strong></td>
+          <td>相互兼容且可叠加吗？</td>
+      </tr>
+      <tr>
+          <td>2</td>
+          <td><strong>子板/子卡生态如何？</strong></td>
+          <td>哪些 IP、微处理器和互联标准？</td>
+      </tr>
+      <tr>
+          <td>3</td>
+          <td><strong>互联有多灵活？</strong></td>
+          <td>能满足跨项目的性能需求吗？</td>
+      </tr>
+      <tr>
+          <td>4</td>
+          <td><strong>板子有经过验证的质量和可靠性记录吗？</strong></td>
+          <td>有参考客户可核实吗？</td>
+      </tr>
+      <tr>
+          <td>5</td>
+          <td><strong>是否提供本地支持？</strong></td>
+          <td>有培训吗？文档有多完整？</td>
+      </tr>
+      <tr>
+          <td>6</td>
+          <td><strong>其他用户达到了什么性能？</strong></td>
+          <td>有参考客户可核实吗？</td>
+      </tr>
+      <tr>
+          <td>7</td>
+          <td><strong>板子够便携和鲁棒吗？</strong></td>
+          <td>能被证明吗？</td>
+      </tr>
+      <tr>
+          <td>8</td>
+          <td><strong>板上调试能力如何？</strong></td>
+          <td>能远程调试吗？</td>
+      </tr>
+      <tr>
+          <td>9</td>
+          <td><strong>能链接到哪些其他调试和验证工具？</strong></td>
+          <td>与现有验证工具一起工作过吗？</td>
+      </tr>
+      <tr>
+          <td>10</td>
+          <td><strong>供应商提供延长保修吗？</strong></td>
+          <td>有快速替换选项吗？</td>
+      </tr>
+  </tbody>
+</table></div>
+<hr>
+<h2 id="关键图示解读">关键图示解读
+</h2><p><strong>Table 11：使用场景 × 选型因素的权重矩阵</strong></p>
+<ul>
+<li>为什么 RTL 调试的 Robustness 是&quot;无关紧要（=）&quot;，而评估板分发的 Robustness 是&quot;极关键（+++）&quot;——因为后者要被寄送到根本不了解 FPGA 的第三方手中独立运行</li>
+<li>这张表本质上是一份&quot;买板前的需求对齐会议&quot;的标准化议事日程</li>
+</ul>
+<p><strong>图59：三种固定互联拓扑</strong></p>
+<ul>
+<li>菊花链（最省引脚但最慢）→ 星形（最快但最浪费引脚）→ 混合（商业板常见但仍然是固定折中）</li>
+</ul>
+<p><strong>图64：三种互联方式的延迟分解</strong></p>
+<ul>
+<li>8.5ns vs 9.5ns vs 9.5ns——直接互联仅领先约 75% 的性能，而非直观预期的&quot;快好几倍&quot;</li>
+<li>这个量化分析支撑了全章最核心的论点</li>
+</ul>
+<p><strong>图62：HAPS 延迟互联的实际照片</strong></p>
+<ul>
+<li>理论与实践的差距——看到真实的排线和夹层板后，对&quot;灵活性&quot;三个字有了物理上的理解</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0176-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 62: Synopsys HAPS[®] : example of deferred interconnect"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0176-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 62: Synopsys HAPS[®] : example of deferred interconnect"
+	
+	
+></p>
+<p><strong>图63：CHIPit 交换互联的拓扑图</strong></p>
+<ul>
+<li>固定走线 + 可编程开关的混合架构——开关矩阵不是全交叉，而是级联小块</li>
+</ul>
+<p><strong>Table 14：Top-10 检查清单</strong></p>
+<ul>
+<li>值得打印出来放在会议室桌上，每次采购 FPGA 原型板时对照使用</li>
+</ul>
+<hr>
+<h2 id="个人总结">个人总结
+</h2><p>这一章和上一章一起构成了&quot;Make vs Buy&quot;的完整论证。第5章教你怎么造，第6章教你如何买——但更重要的是，第6章悄悄论证了一个事实：<strong>对于大多数团队而言，&ldquo;买&quot;优于&quot;造&rdquo;</strong>。</p>
+<p>作者的论证策略非常巧妙。他不是直接比较自建和购买的成本——那在第5章已经用&quot;大多数自建板从未被复用&quot;的事实暗示过。第6章专注论证的是一个更微妙但更重要的点：<strong>互联灵活性才是性能的真正决定因素，而非原始飞行时间</strong>。</p>
+<p>这个结论的推论是：商业平台在互联灵活性上的投资（HapsTrak II 的延迟互联、CHIPit 的交换互联、HSTDM、由分区工具自动控制的路由）是单个自建项目难以复制的。这些不是硬件层面的创新——它们是<strong>硬件+软件+工具链的协同设计</strong>。一家公司可以设计一块板子，但几乎不可能为一两次自建项目开发出与商业平台同等水平的工具链支持。</p>
+<p>最后，Top-10 检查清单的价值不仅在选板——它也反向定义了什么是一个好的原型验证平台。在后续章节讨论具体设计方法时，这十个维度可以作为判断&quot;这对我选用的平台是否适用&quot;的快速评估框架。</p>
+<hr>
+<h2 id="实践思考">实践思考
+</h2><ul>
+<li><strong>Table 11 的价值在于迫使你承认：没有一块板同时擅长一切</strong>。精确理解你的主要使用场景，买最匹配的板，而不是最全的板</li>
+<li><strong>互联可用性 &gt; 飞行时间</strong>是一个反直觉但极其实用的工程准则。在选择板子时，问&quot;能给我多少条有效路径避免复用&quot;比问&quot;最快能跑多少 MHz&quot;更有实际意义</li>
+<li><strong>LVDS/HSTDM 是平台质量的放大器</strong>——一块板如果不能支持高质量差分信令，它的有效互联比标称值大打折扣</li>
+<li><strong>&ldquo;门数&quot;是一个有毒的营销指标</strong>。无视供应商的一切门数宣称；跑自己的综合、加倍结果、对比实际资源</li>
+<li><strong>保修和交付可靠性应该被写入采购合同</strong>——如果你依赖原型平台来验证数亿规模的 SoC 项目，等 8 周才能拿到替换板是不可接受的</li>
+<li><strong>HAPS 和 CHIPit 代表了两种不同的哲学</strong>：HAPS 用物理上可重新配置的连接（延迟互联），CHIPit 用电子的可编程开关（交换互联）。前者在项目变化时可能需要动手，但路径质量更好；后者可以在几分钟内重新配置，甚至支持远程操作——选择哪种取决于团队的使用模式</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0175-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 61: Two examples of Indirect Interconnect"
+	
+	
+></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/fpga/">FPGA</a>
+        
+            <a href="/tags/prototyping/">Prototyping</a>
+        
+            <a href="/tags/commercial-platform/">Commercial Platform</a>
+        
+            <a href="/tags/haps/">HAPS</a>
+        
+            <a href="/tags/chipit/">CHIPit</a>
+        
+            <a href="/tags/interconnect/">Interconnect</a>
+        
+            <a href="/tags/tdm/">TDM</a>
+        
+            <a href="/tags/lvds/">LVDS</a>
+        
+            <a href="/tags/make-vs-buy/">Make vs Buy</a>
+        
+            <a href="/tags/board-selection/">Board Selection</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC8%E7%AB%A0-partitioning-and-reconnecting/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第8章: Partitioning and Reconnecting</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC4%E7%AB%A0-getting-started/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第4章: Getting Started</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC12%E7%AB%A0-breaking-out-of-the-lab-the-prototype-in-the-field/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第12章: Breaking Out of the Lab — The Prototype in the Field</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC13%E7%AB%A0-prototyping--verification-the-best-of-both-worlds/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第13章: Prototyping &#43; Verification = The Best of Both Worlds</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC14%E7%AB%A0-the-future-of-prototyping/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第14章: The Future of Prototyping</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.524358946663b6a5f95fbef001d1c97000115552b473e36faad787d7b96c8241.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

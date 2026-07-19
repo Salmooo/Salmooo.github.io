@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="FPGA 原型能做什么、不能做什么：通过 Freescale、DS2、BBC 三个真实案例，展示 FPGA 原型在实时数据流、软硬件集成、现场测试和展览演示中的独特价值。">
+<title>第2章: What Can FPGA-Based Prototyping Do For Us?</title>
+
+<link rel='canonical' href='https://Salmooo.github.io/p/%E7%AC%AC2%E7%AB%A0-what-can-fpga-based-prototyping-do-for-us/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="第2章: What Can FPGA-Based Prototyping Do For Us?">
+<meta property='og:description' content="FPGA 原型能做什么、不能做什么：通过 Freescale、DS2、BBC 三个真实案例，展示 FPGA 原型在实时数据流、软硬件集成、现场测试和展览演示中的独特价值。">
+<meta property='og:url' content='https://Salmooo.github.io/p/%E7%AC%AC2%E7%AB%A0-what-can-fpga-based-prototyping-do-for-us/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='FPGA' /><meta property='article:tag' content='Prototyping' /><meta property='article:tag' content='Real-Time Dataflow' /><meta property='article:tag' content='HW-SW Integration' /><meta property='article:tag' content='Software Validation' /><meta property='article:tag' content='Case Study' /><meta property='article:tag' content='Freescale' /><meta property='article:tag' content='BBC' /><meta property='article:tag' content='DS2' /><meta property='article:published_time' content='2026-06-04T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-06-04T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="第2章: What Can FPGA-Based Prototyping Do For Us?">
+<meta name="twitter:description" content="FPGA 原型能做什么、不能做什么：通过 Freescale、DS2、BBC 三个真实案例，展示 FPGA 原型在实时数据流、软硬件集成、现场测试和展览演示中的独特价值。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://Salmooo.github.io/" selected>English</option>
+                                
+                                    <option value="https://Salmooo.github.io/zh-cn/" >中文</option>
+                                
+                                    <option value="https://Salmooo.github.io/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#章节概览">章节概览</a></li>
+    <li><a href="#核心知识点">核心知识点</a></li>
+    <li><a href="#详细笔记">详细笔记</a>
+      <ol>
+        <li><a href="#21-fpga-原型的不同目标">2.1 FPGA 原型的不同目标</a>
+          <ol>
+            <li><a href="#table-1项目目标分类">Table 1：项目目标分类</a></li>
+            <li><a href="#211-高性能与精度">2.1.1 高性能与精度</a></li>
+            <li><a href="#212-实时数据流hdmi-原型案例">2.1.2 实时数据流：HDMI 原型案例</a></li>
+            <li><a href="#213-软硬件集成">2.1.3 软硬件集成</a></li>
+            <li><a href="#214-为软件开发建模-soc">2.1.4 为软件开发建模 SoC</a></li>
+            <li><a href="#215-案例一freescale-3g-协议测试">2.1.5 案例一：Freescale 3G 协议测试</a></li>
+          </ol>
+        </li>
+        <li><a href="#22-真实世界接口测试真实数据效应">2.2 真实世界接口：测试真实数据效应</a>
+          <ol>
+            <li><a href="#为什么需要真实数据测试">为什么需要真实数据测试？</a></li>
+            <li><a href="#221-案例二ds2-电力线通信bpl">2.2.1 案例二：DS2 电力线通信（BPL）</a></li>
+          </ol>
+        </li>
+        <li><a href="#23-可行性实验">2.3 可行性实验</a></li>
+        <li><a href="#24-原型走出实验室">2.4 原型走出实验室</a>
+          <ol>
+            <li><a href="#241-案例三bbc-dvb-t2-数字电视">2.4.1 案例三：BBC DVB-T2 数字电视</a></li>
+          </ol>
+        </li>
+        <li><a href="#25-fpga-原型做不到什么">2.5 FPGA 原型做不到什么</a>
+          <ol>
+            <li><a href="#251-fpga-原型不是-rtl-仿真器">2.5.1 FPGA 原型不是 RTL 仿真器</a></li>
+            <li><a href="#252-fpga-原型不是-esl">2.5.2 FPGA 原型不是 ESL</a></li>
+            <li><a href="#253-连续性是关键">2.5.3 连续性是关键</a></li>
+          </ol>
+        </li>
+        <li><a href="#26-总结为什么要用-fpga-原型">2.6 总结：为什么要用 FPGA 原型？</a></li>
+      </ol>
+    </li>
+    <li><a href="#关键图示解读">关键图示解读</a></li>
+    <li><a href="#个人总结">个人总结</a></li>
+    <li><a href="#实践思考">实践思考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/fpga%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" >
+                FPGA学习笔记
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E7%AC%AC2%E7%AB%A0-what-can-fpga-based-prototyping-do-for-us/">第2章: What Can FPGA-Based Prototyping Do For Us?</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jun 04, 2026</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    3 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="章节概览">章节概览
+</h2><p>第1章建立了&quot;为什么需要原型验证&quot;的商业论证；第2章则聚焦于&quot;FPGA 原型具体能做什么（以及不能做什么）&quot;。</p>
+<p>本章的核心信息是：<strong>FPGA 原型是唯一能同时提供 RTL 精度和接近实时速度的方法</strong>。这打破了其他建模方法中精度与速度的反比关系。通过三个详实的案例（Freescale 3G 协议测试、DS2 电力线通信、BBC DVB-T2 数字电视），本章展示了 FPGA 原型在真实项目中的关键价值。同时，作者也坦诚地讨论了 FPGA 原型的局限性——它不是仿真器，不是 ESL 工具，不同验证方法之间需要保持连续性。</p>
+<hr>
+<h2 id="核心知识点">核心知识点
+</h2><ul>
+<li><strong>Table 1 项目目标分组</strong>：三大类原因驱动 FPGA 原型——高性能与精度（含实时数据流、软硬件集成、软件验证）、真实世界接口（真实数据测试、人机交互、罕见数据依赖）、实验室外使用（可行性验证、算法测试、展览/投资者演示）</li>
+<li><strong>精度-速度的反比关系</strong>：虚拟平台速度快但精度低，RTL 仿真精度高但速度慢——只有 FPGA 原型同时打破二者</li>
+<li><strong>软件栈的分层精度需求</strong>：底层（BSP/驱动）需要周期精度和完全硬件可见性，顶层应用只需&quot;刚好够骗过应用&quot;的模型精度</li>
+<li><strong>Freescale 案例</strong>：FPGA 原型使 3G 协议测试从仿真器的&quot;几周&quot;或纯 RTL 仿真的&quot;几年&quot;缩短到一天，产品周期加速 6 个月以上</li>
+<li><strong>DS2 案例</strong>：FPGA 原型是唯一能拿到真实家庭/工业电力线环境中进行现场测试的方案——仿真器太贵且不可搬运</li>
+<li><strong>BBC 案例</strong>：DVB-T2 标准发布同日即实现世界首次直播传输，三个月后完成端到端演示——FPGA 的灵活性和独立运行能力是关键</li>
+<li><strong>三个&quot;不是&quot;</strong>：FPGA 原型不是 RTL 仿真器（调试可见性远不如），不是 ESL 工具（不能在架构层面探索），需要在 RTL 稳定后才能移交</li>
+</ul>
+<hr>
+<h2 id="详细笔记">详细笔记
+</h2><h3 id="21-fpga-原型的不同目标">2.1 FPGA 原型的不同目标
+</h3><h4 id="table-1项目目标分类">Table 1：项目目标分类
+</h4><p>本书作者通过多年与原型工程师的交流，将使用 FPGA 原型的理由归纳为三类：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>项目目标</th>
+          <th>为什么用原型？</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>测试实时数据流</td>
+          <td><strong>高性能与精度</strong></td>
+      </tr>
+      <tr>
+          <td>早期软硬件集成</td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>早期软件验证</td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>测试真实世界数据效应</td>
+          <td><strong>真实世界接口</strong></td>
+      </tr>
+      <tr>
+          <td>测试实时人机接口</td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>调试罕见数据依赖</td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>可行性验证（概念证明）</td>
+          <td><strong>实验室内使用</strong></td>
+      </tr>
+      <tr>
+          <td>算法测试</td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>公开展览</td>
+          <td><strong>实验室外演示</strong></td>
+      </tr>
+      <tr>
+          <td>吸引投资者</td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>扩展 RTL 测试与调试</td>
+          <td><strong>其他目标</strong></td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="211-高性能与精度">2.1.1 高性能与精度
+</h4><blockquote>
+<p>这是所有 FPGA 原型项目最底层的共同原因。</p>
+</blockquote>
+<p>即使团队对外声称的目标是&quot;验证嵌入式软件&quot;，真正驱使他们选择 FPGA 而非虚拟平台的根本原因仍然是：<strong>他们需要 RTL 精度的同时还需要接近实时的速度</strong>。</p>
+<h4 id="212-实时数据流hdmi-原型案例">2.1.2 实时数据流：HDMI 原型案例
+</h4><p>Synopsys IP 团队（葡萄牙波尔图）的 HDMI 原型项目展示了实时数据流的价值：</p>
+<ul>
+<li>高清媒体数据流从外部接收器 → 原型处理器核心 → HDMI PHY → 外部显示器</li>
+<li>包含 MicroBlaze CPU + 外设 + 存储器，是一个完整的 SoC 结构</li>
+<li><strong>只有 FPGA 原型能做到：立即看到和听到不同高清数据对设计的影响</strong></li>
+</ul>
+<p>这个案例的关键洞察是：SoC 的状态取决于当前状态 + 输入序列 + 系统反馈——只有实时运行才能观察到这些动态交互。</p>
+<h4 id="213-软硬件集成">2.1.3 软硬件集成
+</h4><p>软件开发已主导 SoC 开发工作量，处于项目关键路径上。<strong>软件开发和验证决定了 SoC 能否按时进入量产。</strong></p>
+<h4 id="214-为软件开发建模-soc">2.1.4 为软件开发建模 SoC
+</h4><p>以 Android 软件栈为例（图15）：</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0054-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 15: The Android™ stack (based on source: “ Understanding Android ”)"
+	
+	
+></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>栈层</th>
+          <th>精度需求</th>
+          <th>开发者关注点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>应用层（Contacts, Browser, Phone）</td>
+          <td>最低——&ldquo;刚好够骗过应用&rdquo;</td>
+          <td>不直接访问硬件</td>
+      </tr>
+      <tr>
+          <td>中间件 / OS Kernel / 驱动</td>
+          <td>需要寄存器精度</td>
+          <td>完整的硬件映射</td>
+      </tr>
+      <tr>
+          <td>BSP / BIOS 层</td>
+          <td><strong>最高——地址和时钟周期精度</strong></td>
+          <td>硬件行为的软件描述</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>关键原则</strong>：</p>
+<blockquote>
+<p>在每个软件栈层，开发者只需要一个精度&quot;刚好够骗过自己的代码觉得在目标 SoC 上运行&quot;的模型。更多精度只会让模型跑得更慢。</p>
+</blockquote>
+<ul>
+<li>应用层 → SDK 或虚拟平台即可，速度快</li>
+<li>底层驱动/BSP → 需要周期精确模型，FPGA 原型</li>
+<li><strong>当整个软件栈需要一起运行、或需要处理真实世界数据时，FPGA 原型的价值最大化</strong></li>
+</ul>
+<h4 id="215-案例一freescale-3g-协议测试">2.1.5 案例一：Freescale 3G 协议测试
+</h4><p>这是本章最精彩的案例。</p>
+<p><strong>背景</strong>：Freescale 蜂窝产品集团（德州奥斯汀），手机市场产品生命周期只有 1-2 年。</p>
+<p><strong>挑战</strong>：3G 协议测试即使在实时的速度下也需要一整天才能完成一轮：</p>
+<ul>
+<li>RTL 仿真 → 需要<strong>几年</strong></li>
+<li>仿真器（Emulator）→ 需要<strong>几周</strong></li>
+<li>两者都不实用</li>
+</ul>
+<p><strong>解决方案</strong>：</p>
+<ul>
+<li>硬件：Synopsys HAPS-54 原型板 + 4 颗 Xilinx Virtex-5 FPGA</li>
+<li>设计规模：基带处理器超过 500 万 ASIC 门</li>
+<li>架构：双核 MXC2（StarCore DSP + ARM926）+ 60+ 外设 + RF 收发器数字部分</li>
+<li>工具：Synopsys Certify 将基带处理器分区到 3 颗 FPGA，RF 设计放第 4 颗</li>
+<li>模拟部分不原型化，用 Anritsu 协议测试仪直接提供数字蜂窝网络数据</li>
+</ul>
+<p><strong>遇到的困难</strong>：</p>
+<ul>
+<li>老核心使用了一些 ASIC 友好但 FPGA 不友好的设计技巧</li>
+<li>自动生成的 RTL 有过于复杂的时钟网络</li>
+<li>需要修改 RTL 使其 FPGA 兼容——<strong>但回报显著</strong></li>
+</ul>
+<p><strong>成果</strong>：收到初版芯片时已经完成：</p>
+<ul>
+<li>调试器软件发布（硅后无大改）</li>
+<li>驱动软件开发完成</li>
+<li>SoC 启动到 OS 提示符</li>
+<li>调制解调器完成网络注册和驻留</li>
+<li><strong>收到芯片仅 1 个月后实现系统级通话</strong></li>
+<li><strong>产品进度加速超过 6 个月</strong></li>
+</ul>
+<p><strong>项目负责人 Scott Constable 的原话（非常重要）</strong>：</p>
+<blockquote>
+<p>&ldquo;除了我们既定的协议测试目标之外，FPGA 系统原型在诸多其他领域也带来了项目进度加速，多次证明了它的价值。也许最重要的是<strong>不可量化的人力收益——让工程师更早地参与项目，让设计、软件、验证、应用所有团队在芯片到来之前 6 个月就非常熟悉产品</strong>。这种加速的产品专业素养很难在甘特图上衡量，但可能是最有价值的。&rdquo;</p>
+<p>&ldquo;鉴于这些成就，<strong>使用 FPGA 原型方案加速 ASIC 进度是一个&rsquo;不用动脑&rsquo;的决定</strong>。我们已将这套方法论推广到 Freescale 网络和微控制器部门。&rdquo;</p>
+</blockquote>
+<h3 id="22-真实世界接口测试真实数据效应">2.2 真实世界接口：测试真实数据效应
+</h3><h4 id="为什么需要真实数据测试">为什么需要真实数据测试？
+</h4><p>验证的困境：</p>
+<ul>
+<li>对于单个门或小 RTL 块，完整测试是可能的</li>
+<li>随着复杂度增长，<strong>统计上不可能穷尽所有输入数据和初始条件的组合</strong></li>
+<li>约束随机验证虽然极大提升了覆盖度，但永远不是完全穷尽的</li>
+</ul>
+<p><strong>FPGA 原型的独特贡献</strong>：将 SoC 放入原型中，以接近真实芯片的速度和精度运行，在最终的真实环境数据中进行&quot;浸泡&quot;测试——就像最终芯片一样。</p>
+<h4 id="221-案例二ds2-电力线通信bpl">2.2.1 案例二：DS2 电力线通信（BPL）
+</h4><p><strong>背景</strong>：西班牙瓦伦西亚的 DS2 公司，宽带电力线通信技术——用家庭电力线传输高清视频。</p>
+<p><strong>核心技术挑战</strong>：</p>
+<ul>
+<li>复杂的硬件算法和嵌入式软件负责在电力线中编码和提取高速信号</li>
+<li><strong>电力线是非常嘈杂的电气环境</strong></li>
+<li>必须在各种真实世界条件下验证算法</li>
+</ul>
+<p><strong>为什么只能用 FPGA 原型</strong>（DS2 的 ASIC 设计经理 Javier Jimenez 的话）：</p>
+<blockquote>
+<p>&ldquo;开发可靠的高速通信需要使用鲁棒的验证技术。需要非常多次的试验，使用不同的信道和噪声模型。<strong>只有 FPGA 原型</strong>能让我们充分测试算法并在原型上运行嵌入式软件。此外，<strong>我们可以把原型带出实验室进行广泛的现场测试</strong>，将多个原型放置在真实的家庭和工作场所——其中一些是非常恶劣的电气环境。<strong>仿真器系统无法用于此目的：它们太贵且不便于携带。</strong>&rdquo;</p>
+</blockquote>
+<p><strong>关键启发</strong>：让平台<strong>可靠和便携</strong>是成功的关键——这将在第5章和第12章深入讨论。</p>
+<h3 id="23-可行性实验">2.3 可行性实验
+</h3><p>FPGA 原型在项目初期的可行性研究中也有价值：</p>
+<ul>
+<li>芯片拓扑、性能、功耗、片上通信结构等基本决策阶段</li>
+<li>一旦有 RTL（即使是算法工具自动生成的），就可以在 FPGA 中运行</li>
+<li>比纯算法/数学工具的额外好处：<strong>更精确的模型 + 实时速度 + 真实世界输入交互</strong></li>
+<li>用途：在完整的 SoC 项目之间利用已有的 FPGA 硬件和工具，提高投资回报</li>
+</ul>
+<h3 id="24-原型走出实验室">2.4 原型走出实验室
+</h3><p><strong>FPGA 原型的独特能力</strong>：独立运行。</p>
+<p>因为 FPGA 可以从 Flash EEPROM 等自包含介质配置（无需宿主机），原型可以在仿真器或虚拟平台无法企及的环境中运行。例如：</p>
+<ul>
+<li>将原型安装在移动车辆中，探索运动、外部噪声、天线场强变化对设计的影响</li>
+<li>通过公共 GSM 网络在行驶车辆中进行移动通话测试</li>
+<li>贸易展会上进行预生产演示</li>
+</ul>
+<h4 id="241-案例三bbc-dvb-t2-数字电视">2.4.1 案例三：BBC DVB-T2 数字电视
+</h4><p><strong>背景</strong>：BBC 研发部门（伦敦），DVB-T2 是新的地面广播高清电视国际标准，规范制定耗时 30,000 工程师小时。</p>
+<p><strong>挑战</strong>：国际标准在最终冻结前会经历多次变更，需要灵活的硬件平台。</p>
+<p><strong>为什么选 FPGA</strong>：只有 FPGA 能提供在标准变更过程中所需的高度灵活性。</p>
+<p><strong>时间线</strong>：</p>
+<ul>
+<li>2008年3月：标准冻结</li>
+<li>2008年6月26日：作为 DVB 蓝皮书发布</li>
+<li><strong>同日</strong>：BBC 使用 FPGA 原型实现世界首次 DVB-T2 直播传输</li>
+<li>2008年9月：IBC 阿姆斯特丹展览会上完成端到端调制解调演示——<strong>标准发布后仅 3 个月</strong></li>
+</ul>
+<p><strong>硬件方案</strong>：</p>
+<ul>
+<li>调制器：Synopsys HAPS-51 卡 + Virtex-5 FPGA + BBC 自研子卡（ASI 接口 + 上变频到 UHF）</li>
+<li>解调器：同样基于 HAPS 的 FPGA 原型</li>
+</ul>
+<p><strong>BBC 项目负责人 Justin Mitchell</strong>：</p>
+<blockquote>
+<p>&ldquo;FPGA 最大的优势之一是能够跟踪规范在发射日前的晚期变更。能够在规范变更时快速修改调制器是非常重要的。很难想到有其他技术能在如此短的时间内实现调制器和解调器的快速开发，并且具备便携性，使调制器和解调器能够独立用于现场发射机和公开展览。&rdquo;</p>
+</blockquote>
+<p><strong>后续</strong>：2009年3月都灵 PlugFest —— 5 个不同调制器和 6 个不同解调器互操作成功。</p>
+<h3 id="25-fpga-原型做不到什么">2.5 FPGA 原型做不到什么
+</h3><p>作者明确列出了三个局限性，体现平衡视角：</p>
+<h4 id="251-fpga-原型不是-rtl-仿真器">2.5.1 FPGA 原型不是 RTL 仿真器
+</h4><p>将仿真器比喻为 <strong>引擎 + 仪表盘</strong>：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>组件</th>
+          <th>仿真器</th>
+          <th>FPGA 原型</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>引擎（激励模型 + 记录结果）</td>
+          <td>灵活、快速迭代</td>
+          <td>快得多，但设置代价大</td>
+      </tr>
+      <tr>
+          <td>仪表盘（检查结果）</td>
+          <td><strong>完全可见和控制</strong></td>
+          <td>即使最充分的插桩也仅提供仿真器的一部分信息</td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>&ldquo;仿真器是反复编写和评估 RTL 代码的更好环境。<strong>应该等到仿真基本完成、RTL 相对成熟后，再移交给 FPGA 原型团队。</strong>&quot;（第4章会详细讨论交接点）</p>
+</blockquote>
+<h4 id="252-fpga-原型不是-esl">2.5.2 FPGA 原型不是 ESL
+</h4><p>ESL（电子系统级）工具允许在 SystemC 中使用预定义模型库进行设计和仿真：</p>
+<ul>
+<li>FPGA 原型需要 RTL，不适合算法或架构探索</li>
+<li><strong>FPGA 原型在 RTL 成熟后最有价值</strong>——此时软件可以在更精确、更真实的环境中运行</li>
+<li>有些团队会写少量 RTL 在 FPGA 中做可行性研究——这是一个小而重要的用途，但不同于全 SoC 系统级探索</li>
+</ul>
+<h4 id="253-连续性是关键">2.5.3 连续性是关键
+</h4><p>优秀工程师选择正确工具，但必须确保<strong>工作可以在工具间传递</strong>：</p>
+<ul>
+<li>ESL 仿真 → FPGA 原型 → 需要尽可能少的重复工作</li>
+<li>高层综合（HLS）可以生成 RTL 供 FPGA 原型使用</li>
+<li>但同样，应该等到硬件-软件分区和架构探索完成、RTL 稳定后再上 FPGA</li>
+<li>第13章将讨论如何将 FPGA 原型与 ESL 和 RTL 仿真连接</li>
+</ul>
+<h3 id="26-总结为什么要用-fpga-原型">2.6 总结：为什么要用 FPGA 原型？
+</h3><p>三个视角：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>团队</th>
+          <th>FPGA 原型的价值</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>硬件团队</strong></td>
+          <td>为需要长运行时间的 RTL 交互提供高速平台（如整个 OS boot 可在接近实时完成，节省数天仿真时间）</td>
+      </tr>
+      <tr>
+          <td><strong>软件团队</strong></td>
+          <td>独一无二的芯片前软件调试平台——快速且精确，接近最终芯片条件</td>
+      </tr>
+      <tr>
+          <td><strong>整个团队</strong></td>
+          <td>最关键的阶段是软硬件首次集成。如果在芯片流片后才做这件事——发现新 bug 不是好消息。<strong>FPGA 原型让软件尽早接触精确快速的硬件模型</strong></td>
+      </tr>
+  </tbody>
+</table></div>
+<blockquote>
+<p>SoC 团队经常告诉我们：<strong>FPGA 原型最大的好处是——当初版芯片到达时，系统和软件在一天之内就能跑起来。</strong></p>
+</blockquote>
+<hr>
+<h2 id="关键图示解读">关键图示解读
+</h2><p><strong>图15：Android 软件栈</strong></p>
+<ul>
+<li>清晰展示了从应用层到底层硬件的抽象层次</li>
+<li>底部 BSP/内核层需要周期精度 → FPGA 原型的最佳切入点</li>
+<li>顶部应用层可以脱离硬件精度 → SDK/虚拟平台即可</li>
+<li>当需要<strong>整个栈一起跑</strong>时 → FPGA 原型不可或缺</li>
+</ul>
+<p><strong>表1：项目目标分组</strong></p>
+<ul>
+<li>将看似多样的原型使用场景归纳为三大驱动力</li>
+<li>这个分类框架是评估&quot;FPGA 原型是否适合我的项目&quot;的第一步</li>
+</ul>
+<hr>
+<h2 id="个人总结">个人总结
+</h2><p>第2章通过三个高水平的真实案例，把第1章的抽象论证变成了具体故事。</p>
+<p>对我触动最大的是 <strong>Freescale 案例中的&quot;不可量化的人力收益&rdquo;</strong>——让所有团队在芯片到来前 6 个月就熟悉产品。这个价值不在甘特图上，但任何一个管理过复杂硬件项目的工程师都能理解它的分量。当硬件、软件、验证、应用四个团队同时熟悉同一个平台时，chip bring-up 的效率提升是倍数级的。</p>
+<p>另一个重要收获是：<strong>FPGA 原型不是来替代仿真器或 ESL 的，而是填补它们之间的空白</strong>。一个成熟的验证策略应该是三者的组合：</p>
+<ol>
+<li>ESL/虚拟平台 → 最早期的架构探索和早期软件开发</li>
+<li>RTL 仿真器 → 反复迭代的 RTL 开发与验证</li>
+<li>FPGA 原型 → RTL 成熟后的高速、高精度系统级验证</li>
+</ol>
+<p><strong>&ldquo;连续性&quot;是本章埋下的伏笔</strong>——第13章将详细讨论这三种方法如何桥接。</p>
+<hr>
+<h2 id="实践思考">实践思考
+</h2><ul>
+<li><strong>如何判断 RTL 是否&quot;足够成熟&quot;可以上 FPGA？</strong> 这是第4章的核心话题，但本章暗示了标准：仿真大部分完成、RTL 基本稳定、软硬件开始需要集成验证</li>
+<li><strong>自主运行能力（standalone）是 FPGA 原型的一个被低估的优势</strong>。不需要宿主机的独立运行意味着原型可以放在仿真器永远去不了的地方——行驶的车辆、真实的家庭、贸易展览会</li>
+<li><strong>BBC 案例的标准-实现并行策略值得关注</strong>：在标准制定过程中就使用 FPGA 原型进行开发和测试，标准发布当天就完成首次直播——这种敏捷性在标准驱动的行业中极具竞争力</li>
+<li><strong>DS2 案例的启示</strong>：如果被测环境本身就是&quot;嘈杂&quot;和&quot;不可预测&quot;的，那么无论多么先进的仿真都无法替代真实环境中的浸泡测试</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0052-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 14: Block diagram of HDMI prototype"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0057-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 16: The Freescale[®] SoC design partitioned into HAPS[®] -54 board"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0059-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 17: BPL technology used in WiFi Range Extender"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0060-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 18: DS2 making in situ tests on real-world data (source: DS2)"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0062-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 19: DVB-T2 prototype at BBC Research and Development (Source: BBC)"
+	
+	
+></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/fpga/">FPGA</a>
+        
+            <a href="/tags/prototyping/">Prototyping</a>
+        
+            <a href="/tags/real-time-dataflow/">Real-Time Dataflow</a>
+        
+            <a href="/tags/hw-sw-integration/">HW-SW Integration</a>
+        
+            <a href="/tags/software-validation/">Software Validation</a>
+        
+            <a href="/tags/case-study/">Case Study</a>
+        
+            <a href="/tags/freescale/">Freescale</a>
+        
+            <a href="/tags/bbc/">BBC</a>
+        
+            <a href="/tags/ds2/">DS2</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC1%E7%AB%A0-introduction-the-challenge-of-system-verification/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第1章: Introduction — The Challenge of System Verification</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

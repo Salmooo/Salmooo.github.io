@@ -1,0 +1,635 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Hybrid Verification on SalmoneX Blog</title>
+        <link>http://localhost:1313/tags/hybrid-verification/</link>
+        <description>Recent content in Hybrid Verification on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright>
+        <lastBuildDate>Thu, 11 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/hybrid-verification/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>第13章: Prototyping &#43; Verification = The Best of Both Worlds</title>
+        <link>http://localhost:1313/p/%E7%AC%AC13%E7%AB%A0-prototyping--verification-the-best-of-both-worlds/</link>
+        <pubDate>Thu, 11 Jun 2026 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/p/%E7%AC%AC13%E7%AB%A0-prototyping--verification-the-best-of-both-worlds/</guid>
+        <description>&lt;h2 id=&#34;章节概览&#34;&gt;章节概览
+&lt;/h2&gt;&lt;p&gt;前十二章都在讲如何独立地构建和使用 FPGA 原型。第13章回答一个关键问题：&lt;strong&gt;如何将 FPGA 原型与其他验证方法（RTL 仿真器、虚拟平台、仿真加速器）连接起来，构建一个统一的混合验证环境？&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;这是一个重要的话题，因为没有任何一种验证方法能同时满足&amp;quot;最早可用 + 最高速度 + 最佳可见性&amp;quot;三个需求。本章展示了如何让它们互补：虚拟平台提供最早可用性，FPGA 原型提供速度和 RTL 精度，仿真器提供不可替代的可控性和可见性——而连接它们的桥梁就是协同仿真接口（HDL Bridge）、事务级接口（SCE-MI/TLM-2.0）和物理接口（UMRBus）。&lt;/p&gt;
+&lt;p&gt;本章以一个完整的 &lt;strong&gt;USB OTG 混合验证案例&lt;/strong&gt;作为教材级示例贯穿始终，并给出了基于 JPEG 图像处理的&lt;strong&gt;四种接口技术的量化性能对比&lt;/strong&gt;（RTL 仿真 700s → 协同仿真 50s → SCE-MI 160ms → UMRBus 70ms = 性能跨越 10,000×）。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;核心知识点&#34;&gt;核心知识点
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;三种原型链接方式的性能-自主性谱系&lt;/strong&gt;（图149）：协同仿真（仿真器控制硬件，最低性能最高可控性）&amp;lt; 事务级验证（消息通道，中间地带）&amp;lt; 在线原型（自由运行，最高性能最低可控性）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;HDL Bridge 协同仿真&lt;/strong&gt;：双向周期精确链接→仿真器和硬件 lock-step 运行。&lt;strong&gt;不需要任何设计修改&lt;/strong&gt;——工具自动生成硬件/软件两侧的 wrapper。但性能限于仿真器速度（KHz 级）→ 无法使用 PLL/DCM/PHY&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;SCE-MI 2.0 四函数模型&lt;/strong&gt;：Import function（硬件→软件）、Export function（软件→硬件）、Send pipe（硬件→软件流式数据）、Receive pipe（软件→硬件流式数据）——仅四个函数即可实现完整的事务级双向通信&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;TLM-2.0 两种编码风格&lt;/strong&gt;：Loosely Timed（LT——仅内存读写，开发快）→ Approximately Timed（AT——带时序注释，可估算软件性能和架构分析）→ Cycle-Accurate Transactor（信号级精确，连接 RTL）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;VMM HAL&lt;/strong&gt;：允许相同的约束随机测试平台在 &amp;ldquo;纯仿真&amp;rdquo; 和 &amp;ldquo;硬件加速&amp;rdquo; 两种模式间仅通过&lt;strong&gt;命令行开关&lt;/strong&gt;切换——最大化了验证代码的复用&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;JPEG 图像处理性能对比&lt;/strong&gt;（Table 32）：RTL 仿真 700s → 协同仿真 50s (14×) → SCE-MI 160ms (4,375×) → UMRBus 70ms (10,000×)。&lt;strong&gt;SCE-MI 基于 UMRBus 实现——证明了事务抽象的价值&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;5 种混合验证使用模式&lt;/strong&gt;：虚拟平台复用已有 RTL → 虚拟 CPU + FPGA 外设 → 虚拟平台作为 FPGA 测试平台 → 虚拟+物理 IO → Virtual ICE 远程访问&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Amdahl 定律在系统分区中的应用&lt;/strong&gt;（Table 33）：DUT 占仿真 90% → 硬件加速最多 10×。&amp;ldquo;如果目标是仿真加速，&lt;strong&gt;不断将更多组件（包括测试平台）移到 DUT 中&lt;/strong&gt;&amp;rdquo;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;USB OTG 案例的关键教训&lt;/strong&gt;：中断频率是性能杀手——USB 在高速模式下每 125µs 产生一个 Start-of-Frame 中断→处理器的中断服务淹没了 SCE-MI 带宽→虚拟平台反而比系统原型更快。&lt;strong&gt;分区不当 → 硬件加速可能比纯软件更慢&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0389-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 149 Comparing three approaches to linking FPGA prototypes&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;详细笔记&#34;&gt;详细笔记
+&lt;/h2&gt;&lt;h3 id=&#34;131-系统原型的概念&#34;&gt;13.1 系统原型的概念
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;系统原型&lt;/strong&gt; = 硬件（FPGA 系统）+ 软件（虚拟）模型 + 传统 EDA 仿真器的混合体。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;两种核心技术&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;技术&lt;/th&gt;
+          &lt;th&gt;链接方式&lt;/th&gt;
+          &lt;th&gt;同步方式&lt;/th&gt;
+          &lt;th&gt;典型接口&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;协同仿真（Co-simulation）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;周期精确、信号级&lt;/td&gt;
+          &lt;td&gt;仿真器和硬件 &lt;strong&gt;lock-step&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;HDL Bridge&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;事务级验证（Transaction-based）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;抽象消息、&lt;strong&gt;非信号级&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;独立时钟域、消息通道&lt;/td&gt;
+          &lt;td&gt;SCE-MI, TLM-2.0&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;图149：三种链接方式的性能-自主性谱系&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;协同仿真&lt;/strong&gt;：性能最低——但测试平台可以控制硬件&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;事务级验证&lt;/strong&gt;：中间地带——通过抽象消息通信&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;在线原型（自由运行）&lt;/strong&gt;：性能最高——但完全自主、外部不可控&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;132-所需工作量&#34;&gt;13.2 所需工作量
+&lt;/h3&gt;&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;不幸的是，我们不能只是把原型插到仿真器上就期望它工作。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;关键数据&lt;/strong&gt;：为事务级验证准备好 FPGA 需要额外增加 &lt;strong&gt;10-15%&lt;/strong&gt; 的&amp;quot;time-to-prototype&amp;quot;工作量。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;影响因素&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;协同仿真：仅需在工具环境中设置几个约束——额外工作极少&lt;/li&gt;
+&lt;li&gt;事务级验证：取决于是否已有现成的 transactor → 有 = 很少额外工作；需要新建 = 显著投资&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;133-混合验证场景&#34;&gt;13.3 混合验证场景
+&lt;/h3&gt;&lt;p&gt;作者强调这些场景&amp;quot;不是假设——Synopsys 工程师与许多设计团队交谈后确认了他们已经在做或计划在即将到来的项目中做的事情&amp;quot;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;六个核心场景&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;重用已有（遗留/收购）RTL → 将其放入 FPGA + 与虚拟模型结合 → 快速创建完整系统模型&lt;/li&gt;
+&lt;li&gt;复杂处理器用已有虚拟模型 + FPGA 建模仿真的外设 → CPU 运行快于 FPGA 等效实现&lt;/li&gt;
+&lt;li&gt;从完整的虚拟模型开始 → 随 RTL 逐渐成熟替换虚拟部分 → 同一套测试重复运行&lt;/li&gt;
+&lt;li&gt;FPGA + 子板实现真实 IO + 虚拟 IO 替代真实 IO → 回归测试绝对重复之前的刺激条件&lt;/li&gt;
+&lt;li&gt;FPGA 原型放置在远端 → 软件开发者通过桌面访问 → 真实 IO 的好处 + 熟悉的开发环境&lt;/li&gt;
+&lt;li&gt;以上部分或全部模式的组合&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;134-验证接口&#34;&gt;13.4 验证接口
+&lt;/h3&gt;&lt;h4 id=&#34;1341-协同仿真接口&#34;&gt;13.4.1 协同仿真接口
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;HDL Bridge 是 Synopsys 的协同仿真实现&lt;/strong&gt;：VCS 仿真器 ↔ FPGA 原型（CHIPit/HAPS）之间的双向周期精确链接。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;关键特性&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;不需要修改设计&lt;/strong&gt;——工具自动生成硬件和软件两侧的 wrapper&lt;/li&gt;
+&lt;li&gt;CHIPit 工具基于用户提供的 RTL 自动准备通信基础设施&lt;/li&gt;
+&lt;li&gt;设置极快：仅需提供顶层设计描述 + 定义时钟和复位极性&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;允许仿真器监视 FPGA 内 DUT 的所有内部寄存器&lt;/strong&gt;（图150）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;**设计&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0392-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 150: HDL Bridge co-simulation partitioning&#34;
+	
+	
+&gt;
+流程**（图151）：用户定义输入（RTL + 约束 + 测试平台）→ 工具自动生成 wrapper + 通信基础设施 → 编译 → 运行&lt;/p&gt;
+&lt;p&gt;**协同&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0393-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 151 HDL Bridge co-simulation design flow&#34;
+	
+	
+&gt;
+仿真的根本局限**：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;仿真器只能跑几 KHz → 硬件在 lock-step 模式 → &lt;strong&gt;无法使用需要最低频率的组件：PLL、DCM、IP PHY&lt;/strong&gt;。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;调试与性能的跷跷板&lt;/strong&gt;：HDL Bridge 允许监视 FPGA 内部寄存器——但&lt;strong&gt;监视的信号越多，接口性能越低&lt;/strong&gt;。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;提前规划时钟结构以支持低频时钟——这会让协同仿真的设置更简单。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;1342-事务级验证接口&#34;&gt;13.4.2 事务级验证接口
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;核心差异&lt;/strong&gt;：协同仿真 = 仿真器&lt;strong&gt;控制&lt;/strong&gt;硬件；事务级验证 = DUT（硬件）与仿真器或主机软件通过&lt;strong&gt;传递消息/事务&lt;/strong&gt;通信。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;优势&lt;/strong&gt;：比协同仿真更快 + 更容易调试。设计团队可以在关注实现之前先专注于系统和行为——因为他们在处理器上运行软件来定义验证场景。&lt;/p&gt;
+&lt;h4 id=&#34;1343-tlm-与-transactor&#34;&gt;13.4.3 TLM 与 Transactor
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;SystemC TLM-2.0 两种编码风格&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;风格&lt;/th&gt;
+          &lt;th&gt;特点&lt;/th&gt;
+          &lt;th&gt;开发速度&lt;/th&gt;
+          &lt;th&gt;适用场景&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Loosely Timed (LT)&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;仅处理内存位置的读写——无时序&lt;/td&gt;
+          &lt;td&gt;快&lt;/td&gt;
+          &lt;td&gt;高层次系统探索&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Approximately Timed (AT)&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;带时序注释&lt;/td&gt;
+          &lt;td&gt;稍慢&lt;/td&gt;
+          &lt;td&gt;软件性能估算、架构分析&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;从高层到硬件的精度桥接&lt;/strong&gt;：需要一个能将事务 → 信号、信号 → 事务双向转换的 &lt;strong&gt;Transactor&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Transactor 的位置选择&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;软件&lt;/strong&gt;（主机）：开发快但性能受限于主机-硬件通信&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;硬件&lt;/strong&gt;（FPGA 内）：&lt;strong&gt;将计算密集部分在硬件中处理&lt;/strong&gt;——编为可综合状态机 / 总线功能模型（BFM）。接收消息 → 转换为连接到设计端口或内部总线的信号&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;可综合 Transactor 的开发成本&lt;/strong&gt;：对复杂接口（如 AXI）可能极其耗时 → &lt;strong&gt;复用极其可取&lt;/strong&gt;。&lt;/p&gt;
+&lt;h4 id=&#34;1344-sce-mi-标准&#34;&gt;13.4.4 SCE-MI 标准
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;Accellera 2007 年批准的 SCE-MI 2.0&lt;/strong&gt;：为事务级验证提供多通道消息传递环境。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;SCE-MI 1.1 的消息通道模型&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;软件侧&lt;/strong&gt;：消息端口代理（C++ 对象，API 访问通道）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;硬件侧&lt;/strong&gt;：消息端口宏（在 transactor 内部实例化）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;单向&lt;/strong&gt;：输入通道（软件→硬件）或输出通道（硬件→软件）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;不是硬件总线&lt;/strong&gt;——类似于网络套接字 + 消息传递协议&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;Transactor 的双重职责&lt;/em&gt;*：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;分解（Decompose）&lt;/strong&gt;：输入通道消息 → 周期精确事件序列 → 时钟进入 DUT&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;重组（Recompose）&lt;/strong&gt;：DUT 输出的事件序列 → 消息 → 通过输出通道发送到软件侧&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;SCE-MI 2.0 的简化&lt;/em&gt;*：采用 SystemVerilog DPI 函数调用模型：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;方向&lt;/th&gt;
+          &lt;th&gt;数据类型&lt;/th&gt;
+          &lt;th&gt;硬件调用（H→S）&lt;/th&gt;
+          &lt;th&gt;软件调用（S→H）&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;数据传输&lt;/td&gt;
+          &lt;td&gt;控制信号/小数据量&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;Import&lt;/strong&gt; function&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;Export&lt;/strong&gt; function&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;流式传输&lt;/td&gt;
+          &lt;td&gt;大量数据&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;Send&lt;/strong&gt; pipe&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;Receive&lt;/strong&gt; pipe&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;如果数据量巨大 → 必须使用 pipe。如果只有控制信号或小量数据 → 使用 function。如果对大量数据使用 function→握手开销可能超过数据包本身。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;SCE-MI 的时钟控制&lt;/strong&gt;：交付给 SCE-MI transactor 的时钟由基础设施自动控制——用户无需手动停止和启动时钟。数据在 SCE-MI 时钟域（独立于 DUT 时钟域）上传输 → 传输期间 DUT 时钟被暂停 → 传输完成后自动释放。&lt;/p&gt;
+&lt;h4 id=&#34;1345-sce-mi-20-实现示例&#34;&gt;13.4.5 SCE-MI 2.0 实现示例
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;CHIPit/HAPS 的实现架构&lt;/strong&gt;（图153）：UMRBus → SCE-MI 基础设施 → Transactor（用户定义）→ DUT。CHIPit 工具同时创建硬件基础设施和软件 C/C++ 文件。&lt;/p&gt;
+&lt;p&gt;**与&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0397-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 153: SCE-MI 2.0 co-emulation overview for CHIPit[®] /HAPS[®]&#34;
+	
+	
+&gt;
+SystemVerilog 测试平台的桥接**（图154）：仿真器中的 SV Testbench → DPI → C 环境 → SCE-MI 2.0 DPI → FPGA 硬件。&lt;strong&gt;同一个 C 代码同时通过标准 DPI 与仿真器通信 + 通过 SCE-MI DPI 函数与硬件通信。&lt;/strong&gt;&lt;/p&gt;
+&lt;h4 id=&#34;heading&#34;&gt;
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0398-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 154: SCE-MI communication through DPI&#34;
+	
+	
+&gt;
+13.4.6 VMM HAL&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;VMM HAL 的核心价值&lt;/strong&gt;：&lt;strong&gt;相同的约束随机测试平台——一条命令行开关 = &amp;ldquo;纯仿真&amp;quot;模式还是&amp;quot;硬件加速&amp;quot;模式&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;工作原理&lt;/strong&gt;：将 VMM 环境中的交易层驱动和监视器 → 替换为 SCE-MI 2.0 transactor → DUT = 包含 SoC 设计的 FPGA 原型。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;关键收益&lt;/strong&gt;：测试平台和测试用例可以&lt;strong&gt;完全在纯仿真中开发和调试——无需硬件&lt;/strong&gt;。开发完成后 → 硬件加速模式仅需命令行切换。&lt;/p&gt;
+&lt;h4 id=&#34;1347-物理层接口&#34;&gt;13.4.7 物理层接口
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;UMRBus 的独特定位&lt;/strong&gt;：&lt;strong&gt;专为实现主机与 FPGA 原型之间高性能、低延迟通信而设计的物理层&lt;/strong&gt;。不同于通用总线（如 PCIe）——后者可能因为共享非协同仿真数据流量而性能较低。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;135-接口技术性能对比&#34;&gt;13.5 接口技术性能对比
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;基于 JPEG 图像处理的量化性能&lt;/strong&gt;（Table 32）：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;接口&lt;/th&gt;
+          &lt;th&gt;是否需要改 RTL&lt;/th&gt;
+          &lt;th&gt;Wrapper 生成&lt;/th&gt;
+          &lt;th&gt;时钟模式&lt;/th&gt;
+          &lt;th&gt;信号可见性&lt;/th&gt;
+          &lt;th&gt;JPEG 运行时间&lt;/th&gt;
+          &lt;th&gt;相对倍速&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RTL 仿真&lt;/td&gt;
+          &lt;td&gt;No&lt;/td&gt;
+          &lt;td&gt;No&lt;/td&gt;
+          &lt;td&gt;主机控制&lt;/td&gt;
+          &lt;td&gt;全部&lt;/td&gt;
+          &lt;td&gt;700s&lt;/td&gt;
+          &lt;td&gt;1×&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;协同仿真（HDL Bridge）&lt;/td&gt;
+          &lt;td&gt;No&lt;/td&gt;
+          &lt;td&gt;Yes&lt;/td&gt;
+          &lt;td&gt;主机控制&lt;/td&gt;
+          &lt;td&gt;寄存器+端口&lt;/td&gt;
+          &lt;td&gt;50s&lt;/td&gt;
+          &lt;td&gt;14×&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;SCE-MI&lt;/td&gt;
+          &lt;td&gt;Yes&lt;/td&gt;
+          &lt;td&gt;Yes（工具）&lt;/td&gt;
+          &lt;td&gt;SCE-MI 控制&lt;/td&gt;
+          &lt;td&gt;全部&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;160ms&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;4,375×&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;UMRBus&lt;/td&gt;
+          &lt;td&gt;Yes&lt;/td&gt;
+          &lt;td&gt;No&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;自由运行&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;全部&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;70ms&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;10,000×&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;关键结论&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;协同仿真比纯 RTL 仿真快 14×——但仍是秒级，因为 lock-step 于仿真器速度&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;SCE-MI 比协同仿真快约 300×&lt;/strong&gt;——这来自事务抽象的威力&lt;/li&gt;
+&lt;li&gt;UMRBus 最快——因为是专用通道且自由运行&lt;/li&gt;
+&lt;li&gt;&amp;ldquo;性能取决于设计——不能一概而论。取决于多少计算在硬件上、多少在仿真器中、有多少数据在两侧之间传输、使用什么传输机制。&amp;rdquo;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;136-使用模式详细展开&#34;&gt;13.6 使用模式详细展开
+&lt;/h3&gt;&lt;h4 id=&#34;1361-虚拟平台复用已有-rtl&#34;&gt;13.6.1 虚拟平台复用已有 RTL
+&lt;/h4&gt;&lt;p&gt;&lt;strong&gt;场景&lt;/strong&gt;（图156）：新架构需要尽早开始软件开发——但新 RTL 尚不可得。&lt;/p&gt;
+&lt;p&gt;**方案&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0403-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 156: Virtual platform re-using existing RTL&#34;
+	
+	
+&gt;
+**：虚拟平台中最新的 ARM 核心 + &lt;strong&gt;已有 RTL（如视频编解码器）实例化到 FPGA&lt;/strong&gt;。混合系统比纯虚拟更快获得周期精度，比等待全新 RTL 快得多。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;投资回报&lt;/strong&gt;：新 RTL 从零到原型 = 2-3 个月；全新虚拟平台模型时间更长但比等待新 RTL 快 → 混合模型 = 两者优势结合。&lt;/p&gt;
+&lt;h4 id=&#34;137-为软件的虚拟平台图157&#34;&gt;13.7 为软件的虚拟平台（图157）
+&lt;/h4&gt;&lt;p&gt;**问题&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0404-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 157: Embedded software executed on host&#34;
+	
+	
+&gt;
+**：复杂处理器（如 ARM Cortex-A8）在 FPGA 中实例化困难——速度远慢于专用 ISS。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;方案&lt;/strong&gt;：将处理器的 ISS 留在虚拟平台中 → 大部分事务在软件中处理 → 仅访问外设时走 SCE-MI 到 FPGA。&lt;strong&gt;关键细节：本地存储器（L3）也必须留在虚拟平台——否则从 FPGA 侧通过 SCE-MI 取指令和数据会抹杀所有性能收益。&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;在工作站上用虚拟模型处理器执行嵌入式软件比在 FPGA 原型中更快。FPGA 用来维持外设和加速器的精度。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;1371-虚拟平台作为测试平台图158&#34;&gt;13.7.1 虚拟平台作为测试平台（图158）
+&lt;/h4&gt;&lt;p&gt;**时序&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0405-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 158: Virtual platform acts as a testbench for RTL in FPGA&#34;
+	
+	
+&gt;
+**：项目前期用虚拟平台启动了预 RTL 软件开发 + 编写了测试用例。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;当 RTL 可用时&lt;/strong&gt;：将 TLM 替换为 FPGA 中的 RTL → &lt;strong&gt;同一套软件验证测试重新运行&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;多重价值&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;复用系统级开发阶段的投入&lt;/li&gt;
+&lt;li&gt;对比纯软件仿真结果 vs 硬件中的结果 → 验证硬件流程&lt;/li&gt;
+&lt;li&gt;通过重复一组已知刺激验证流程&lt;/li&gt;
+&lt;li&gt;为验证计划提供反馈&lt;/li&gt;
+&lt;li&gt;高效运行回归测试&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;1372-虚拟与物理-io图159&#34;&gt;13.7.2 虚拟与物理 IO（图159）
+&lt;/h4&gt;&lt;p&gt;**哲学&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0406-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 159: Virtual platform with a physical connection to the real world&#34;
+	
+	
+&gt;
+**：虚拟 IO 达不到真实物理接口的验证完整度——&lt;strong&gt;我们需要在系统上下文中验证设计，将其连接到真实世界&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;手机摄像头的例子&lt;/strong&gt;：将基带设计连接到工作站上的摄像头 → 软件相信信息来自手机中的真实摄像头 → 允许在适当时使用真实世界刺激。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;GUI 场景&lt;/strong&gt;：&amp;ldquo;手机在打游戏和下载邮件的同时能接电话吗？&amp;quot;——这类涉及并发真实场景的验证通过 GUI 交互来覆盖。&lt;/p&gt;
+&lt;h4 id=&#34;1373-virtual-ice图160&#34;&gt;13.7.3 Virtual ICE（图160）
+&lt;/h4&gt;&lt;p&gt;**解决&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0407-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 160: Platform provides links to designers at their desks&#34;
+	
+	
+&gt;
+的问题**：软件开发者不想要/不需要看到桌上的板子——但&lt;strong&gt;确实需要访问 DUT 的功能&lt;/strong&gt;来写代码。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;架构&lt;/strong&gt;：FPGA 模型中包含 LCD 和 UART 接口 → 通过 SCE-MI 将这些接口重定向回 PC 上的虚拟平台 → LCD 和 UART 以虚拟形式呈现在开发者桌面上。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;核心优势&lt;/strong&gt;：软件工程师&lt;strong&gt;留在他们熟悉的开发环境中&lt;/strong&gt;（键盘+屏幕）——而不是实验室中。大型或脆弱的原型可以安全地留在实验室机柜中。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;代价&lt;/strong&gt;：网络传输的仿真性能比直接的实验室高速连接差。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;138-系统分区amdahl-定律的应用&#34;&gt;13.8 系统分区——Amdahl 定律的应用
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;固定约束&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;测试平台的不可综合部分不能放硬件&lt;/li&gt;
+&lt;li&gt;设计大小可能溢出目标 FPGA&lt;/li&gt;
+&lt;li&gt;高利用率 → 更长的实现时间&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;灵活选择&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;只能在已有 transactor 的地方做切割（或可以轻松获得 transactor 的地方）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;倾向于在明确定义的行业标准接口处切割&lt;/strong&gt;（如 AHB 总线接口），而非在任意点——后者需要自己建模&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;计算必须主导通信&lt;/strong&gt;——如果软件/硬件接口上的通信量过大，硬件加速的优势被抹杀&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Amdahl 定律的验证加速预测&lt;/strong&gt;（Table 33）：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;场景&lt;/th&gt;
+          &lt;th&gt;测试平台占%&lt;/th&gt;
+          &lt;th&gt;DUT 占%&lt;/th&gt;
+          &lt;th&gt;最大加速因子&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;测试平台密集型&lt;/td&gt;
+          &lt;td&gt;90%&lt;/td&gt;
+          &lt;td&gt;10%&lt;/td&gt;
+          &lt;td&gt;10%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;DUT 密集型&lt;/td&gt;
+          &lt;td&gt;10%&lt;/td&gt;
+          &lt;td&gt;90%&lt;/td&gt;
+          &lt;td&gt;900%&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;如果目标是仿真加速，&lt;strong&gt;考虑计算在哪里发生。不断将更多组件移入 DUT——如果可能，将测试平台也综合到 DUT 中。&lt;/strong&gt;&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;迭代式分区策略&lt;/strong&gt;：随着 RTL 成熟逐步将更多组件移入 DUT——不将未经测试的代码放入 FPGA 有助于风险控制。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;如果 DUT 使用多颗 FPGA，&lt;strong&gt;将仿真器接口仅分配给其中一颗 FPGA&lt;/strong&gt;——这会提升性能。&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;139-案例研究usb-otg全书最完整的混合验证案例&#34;&gt;13.9 案例研究：USB OTG（全书最完整的混合验证案例）
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;系统架构&lt;/strong&gt;（图161）：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;虚拟平台侧&lt;/strong&gt;：Innovator → Samsung SoC 模型（LCD、触摸屏、DMA、物理以太网）→ 运行未经修改的 Linux 映像&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;FPGA 原型侧&lt;/strong&gt;：USB 2.0 OTG 核心 RTL&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;桥梁&lt;/strong&gt;：AHB 总线 transactor → SCE-MI 2.0&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;物理接口&lt;/strong&gt;：子卡 → USB 存储棒&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0410-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 161: CHIPit Innovator system prototype&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Table 34 的完整性能数据&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;操作&lt;/th&gt;
+          &lt;th&gt;RTL 仿真&lt;/th&gt;
+          &lt;th&gt;RTL+虚拟平台&lt;/th&gt;
+          &lt;th&gt;虚拟平台&lt;/th&gt;
+          &lt;th&gt;系统原型&lt;/th&gt;
+          &lt;th&gt;纯硬件&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;精度&lt;/td&gt;
+          &lt;td&gt;周期精确&lt;/td&gt;
+          &lt;td&gt;取决于分区&lt;/td&gt;
+          &lt;td&gt;事务级功能精确&lt;/td&gt;
+          &lt;td&gt;取决于分区&lt;/td&gt;
+          &lt;td&gt;周期精确&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Linux boot&lt;/td&gt;
+          &lt;td&gt;-&lt;/td&gt;
+          &lt;td&gt;86s&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;29s&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;43s&lt;/td&gt;
+          &lt;td&gt;12s&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Modprobe&lt;/td&gt;
+          &lt;td&gt;-&lt;/td&gt;
+          &lt;td&gt;702s&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;23s&lt;/strong&gt; (31×)&lt;/td&gt;
+          &lt;td&gt;61s (12×)&lt;/td&gt;
+          &lt;td&gt;10s (70×)&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Mount&lt;/td&gt;
+          &lt;td&gt;-&lt;/td&gt;
+          &lt;td&gt;-&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;15s&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;22s&lt;/td&gt;
+          &lt;td&gt;&amp;lt;1s&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Copy&lt;/td&gt;
+          &lt;td&gt;-&lt;/td&gt;
+          &lt;td&gt;-&lt;/td&gt;
+          &lt;td&gt;4s&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;3s&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;&amp;lt;1s&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Umount&lt;/td&gt;
+          &lt;td&gt;-&lt;/td&gt;
+          &lt;td&gt;-&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;&amp;lt;1s&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;9s&lt;/td&gt;
+          &lt;td&gt;&amp;lt;1s&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;缩放性能&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;0.03125×&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;1×&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;225×&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;~30×&lt;/td&gt;
+          &lt;td&gt;625×&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;最反直觉的结果&lt;/strong&gt;：&lt;strong&gt;纯虚拟平台在多个测试中比系统原型（FPGA 硬件加速）更快！&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;原因分析&lt;/strong&gt;：USB 在高速模式下每 &lt;strong&gt;125µs 产生一个 Start-of-Frame 中断&lt;/strong&gt;——处理器需要服务每一个中断 → SCE-MI 带宽被大量中断淹没 → 硬件加速的优势被大量跨接口通信消耗殆尽。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;USB 不是演示硬件加速性能的最佳例子——因为核心产生中断的数量以及处理器需要服务的中断数量。&lt;strong&gt;经过大量工作优化设计以阻止中断淹没带宽&lt;/strong&gt;后，性能才有所提升。&lt;strong&gt;分区正确的话——视频编解码器之类的东西在系统原型上的性能会比虚拟平台好得多。&lt;/strong&gt;&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;这个失败案例的价值&lt;/strong&gt;：它为 13.8 节的 Amdahl 定律提供了最生动的反证——&lt;strong&gt;当计算收益（硬件中运行 RTL）被通信代价（处理大量中断的跨接口往返）超越时，硬件加速的结果可能比纯软件更差&lt;/strong&gt;。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;关键图示解读&#34;&gt;关键图示解读
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;图149：三种原型链接方式的性能-自主性谱系&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;横轴 = 性能，纵轴 = 自主性——两个维度相互排斥&lt;/li&gt;
+&lt;li&gt;在线原型自由运行最大性能 → 耦合仿真受仿真器控制最小性能 → 事务级验证居中间&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;图150：HDL Bridge 的分区结构&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;非综合部分留在仿真器中 → 综合代码在硬件中 → PLI 接口桥接&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Table 32：四种接口的量化性能对比&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;700s → 50s → 160ms → 70ms：四个数量级的性能跨越——核心驱动力 = 从周期精确信号 → 事务抽象&lt;/li&gt;
+&lt;li&gt;SCE-MI 160ms vs 协同仿真 50s——事务抽象的威力（300× 提升）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Table 33：Amdahl 定律的验证加速预测&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;将 90% 仿真工作量移入硬件 → 最多 10× 加速。这不是一个好结果——&lt;strong&gt;应该把测试平台本身也综合进去&lt;/strong&gt;以获得真正的加速&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Table 34：USB OTG 全模态性能对比&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;纯虚拟平台（225× 缩放性能）比系统原型（30×）更快——&lt;strong&gt;中断频率是混合验证的性能杀手&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;个人总结&#34;&gt;个人总结
+&lt;/h2&gt;&lt;p&gt;第13章可能是全书中最被低估的一章。它回答了一个在项目规划会上经常被问但很难回答的问题：&lt;strong&gt;&amp;ldquo;我们已经有了虚拟平台（或仿真器环境），为什么还需要 FPGA 原型？&amp;rdquo;&lt;/strong&gt;——以及反过来：&lt;strong&gt;&amp;ldquo;我们已经有了 FPGA 原型，为什么还需要虚拟平台？&amp;rdquo;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;本章的回答是：&lt;strong&gt;两者不是竞争关系——它们是同一个统一验证生态中互补的节点&lt;/strong&gt;。虚拟平台给最早期的软件开发和测试平台验证提供了速度和可用时机；FPGA 原型给 RTL 成熟后的高精度、高速验证提供了平台；而 SCE-MI 和协同仿真接口将它们桥接起来——让团队可以在同一个验证计划中，根据各阶段的精度/速度需求灵活调配。&lt;/p&gt;
+&lt;p&gt;但本章最诚实的部分不是成功案例——而是 &lt;strong&gt;USB OTG 的&amp;quot;失败&amp;quot;案例&lt;/strong&gt;。纯虚拟平台在很多测试中比花了大量努力构建的系统原型更快。这个反直觉的事实揭示了一个残酷的工程真相：&lt;strong&gt;如果分区的接口上通信量大于计算加速收益，硬件加速投入可能得不偿失&lt;/strong&gt;。不是所有设计都适合混合验证——正确的设计（如视频编解码器——计算密集型、接口简单）可以获得巨大收益；不正确的设计（如 USB——中断密集、接口复杂）可能比纯软件更慢。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Amdahl 定律在验证中的含义&lt;/strong&gt;不仅是&amp;quot;预测加速上限&amp;rdquo;——更重要的是它告诉我们应该把&lt;strong&gt;测试平台本身也综合进 FPGA&lt;/strong&gt;。这是很多团队容易忽视的一步——他们自然地认为测试平台应该留在仿真器侧，但这样做就把仿真器变成了 Amdahl 定律中的串行瓶颈。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;实践思考&#34;&gt;实践思考
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;易于获得 transactor 的地方&amp;rdquo; 是决定系统分区的实际约束&lt;/strong&gt;——在做架构选型时就确认哪些接口有现成的 transactor（AHB 总线的 transactor 容易获得；自定义接口的 transactor 需要自己开发——投入数周甚至数月）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;中断频率是事务级验证的潜在性能杀手&lt;/strong&gt;——在设计规划阶段就评估 DUT 的中断频率 × 每次中断的数据传输量 × SCE-MI 通道带宽。如果中断开销超过计算加速，考虑另一种分区方案&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;VMM HAL 的&amp;quot;命令行切换&amp;quot;是最低风险的混合验证引入方式&lt;/strong&gt;——先用纯仿真环境开发和调试所有测试用例 → 待一切稳定后再切换到硬件加速模式 → 无需任何代码变更&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;协同仿真要求 PLL/DCM 在低频下工作——这可能与第8章讨论的最低锁定频率限制冲突&lt;/strong&gt;。在设计阶段就为协同仿真预留一个低频直通时钟路径&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;SCE-MI 2.0 的 pipe vs function 选择不是性能问题——是功能问题&lt;/strong&gt;。大型数据用 function 会因为握手开销而退化→ 在设计 transactor 时就必须决定正确的数据传输机制&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;将测试平台本身综合进 DUT&amp;quot;是 Amdahl 定律在验证中最激进的推论&lt;/strong&gt;——但这需要从项目开始就以&amp;quot;可综合测试平台&amp;quot;为前提设计验证环境&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0395-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 152 High-level view of runtime components in SCE-MI based co-modeling&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0399-04.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 155 HAL-compliant transaction-level testbench&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0411-01.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 162: Innovator and VCS&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0412-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 163: Innovator and CHIPit (or HAPS)&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0413-02.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Figure 164: Pure software virtual platform&#34;
+	
+	
+&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

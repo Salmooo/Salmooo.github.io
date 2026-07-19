@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="多 FPGA 分区的完整方法论：从手动十步分区流程、影响分析、逻辑复制、走线分配到自动化分区；从跨 FPGA 时钟/复位/启动三同步到 TDM 三种复用方案的量化时序计算——原型第一定律的全面应对。">
+<title>第8章: Partitioning and Reconnecting</title>
+
+<link rel='canonical' href='http://localhost:1313/p/%E7%AC%AC8%E7%AB%A0-partitioning-and-reconnecting/'>
+
+<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="第8章: Partitioning and Reconnecting">
+<meta property='og:description' content="多 FPGA 分区的完整方法论：从手动十步分区流程、影响分析、逻辑复制、走线分配到自动化分区；从跨 FPGA 时钟/复位/启动三同步到 TDM 三种复用方案的量化时序计算——原型第一定律的全面应对。">
+<meta property='og:url' content='http://localhost:1313/p/%E7%AC%AC8%E7%AB%A0-partitioning-and-reconnecting/'>
+<meta property='og:site_name' content='SalmoneX Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='FPGA' /><meta property='article:tag' content='Prototyping' /><meta property='article:tag' content='Partitioning' /><meta property='article:tag' content='Multi-FPGA' /><meta property='article:tag' content='TDM' /><meta property='article:tag' content='LVDS' /><meta property='article:tag' content='HSTDM' /><meta property='article:tag' content='Trace Assignment' /><meta property='article:tag' content='Clock Synchronization' /><meta property='article:tag' content='Time Budgeting' /><meta property='article:tag' content='IOSERDES' /><meta property='article:published_time' content='2026-06-05T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-06-05T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="第8章: Partitioning and Reconnecting">
+<meta name="twitter:description" content="多 FPGA 分区的完整方法论：从手动十步分区流程、影响分析、逻辑复制、走线分配到自动化分区；从跨 FPGA 时钟/复位/启动三同步到 TDM 三种复用方案的量化时序计算——原型第一定律的全面应对。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/images/sal_hu899758002541348466.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">SalmoneX Blog</a></h1>
+            <h2 class="site-description">Record the road to rebirth</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Salmooo'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="http://localhost:1313/" selected>English</option>
+                                
+                                    <option value="http://localhost:1313/zh-cn/" >中文</option>
+                                
+                                    <option value="http://localhost:1313/ar/" >عربي</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#章节概览">章节概览</a></li>
+    <li><a href="#核心知识点">核心知识点</a></li>
+    <li><a href="#详细笔记">详细笔记</a>
+      <ol>
+        <li><a href="#81-我们是否总需要跨-fpga-分区">8.1 我们是否总需要跨 FPGA 分区？</a></li>
+        <li><a href="#82-分区总体方法">8.2 分区总体方法</a>
+          <ol>
+            <li><a href="#821-推荐的交互式手动分区十步法table-17">8.2.1 推荐的交互式手动分区十步法（Table 17）</a></li>
+            <li><a href="#822-board-description-file">8.2.2 Board Description File</a></li>
+            <li><a href="#823-估算各子块面积">8.2.3 估算各子块面积</a></li>
+            <li><a href="#824-分配顶层-io">8.2.4 分配顶层 IO</a></li>
+            <li><a href="#825-分配高互连块">8.2.5 分配高互连块</a></li>
+            <li><a href="#heading"></a></li>
+            <li><a href="#827-分配剩余块--828-复制以降低-io--829-复用超标互联">8.2.7 分配剩余块 → 8.2.8 复制以降低 IO → 8.2.9 复用超标互联</a></li>
+            <li><a href="#8210-分配走线">8.2.10 分配走线</a></li>
+            <li><a href="#8211-迭代改进">8.2.11 迭代改进</a></li>
+          </ol>
+        </li>
+        <li><a href="#83-自动化分区">8.3 自动化分区</a></li>
+        <li><a href="#84-改善原型性能">8.4 改善原型性能</a>
+          <ol>
+            <li><a href="#841-顺序边界sequential-boundaries的时序预算">8.4.1 顺序边界（Sequential Boundaries）的时序预算</a></li>
+            <li><a href="#842-组合边界combinatorial-boundaries的时序预算">8.4.2 组合边界（Combinatorial Boundaries）的时序预算</a></li>
+          </ol>
+        </li>
+        <li><a href="#85-跨多-fpga-的设计同步">8.5 跨多 FPGA 的设计同步</a>
+          <ol>
+            <li><a href="#851-多-fpga-时钟同步">8.5.1 多 FPGA 时钟同步</a></li>
+            <li><a href="#852-多-fpga-复位同步">8.5.2 多 FPGA 复位同步</a></li>
+            <li><a href="#853-多-fpga-启动同步">8.5.3 多 FPGA 启动同步</a></li>
+          </ol>
+        </li>
+        <li><a href="#86-87-信号复用tdm">8.6-8.7 信号复用（TDM）</a>
+          <ol>
+            <li><a href="#861-tdm-的基本要求和约束">8.6.1 TDM 的基本要求和约束</a></li>
+            <li><a href="#871-基于-mux-的方案">8.7.1 基于 MUX 的方案</a></li>
+            <li><a href="#872-哪些网适合复用table-19">8.7.2 哪些网适合复用（Table 19）</a></li>
+            <li><a href="#873-基于移位寄存器的方案图120">8.7.3 基于移位寄存器的方案（图120）</a></li>
+            <li><a href="#874-同步-mux-方案的完整工作时序计算">8.7.4 同步 MUX 方案的完整工作时序计算</a></li>
+            <li><a href="#875-lvds--ioserdes-方案hstdm">8.7.5 LVDS + IOSERDES 方案（HSTDM）</a></li>
+            <li><a href="#876-三种方案对比总结">8.7.6 三种方案对比总结</a></li>
+          </ol>
+        </li>
+        <li><a href="#88-复用方案的时序约束">8.8 复用方案的时序约束</a></li>
+        <li><a href="#89-分区与重连总结">8.9 分区与重连：总结</a></li>
+      </ol>
+    </li>
+    <li><a href="#关键图示解读">关键图示解读</a></li>
+    <li><a href="#个人总结">个人总结</a></li>
+    <li><a href="#实践思考">实践思考</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/fpga%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" >
+                FPGA学习笔记
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E7%AC%AC8%E7%AB%A0-partitioning-and-reconnecting/">第8章: Partitioning and Reconnecting</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jun 05, 2026</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    8 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="章节概览">章节概览
+</h2><p>第8章解决&quot;原型第一定律&quot;——SoC 比 FPGA 大，必须分到多颗 FPGA 中。它不仅讨论&quot;怎么分&quot;，还讨论&quot;分完后怎么重新连起来并保持同步&quot;。</p>
+<p>章节结构是一个从粗到细的完整工作流：Board Description → 面积估算 → 分区步骤（10 步手动流程） → 走线分配 → 自动化分区 → 性能优化（时序预算 + IO FF 利用） → 跨 FPGA 三同步（时钟/复位/启动） → TDM 信号复用（三种方案对比 + 完整量化时序计算） → HSTDM（LVDS + IOSERDES）。</p>
+<p>本章最具工程价值的内容是<strong>分段式计算那个 4:1 同步 MUX 方案最终的 14.28MHz（而非直观的 25MHz）设计频率</strong>——这个详细的逐周期数据传输分析（Table 20）展示了 TDM 性能估算不能靠直觉，而必须逐级拉时序表格。</p>
+<hr>
+<h2 id="核心知识点">核心知识点
+</h2><ul>
+<li><strong>分区前必须准备 Board Description File</strong>（Verilog 格式）：列出 FPGA 间所有走线、复位和时钟走线、FPGA 例化与引脚映射、不影响信号连接的部分（电源轨、上拉电阻、去耦电容）不需要描述</li>
+<li><strong>手动分区十步法</strong>（Table 17）：描述板资源 → 估算面积 → 分配顶层 IO → 分配高互连块 → 分配最大块 → 分配剩余块 → 复制共享资源 → 复用超标互联 → 分配走线 → 迭代改进</li>
+<li><strong>影响分析（Impact Analysis）</strong>：在分配前预览&quot;如果选 uA → 面积 +672 LE，IO +137 / 如果选 uB → 面积 +672 LE，IO -83&quot;——基于数据的决策而非猜测</li>
+<li><strong>复制（Replication）是 IO 优化最有效的技巧</strong>：一个块需要同时驱动两个不同 FPGA 中的逻辑 → 在每个 FPGA 中各复制一份 → 省掉所有跨 FPGA 的连线</li>
+<li><strong>走线分配三优先原则</strong>：(1) 完全匹配端点（同一走线经过所有所需 FPGA）→ (2) 匹配端点 + 最少冗余端点 → (3) 切分信号到两条走线（源 FPGA 多用一根输出引脚）</li>
+<li><strong>时钟同步四步法</strong>：板级 PLL 生成基时钟 → 每 FPGA 内 MMCM 重新同步并分发 → 基时钟作为反馈时钟输入保持 MMCM 输出相位一致 → 只在所有 PLL/MMCM 锁定后才释放全局复位</li>
+<li><strong>三 FF 流水线级实现跨 FPGA 复位分发</strong>：第一和第三 FF 可放入 IO FF → 中间 FF 在内部 → 整个时钟周期供复位信号传播——极大放宽 P&amp;R 约束</li>
+<li><strong>TDM 复用比 ≠ 设计频率反比</strong>：4:1 同步 MUX 实际设计频率仅 14.28MHz（100MHz/7），而非 25MHz（100MHz/4）——额外 3 个传输周期用于跨域时序开销</li>
+<li><strong>三种复用方案对比</strong>：MUX 方案（最简单、性能最低、IO 约束复杂）→ Shift-Register（灵活、中等性能、适合长飞行时间板）→ IOSERDES/LVDS（性能最高、128:2 复用比、仅限差分 IO 板）</li>
+<li><strong>LVDS + IOSERDES = 复用比的质变</strong>：单端 8:1 需要 1 个走线 → 差分 8:2 需要 2 个走线 → 但 LVDS 速率可达 1GHz → 128:2 成为可能 → 有效互联带宽远超单端方案</li>
+</ul>
+<hr>
+<h2 id="详细笔记">详细笔记
+</h2><h3 id="81-我们是否总需要跨-fpga-分区">8.1 我们是否总需要跨 FPGA 分区？
+</h3><p><strong>不需要的场景</strong>：设计足够小、或原型范围被有意限制到单 FPGA。FPGA 容量沿 Moore&rsquo;s Law 持续增长，但 SoC 也同时变大（多 CPU + 视频图形 + DSP）——第一定律仍将长期成立。</p>
+<p><strong>DFP 的预分区</strong>（第9章预告）：通过提前规划，使每个主要功能块自然适配单颗大 FPGA，或能在边界清晰信号很少的地方轻松拆分。</p>
+<p><strong>不总是需要 EDA 分区工具，但没有工具很难成功</strong>。工具三大优势：</p>
+<ol>
+<li>全局实现约束 → 工具透明传播到各 FPGA 的 P&amp;R</li>
+<li>可选插入引脚复用和逻辑复制</li>
+<li>与综合工具紧密集成 → 资源和时序信息互通</li>
+</ol>
+<hr>
+<h3 id="82-分区总体方法">8.2 分区总体方法
+</h3><h4 id="821-推荐的交互式手动分区十步法table-17">8.2.1 推荐的交互式手动分区十步法（Table 17）
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>步骤</th>
+          <th>任务</th>
+          <th>核心原因</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>1</td>
+          <td><strong>描述目标资源</strong></td>
+          <td>所有 EDA 分区工具的基本要求</td>
+      </tr>
+      <tr>
+          <td>2</td>
+          <td><strong>估算面积</strong></td>
+          <td>防止分区时过度使用资源</td>
+      </tr>
+      <tr>
+          <td>3</td>
+          <td><strong>分配顶层 IO</strong></td>
+          <td>确保与外部资源的连接；引导 IO 电压区域选择</td>
+      </tr>
+      <tr>
+          <td>4</td>
+          <td><strong>分配高互连块</strong></td>
+          <td>为宽总线最小化跨 FPGA 互联</td>
+      </tr>
+      <tr>
+          <td>5</td>
+          <td><strong>分配最大块</strong></td>
+          <td>早期反馈资源平衡状况；留小块填补间隙</td>
+      </tr>
+      <tr>
+          <td>6</td>
+          <td><strong>分配剩余块</strong></td>
+          <td>可控地使用复制和修剪；在较低的层级工作</td>
+      </tr>
+      <tr>
+          <td>7</td>
+          <td><strong>复制关键资源</strong></td>
+          <td>减少 RTL 修改量；同步各 FPGA 的时钟和复位</td>
+      </tr>
+      <tr>
+          <td>8</td>
+          <td><strong>复用超标互联</strong></td>
+          <td>释放 FPGA IO 给关键路径</td>
+      </tr>
+      <tr>
+          <td>9</td>
+          <td><strong>分配走线</strong></td>
+          <td>分配跨 FPGA 信号 = 固定引脚位置</td>
+      </tr>
+      <tr>
+          <td>10</td>
+          <td><strong>迭代改进</strong></td>
+          <td>初始分区通常可以改善；成熟后可提升目标速度</td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="822-board-description-file">8.2.2 Board Description File
+</h4><p>Certify 使用的是 Verilog 格式的板描述文件（图104），包含：</p>
+<ul>
+<li>板级走线（如 <code>wire [44:1] AB; wire [29:1] AC; wire [62:1] AD</code>）</li>
+<li>FPGA 例化及引脚映射（如 <code>XC6VLX760FF1760 uA (.pin_AR8(A1_A[1]), ...)</code>）</li>
+<li>复位和时钟走线</li>
+</ul>
+<p><strong>不需要描述的</strong>：电源轨、上拉电阻、去耦电容、FPGA 配置引脚。</p>
+<p><strong>关键</strong>：连接性信息必须绝对正确。最好直接从板布局工具导出 → 脚本过滤。可配置互联（延迟或交换互联，第6章）的板 → 板描述需反映项目的实际配置。</p>
+<h4 id="823-估算各子块面积">8.2.3 估算各子块面积
+</h4><p>Certify 三种估算模式（Table 18）：</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>Effort</th>
+          <th>模式</th>
+          <th>描述</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Low</strong></td>
+          <td>Model based</td>
+          <td>网表操纵器写 .est 文件；最快</td>
+      </tr>
+      <tr>
+          <td><strong>Medium</strong></td>
+          <td>Model based</td>
+          <td>改进寄存器估算；更长运行时间</td>
+      </tr>
+      <tr>
+          <td><strong>High（默认）</strong></td>
+          <td>Architecture based</td>
+          <td>FPGA 映射器写估计文件；最慢但最精确</td>
+      </tr>
+  </tbody>
+</table></div>
+<p><strong>好的副产品</strong>：面积估算通常偏高 → <strong>鼓励我们在 FPGA 中留更多空间</strong>。</p>
+<h4 id="824-分配顶层-io">8.2.4 分配顶层 IO
+</h4><ul>
+<li>被强制的分配优先做（如哪个 FPGA 连到外部 RAM 子卡、外部 PHY、逻辑分析仪探头）</li>
+<li>灵活平台可通过重新排列子卡位置改变哪些 FPGA 引脚连接哪些外部资源</li>
+<li><strong>部分团队的策略</strong>：让一个 FPGA 承担尽可能多的外部 SoC IO → 虽然该 FPGA 看似被过度约束，但给其余 FPGA 的分配留下了最大自由度</li>
+</ul>
+<h5 id="8241-io-电压区域注意">8.2.4.1 IO 电压区域注意
+</h5><ul>
+<li>SoC 中不同端口需要不同电压连接外部资源 → FPGA 引脚必须按 Bank（每 Bank 40 引脚，共享同一电压）配置</li>
+<li><strong>没有完全自由的引脚布局</strong>：分区工具应在分区时提供电压区域指导并警告不正确的 IO 放置</li>
+</ul>
+<h4 id="825-分配高互连块">8.2.5 分配高互连块
+</h4><p><strong>第一步最关键</strong>——从与其他块共享最多互联的块开始。</p>
+<p><strong>Certify 的互连矩阵</strong>（图106）：一眼看出 <code>b2v_inst3</code> 有最多顶层 IO 连接（106 条），<code>b2v_inst1</code> 和 <code>b2v_inst2</code> 彼此有 82 条互连但与其他块几乎无连接 → <strong>将 1 和 2 放在同一 FPGA，3 放在另一 FPGA</strong>。</p>
+<p>**高互</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0253-03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 106: Mutual interconnect between blocks displayed as a matrix"
+	
+	
+>
+连块无法放同一 FPGA 时的策略**：向下一级层级寻找连接较少的块 → 提取到不同 FPGA → 仍会增加 IO，但比上一级放入不同 FPGA 的增加量少。如果一直往下找 → 越来越细的粒度 → 分区对设计迭代越来越脆弱（优化导致重命名等）→ <strong>不如回到顶层换一个完全不同的粗分区策略</strong>。</p>
+<blockquote>
+<p>&ldquo;尝试不同的起点并对分配做部分完成，以&rsquo;感受&rsquo;适配到 FPGA 和互联中的难易度。如果一个分区方向很快变得难以平衡，它也不太可能最终令人满意。&rdquo;</p>
+</blockquote>
+<p><strong>Certify 的&quot;温度计&quot;指示器</strong>（图105）：每颗 FPGA 三个字段——逻辑资源使用率 + IO 使用率。分配块时实时上下变动。</p>
+<h4 id="heading">
+</h4><p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0252-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 105: Immediate indication of resource and IO usage in each FPGA"
+	
+	
+>
+8.2.6 分配最大块</p>
+<ul>
+<li>从最大的块开始 → 留小块最后填补</li>
+<li>平衡资源利用率 → 保持在 &lt;70%</li>
+<li>如果某块 RTL 会频繁更新或插桩 → <strong>保持其 FPGA 的低利用率 → 加速设计迭代</strong></li>
+</ul>
+<h5 id="8261-影响分析impact-analysis">8.2.6.1 影响分析（Impact Analysis）
+</h5><p><strong>在分配之前预览结果</strong>（图107）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">选 mb.uB → 面积 +672 LE，IO +137（共 150）
+</span></span><span class="line"><span class="cl">选 mb.uA → 面积 +672 LE，IO -83（因为该块与 uA 中已有逻辑连接）
+</span></span><span class="line"><span class="cl">→ 选 uA
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0255-05.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 107: View of impact analysis in Certify tool"
+	
+	
+></p>
+<h4 id="827-分配剩余块--828-复制以降低-io--829-复用超标互联">8.2.7 分配剩余块 → 8.2.8 复制以降低 IO → 8.2.9 复用超标互联
+</h4><p><strong>复制（Replication）</strong>：当一个块需要同时在两个不同 FPGA 中驱动宽总线 → 在每个 FPGA 中各放一份复制 → 消除所有跨 FPGA 连接。特别适用于时钟和复位等芯片支持元素。</p>
+<p><strong>MUX 补充</strong>：当复制仍不够时，只能用时域复用——在一条物理走线上传输多路信号。详见 8.6。</p>
+<h4 id="8210-分配走线">8.2.10 分配走线
+</h4><p><strong>重要概念纠正</strong>：不是&quot;给 FPGA 分配信号到引脚&quot;，而是**&ldquo;给信号分配走线&rdquo;**——一条走线可能经过多颗 FPGA 的引脚，所有引脚同时被固定。</p>
+<p><strong>推荐分配顺序</strong>：</p>
+<ol>
+<li>时钟、复位和其他全局输入</li>
+<li>测试点或探针输出（匹配板上连接）</li>
+<li>连接专用资源或连接器的顶层端口</li>
+<li>其余跨器件信号（注意电压电平要求）</li>
+</ol>
+<p><strong>三优先原则</strong>：</p>
+<ol>
+<li>有完全相同端点的走线 → <strong>首选</strong></li>
+<li>端点匹配 + 最少冗余端点 → 冗余端点的 FPGA 引脚被浪费</li>
+<li>无满足 1 或 2 的走线 → <strong>将信号拆分到两条走线</strong>（源 FPGA 多用一根输出引脚，图112）</li>
+</ol>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0261-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 112: Splitting signal onto two FPGA pins, using two traces to reach destination pins"
+	
+	
+></p>
+<p><strong>自动化走线分配</strong>：EDA 工具可遵循相同规则自动完成。<strong>半自动化</strong>：自己做关键的连接 + 工具补完不关键的。<strong>命名约定</strong>：信号名 + 资源引脚名使用相同命名约定 → 工具识别 <code>addr1</code> 信号连接 <code>ram addr1</code> 引脚。</p>
+<h5 id="82102-无-eda-工具时的替代方案电子表格方法">8.2.10.2 无 EDA 工具时的替代方案（&ldquo;电子表格方法&rdquo;）
+</h5><p>某团队的多项目经验：从虚拟综合的 log 提取信号名 → 导入电子表格 → 文本搜索匹配 → 手工分配到 FPGA 引脚 → 生成 UCF。<strong>极少见，不推荐</strong>——不仅需开发和维护脚本/电子表格，且引入额外错误机会。&ldquo;Make vs Buy&quot;决策中绝大多数人选择商业工具。</p>
+<h4 id="8211-迭代改进">8.2.11 迭代改进
+</h4><ul>
+<li><strong>多人并行尝试不同的初始分区</strong>→ 起始点对最终结果影响巨大</li>
+<li>与 SoC 后端布局团队讨论分区策略 → 他们可能分享降低路由拥塞的思路</li>
+<li><strong>非显而易见的特殊策略</strong>：按时钟域分区（特定时钟驱动的所有逻辑放入同一 FPGA）→ 关键路径完全在 FPGA 内部 → 更高性能</li>
+<li>实验室中 bring-up 当前版本的同时，并行探索改进分区</li>
+</ul>
+<hr>
+<h3 id="83-自动化分区">8.3 自动化分区
+</h3><p><strong>自动分区工具的六个辅助任务</strong>：</p>
+<ol>
+<li><strong>固定需要连接外部资源的引脚组</strong>（否则分区器可能把它们分散到所有 FPGA）</li>
+<li><strong>约束每器件的资源使用率</strong>：50-70%</li>
+<li><strong>为黑盒填入尺寸信息</strong>（否则自动分区器无法为它们预留空间；黑盒不能拆分）</li>
+<li><strong>手动分配时钟和复位</strong>→ 在所有 FPGA 中复制</li>
+<li><strong>为峰值性能手动分组关键块</strong></li>
+<li><strong>允许自动分区器执行复用</strong></li>
+</ol>
+<blockquote>
+<p>&ldquo;自动分区工具不能替代有经验的原型工程师找到最优解，但它们可以尝试大量策略直到找到可行的。最佳状态：人做初始分配，机器完成剩余。&rdquo;</p>
+</blockquote>
+<blockquote>
+<p>针对 FPGA 原型（高性能是目标），完全自动的分区不现实——&ldquo;人类始终需要也值得参与其中&rdquo;。</p>
+</blockquote>
+<hr>
+<h3 id="84-改善原型性能">8.4 改善原型性能
+</h3><p><strong>核心问题</strong>：跨 FPGA 信号路径时间通常 &gt; FPGA 内部路径时间 → 跨 FPGA 时序是系统时钟频率的限制因素。</p>
+<p><strong>时序预算（Time Budgeting）</strong>：所有 FPGA IO 引脚的边界条件已知（板走线性能、确切路径、源 FPGA 中驱动逻辑）→ 可自动转换为每个 FPGA 的 IO 时序约束。</p>
+<h4 id="841-顺序边界sequential-boundaries的时序预算">8.4.1 顺序边界（Sequential Boundaries）的时序预算
+</h4><p><strong>IO FF 的关键价值</strong>：</p>
+<ul>
+<li>每个 FPGA IO Pad 内嵌多个 FF——<strong>&ldquo;免费&quot;可用</strong></li>
+<li>SoC 顶层约束自动适用于所有 FF → 映射到 IO FF 后简化了各 FPGA 的隔离约束</li>
+<li>时钟到输出延迟 + 目标建立时间 → 最小化</li>
+</ul>
+<p><strong>但不允许随意插入流水线 FF</strong>：插入 FF 改变系统级调度 → 必须与原始设计师确认 → 可能需要在其他地方插入补偿 FF → 建议重新运行系统级仿真。</p>
+<h4 id="842-组合边界combinatorial-boundaries的时序预算">8.4.2 组合边界（Combinatorial Boundaries）的时序预算
+</h4><p><strong>为什么默认约束不对</strong>：P&amp;R 工具默认假设整个时钟周期都可用——但实际上信号从另一 FPGA 的内部 FF 出发，经历了 FPGA 内布线 + 输出 Pad + 板走线 → 到达时只剩小于时钟周期的时间完成输入 Pad 到内部 FF 的路径。</p>
+<p><strong>Certify 的时序预算算法</strong>（图113）：</p>
+<ul>
+<li>Quick-Pass 综合估算各 FPGA 内路径占总路径的比例</li>
+<li>如 FPGA A 内部 40ns（占 100ns 总约束的 40%），FPGA B 内部 10ns → A 获得更宽松的 IO 时序约束</li>
+<li><strong>多 FPGA 边界 + 不同时钟域也被纳入计算</strong></li>
+<li>为每条多 FPGA 路径生成 slack 值</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0268-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 113: Time budgeting at combinatorial partition boundaries"
+	
+	
+></p>
+<hr>
+<h3 id="85-跨多-fpga-的设计同步">8.5 跨多 FPGA 的设计同步
+</h3><p>原型中时钟、复位和启动必须表现得好像&quot;硬件的跨 FPGA 边界不存在&rdquo;。</p>
+<h4 id="851-多-fpga-时钟同步">8.5.1 多 FPGA 时钟同步
+</h4><p><strong>两个潜在问题</strong>：</p>
+<ol>
+<li>
+<p><strong>时钟偏斜和不确定性</strong>：板级 PLL → 各 FPGA 时钟输入的走线和缓冲器引入偏斜 → 可能导致相关时钟间短路径上的保持时间违规。<strong>解决</strong>：用 FPGA 内部 MCMM 重新生成时钟，后端工具理解 MCMM 的偏斜和不确定性。</p>
+</li>
+<li>
+<p><strong>时钟同步</strong>：当相关时钟在各 FPGA 本地重新生成 → 分频时钟（如 divide-by-N）可能因不同复位或初始条件而失步。<strong>解决</strong>：确保所有分频器在<strong>同一时钟沿</strong>释放（见下一节的全局复位机制）。</p>
+</li>
+</ol>
+<p><strong>通用时钟分配方案</strong>（图114）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">![Figure 114: Clock distribution across FPGAs](/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0270-04.png)
+</span></span><span class="line"><span class="cl">板级 PLL → 全局基时钟
+</span></span><span class="line"><span class="cl">    ↓ (进入各 FPGA)
+</span></span><span class="line"><span class="cl">MMCM (每 FPGA 内重新同步)
+</span></span><span class="line"><span class="cl">    ↓
+</span></span><span class="line"><span class="cl">BUFG 全局缓冲器 → 本地时钟树
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>Virtex-6 MCMM 的最低锁定频率仅 10MHz</strong>（前代技术 30MHz+），特别适合原型验证——能以更低的输入频率工作。</p>
+<blockquote>
+<p>一个独立于 MCMM 输出的自由运行时钟驱动锁检测的 NAND/OR 逻辑是必要的——因为它必须在不依赖待检测时钟的情况下运行。</p>
+</blockquote>
+<p><strong>多板系统</strong>额外层级：板级 PLL 驱动主板 → 每板用 PLL 重新同步 → 每 FPGA 内 MCMM 本地生成。</p>
+<h4 id="852-多-fpga-复位同步">8.5.2 多 FPGA 复位同步
+</h4><p><strong>核心见解</strong>：全局复位的释放不需要在特定时钟沿，只要在<strong>所有 FPGA 的同一个时钟沿</strong>即可 → 可以插入任意多级流水线。</p>
+<p><strong>三 FF 流水线级方案</strong>（图116 + 图117）：</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0274-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 116: A three-FF pipeline stage gives more freedom to place & route"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0274-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 117: Tree pipeline created by logic replication"
+	
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">输入复位 → 同步 FF (1 颗 FPGA 中)
+</span></span><span class="line"><span class="cl">    ↓
+</span></span><span class="line"><span class="cl">各 FPGA: IO FF IN → 内部 FF → IO FF OUT → 下一个 FPGA
+</span></span><span class="line"><span class="cl">    ↓
+</span></span><span class="line"><span class="cl">分布式全局复位
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>第一和第三 FF 放入 IO FF</strong> → 一整时钟周期供内部 FF 传播 → 极大放宽 P&amp;R 约束</li>
+<li><strong>注意</strong>：综合器可能将三个 FF 合并为 SRL（移位寄存器 LUT）→ 破坏布局自由度 → 需要 <code>syn_srlstyle</code> 属性禁止 + <code>syn_useioff</code> 强制 IO FF</li>
+</ul>
+<h4 id="853-多-fpga-启动同步">8.5.3 多 FPGA 启动同步
+</h4><p><strong>复位条件树</strong>（图118）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">![Figure 118: Example reset condition tree](/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0275-05.png)
+</span></span><span class="line"><span class="cl">各 FPGA: MCMM1_LOCKED &amp; MCMM2_LOCKED &amp; ... → all_locked (NAND)
+</span></span><span class="line"><span class="cl">    ↓ 送出
+</span></span><span class="line"><span class="cl">主 FPGA: all_locked_FPGA1 &amp; all_locked_FPGA2 &amp; ... + 外部仪器就绪 + 用户按键(OR/Wired-AND)
+</span></span><span class="line"><span class="cl">    ↓ = global_reset_release
+</span></span><span class="line"><span class="cl">Drive 复位分发树 (8.5.2)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>所有 MCMM 锁定 + 板级 PLL 锁定 + 外部条件满足 → 全局复位释放 → 所有分频器在同一时钟沿释放 → <strong>跨 FPGA 同步成功</strong>。</p>
+<hr>
+<h3 id="86-87-信号复用tdm">8.6-8.7 信号复用（TDM）
+</h3><h4 id="861-tdm-的基本要求和约束">8.6.1 TDM 的基本要求和约束
+</h4><p><strong>核心要求</strong>：在一个设计时钟周期内传输所有 IO 数据值到另一个 FPGA。</p>
+<p><strong>4:1 MUX 的简单推演</strong>：设计时钟 20MHz → 传输时钟 ≥ 80MHz。<strong>但实际上要 &gt;80MHz</strong>——因为需要满足传输时钟上的 setup/hold 和数据被设计时钟锁存时的时序余量。</p>
+<blockquote>
+<p>在大多数使用复用的情况下，<strong>复用降低了设计的整体速度，且往往是系统速度的主导限制因素</strong>。</p>
+</blockquote>
+<p><strong>Certify 的两种复用方案</strong>：CPM（Certify Pin Multiplier）+ HSTDM（High Speed TDM）。对应同步/异步两种模式。</p>
+<h4 id="871-基于-mux-的方案">8.7.1 基于 MUX 的方案
+</h4><p><strong>简单 MUX 方案</strong>（图119）：MUX + 发送 FF (FFMO) → 板走线 → 接收 FF (FFMI) → DMUX → 捕获 FF (FFMC) → 设计 FF (FFR)。</p>
+<p>**候选</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0277-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 119: Basic time-division multiplexing of inter-FPGA signals"
+	
+	
+>
+信号选择准则**：直接由 FF 驱动的信号最优（可映射到 IO FF → 时钟周期上最大比例可用于传播）。正 slack 良好的路径才适合复用。</p>
+<h4 id="872-哪些网适合复用table-19">8.7.2 哪些网适合复用（Table 19）
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>网拓扑</th>
+          <th>适合？</th>
+          <th>原因</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>FF → FF</td>
+          <td><strong>YES</strong></td>
+          <td>尽量用 IO FF</td>
+      </tr>
+      <tr>
+          <td>组合逻辑 → FF</td>
+          <td>YES</td>
+          <td>但难以满足设计-传输时钟时序</td>
+      </tr>
+      <tr>
+          <td>同时是顶层 IO 端口</td>
+          <td><strong>NO</strong></td>
+          <td>外部硬件不能做 dmux</td>
+      </tr>
+      <tr>
+          <td>跨时钟域 FF → FF</td>
+          <td><strong>NO</strong></td>
+          <td>不可预测行为</td>
+      </tr>
+      <tr>
+          <td>Feed-through FPGA</td>
+          <td>NO/(YES)理论可行</td>
+          <td>实际降低性能，时序极难估算</td>
+      </tr>
+      <tr>
+          <td>时钟/复位/启动</td>
+          <td><strong>NO</strong></td>
+          <td>在 MUX 之前优先分配</td>
+      </tr>
+  </tbody>
+</table></div>
+<h4 id="873-基于移位寄存器的方案图120">8.7.3 基于移位寄存器的方案（图120）
+</h4><p>数据并行</p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0281-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 120: Basic time-division multiplexing based on shift registers"
+	
+	
+>
+加载到移位寄存器 → 传输时钟移位输出 → 接收端移位输入 → 并行输出。<strong>优势</strong>：无额外组合延迟 → 全周期用于传输 → 特别适合较长飞行时间的板子。<strong>风险</strong>：前一个采样被接收之前不能发送新数据 → 传输线反射或不连续可能导致不可靠。</p>
+<h4 id="874-同步-mux-方案的完整工作时序计算">8.7.4 同步 MUX 方案的完整工作时序计算
+</h4><p><strong>这是全书最数学化的段落。</strong></p>
+<p><strong>传输时钟最大频率计算</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">T_max = T_out + T_board + T_in = 5 + 2 + 1 = 8ns
+</span></span><span class="line"><span class="cl">F_max_transfer = 1/8ns = 125MHz (理论极限)
+</span></span><span class="line"><span class="cl">加 T_tolerances = 2ns → T_max = 10ns → F_max_transfer = 100MHz (安全上限)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>4:1 同步 MUX 的逐周期数据传输（Table 20，全书最精密的表格）</strong>：</p>
+<p>新数据 DA 在 cycle 1/2（设计周期 1 / 传输周期 2）首先进入 FFMO → 经过 6 个传输周期后，全部 4 位 DA[1:4] 到达 FFMC[0:3] → cycle 2/1（设计周期 2）才锁存到 FFR。</p>
+<p><strong>关键结果</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">设计时钟/传输时钟 = 7:1（非 4:1！）
+</span></span><span class="line"><span class="cl">F_design_max = 100MHz / 7 =14.28MHz
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">不是 100MHz/4 = 25MHz！
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>异步 MUX 方案</strong>：收发两侧各加一个传输时钟周期用于设计↔传输时钟域的同步：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">异步 F_design_max = 100MHz / (7+2) = 11.11MHz
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>更慢，但不需要同步设计时钟和传输时钟——有更大的时钟源自由。</p>
+<h4 id="875-lvds--ioserdes-方案hstdm">8.7.5 LVDS + IOSERDES 方案（HSTDM）
+</h4><p><strong>源同步接口</strong>：时钟与数据同一源并行发送 → 时钟具有与数据相同的 off-chip/on-chip 偏斜 → 匹配延迟走线的板上时序变得简单。</p>
+<p><strong>差分信令的代价与收益</strong>：</p>
+<ul>
+<li>代价：每路串行数据需要 2 根引脚（差分对）→ 8:2 而非单端的 8:1</li>
+<li>收益：LVDS 速率可达 1GHz → <strong>128:2 的复用比 → 远比单端 8:1 的方案更大的有效互联带宽</strong></li>
+</ul>
+<p><strong>HSTDM 实现的典型结构</strong>（图122）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">100MHz 外部时钟 → FPGA 内 PLL → 400MHz 传输时钟
+</span></span><span class="line"><span class="cl">                                    ↓
+</span></span><span class="line"><span class="cl">OSERDES(8:1 DDR → 仅需 400MHz 传输时钟而无需 800MHz)
+</span></span><span class="line"><span class="cl">    ↓ LVDS 差分
+</span></span><span class="line"><span class="cl">板走线（数据和时钟并行源同步）
+</span></span><span class="line"><span class="cl">    ↓
+</span></span><span class="line"><span class="cl">IODELAY(数据侧，调整相对于时钟的时序)
+</span></span><span class="line"><span class="cl">    ↓
+</span></span><span class="line"><span class="cl">ISERDES(DDR) + BUFR(分频 /4 → 恢复 100MHz 用于 ISERDES 和 dmux)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0288-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 122: Advanced multiplexing scheme using LVDS and IOSERDES"
+	
+	
+></p>
+<p><strong>Link Training</strong>：所有 HSTDM 通道在传输真实数据之前需要自动对齐训练——训练完成产生 ready 信号 → 作为另一输入加入 8.5 节的复位条件树。没有训练则需要人工调整 IDELAY。</p>
+<h4 id="876-三种方案对比总结">8.7.6 三种方案对比总结
+</h4><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>方案</th>
+          <th>性能</th>
+          <th>时序约束工作量</th>
+          <th>复杂度</th>
+          <th>适用性</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>MUX</strong></td>
+          <td>低（不能保证 IO FF）</td>
+          <td>高（需 IO 延迟约束）</td>
+          <td>低</td>
+          <td>所有平台</td>
+      </tr>
+      <tr>
+          <td><strong>Shift-Register</strong></td>
+          <td>中（FPGA 结构中实现）</td>
+          <td>中（仅时钟约束）</td>
+          <td>低（灵活易用）</td>
+          <td>所有平台</td>
+      </tr>
+      <tr>
+          <td><strong>IOSERDES/LVDS</strong></td>
+          <td><strong>高（最优 FPGA 资源利用）</strong></td>
+          <td>中（仅时钟约束）</td>
+          <td>高（但由分区工具提供）</td>
+          <td><strong>仅差分 IO 板</strong></td>
+      </tr>
+  </tbody>
+</table></div>
+<hr>
+<h3 id="88-复用方案的时序约束">8.8 复用方案的时序约束
+</h3><p>必须添加四类约束：</p>
+<ol>
+<li><strong>传输时钟的时钟周期约束</strong>——基于 IO 延迟 + 板延迟 + 容限计算</li>
+<li><strong>设计时钟到传输时钟的最大延迟约束</strong>——确保复用连接在定义延迟内完成</li>
+<li><strong>时钟到时钟比率</strong>——通知 P&amp;R 工具 mux 时钟与设计时钟的关系</li>
+<li><strong>如果这些约束缺失 → 功能完整性的风险</strong></li>
+</ol>
+<hr>
+<h3 id="89-分区与重连总结">8.9 分区与重连：总结
+</h3><blockquote>
+<p>&ldquo;有一个老笑话：迷路的司机问路人怎么去伦敦，路人回答说&rsquo;哦，你不会想从这里出发的！&rsquo;&ldquo;这个故事是说——有些 SoC 设计本身就是最难分区的起点。我们不想从复杂、高度互连、多宽总线的设计开始。<strong>第9章（Design-for-Prototyping）将讨论如何从更好的起点出发——让原型工程师参与上游决策，打破第三定律的源头。</strong></p>
+</blockquote>
+<hr>
+<h2 id="关键图示解读">关键图示解读
+</h2><p><strong>图104：Board Description File 摘录</strong></p>
+<ul>
+<li>展示了板级走线定义的精确格式——<code>wire [44:1] AB; wire [62:1] AD; wire [65:1] CD</code></li>
+<li><strong>板上各 FPGA 对的走线数量是不同的！</strong> AB 44 条, AC 29 条, AD 62 条——这是物理互联约束，决定了哪些 FPGA 对适合承载密集互联</li>
+</ul>
+<p><strong>图106：互连矩阵</strong></p>
+<ul>
+<li>一眼看出块的聚类关系——82 条互连的块对 vs 0 条互连的孤立块</li>
+<li>这是&quot;高互连块放同一 FPGA&quot;原则的可视化证据</li>
+</ul>
+<p><strong>图107：影响分析</strong></p>
+<ul>
+<li>&ldquo;赋值前预览结果&rdquo;——以数据而非直觉做分区决策</li>
+</ul>
+<p><strong>图113：时序预算</strong></p>
+<ul>
+<li>40ns(FPGA A) + 10ns(FPGA B) = 50ns 内部路径 → 剩余的 50ns 中分别按比例分配 IO 约束</li>
+</ul>
+<p><strong>Table 20：4:1 MUX 逐周期数据传输</strong></p>
+<ul>
+<li>全书最精密的时序表格。清晰的逐 FF 数据流追踪证明了为什么必须 7:1 而不是 4:1</li>
+</ul>
+<p><strong>图116+117：三 FF 复位流水线</strong></p>
+<ul>
+<li>两端的 IO FF + 中间内部 FF = 时钟周期内有足够传播时间</li>
+<li>包含对综合器 SRL 优化的明确警告和对应的 synthesis 属性</li>
+</ul>
+<p><strong>图122：HSTDM 完整架构</strong></p>
+<ul>
+<li>从 PLL → OSERDES(DDR) → LVDS → IODELAY → ISERDES → BUFR 的完整源同步串行链路</li>
+<li>Link Training 的必要性和与全局复位条件树的集成</li>
+</ul>
+<hr>
+<h2 id="个人总结">个人总结
+</h2><p>第8章在全书中的位置非常特别——它既是第7章（设计移植）的延续（已经 FPGA-ready 的设计，现在要分到多颗 FPGA 中），也是所有后续章节（Bring-Up、调试、现场部署）的前提。</p>
+<p>本章最重要的思想跃迁是<strong>从&quot;把设计放进 FPGA&quot;到&quot;把设计分配到一个互联受约束的物理系统中&rdquo;</strong>。Board Description File 这个看似纯粹格式性的东西，实际上代表了这个跃迁——它把抽象的&quot;更多 FPGA&quot;变成了具体的&quot;AB 有 44 条走线、AC 有 29 条、AD 有 62 条&quot;的物理约束。从此分区的每一步都有硬性数字约束——不是&quot;这样分好不好&rdquo;，而是&quot;这样分有没有足够的物理连线&rdquo;。</p>
+<p>复用方案的量化时序计算（Table 20）是全书最具工程学科气质的部分。4:1 MUX 实际频率是 14.28MHz 而非 25MHz——这个差异来自对四个捕获 FF 的顺序填充、对设计时钟到传输时钟延迟（最大 1 传输周期）的纳入、以及对 mux/dmux 流水线级的完整建模。忽略这些细节就意味着一块板子标称 25MHz 但只能稳定跑 14MHz——在真实项目中，这就是两周的调试时间。</p>
+<hr>
+<h2 id="实践思考">实践思考
+</h2><ul>
+<li><strong>不要用直觉估算 MUX 后的设计频率</strong>。画一个像 Table 20 一样的逐周期数据流表——它能暴露 MUX 流水线的真实延迟，往往比直觉大得多</li>
+<li><strong>复制是 IO 优化的&quot;免费午餐&quot;</strong>——只要一个块在两个 FPGA 都需要，复制它完全消除了该块所有跨 FPGA 互联。在分区早期就应主动寻找复制机会</li>
+<li><strong>Board Description 应从布局工具自动导出而非手工编写</strong>。一个引脚位置错误可能需要数天才能定位；在大规模原型中上千引脚的手工编写不可能可靠</li>
+<li><strong>三 FF 复位流水线是解决跨 FPGA 同步复位的&quot;银弹&quot;</strong>——代价仅仅是两三个时钟周期的复位延迟（对全局复位信号完全可以忽略），但必须记得 <strong>综合器的 SRL 优化需要被显式禁止</strong></li>
+<li><strong>异步 vs 同步 MUX</strong>：7:1(同步) vs 9:1(异步) → 只有差别 2 个传输周期的差异 → 如果板级有现成的高质量时钟分布方案，选同步可获得更高性能；如果板级时钟分布不成熟或有意用独立的低频源，选异步获得更大的自由度</li>
+<li><strong>HSTDM 需要 Link Training</strong> → 如果自己实现（而非使用商业分区工具的 IP），训练状态机 + IDELAY 的自动校准是一个显著的设计工作量</li>
+<li><strong>不要等到分区完成后才考虑性能</strong>——从一开始就将 IO FF 的使用、时序约束和复用方案作为分区决策的一部分来评估</li>
+</ul>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0260-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 111: Certify tool’s trace assignment environment"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0273-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 115: Pipelined synchronous reset driving elements in 4 FPGAs"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0282-02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Figure 121: Example time-division multiplexing based on sample register"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0283-06.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Book page 283"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0283-08.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Book page 283"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0283-10.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Book page 283"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0283-12.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Book page 283"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0283-14.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Book page 283"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0283-16.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Book page 283"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0286-01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Book page 286"
+	
+	
+></p>
+<p><img src="/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0286-04.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Book page 286"
+	
+	
+></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/fpga/">FPGA</a>
+        
+            <a href="/tags/prototyping/">Prototyping</a>
+        
+            <a href="/tags/partitioning/">Partitioning</a>
+        
+            <a href="/tags/multi-fpga/">Multi-FPGA</a>
+        
+            <a href="/tags/tdm/">TDM</a>
+        
+            <a href="/tags/lvds/">LVDS</a>
+        
+            <a href="/tags/hstdm/">HSTDM</a>
+        
+            <a href="/tags/trace-assignment/">Trace Assignment</a>
+        
+            <a href="/tags/clock-synchronization/">Clock Synchronization</a>
+        
+            <a href="/tags/time-budgeting/">Time Budgeting</a>
+        
+            <a href="/tags/ioserdes/">IOSERDES</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC6%E7%AB%A0-which-platform-ready-made/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第6章: Which Platform? — Ready Made</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC3%E7%AB%A0-fpga-technology-today-chips-and-tools/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第3章: FPGA Technology Today — Chips and Tools</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC12%E7%AB%A0-breaking-out-of-the-lab-the-prototype-in-the-field/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第12章: Breaking Out of the Lab — The Prototype in the Field</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC13%E7%AB%A0-prototyping--verification-the-best-of-both-worlds/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第13章: Prototyping &#43; Verification = The Best of Both Worlds</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E7%AC%AC14%E7%AB%A0-the-future-of-prototyping/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第14章: The Future of Prototyping</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2026 salmone
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.524358946663b6a5f95fbef001d1c97000115552b473e36faad787d7b96c8241.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

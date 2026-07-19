@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>PyTorch on SalmoneX Blog</title>
+        <link>http://localhost:1313/tags/pytorch/</link>
+        <description>Recent content in PyTorch on SalmoneX Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <copyright>salmone</copyright><atom:link href="http://localhost:1313/tags/pytorch/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>AI系统：第20章 AI 框架基础</title>
+        <link>http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC20%E7%AB%A0-ai-%E6%A1%86%E6%9E%B6%E5%9F%BA%E7%A1%80/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC20%E7%AB%A0-ai-%E6%A1%86%E6%9E%B6%E5%9F%BA%E7%A1%80/</guid>
+        <description>&lt;h2 id=&#34;本章概览&#34;&gt;本章概览
+&lt;/h2&gt;&lt;p&gt;前面十几章我们深入了芯片、编译器、推理引擎和 Kernel 优化的细节，到了第 20 章，该回过头来看看&lt;strong&gt;AI 框架本身&lt;/strong&gt;了——这个把算法、芯片、训练、推理全部串起来的&amp;quot;操作系统&amp;quot;。&lt;/p&gt;
+&lt;p&gt;这一章的核心主题其实是两个词：&lt;strong&gt;作用和演进&lt;/strong&gt;。AI 框架为什么要存在？它解决了什么问题？从 Theano 到 PyTorch 再到 MindSpore，框架是怎么一步步演化的？&lt;/p&gt;
+&lt;p&gt;本章要回答的核心问题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;深度学习的数学原理是什么？为什么需要 AI 框架？&lt;/li&gt;
+&lt;li&gt;AI 框架最核心的功能是什么？自动微分凭什么这么重要？&lt;/li&gt;
+&lt;li&gt;AI 框架经历了哪四个发展阶段？每一代架构的特点是什么？&lt;/li&gt;
+&lt;li&gt;声明式编程 vs 命令式编程 vs 函数式编程——三种范式各自解决了什么问题？&lt;/li&gt;
+&lt;li&gt;华为昇思 MindSpore 有哪些关键特性？动静统一、图算融合具体怎么实现？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;一句话总结&lt;/strong&gt;：AI 框架是 AI 时代的&amp;quot;操作系统&amp;quot;，理解框架的演进逻辑，才能看清整个 AI 技术栈的脉络。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;201-引言&#34;&gt;20.1 引言
+&lt;/h2&gt;&lt;p&gt;深度学习通过&lt;strong&gt;函数逼近&lt;/strong&gt;来解析神经网络的数学原理，通过&lt;strong&gt;反向求导算法&lt;/strong&gt;来求解神经网络中参数的偏导，从而迭代地求解神经网络中的最优值。&lt;/p&gt;
+&lt;p&gt;AI 框架的核心定位：&lt;strong&gt;作为 AI 算法（深度学习算法）的模型设计、训练和验证的一套标准接口、特性库和工具包&lt;/strong&gt;，集成了算法的封装、数据的调用以及计算资源的使用，同时面向开发者提供了开发界面和高效的执行平台。&lt;/p&gt;
+&lt;p&gt;截至目前，国际主流的 AI 框架（PyTorch、TensorFlow 等）基本已经实现&lt;strong&gt;动态图开发、静态图部署&lt;/strong&gt;的编程范式，具备动静态图转换的能力。国内厂商也在加速自研：华为昇腾构建 MindSpore、百度打造飞桨 PaddlePaddle、之江实验室联合一流科技开发 OneFlow 等。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;202-ai-框架作用&#34;&gt;20.2 AI 框架作用
+&lt;/h2&gt;&lt;h3 id=&#34;2021-深度学习原理&#34;&gt;20.2.1 深度学习原理
+&lt;/h3&gt;&lt;h4 id=&#34;1-神经网络&#34;&gt;1. 神经网络
+&lt;/h4&gt;&lt;p&gt;从两个角度看神经网络：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;通用概念&lt;/strong&gt;：模拟人脑工作机制，神经元与神经突触之间连接产生不同的信号传递&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;统计学角度&lt;/strong&gt;：预测数据分布，从数据中学得一个模型，再通过模型预测新数据&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;数学上简单地理解：单个神经元就是 &lt;strong&gt;X · W&lt;/strong&gt; 的矩阵乘，加上激活函数 fun(X · W)。通过复合函数组合神经元，变成神经网络的一层。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch20/ai_system.pdf-0729-13.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图20.2.1 神经网络可通过逻辑函数组合模拟任意函数&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h4 id=&#34;2-函数逼近&#34;&gt;2. 函数逼近
+&lt;/h4&gt;&lt;p&gt;神经网络的数学理论基础是&lt;strong&gt;通用逼近定理（Universal Approximation Theorem）&lt;/strong&gt;：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;只要神经网络规模经过巧妙设计，使用非线性函数进行组合，它可以以任意精度逼近任意一个在闭集里的连续函数。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;函数逼近的数学形式为：&lt;strong&gt;Loss(w) = f(w) − g&lt;/strong&gt;，通过求解损失函数的最小值来确定网络参数 w。&lt;/p&gt;
+&lt;h4 id=&#34;3-反向求导&#34;&gt;3. 反向求导
+&lt;/h4&gt;&lt;p&gt;深度学习一般流程：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;构建神经网络模型&lt;/li&gt;
+&lt;li&gt;定义损失函数和优化器&lt;/li&gt;
+&lt;li&gt;开始训练（计算梯度并更新权重参数）&lt;/li&gt;
+&lt;li&gt;验证精度&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch20/ai_system.pdf-0731-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图20.2.2 深度学习完整流程：构建网络→定义损失→训练→验证&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;训练的本质就是&lt;strong&gt;反向求导 + 迭代逼近&lt;/strong&gt;。导数是函数的局部性质，如果把神经网络看作一个高维复杂函数，训练的过程就是对损失函数求导，利用导数的性质找到损失函数的变化趋势，一步步逼近最优参数。&lt;/p&gt;
+&lt;h3 id=&#34;2022-ai-框架作用详情&#34;&gt;20.2.2 AI 框架作用详情
+&lt;/h3&gt;&lt;h4 id=&#34;1-ai-框架与微分关系&#34;&gt;1. AI 框架与微分关系
+&lt;/h4&gt;&lt;p&gt;AI 框架最核心和基础的功能是&lt;strong&gt;自动微分（AutoGrad）&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;假设神经网络是一个复合函数，求导使用链式法则。每一次导数的计算都可以&lt;strong&gt;重用前一次的计算结果&lt;/strong&gt;——这就是反向传播算法的核心。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch20/ai_system.pdf-0732-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图20.2.3 反向传播示意图：每次求导复用前次计算结果&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;图中的反向箭头意味着：每次对损失函数中的参数求导，都会复用前一次的计算结果和与其对称的原公式中的变量，从而高效地对复合函数求导。&lt;/p&gt;
+&lt;h4 id=&#34;2-ai-框架与程序结合&#34;&gt;2. AI 框架与程序结合
+&lt;/h4&gt;&lt;p&gt;AI 框架的核心工作流程：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;为开发者提供构建神经网络的数学操作（API）&lt;/li&gt;
+&lt;li&gt;把复杂的数学表达转换成计算机可识别的&lt;strong&gt;计算图&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;自动对损失函数求导（即对网络中各个参数求偏导）&lt;/li&gt;
+&lt;li&gt;在原始计算图基础上构建&lt;strong&gt;对称的反向计算图&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch20/ai_system.pdf-0733-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图20.2.4 AI框架：将数学表达式映射为计算机可执行的计算图&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch20/ai_system.pdf-0733-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图20.2.5 反向计算图：正向图的对称结构，表示偏导数传播路径&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;总结&lt;/strong&gt;：AI 框架最核心的作用是提供开发者构建神经网络的接口（数学操作），自动对神经网络训练（进行反向求导，逼近求解最优值），得到一个神经网络模型用于解决分类、回归、拟合问题。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;203-ai-框架之争&#34;&gt;20.3 AI 框架之争
+&lt;/h2&gt;&lt;p&gt;除了数学表示原理外，AI 框架还需要解决：多线程算子加速、跨设备执行（GPU/NPU）、代码编译优化等系统工程问题。&lt;/p&gt;
+&lt;p&gt;一个完整商用的 AI 框架需要系统性梳理五层问题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;前端（面向用户）&lt;/strong&gt;：如何灵活地表达神经网络模型？&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;算子（执行计算）&lt;/strong&gt;：如何保证每个算子的执行性能和泛化性？&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;微分（更新参数）&lt;/strong&gt;：如何自动、高效地提供求导运算？&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;后端（系统相关）&lt;/strong&gt;：如何将同一个算子跑在不同的加速设备上？&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;运行时&lt;/strong&gt;：如何自动优化和调度网络模型进行计算？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;2031-构建-ai-框架的目的&#34;&gt;20.3.1 构建 AI 框架的目的
+&lt;/h3&gt;&lt;p&gt;AI 框架是为在计算加速硬件（GPU/NPU）和 AI 集群上高效训练深度神经网络而设计的可编程系统，需要同时兼顾：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;（1）灵活的编程模型和编程接口&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;自动推导计算图，转换为计算机可执行的表示&lt;/li&gt;
+&lt;li&gt;良好的生态融合能力（PyTorch 对外提供超过 2000+ API）&lt;/li&gt;
+&lt;li&gt;直观的模型构建方式和简洁的神经网络编程语言&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;（2）高效和可扩展的计算能力&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;自动编译优化：子表达式消除、内核融合、内存优化&lt;/li&gt;
+&lt;li&gt;自动并行化：针对 GPU/NPU/TPU 等异构硬件深度优化&lt;/li&gt;
+&lt;li&gt;降低新模型开发成本和硬件接入成本&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;2032-ai-框架的发展&#34;&gt;20.3.2 AI 框架的发展
+&lt;/h3&gt;&lt;h4 id=&#34;1-时间维度四个阶段&#34;&gt;1. 时间维度：四个阶段
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch20/ai_system.pdf-0736-11.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图20.3.2 AI框架发展四阶段：萌芽→成长→爆发→深化&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;（1）萌芽阶段（2000年代初期）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;受限于早期计算能力，以 Matlab 的神经网络库为代表。缺点是需手写反向传播、搭建网络结构、自行设计优化器，且不支持 GPU/NPU 异构加速。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch20/ai_system.pdf-0737-05.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图20.3.3 Matlab神经网络库：早期AI框架雏形&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;（2）成长阶段（2012~2014）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;AlexNet 引爆深度神经网络热潮。出现 &lt;strong&gt;Caffe、Chainer、Theano&lt;/strong&gt; 等代表性框架，支持多 GPU 训练，声明式与命令式两种编程范式开始分化。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;（3）爆发阶段（2015~2019）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;ResNet 再次突破边界。TensorFlow（2016）、PyTorch（2016）、CNTK、MXNet、PaddlePaddle 百花齐放。激烈竞争后形成 &lt;strong&gt;TensorFlow 和 PyTorch 双头垄断&lt;/strong&gt;格局。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;（4）深化阶段（2020年以后）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;GPT 系列超大模型出现，对全场景、异构算力提出更高要求。2020 年华为推出&lt;strong&gt;昇思 MindSpore&lt;/strong&gt;（全场景协同 + 可信赖），旷视推出天元 MegEngine，PyTorch 走向 PyTorch 2.X。AI 框架向着全场景、大模型、分布式、安全可信方向深化。&lt;/p&gt;
+&lt;h4 id=&#34;2-技术维度三代架构&#34;&gt;2. 技术维度：三代架构
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch20/ai_system.pdf-0738-11.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图20.3.4 AI框架三代架构的技术演进路径&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;代际&lt;/th&gt;
+          &lt;th&gt;特征&lt;/th&gt;
+          &lt;th&gt;代表作品&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;第一代&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;库方式 + Layer Base 驱动；灵活性不足&lt;/td&gt;
+          &lt;td&gt;MATLAB、SciPy、Torch、Theano&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;第二代&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;基于数据流图的计算框架&lt;/td&gt;
+          &lt;td&gt;TensorFlow、PyTorch&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;第三代&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;面向 DSL + 编译期优化 + 兼顾灵活与性能&lt;/td&gt;
+          &lt;td&gt;JAX、Taichi、MindSpore&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch20/ai_system.pdf-0739-07.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图20.3.5 GAN、深度强化学习等新结构推动框架向灵活编程演进&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;2033-ai-框架的未来&#34;&gt;20.3.3 AI 框架的未来
+&lt;/h3&gt;&lt;p&gt;四大技术趋势：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;全场景&lt;/strong&gt;：支持端边云全场景跨平台设备部署，解决训练和推理框架碎片化问题&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;易用性&lt;/strong&gt;：前端便捷性与后端高效性统一，动态图开发 + 静态图部署深度融合&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;大规模分布式&lt;/strong&gt;：支持超大规模 AI（GPT-4 参数量已达 GPT-3 的 10 倍以上），解决内存、算力、通信、调优四大挑战&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;科学计算&lt;/strong&gt;：AI 框架与科学计算深度融合——AI 建模替代传统数值模型、AI 求解科学计算方程、AI 框架加速方程求解&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;204-ai-框架的编程范式&#34;&gt;20.4 AI 框架的编程范式
+&lt;/h2&gt;&lt;h3 id=&#34;2041-程序开发的编程范式&#34;&gt;20.4.1 程序开发的编程范式
+&lt;/h3&gt;&lt;p&gt;两大核心编程范式：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch20/ai_system.pdf-0742-11.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图20.4.1 声明式编程 vs 命令式编程：两种根本不同的思维方式&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;范式&lt;/th&gt;
+          &lt;th&gt;核心理念&lt;/th&gt;
+          &lt;th&gt;代表框架&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;命令式（Imperative）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;详细命令机器&lt;strong&gt;怎么（How）&lt;strong&gt;做以达到&lt;/strong&gt;结果（What）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;PyTorch&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;声明式（Declarative）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;只告诉机器想要的&lt;strong&gt;结果（What）&lt;/strong&gt;，机器自己摸索&lt;strong&gt;过程（How）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;TensorFlow 1.X&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;命令式编程&lt;/strong&gt;：把计算机看成一个善始善终服从命令的装置，每一步都要明确交代。如 PyTorch 的 define-by-run 模式——代码写一行执行一行。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;声明式编程&lt;/strong&gt;：描述目标性质，让计算机明白目标而非流程。如 SQL 查询：&lt;code&gt;SELECT * FROM collection WHERE num &amp;gt; 5&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;函数式编程&lt;/strong&gt;是声明式的一种特殊范型，强调：不使用可变状态、避免副作用、函数结果仅取决于参数。JAX 和 MindSpore 均采用此范式。&lt;/p&gt;
+&lt;h3 id=&#34;2042-ai-框架的编程范式详情&#34;&gt;20.4.2 AI 框架的编程范式详情
+&lt;/h3&gt;&lt;h4 id=&#34;1-命令式编程动态图--define-by-run&#34;&gt;1. 命令式编程（动态图 / define-by-run）
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;前端 Python 直接驱动后端算子执行&lt;/li&gt;
+&lt;li&gt;表达式立即被求值&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;优点&lt;/strong&gt;：方便调试、灵活性高&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;缺点&lt;/strong&gt;：执行前无法获得完整计算图描述，缺乏编译期优化&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;PyTorch 示例：每一行代码都立即执行，模型定义和执行混合进行。&lt;/p&gt;
+&lt;h4 id=&#34;2-声明式编程静态图--define-and-run&#34;&gt;2. 声明式编程（静态图 / define-and-run）
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;先构建完整前向计算图，经优化后再执行&lt;/li&gt;
+&lt;li&gt;前端表达不直接执行&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;优点&lt;/strong&gt;：极致性能优化、编译期全局优化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;缺点&lt;/strong&gt;：数据类型和控制流受 API 约束、不方便调试、灵活性低&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;TensorFlow 1.X 示例：先定义计算图（placeholder + Variable），再通过 Session 执行。参数的更新也是计算图的一部分。&lt;/p&gt;
+&lt;h4 id=&#34;3-函数式编程&#34;&gt;3. 函数式编程
+&lt;/h4&gt;&lt;p&gt;JAX 和 MindSpore 采用函数式编程范式，核心优势：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;无副作用：函数结果仅取决于输入&lt;/li&gt;
+&lt;li&gt;可组合：小功能以模块化方式组合&lt;/li&gt;
+&lt;li&gt;支持高阶函数变换（微分、向量化、并行）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;三种范式的对比：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;维度&lt;/th&gt;
+          &lt;th&gt;命令式（PyTorch）&lt;/th&gt;
+          &lt;th&gt;声明式（TF 1.X）&lt;/th&gt;
+          &lt;th&gt;函数式（JAX/MindSpore）&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;执行方式&lt;/td&gt;
+          &lt;td&gt;写一行跑一行&lt;/td&gt;
+          &lt;td&gt;先构图再执行&lt;/td&gt;
+          &lt;td&gt;函数变换 + 即时编译&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;灵活性&lt;/td&gt;
+          &lt;td&gt;⭐⭐⭐&lt;/td&gt;
+          &lt;td&gt;⭐&lt;/td&gt;
+          &lt;td&gt;⭐⭐&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;性能优化&lt;/td&gt;
+          &lt;td&gt;⭐&lt;/td&gt;
+          &lt;td&gt;⭐⭐⭐&lt;/td&gt;
+          &lt;td&gt;⭐⭐⭐&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;调试难度&lt;/td&gt;
+          &lt;td&gt;⭐⭐⭐（简单）&lt;/td&gt;
+          &lt;td&gt;⭐（困难）&lt;/td&gt;
+          &lt;td&gt;⭐⭐&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;205-昇思-mindspore-关键特性&#34;&gt;20.5 昇思 MindSpore 关键特性
+&lt;/h2&gt;&lt;h3 id=&#34;2051-mindspore-基本介绍&#34;&gt;20.5.1 MindSpore 基本介绍
+&lt;/h3&gt;&lt;p&gt;昇思 MindSpore 是华为面向&lt;strong&gt;端边云全场景&lt;/strong&gt;设计的 AI 计算框架，三大价值主张：全场景协同、全流程极简、全架构统一。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch20/ai_system.pdf-0749-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图20.5.1 昇思MindSpore定位：向上使能AI模型创新，向下兼容多样性算力&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;四层架构&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch20/ai_system.pdf-0750-03.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图20.5.2 MindSpore四层架构：模型层→表达层→编译优化层→运行时层&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;层级&lt;/th&gt;
+          &lt;th&gt;功能&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;模型层&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;预置模型、开发套件、GNN/深度概率编程等拓展库&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;表达层（MindExpression）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;原生 Python 开发调试、动静统一、全场景 C++ 接口&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;编译优化层（MindCompiler）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;MindIR 统一中间表示、自动微分、图算融合、算子生成&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;运行时层（MindRT）&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;端边云统一运行时架构、联邦学习协同&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;2052-昇思-mindspore-特性&#34;&gt;20.5.2 昇思 MindSpore 特性
+&lt;/h3&gt;&lt;h4 id=&#34;1-前端编程三种范式融合&#34;&gt;1. 前端编程：三种范式融合
+&lt;/h4&gt;&lt;p&gt;MindSpore 独特地支持三种编程范式的融合：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;面向对象编程&lt;/strong&gt;：通过 nn.Cell 类构建神经网络层&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;函数式编程&lt;/strong&gt;：通过函数变换（grad、vmap、jit 等）实现自动微分和加速&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;融合编程&lt;/strong&gt;：用类构建网络 + 函数变换实现训练，兼顾易用性和灵活性&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这是 MindSpore 相比 PyTorch 和 TensorFlow 最独特的设计——&lt;strong&gt;类构建网络 + 函数驱动训练&lt;/strong&gt;。&lt;/p&gt;
+&lt;h4 id=&#34;2-动静统一&#34;&gt;2. 动静统一
+&lt;/h4&gt;&lt;blockquote&gt;
+&lt;p&gt;MindSpore 基于&lt;strong&gt;源码转换机制&lt;/strong&gt;构建神经网络的图结构，相比传统静态图有更易用的表达能力。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;JIT Fallback 机制&lt;/strong&gt;：检测图模式不支持的 Python 语法 → 生成解释节点 → 编译时或运行时执行解释节点。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch20/ai_system.pdf-0755-08.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图20.5.4 JIT Fallback：将纯算子执行和Python代码交替混合执行&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;MindSpore 的动态图模式称为 &lt;strong&gt;PyNative 模式&lt;/strong&gt;，因为是 Python 解释器在执行。静态图通过 MindCompiler 将 AST 转换到 ANF 范式的 MindIR。&lt;/p&gt;
+&lt;h4 id=&#34;3-端边云全场景&#34;&gt;3. 端边云全场景
+&lt;/h4&gt;&lt;p&gt;两大关键能力：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;轻量化推理&lt;/strong&gt;：训练模型 → 持久化 → 模型优化（算子融合、常量折叠）→ 适配不同硬件约束 → 软硬协同优化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;联邦学习（MindSpore Federated）&lt;/strong&gt;：支持千万级无状态终端设备商用化部署，数据留存在本地、共建 AI 模型&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;4-极致性能图算融合&#34;&gt;4. 极致性能：图算融合
+&lt;/h4&gt;&lt;p&gt;传统 AI 框架的算子定义从开发者易用角度出发，但&lt;strong&gt;从硬件执行角度看并不高效&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;算量过大的算子 → 难以生成高性能切分&lt;/li&gt;
+&lt;li&gt;算量过小的算子 → 计算无法隐藏数据搬移开销&lt;/li&gt;
+&lt;li&gt;算子 Shape 小 → 部分核空闲&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;MindSpore 采用&lt;strong&gt;图算融合&lt;/strong&gt;技术，打通图层（High-Level IR）和算子层（Low-Level IR）的协同优化壁垒。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Ascend 加速&lt;/strong&gt;：昇腾硬件（AICORE + AICPU + CPU）支持整图下沉，减少 Host-Device 交互，结合循环下沉实现多 Step 下沉。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;梯度累积&lt;/strong&gt;：将大 Batch Size 拆分为小 Batch，按顺序计算后再统一更新参数。解决内存不足以支撑大 Batch 训练的难题。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch20/ai_system.pdf-0758-12.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图20.5.5 梯度累积：将大Batch拆成小Batch顺序计算后统一更新&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;自适应梯度求和（Adasum）&lt;/strong&gt;：考虑到梯度方向——网络初期梯度基本平行，后期趋于正交，且不同层的正交性差异大。混合 Adasum 和传统 ReduceSum 优化分布式训练通信开销。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch20/ai_system.pdf-0759-06.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;图20.5.6 自适应梯度求和：根据梯度方向正交性动态选择聚合策略&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;-学完这章我的几点感悟&#34;&gt;🤔 学完这章，我的几点感悟
+&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;AI 框架 = AI 时代的操作系统&lt;/strong&gt;。就像 Windows/Linux 对 PC 一样，AI 框架屏蔽了底层硬件（GPU/NPU）的复杂性，让算法工程师专注于模型设计而非算子实现。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;自动微分是 AI 框架的灵魂&lt;/strong&gt;。没有自动微分，就没有现代深度学习。理解了链式法则 + 计算图 + 反向传播，就理解了 AI 框架最核心的&amp;quot;魔法&amp;quot;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;编程范式的演进史就是框架的进化史&lt;/strong&gt;。从命令式（PyTorch 灵活但优化难）到声明式（TF 1.X 性能好但调试难）再到函数式+融合（MindSpore 兼顾两者），这本质上是在&lt;strong&gt;灵活性和性能之间寻找最优平衡点&lt;/strong&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;MindSpore 走了一条独特的路径&lt;/strong&gt;。源码转换 + 动静统一 + 图算融合 + 函数式编程——这些组合让它在全场景（端边云）部署上具有天然优势。它不是 PyTorch 或 TensorFlow 的跟随者，而是一个全新的架构设计。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;AI 框架的未来是&amp;quot;重型基础设施&amp;quot;的竞争&lt;/strong&gt;。大模型时代，光有前端易用性还不够——分布式并行、通信压缩、内存优化、科学计算融合这些&amp;quot;硬核&amp;quot;能力才是决胜点。这也是为什么国内厂商纷纷自研框架的根本原因。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;小结&#34;&gt;小结
+&lt;/h2&gt;&lt;p&gt;第 20 章帮我们建立了 AI 框架的完整认知：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;AI 框架核心作用&lt;/strong&gt;：封装深度学习训练流程，提供自动微分、计算图构建、算子加速等功能&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;数学基础&lt;/strong&gt;：函数逼近 + 链式求导 + 反向传播 → 自动微分&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;发展四阶段&lt;/strong&gt;：萌芽（MATLAB）→ 成长（Caffe/Theano）→ 爆发（TF/PyTorch 双头垄断）→ 深化（全场景/大模型/安全可信）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;三代架构&lt;/strong&gt;：库/Layer Base → 数据流图 → DSL + 编译优化&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;三种编程范式&lt;/strong&gt;：命令式（define-by-run）、声明式（define-and-run）、函数式（函数变换）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;MindSpore 特性&lt;/strong&gt;：动静统一（源码转换 + JIT Fallback）、图算融合、Ascend 加速、联邦学习、自适应梯度求和&lt;/li&gt;
+&lt;/ul&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;对比维度&lt;/th&gt;
+          &lt;th&gt;PyTorch&lt;/th&gt;
+          &lt;th&gt;TensorFlow 1.X&lt;/th&gt;
+          &lt;th&gt;MindSpore&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;编程范式&lt;/td&gt;
+          &lt;td&gt;命令式（动态图）&lt;/td&gt;
+          &lt;td&gt;声明式（静态图）&lt;/td&gt;
+          &lt;td&gt;融合式（OO + 函数式）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;易用性&lt;/td&gt;
+          &lt;td&gt;⭐⭐⭐&lt;/td&gt;
+          &lt;td&gt;⭐⭐&lt;/td&gt;
+          &lt;td&gt;⭐⭐⭐&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;性能优化&lt;/td&gt;
+          &lt;td&gt;⭐⭐&lt;/td&gt;
+          &lt;td&gt;⭐⭐⭐&lt;/td&gt;
+          &lt;td&gt;⭐⭐⭐&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;动静统一&lt;/td&gt;
+          &lt;td&gt;PyTorch 2.0 引入&lt;/td&gt;
+          &lt;td&gt;TF 2.0 默认 Eager&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;原生支持，源码转换&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;全场景支持&lt;/td&gt;
+          &lt;td&gt;较弱&lt;/td&gt;
+          &lt;td&gt;较弱&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;端边云统一架构&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;硬件适配&lt;/td&gt;
+          &lt;td&gt;CUDA 为主&lt;/td&gt;
+          &lt;td&gt;多平台&lt;/td&gt;
+          &lt;td&gt;&lt;strong&gt;NPU/GPU/CPU&lt;/strong&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;核心启示&lt;/strong&gt;：AI 框架的本质是&amp;quot;用什么样的抽象让算法工程师舒服，同时用什么样的编译优化让硬件高效运行&amp;quot;。从第一代到第三代，从命令式到融合式，AI 框架的每一次重大变革，都在回答这个问题。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;em&gt;下一篇预告：第 21 章将深入探讨自动微分的原理与实现——前向微分 vs 反向微分、雅可比矩阵、表达式/操作符重载/源码转换三种实现方式，以及自动微分的未来挑战。敬请期待！&lt;/em&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
