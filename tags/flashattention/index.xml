@@ -2,16 +2,16 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>FlashAttention on SalmoneX Blog</title>
-        <link>http://localhost:1313/tags/flashattention/</link>
+        <link>https://Salmooo.github.io/tags/flashattention/</link>
         <description>Recent content in FlashAttention on SalmoneX Blog</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en</language>
-        <copyright>salmone</copyright><atom:link href="http://localhost:1313/tags/flashattention/index.xml" rel="self" type="application/rss+xml" /><item>
+        <copyright>salmone</copyright><atom:link href="https://Salmooo.github.io/tags/flashattention/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>AI系统：第18章 计算图优化架构</title>
-        <link>http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC18%E7%AB%A0-%E8%AE%A1%E7%AE%97%E5%9B%BE%E4%BC%98%E5%8C%96%E6%9E%B6%E6%9E%84/</link>
+        <link>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC18%E7%AB%A0-%E8%AE%A1%E7%AE%97%E5%9B%BE%E4%BC%98%E5%8C%96%E6%9E%B6%E6%9E%84/</link>
         <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
         
-        <guid>http://localhost:1313/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC18%E7%AB%A0-%E8%AE%A1%E7%AE%97%E5%9B%BE%E4%BC%98%E5%8C%96%E6%9E%B6%E6%9E%84/</guid>
+        <guid>https://Salmooo.github.io/p/ai%E7%B3%BB%E7%BB%9F%E7%AC%AC18%E7%AB%A0-%E8%AE%A1%E7%AE%97%E5%9B%BE%E4%BC%98%E5%8C%96%E6%9E%B6%E6%9E%84/</guid>
         <description>&lt;h2 id=&#34;本章概览&#34;&gt;本章概览
 &lt;/h2&gt;&lt;p&gt;如果说前面的章节介绍了推理引擎的整体架构，那么第 18 章则将焦点对准推理引擎中&lt;strong&gt;最核心的优化环节——计算图优化（Graph Optimization）&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;计算图是一种表示和执行数学运算的数据结构。在深度学习中，模型的训练和推理过程通常被表示成一个复杂的计算图，其中&lt;strong&gt;节点代表运算操作，边代表张量在操作之间的流动&lt;/strong&gt;。推理引擎中的图优化模块负责实现计算图中的各种优化操作，包括算子融合、布局转换、算子替换和内存优化等，目标是&lt;strong&gt;提高计算效率和减少内存占用&lt;/strong&gt;。&lt;/p&gt;
@@ -105,7 +105,7 @@
 &lt;/div&gt;&lt;p&gt;&lt;strong&gt;三种具体折叠形式：&lt;/strong&gt;&lt;/p&gt;
 &lt;h4 id=&#34;1-const-折叠&#34;&gt;1. Const 折叠
 &lt;/h4&gt;&lt;p&gt;如果某 Op 的所有输入都是常量，先计算好结果替代该 Op，避免每次推理重复计算。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0661-11.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch18/ai_system.pdf-0661-11.png&#34;
 	
 	
 	
@@ -120,7 +120,7 @@
 &lt;/blockquote&gt;
 &lt;h4 id=&#34;2-expanddims-折叠&#34;&gt;2. ExpandDims 折叠
 &lt;/h4&gt;&lt;p&gt;当 ExpandDims 的指定维度输入是常量时，将该维度以参数形式折叠到算子内部，减少一个算子。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0661-12.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch18/ai_system.pdf-0661-12.png&#34;
 	
 	
 	
@@ -132,7 +132,7 @@
 &gt;&lt;/p&gt;
 &lt;h4 id=&#34;3-binary-折叠&#34;&gt;3. Binary 折叠
 &lt;/h4&gt;&lt;p&gt;Binary Op 的第二个输入是标量常量时，将该标量以参数形式折叠到 Binary Op 的属性中。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0662-04.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch18/ai_system.pdf-0662-04.png&#34;
 	
 	
 	
@@ -171,7 +171,7 @@
       &lt;/tr&gt;
   &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0663-02.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch18/ai_system.pdf-0663-02.png&#34;
 	
 	
 	
@@ -211,7 +211,7 @@
       &lt;/tr&gt;
   &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0664-09.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch18/ai_system.pdf-0664-09.png&#34;
 	
 	
 	
@@ -223,7 +223,7 @@
 &gt;&lt;/p&gt;
 &lt;h4 id=&#34;3-op-位置无意义&#34;&gt;3. Op 位置无意义
 &lt;/h4&gt;&lt;p&gt;某些算子在计算图中特定位置会变得多余：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0665-07.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch18/ai_system.pdf-0665-07.png&#34;
 	
 	
 	
@@ -236,7 +236,7 @@
 &lt;blockquote&gt;
 &lt;p&gt;图18.2.6：Remove Output Cast、UnSqueeze Elimination、Orphaned Elimination、Reshape after Global Pooling 等场景。&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0666-05.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch18/ai_system.pdf-0666-05.png&#34;
 	
 	
 	
@@ -257,7 +257,7 @@
 &lt;li&gt;&lt;strong&gt;Quant ↔ Dequant&lt;/strong&gt;：量化与反量化抵消&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Concat ↔ Slice&lt;/strong&gt;：合并后拆分可简化为直接索引&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0667-09.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch18/ai_system.pdf-0667-09.png&#34;
 	
 	
 	
@@ -269,7 +269,7 @@
 &gt;&lt;/p&gt;
 &lt;h4 id=&#34;5-公共子图优化cse&#34;&gt;5. 公共子图优化（CSE）
 &lt;/h4&gt;&lt;p&gt;当模型中出现类型、参数和输入均相同的公共子图时，只需计算一次，其他通过赋值复用结果。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0668-06.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch18/ai_system.pdf-0668-06.png&#34;
 	
 	
 	
@@ -287,7 +287,7 @@
 &lt;h4 id=&#34;示例一以-conv-为中心的融合&#34;&gt;示例一：以 Conv 为中心的融合
 &lt;/h4&gt;&lt;p&gt;&lt;strong&gt;1) Conv + BN + Act&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;将 BN 的 \( \gamma \) 和 \( \beta \) 参数融合到 Conv 的权重和偏置中：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0669-08.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch18/ai_system.pdf-0669-08.png&#34;
 	
 	
 	
@@ -329,7 +329,7 @@
 &lt;/div&gt;&lt;p&gt;&lt;strong&gt;2) Conv + Bias + Add&lt;/strong&gt;：Add 的值直接合并到 Bias 中，&lt;code&gt;b&#39; = b + a&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;3) Conv + Scale + Act&lt;/strong&gt;：Scale 参数 α 融合到权重，&lt;code&gt;W&#39; = αW&lt;/code&gt;, &lt;code&gt;b&#39; = αb&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;4) Conv + MatMul + Act&lt;/strong&gt;：与 Scale 融合原理相同&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0670-11.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch18/ai_system.pdf-0670-11.png&#34;
 	
 	
 	
@@ -374,7 +374,7 @@
       &lt;/tr&gt;
   &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0672-02.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch18/ai_system.pdf-0672-02.png&#34;
 	
 	
 	
@@ -397,7 +397,7 @@
 &lt;li&gt;&lt;strong&gt;pReLU → Leaky ReLU&lt;/strong&gt;：不影响性能前提下聚焦有限算法&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Conv → Linear&lt;/strong&gt;（Global Pooling 之后）：简化后续处理&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0673-09.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch18/ai_system.pdf-0673-09.png&#34;
 	
 	
 	
@@ -414,7 +414,7 @@
 &lt;li&gt;&lt;strong&gt;Group Conv&lt;/strong&gt;：通过 Slice + Conv 组合实现&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;ShapeN&lt;/strong&gt;：通过多个 Shape 操作组合实现&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0675-03.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch18/ai_system.pdf-0675-03.png&#34;
 	
 	
 	
@@ -430,7 +430,7 @@
 &lt;li&gt;&lt;strong&gt;Slice and Mul&lt;/strong&gt;：利用交换律调整算子顺序&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Bit shift and Reduce Sum&lt;/strong&gt;：通过算术简化减少数据传输&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0676-02.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch18/ai_system.pdf-0676-02.png&#34;
 	
 	
 	
@@ -477,7 +477,7 @@
       &lt;/tr&gt;
   &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0677-08.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch18/ai_system.pdf-0677-08.png&#34;
 	
 	
 	
@@ -504,7 +504,7 @@
 &lt;/ul&gt;
 &lt;p&gt;SRAM 的访问速度是 HBM 的约 10 倍！标准 Attention 的问题在于：每个 Kernel 都从 HBM 读取数据、计算、再写回 HBM，产生了大量冗余的 HBM 访问。&lt;/p&gt;
 &lt;h4 id=&#34;flashattention-的两大核心技术&#34;&gt;FlashAttention 的两大核心技术
-&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0680-02.png&#34;
+&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch18/ai_system.pdf-0680-02.png&#34;
 	
 	
 	
@@ -538,7 +538,7 @@
 &lt;/h4&gt;&lt;p&gt;FlashAttention 的 HBM 访问次数从标准 Attention 的 \( O(N \times d + N^2) \) 降低到 \( O(N^2 \times d^2 / M) \)，其中 \( M \) 是 SRAM 大小。三个 Kernel 合并为一个，中间计算完全基于 SRAM。&lt;/p&gt;
 &lt;h3 id=&#34;1833-layout--memory-优化&#34;&gt;18.3.3 Layout &amp;amp; Memory 优化
 &lt;/h3&gt;&lt;p&gt;当上一层和下一层的算子输入输出格式不同时，需要插入特定算子进行数据节点转换。同时，内存优化通过以下策略减少内存占用：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/ai_system/ch18/ai_system.pdf-0684-02.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/ai_system/ch18/ai_system.pdf-0684-02.png&#34;
 	
 	
 	
