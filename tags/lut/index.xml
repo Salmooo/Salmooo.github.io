@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>LUT on SalmoneX Blog</title>
-        <link>http://localhost:1313/tags/lut/</link>
+        <link>https://Salmooo.github.io/tags/lut/</link>
         <description>Recent content in LUT on SalmoneX Blog</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en</language>
         <copyright>salmone</copyright>
-        <lastBuildDate>Thu, 04 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/lut/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Thu, 04 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://Salmooo.github.io/tags/lut/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>第3章: FPGA Technology Today — Chips and Tools</title>
-        <link>http://localhost:1313/p/%E7%AC%AC3%E7%AB%A0-fpga-technology-today-chips-and-tools/</link>
+        <link>https://Salmooo.github.io/p/%E7%AC%AC3%E7%AB%A0-fpga-technology-today-chips-and-tools/</link>
         <pubDate>Thu, 04 Jun 2026 00:00:00 +0000</pubDate>
         
-        <guid>http://localhost:1313/p/%E7%AC%AC3%E7%AB%A0-fpga-technology-today-chips-and-tools/</guid>
+        <guid>https://Salmooo.github.io/p/%E7%AC%AC3%E7%AB%A0-fpga-technology-today-chips-and-tools/</guid>
         <description>&lt;h2 id=&#34;章节概览&#34;&gt;章节概览
 &lt;/h2&gt;&lt;p&gt;本章是全书的技术底座——系统阐述 FPGA 原型验证所依赖的两大支柱：&lt;strong&gt;FPGA 器件硬件&lt;/strong&gt;（以 Xilinx Virtex-6 为例）和 &lt;strong&gt;EDA 工具链&lt;/strong&gt;（综合 → 分区 → 布局布线 → 调试）。作者提出并围绕&amp;quot;原型三定律&amp;quot;组织全章：SoC 比 FPGA 大（需要分区）、SoC 比 FPGA 快（需要优化）、SoC 设计对 FPGA 不友好（需要 RTL 改造）。&lt;/p&gt;
 &lt;p&gt;本章信息密度极高，涵盖 10 种 FPGA 资源的原型效用评估、两种分区方法的对比、UCF 约束文件的实战示例，以及 4 种调试工具的横向对比。后续第7-11章将对本章提到的各项技术逐一深入。&lt;/p&gt;
@@ -616,7 +616,7 @@
 &lt;li&gt;展示了 FPGA 容量沿 Moores Law 的持续增长&lt;/li&gt;
 &lt;li&gt;传达了关键信息：&lt;strong&gt;投资 FPGA 原型方法不会因 FPGA 技术缺乏而产生风险&lt;/strong&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0067-01.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0067-01.png&#34;
 	
 	
 	
@@ -631,7 +631,7 @@
 &lt;li&gt;综合、设计适配、分区、约束生成、P&amp;amp;R 的全貌&lt;/li&gt;
 &lt;li&gt;在每一步都需要验证手段——建议尽可能复用现有 SoC 验证框架&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0083-03.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0083-03.png&#34;
 	
 	
 	
@@ -673,7 +673,7 @@
 &lt;li&gt;&lt;strong&gt;调试策略应在设计阶段就规划&lt;/strong&gt;：不要等 bring-up 遇到问题才开始想怎么插探针。预留在顶层的一组调试 MUX 比事后在 FPGA Editor 中&amp;quot;飞线&amp;quot;可靠得多&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;UCF 不是后端的独有领地&lt;/strong&gt;：综合阶段就应提供完整的时序约束——这在原型性能优化中可能是&amp;quot;花 10 分钟做约束，省 10 小时跑 P&amp;amp;R&amp;quot;的杠杆点&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0070-01.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0070-01.png&#34;
 	
 	
 	
@@ -683,7 +683,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0071-04.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0071-04.png&#34;
 	
 	
 	
@@ -693,7 +693,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0073-02.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0073-02.png&#34;
 	
 	
 	
@@ -703,7 +703,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0075-01.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0075-01.png&#34;
 	
 	
 	
@@ -713,7 +713,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0079-01.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0079-01.png&#34;
 	
 	
 	
@@ -723,7 +723,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0085-04.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0085-04.png&#34;
 	
 	
 	
@@ -733,7 +733,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0091-01.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0091-01.png&#34;
 	
 	
 	
@@ -743,7 +743,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0092-03.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0092-03.png&#34;
 	
 	
 	
@@ -753,7 +753,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0094-02.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0094-02.png&#34;
 	
 	
 	
@@ -763,7 +763,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0096-02.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0096-02.png&#34;
 	
 	
 	
@@ -773,7 +773,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0097-04.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0097-04.png&#34;
 	
 	
 	
@@ -783,7 +783,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0099-03.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0099-03.png&#34;
 	
 	
 	
@@ -793,7 +793,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0100-03.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0100-03.png&#34;
 	
 	
 	
@@ -803,7 +803,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0104-05.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0104-05.png&#34;
 	
 	
 	
@@ -813,7 +813,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0108-02.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0108-02.png&#34;
 	
 	
 	
@@ -823,7 +823,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0109-01.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0109-01.png&#34;
 	
 	
 	
@@ -833,7 +833,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0110-01.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0110-01.png&#34;
 	
 	
 	
@@ -843,7 +843,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0111-02.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0111-02.png&#34;
 	
 	
 	
@@ -853,7 +853,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0112-01.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0112-01.png&#34;
 	
 	
 	
@@ -863,7 +863,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0113-03.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0113-03.png&#34;
 	
 	
 	
@@ -873,7 +873,7 @@
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0114-03.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0114-03.png&#34;
 	
 	
 	
