@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Workstation on SalmoneX Blog</title>
-        <link>http://localhost:1313/tags/workstation/</link>
+        <link>https://Salmooo.github.io/tags/workstation/</link>
         <description>Recent content in Workstation on SalmoneX Blog</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en</language>
         <copyright>salmone</copyright>
-        <lastBuildDate>Thu, 04 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/workstation/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Thu, 04 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://Salmooo.github.io/tags/workstation/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>第4章: Getting Started</title>
-        <link>http://localhost:1313/p/%E7%AC%AC4%E7%AB%A0-getting-started/</link>
+        <link>https://Salmooo.github.io/p/%E7%AC%AC4%E7%AB%A0-getting-started/</link>
         <pubDate>Thu, 04 Jun 2026 00:00:00 +0000</pubDate>
         
-        <guid>http://localhost:1313/p/%E7%AC%AC4%E7%AB%A0-getting-started/</guid>
+        <guid>https://Salmooo.github.io/p/%E7%AC%AC4%E7%AB%A0-getting-started/</guid>
         <description>&lt;h2 id=&#34;章节概览&#34;&gt;章节概览
 &lt;/h2&gt;&lt;p&gt;前三章讲了 Why（为什么做原型）和 What（FPGA 技术是什么），第四章终于进入 How——如何启动一个 FPGA 原型项目。&lt;/p&gt;
 &lt;p&gt;本章是一份完整的项目启动手册，回答了六个核心问题：(1) RTL 什么时候才算准备好了？(2) 需要多少 FPGA 资源？(3) 原型能跑多快？(4) 处理一遍设计要多久？(5) 工程工作量多大？(6) 团队需要什么技能？&lt;/p&gt;
@@ -529,7 +529,7 @@
 &lt;ul&gt;
 &lt;li&gt;四颗主 FPGA + 管理 FPGA + 子板生态——商业平台应对复用性的典型做法&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0138-01.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0138-01.png&#34;
 	
 	
 	
