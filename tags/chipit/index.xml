@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>CHIPit on SalmoneX Blog</title>
-        <link>http://localhost:1313/tags/chipit/</link>
+        <link>https://Salmooo.github.io/tags/chipit/</link>
         <description>Recent content in CHIPit on SalmoneX Blog</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en</language>
         <copyright>salmone</copyright>
-        <lastBuildDate>Fri, 05 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/chipit/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Fri, 05 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://Salmooo.github.io/tags/chipit/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>第6章: Which Platform? — Ready Made</title>
-        <link>http://localhost:1313/p/%E7%AC%AC6%E7%AB%A0-which-platform-ready-made/</link>
+        <link>https://Salmooo.github.io/p/%E7%AC%AC6%E7%AB%A0-which-platform-ready-made/</link>
         <pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate>
         
-        <guid>http://localhost:1313/p/%E7%AC%AC6%E7%AB%A0-which-platform-ready-made/</guid>
+        <guid>https://Salmooo.github.io/p/%E7%AC%AC6%E7%AB%A0-which-platform-ready-made/</guid>
         <description>&lt;h2 id=&#34;章节概览&#34;&gt;章节概览
 &lt;/h2&gt;&lt;p&gt;第5章讲了&amp;quot;造&amp;quot;；第6章讲&amp;quot;买&amp;quot;——如何评估和选择商业现成的 FPGA 原型平台。&lt;/p&gt;
 &lt;p&gt;本章的核心论点是：&lt;strong&gt;互联灵活性（而非原始飞行时间）才是决定平台真正性能的关键因素&lt;/strong&gt;。作者通过严谨的量化时序分析证明，即使是延迟互联（4ns 飞行时间）也能达到 100MHz+ 的系统性能，但互联资源的可用性——即能否提供足够的引脚来避免信号复用——才是实际的性能瓶颈。一个能让你以直连方式跑关键路径的平台，比一个飞行时间更短但逼你用 8:1 复用的平台更快。&lt;/p&gt;
@@ -200,7 +200,7 @@
 &lt;h3 id=&#34;64-灵活性互联&#34;&gt;6.4 灵活性：互联
 &lt;/h3&gt;&lt;p&gt;&lt;strong&gt;三种固定互联拓扑&lt;/strong&gt;（图59）：&lt;/p&gt;
 &lt;p&gt;| 拓&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0173-01.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0173-01.png&#34;
 	
 	
 	
@@ -242,7 +242,7 @@
 &lt;li&gt;第 4 颗 FPGA 的 130+ 引脚硬连接到总线 → 只能设高阻态 → &lt;strong&gt;永久浪费&lt;/strong&gt;&lt;/li&gt;
 &lt;li&gt;如果用第 4 颗 FPGA 放设计的其他部分 → 引脚浪费可能致命&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0174-01.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0174-01.png&#34;
 	
 	
 	
@@ -290,7 +290,7 @@
 &lt;li&gt;类似开关可以链接存储模块、连接其他板/平台&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;非所有开关组合合法且数量过多无法手工控制 → 由软件自动配置&lt;/strong&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0177-03.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0177-03.png&#34;
 	
 	
 	
@@ -453,7 +453,7 @@
 &lt;/ul&gt;
 &lt;h4 id=&#34;lvds-高速-tdm图65&#34;&gt;LVDS 高速 TDM（图65）
 &lt;/h4&gt;&lt;p&gt;使用&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0184-02.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0184-02.png&#34;
 	
 	
 	
@@ -629,7 +629,7 @@ FPGA 的 LVDS 差分信令能力 → 板上路径速度可达 &lt;strong&gt;1GHz
 &lt;ul&gt;
 &lt;li&gt;理论与实践的差距——看到真实的排线和夹层板后，对&amp;quot;灵活性&amp;quot;三个字有了物理上的理解&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0176-03.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0176-03.png&#34;
 	
 	
 	
@@ -639,7 +639,7 @@ FPGA 的 LVDS 差分信令能力 → 板上路径速度可达 &lt;strong&gt;1GHz
 	
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0176-04.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0176-04.png&#34;
 	
 	
 	
@@ -673,7 +673,7 @@ FPGA 的 LVDS 差分信令能力 → 板上路径速度可达 &lt;strong&gt;1GHz
 &lt;li&gt;&lt;strong&gt;保修和交付可靠性应该被写入采购合同&lt;/strong&gt;——如果你依赖原型平台来验证数亿规模的 SoC 项目，等 8 周才能拿到替换板是不可接受的&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;HAPS 和 CHIPit 代表了两种不同的哲学&lt;/strong&gt;：HAPS 用物理上可重新配置的连接（延迟互联），CHIPit 用电子的可编程开关（交换互联）。前者在项目变化时可能需要动手，但路径质量更好；后者可以在几分钟内重新配置，甚至支持远程操作——选择哪种取决于团队的使用模式&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0175-04.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://Salmooo.github.io/images/fpga/FPGA-Based_Prototyping_Methodology_Manual.pdf-0175-04.png&#34;
 	
 	
 	

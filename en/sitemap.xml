@@ -23,17 +23,11 @@
     <loc>https://Salmooo.github.io/post/</loc>
     <lastmod>2026-06-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://Salmooo.github.io/tags/bbc/</loc>
-    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/tags/blockram/</loc>
-    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/tags/case-study/</loc>
-    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
+    <loc>https://Salmooo.github.io/tags/board-selection/</loc>
+    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/categories/</loc>
-    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
+    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
@@ -50,6 +44,66 @@
                 href="https://Salmooo.github.io/categories/"
                 />
   </url><url>
+    <loc>https://Salmooo.github.io/tags/chipit/</loc>
+    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/commercial-platform/</loc>
+    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/fpga/</loc>
+    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/categories/fpga%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>
+    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/haps/</loc>
+    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/interconnect/</loc>
+    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/lvds/</loc>
+    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/make-vs-buy/</loc>
+    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/prototyping/</loc>
+    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/</loc>
+    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
+    <xhtml:link
+                rel="alternate"
+                hreflang="zh-cn"
+                href="https://Salmooo.github.io/zh-cn/tags/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="ar"
+                href="https://Salmooo.github.io/ar/tags/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://Salmooo.github.io/tags/"
+                />
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/tdm/</loc>
+    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/p/%E7%AC%AC6%E7%AB%A0-which-platform-ready-made/</loc>
+    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/bbc/</loc>
+    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/blockram/</loc>
+    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/case-study/</loc>
+    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>https://Salmooo.github.io/tags/chipscope/</loc>
     <lastmod>2026-06-04T00:00:00+00:00</lastmod>
   </url><url>
@@ -60,12 +114,6 @@
     <lastmod>2026-06-04T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/tags/ds2/</loc>
-    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/tags/fpga/</loc>
-    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/categories/fpga%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>
     <lastmod>2026-06-04T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/tags/freescale/</loc>
@@ -86,9 +134,6 @@
     <loc>https://Salmooo.github.io/tags/place--route/</loc>
     <lastmod>2026-06-04T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://Salmooo.github.io/tags/prototyping/</loc>
-    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://Salmooo.github.io/tags/real-time-dataflow/</loc>
     <lastmod>2026-06-04T00:00:00+00:00</lastmod>
   </url><url>
@@ -97,24 +142,6 @@
   </url><url>
     <loc>https://Salmooo.github.io/tags/synthesis/</loc>
     <lastmod>2026-06-04T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/tags/</loc>
-    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
-    <xhtml:link
-                rel="alternate"
-                hreflang="zh-cn"
-                href="https://Salmooo.github.io/zh-cn/tags/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="ar"
-                href="https://Salmooo.github.io/ar/tags/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="en"
-                href="https://Salmooo.github.io/tags/"
-                />
   </url><url>
     <loc>https://Salmooo.github.io/tags/virtex-6/</loc>
     <lastmod>2026-06-04T00:00:00+00:00</lastmod>
