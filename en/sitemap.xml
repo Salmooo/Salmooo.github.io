@@ -23,9 +23,6 @@
     <loc>https://Salmooo.github.io/post/</loc>
     <lastmod>2026-06-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://Salmooo.github.io/tags/board-selection/</loc>
-    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://Salmooo.github.io/categories/</loc>
     <lastmod>2026-06-05T00:00:00+00:00</lastmod>
     <xhtml:link
@@ -44,13 +41,7 @@
                 href="https://Salmooo.github.io/categories/"
                 />
   </url><url>
-    <loc>https://Salmooo.github.io/tags/chipit/</loc>
-    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://Salmooo.github.io/tags/clock-management/</loc>
-    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/tags/commercial-platform/</loc>
     <lastmod>2026-06-05T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/tags/fpga/</loc>
@@ -59,22 +50,10 @@
     <loc>https://Salmooo.github.io/categories/fpga%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>
     <lastmod>2026-06-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://Salmooo.github.io/tags/haps/</loc>
-    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://Salmooo.github.io/tags/hardware-platform/</loc>
     <lastmod>2026-06-05T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/tags/in-house-platform/</loc>
-    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/tags/interconnect/</loc>
-    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/tags/lvds/</loc>
-    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/tags/make-vs-buy/</loc>
     <lastmod>2026-06-05T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/tags/pcb-design/</loc>
@@ -110,16 +89,10 @@
                 href="https://Salmooo.github.io/tags/"
                 />
   </url><url>
-    <loc>https://Salmooo.github.io/tags/tdm/</loc>
-    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://Salmooo.github.io/tags/thermal-management/</loc>
     <lastmod>2026-06-05T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/p/%E7%AC%AC5%E7%AB%A0-which-platform-build-your-own/</loc>
-    <lastmod>2026-06-05T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://Salmooo.github.io/p/%E7%AC%AC6%E7%AB%A0-which-platform-ready-made/</loc>
     <lastmod>2026-06-05T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/tags/bbc/</loc>
@@ -144,6 +117,9 @@
     <lastmod>2026-06-04T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/tags/freescale/</loc>
+    <lastmod>2026-06-04T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://Salmooo.github.io/tags/haps/</loc>
     <lastmod>2026-06-04T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://Salmooo.github.io/tags/hw-sw-integration/</loc>

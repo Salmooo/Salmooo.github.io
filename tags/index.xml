@@ -8,22 +8,6 @@
         <language>en</language>
         <copyright>salmone</copyright>
         <lastBuildDate>Fri, 05 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://Salmooo.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>Board Selection</title>
-        <link>https://Salmooo.github.io/tags/board-selection/</link>
-        <pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate>
-        
-        <guid>https://Salmooo.github.io/tags/board-selection/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>CHIPit</title>
-        <link>https://Salmooo.github.io/tags/chipit/</link>
-        <pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate>
-        
-        <guid>https://Salmooo.github.io/tags/chipit/</guid>
-        <description></description>
-        </item>
-        <item>
         <title>Clock Management</title>
         <link>https://Salmooo.github.io/tags/clock-management/</link>
         <pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate>
@@ -32,27 +16,11 @@
         <description></description>
         </item>
         <item>
-        <title>Commercial Platform</title>
-        <link>https://Salmooo.github.io/tags/commercial-platform/</link>
-        <pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate>
-        
-        <guid>https://Salmooo.github.io/tags/commercial-platform/</guid>
-        <description></description>
-        </item>
-        <item>
         <title>FPGA</title>
         <link>https://Salmooo.github.io/tags/fpga/</link>
         <pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate>
         
         <guid>https://Salmooo.github.io/tags/fpga/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>HAPS</title>
-        <link>https://Salmooo.github.io/tags/haps/</link>
-        <pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate>
-        
-        <guid>https://Salmooo.github.io/tags/haps/</guid>
         <description></description>
         </item>
         <item>
@@ -69,30 +37,6 @@
         <pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate>
         
         <guid>https://Salmooo.github.io/tags/in-house-platform/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Interconnect</title>
-        <link>https://Salmooo.github.io/tags/interconnect/</link>
-        <pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate>
-        
-        <guid>https://Salmooo.github.io/tags/interconnect/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>LVDS</title>
-        <link>https://Salmooo.github.io/tags/lvds/</link>
-        <pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate>
-        
-        <guid>https://Salmooo.github.io/tags/lvds/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Make vs Buy</title>
-        <link>https://Salmooo.github.io/tags/make-vs-buy/</link>
-        <pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate>
-        
-        <guid>https://Salmooo.github.io/tags/make-vs-buy/</guid>
         <description></description>
         </item>
         <item>
@@ -133,14 +77,6 @@
         <pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate>
         
         <guid>https://Salmooo.github.io/tags/system-ace/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>TDM</title>
-        <link>https://Salmooo.github.io/tags/tdm/</link>
-        <pubDate>Fri, 05 Jun 2026 00:00:00 +0000</pubDate>
-        
-        <guid>https://Salmooo.github.io/tags/tdm/</guid>
         <description></description>
         </item>
         <item>
@@ -213,6 +149,14 @@
         <pubDate>Thu, 04 Jun 2026 00:00:00 +0000</pubDate>
         
         <guid>https://Salmooo.github.io/tags/freescale/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>HAPS</title>
+        <link>https://Salmooo.github.io/tags/haps/</link>
+        <pubDate>Thu, 04 Jun 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://Salmooo.github.io/tags/haps/</guid>
         <description></description>
         </item>
         <item>
